@@ -19,6 +19,7 @@ packages = [{include="automojo", from="source/packages"}]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
+pyyaml = "^6.0.2"
 
 [tool.poetry.group.dev.dependencies]
 
