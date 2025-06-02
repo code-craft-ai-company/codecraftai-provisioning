@@ -117,7 +117,7 @@ def setup_environment_main():
     ENV_FILE = os.path.join(REPOSITORY_DIR, ".env")
     if not os.path.exists(ENV_FILE):
         errmsg_lines = [
-            "ERROR: Development environment file not found. Did you run the 'repository-setup' script.",
+            "ERROR: Development environment file not found. Did you run the 'repository-setup/rehome-repository' script.",
             f"    location=$ENV_FILE"
         ]
         errmsg = os.linesep.join(errmsg_lines)
