@@ -183,7 +183,6 @@ def generate_directories():
 
 def generate_python_path():
 
-    folder_testbase_root = os.path.join(REPOSITORY_SOURCE_FOLDER, "testroots", "testbase")
     folder_packages = os.path.join(REPOSITORY_SOURCE_FOLDER, "packages")
     folder_service = os.path.join(REPOSITORY_SOURCE_FOLDER, "service")
     folder_testroots = os.path.join(REPOSITORY_SOURCE_FOLDER, "testroots")
@@ -191,7 +190,6 @@ def generate_python_path():
     folder_tools = os.path.join(REPOSITORY_SOURCE_FOLDER, "tools")
 
     python_path_parts = [
-        folder_testbase_root,
         folder_packages,
         folder_service,
         folder_testroots,
