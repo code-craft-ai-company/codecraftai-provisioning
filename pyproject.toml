@@ -13,17 +13,62 @@ classifiers = [
     "Operating System :: POSIX"
 ]
 keywords = [
-    "python"
+    "python",
+    "automation",
+    "automojo",
+    "provisioning",
+    "cloud"
 ]
 packages = [{include="automojo", from="source/packages"}]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
 pyyaml = "^6.0.2"
+requests = "^2.32.5"
+automojo-errors = { git = "https://github.com/automationmojo/automojo-errors.git", branch = "main" }
+automojo-interfaces = { git = "https://github.com/automationmojo/automojo-interfaces.git", branch = "main" }
+automojo-credentials = { git = "https://github.com/automationmojo/automojo-credentials.git", branch = "main" }
+automojo-restclient-base = { git = "https://github.com/automationmojo/automojo-restclient-base.git", branch = "main" }
+automojo-configuration = { git = "https://github.com/automationmojo/automojo-configuration.git", branch = "main" }
+automojo-landscaping = { git = "https://github.com/automationmojo/automojo-landscaping.git", branch = "main" }
+automojo-interop-vsphere = { git = "https://github.com/automationmojo/automojo-interop-vsphere.git", branch = "main" }
+automojo-interop-kubernetes = { git = "https://github.com/automationmojo/automojo-interop-kubernetes.git", branch = "main" }
+automojo-interop-coreweave = { git = "https://github.com/automationmojo/automojo-interop-coreweave.git", branch = "main" }
 automojo-interop-lambdalabs = { git = "https://github.com/automationmojo/automojo-interop-lambdalabs.git", branch = "main" }
+automojo-interop-crusoe = { git = "https://github.com/automationmojo/automojo-interop-crusoe.git", branch = "main" }
 automojo-interop-nebius = { git = "https://github.com/automationmojo/automojo-interop-nebius.git", branch = "main" }
+automojo-interop-runpod = { git = "https://github.com/automationmojo/automojo-interop-runpod.git", branch = "main" }
+automojo-interop-proxmox = { git = "https://github.com/automationmojo/automojo-interop-proxmox.git", branch = "main" }
+automojo-interop-libvirt = { git = "https://github.com/automationmojo/automojo-interop-libvirt.git", branch = "main" }
+automojo-interop-xen = { git = "https://github.com/automationmojo/automojo-interop-xen.git", branch = "main" }
+automojo-interop-hyperv = { git = "https://github.com/automationmojo/automojo-interop-hyperv.git", branch = "main" }
+automojo-interop-nutanix = { git = "https://github.com/automationmojo/automojo-interop-nutanix.git", branch = "main" }
+
+[tool.poetry.group.cloud-sdks]
+optional = true
+
+[tool.poetry.group.cloud-sdks.dependencies]
+boto3 = "^1.34"
+azure-identity = "^1.16"
+azure-mgmt-resource = "^23.0"
+azure-mgmt-network = "^25.0"
+azure-mgmt-compute = "^31.0"
+azure-mgmt-dns = "^8.1"
+azure-mgmt-storage = "^21.0"
+google-cloud-compute = "^1.19"
+google-cloud-storage = "^2.18"
+google-cloud-dns = "^0.35"
+oci = "^2.130"
+pydo = "^0.3"
+hcloud = "^2.0"
+linode-api4 = "^5.20"
+vultr = "^1.0"
 
 [tool.poetry.group.dev.dependencies]
+hypothesis = "^6.0"
+pytest = "^8.0"
+requests-mock = "^1.12"
+moto = "^5.0"
 
 [tool.poetry.group.dbio.dependencies]
 
