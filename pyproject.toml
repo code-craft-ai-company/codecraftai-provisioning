@@ -20,6 +20,8 @@ packages = [{include="automojo", from="source/packages"}]
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
 pyyaml = "^6.0.2"
+automojo-interop-lambdalabs = { git = "https://github.com/automationmojo/automojo-interop-lambdalabs.git", branch = "main" }
+automojo-interop-nebius = { git = "https://github.com/automationmojo/automojo-interop-nebius.git", branch = "main" }
 
 [tool.poetry.group.dev.dependencies]
 
