@@ -2,44 +2,44 @@
 
 ## Scaffolding
 
-- [ ] 1. Create `provisioning/venues/crusoe/` tree per `design.md`.
-- [ ] 2. Add `automojo-interop-crusoe` dep.
-- [ ] 3. Declare `CrusoeValidationError`, `CrusoeConflictError`,
+- [x] 1. Create `provisioning/venues/crusoe/` tree per `design.md`.
+- [x] 2. Add `automojo-interop-crusoe` dep.
+- [x] 3. Declare `CrusoeValidationError`, `CrusoeConflictError`,
   `ConfirmationRequiredError` in `crusoeerrors.py`.
 
 ## Resolver and Translator
 
-- [ ] 4. Implement `CrusoeResolver.image_to_alias(family, version, arch)`.
-- [ ] 5. Implement `CrusoeResolver.size_to_instance_type(size_hint,
+- [x] 4. Implement `CrusoeResolver.image_to_alias(family, version, arch)`.
+- [x] 5. Implement `CrusoeResolver.size_to_instance_type(size_hint,
   accelerators, interconnect)`.
-- [ ] 6. Implement `CrusoeLabelTranslator.to_crusoe(neutral_tags)` /
+- [x] 6. Implement `CrusoeLabelTranslator.to_crusoe(neutral_tags)` /
   `from_crusoe(d)` with round-trip identity.
 
 ## Validate / Plan / Apply / Destroy / Inventory
 
-- [ ] 7. Implement `CrusoeCloudProvisioner.validate(spec, aspects)` rejecting
+- [x] 7. Implement `CrusoeCloudProvisioner.validate(spec, aspects)` rejecting
   bucket/LB asks and shared-FS provision path.
-- [ ] 8. Validate that IB-requesting instance types match the interconnect
+- [x] 8. Validate that IB-requesting instance types match the interconnect
   request.
-- [ ] 9. Implement `CrusoePlanBuilder.plan(spec, aspects)`.
-- [ ] 10. Implement `CrusoeApplyStages.apply_network_and_firewall`.
-- [ ] 11. Implement `CrusoeIbPartition.ensure_and_attach(spec, aspects)` for
+- [x] 9. Implement `CrusoePlanBuilder.plan(spec, aspects)`.
+- [x] 10. Implement `CrusoeApplyStages.apply_network_and_firewall`.
+- [x] 11. Implement `CrusoeIbPartition.ensure_and_attach(spec, aspects)` for
   IB-grouped instances.
-- [ ] 12. Implement `CrusoeApplyStages.apply_instances_and_disks` with
+- [x] 12. Implement `CrusoeApplyStages.apply_instances_and_disks` with
   `user_data` rendering.
-- [ ] 13. Implement `CrusoeDestroyStages.destroy(spec, aspects)` reversing
+- [x] 13. Implement `CrusoeDestroyStages.destroy(spec, aspects)` reversing
   apply, calling `IVPNControlPlane.delete_device` after instance terminate.
-- [ ] 14. Implement `CrusoeInventory.list_run(spec, aspects)`.
-- [ ] 15. Persist inventory under
+- [x] 14. Implement `CrusoeInventory.list_run(spec, aspects)`.
+- [x] 15. Persist inventory under
   `.output/provisioning/<runid>/crusoe-inventory.json`.
 
 ## Property tests (hypothesis)
 
-- [ ] 16. `test_apply_idempotent`.
-- [ ] 17. `test_destroy_is_inverse_of_apply`.
-- [ ] 18. `test_label_round_trip_identity_for_conformant_inputs`.
-- [ ] 19. `test_ib_partition_grouping`.
-- [ ] 20. `test_validate_rejects_bucket_lb_and_fs_provision`.
+- [x] 16. `test_apply_idempotent`.
+- [x] 17. `test_destroy_is_inverse_of_apply`.
+- [x] 18. `test_label_round_trip_identity_for_conformant_inputs`.
+- [x] 19. `test_ib_partition_grouping`.
+- [x] 20. `test_validate_rejects_bucket_lb_and_fs_provision`.
 
 ## Integration tests (gated)
 
@@ -47,5 +47,5 @@
 
 ## Documentation
 
-- [ ] 22. Author `provisioning/venues/crusoe/README.md` cross-linking the
+- [x] 22. Author `provisioning/venues/crusoe/README.md` cross-linking the
   resource model, lifecycle, vpn-join, and the Crusoe interop client.

@@ -2,41 +2,41 @@
 
 ## Scaffolding
 
-- [ ] 1. Create `provisioning/venues/lambdalabs/` tree per `design.md`.
-- [ ] 2. Add `automojo-interop-lambdalabs` dep.
-- [ ] 3. Declare `LlValidationError`, `LlCapacityError`,
+- [x] 1. Create `provisioning/venues/lambdalabs/` tree per `design.md`.
+- [x] 2. Add `automojo-interop-lambdalabs` dep.
+- [x] 3. Declare `LlValidationError`, `LlCapacityError`,
   `ConfirmationRequiredError` in `llerrors.py`.
 
 ## Resolver and Translator
 
-- [ ] 4. Implement `LlResolver.accelerator_to_instance_type(accel_spec,
+- [x] 4. Implement `LlResolver.accelerator_to_instance_type(accel_spec,
   interconnect)` returning either a single-instance SKU or a 1-Click Cluster
   product code.
-- [ ] 5. Implement `LlSidecarTag.write(neutral_tags, instance_id)` and
+- [x] 5. Implement `LlSidecarTag.write(neutral_tags, instance_id)` and
   `read(instance_id)` with round-trip identity.
 
 ## Validate / Plan / Apply / Destroy / Inventory
 
-- [ ] 6. Implement `LambdalabsCloudProvisioner.validate(spec, aspects)`
+- [x] 6. Implement `LambdalabsCloudProvisioner.validate(spec, aspects)`
   rejecting bucket/LB/DNS and warning on unsupported network resources.
-- [ ] 7. Implement `LlPlanBuilder.plan(spec, aspects)`.
-- [ ] 8. Implement `LlApplyStages.ensure_ssh_keys`.
-- [ ] 9. Implement `LlApplyStages.apply_instances` covering both single
+- [x] 7. Implement `LlPlanBuilder.plan(spec, aspects)`.
+- [x] 8. Implement `LlApplyStages.ensure_ssh_keys`.
+- [x] 9. Implement `LlApplyStages.apply_instances` covering both single
   Instance and 1-Click Cluster branches with `user_data` rendering.
-- [ ] 10. Implement `LlDestroyStages.destroy(spec, aspects)`, calling
+- [x] 10. Implement `LlDestroyStages.destroy(spec, aspects)`, calling
   `IVPNControlPlane.delete_device` after terminate.
-- [ ] 11. Implement `LlInventory.list_run(spec, aspects)`.
-- [ ] 12. Persist sidecar tags under
+- [x] 11. Implement `LlInventory.list_run(spec, aspects)`.
+- [x] 12. Persist sidecar tags under
   `.output/provisioning/<runid>/lambdalabs-tags.json` and inventory under
   `.output/provisioning/<runid>/lambdalabs-inventory.json`.
 
 ## Property tests (hypothesis)
 
-- [ ] 13. `test_apply_idempotent`.
-- [ ] 14. `test_destroy_is_inverse_of_apply`.
-- [ ] 15. `test_sidecar_tag_round_trip_identity`.
-- [ ] 16. `test_one_click_vs_single_instance_branch`.
-- [ ] 17. `test_validate_rejects_bucket_lb_dns`.
+- [x] 13. `test_apply_idempotent`.
+- [x] 14. `test_destroy_is_inverse_of_apply`.
+- [x] 15. `test_sidecar_tag_round_trip_identity`.
+- [x] 16. `test_one_click_vs_single_instance_branch`.
+- [x] 17. `test_validate_rejects_bucket_lb_dns`.
 
 ## Integration tests (gated)
 
