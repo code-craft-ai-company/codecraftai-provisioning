@@ -30,7 +30,7 @@
 - [x] 14. Implement `OciDestroyStages.destroy(spec, aspects)` reversing apply,
   calling `IVPNControlPlane.delete_device` after Instance terminate.
 - [x] 15. Implement `OciInventory.list_run(spec, aspects)`.
-- [ ] 16. Persist inventory under
+- [ ] 16. Persist inventory under (deferred: run-inventory file persistence owned by the provisioning engine/state layer; venue exposes inventory())
   `.output/provisioning/<runid>/oci-inventory.json`.
 
 ## Property tests (hypothesis)
@@ -43,9 +43,9 @@
 
 ## Integration tests (gated)
 
-- [ ] 22. `RUN_LIVE_OCI=1` end-to-end against a sandbox tenancy.
+- [ ] 22. `RUN_LIVE_OCI=1` end-to-end against a sandbox tenancy. (deferred: live-integration end-to-end test gated on real hardware/account)
 
 ## Documentation
 
-- [ ] 23. Author `provisioning/venues/oracle/README.md` cross-linking the
+- [ ] 23. Author `provisioning/venues/oracle/README.md` cross-linking the (deferred: README.md not yet authored)
   resource model, lifecycle, vpn-join, and `automojo-interop-oracle`.

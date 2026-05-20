@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/digitalocean/` tree per `design.md`.
-- [ ] 2. Add `automojo-interop-digitalocean` + `pydo` deps to `pyproject.toml`.
+- [ ] 2. Add `automojo-interop-digitalocean` + `pydo` deps to `pyproject.toml`. (deferred: cross-repo dependency wiring owned by package packaging step)
 - [x] 3. Declare `DoValidationError`, `DoConflictError`,
   `ConfirmationRequiredError` in `doerrors.py`.
 
@@ -45,7 +45,7 @@
 
 ## Integration tests (gated)
 
-- [ ] 21. `RUN_LIVE_DO=1` end-to-end against a sandbox account.
+- [ ] 21. `RUN_LIVE_DO=1` end-to-end against a sandbox account. (deferred: live-integration end-to-end test gated on real hardware/account)
 
 ## Documentation
 

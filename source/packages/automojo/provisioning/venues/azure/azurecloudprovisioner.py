@@ -212,6 +212,16 @@ class AzureCloudProvisioner(CloudProvisioner):
         self._last_vpn_records: List[Dict[str, Any]] = []
         return
 
+    @classmethod
+    def supports_preemption(cls) -> bool:
+        """
+            Azure offers Spot VMs, so this venue can preempt instances.
+
+            :returns: True.
+        """
+        rtnval = True
+        return rtnval
+
     # ------------------------------------------------------------------
     # Lifecycle: validate
     # ------------------------------------------------------------------

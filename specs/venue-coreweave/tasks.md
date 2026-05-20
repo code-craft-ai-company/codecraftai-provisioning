@@ -53,7 +53,7 @@
 
 ## Integration tests (gated)
 
-- [ ] 24. `RUN_LIVE_COREWEAVE=1` end-to-end against a sandbox project.
+- [ ] 24. `RUN_LIVE_COREWEAVE=1` end-to-end against a sandbox project. (deferred: live-integration end-to-end test gated on real hardware/account)
 
 ## Documentation
 

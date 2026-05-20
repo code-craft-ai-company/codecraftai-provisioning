@@ -40,10 +40,10 @@
 
 ## Integration tests (gated)
 
-- [ ] 18. `RUN_LIVE_LAMBDA=1` end-to-end against a sandbox account (incurs
+- [ ] 18. `RUN_LIVE_LAMBDA=1` end-to-end against a sandbox account (incurs (deferred: live-integration end-to-end test gated on real hardware/account)
   per-second GPU charges; excluded from PR CI).
 
 ## Documentation
 
-- [ ] 19. Author `provisioning/venues/lambdalabs/README.md` cross-linking the
+- [ ] 19. Author `provisioning/venues/lambdalabs/README.md` cross-linking the (deferred: README.md not yet authored)
   resource model, lifecycle, vpn-join, and the Lambda Labs interop client.

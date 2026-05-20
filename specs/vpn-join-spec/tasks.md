@@ -19,16 +19,16 @@
 
 ## Cloud-Init Renderer Contract
 
-- [ ] 12. Declare `render_cloud_init` signature in `vpncloudinitrenderer.py`
-- [ ] 13. Implementation lives in `cloud-init-injection` spec; this spec only owns
+- [x] 12. Declare `render_cloud_init` signature in `vpncloudinitrenderer.py`
+- [x] 13. Implementation lives in `cloud-init-injection` spec; this spec only owns
         the function signature and contract
-- [ ] 14. Document quoting rules in the function docstring
+- [ ] 14. Document quoting rules in the function docstring (deferred: docstring quoting-rules section not yet authored)
 
 ## Credential Resolution
 
-- [ ] 15. Add lifecycle hook to resolve `control_plane_credential` from vault
-- [ ] 16. Verify credential class matches declared provider
-- [ ] 17. Raise `SchemaSemanticError` for missing or mismatched credential
+- [x] 15. Add lifecycle hook to resolve `control_plane_credential` from vault
+- [x] 16. Verify credential class matches declared provider
+- [x] 17. Raise `SchemaSemanticError` for missing or mismatched credential
 
 ## Tests — Examples
 
@@ -45,10 +45,10 @@
 
 - [x] 26. `test_property_render_hostnames_unique_when_index_in_template`
 - [x] 27. `test_property_rendered_name_is_valid_dns_label`
-- [ ] 28. `test_property_cloud_init_is_valid_yaml_for_any_spec`
-- [ ] 29. `test_property_authkey_quoted_in_every_shell_position`
+- [x] 28. `test_property_cloud_init_is_valid_yaml_for_any_spec`
+- [x] 29. `test_property_authkey_quoted_in_every_shell_position`
 
 ## Documentation
 
-- [ ] 30. Cross-link `cloud-init-injection` from the cloud-init renderer contract
-- [ ] 31. Document the §5 ephemeral-key-only default in the module docstring
+- [ ] 30. Cross-link `cloud-init-injection` from the cloud-init renderer contract (deferred: documentation cross-link not yet authored)
+- [ ] 31. Document the §5 ephemeral-key-only default in the module docstring (deferred: module docstring §5 note not yet authored)

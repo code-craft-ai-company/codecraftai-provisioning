@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/hetzner/` tree per `design.md`.
-- [ ] 2. Add `automojo-interop-hetzner` + `hcloud` deps.
+- [ ] 2. Add `automojo-interop-hetzner` + `hcloud` deps. (deferred: cross-repo dependency wiring owned by package packaging step)
 - [x] 3. Declare `HetznerValidationError`, `HetznerConflictError`,
   `ConfirmationRequiredError` in `hetznererrors.py`.
 
@@ -38,7 +38,7 @@
 
 ## Integration tests (gated)
 
-- [ ] 19. `RUN_LIVE_HETZNER=1` end-to-end against a sandbox project.
+- [ ] 19. `RUN_LIVE_HETZNER=1` end-to-end against a sandbox project. (deferred: live-integration end-to-end test gated on real hardware/account)
 
 ## Documentation
 

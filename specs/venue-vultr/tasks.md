@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/vultr/` tree per `design.md`.
-- [ ] 2. Add `automojo-interop-vultr` dep (built on
+- [ ] 2. Add `automojo-interop-vultr` dep (built on (deferred: cross-repo dependency wiring owned by package packaging step)
   `automojo-restclient-base`).
   > Deviation: per the M13 directive the venue calls the Vultr v2 REST API
   > directly via `requests` (same pattern as the AWS venue using boto3); no
@@ -43,7 +43,7 @@
 
 ## Integration tests (gated)
 
-- [ ] 19. `RUN_LIVE_VULTR=1` end-to-end against a sandbox account.
+- [ ] 19. `RUN_LIVE_VULTR=1` end-to-end against a sandbox account. (deferred: live-integration end-to-end test gated on real hardware/account)
   > Not implemented: requires a live Vultr sandbox account; out of scope for
   > the offline mock-only test environment.
 

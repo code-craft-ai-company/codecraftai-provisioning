@@ -18,18 +18,18 @@
 
 ## V1 Subclasses (stubs)
 
-- [ ] 11. Create `kubernetesworkloadprovisioner.py` — full v1 impl shell
-- [ ] 12. Create `slurmworkloadprovisioner.py` — `apply` raises NIE
-- [ ] 13. Create `rayworkloadprovisioner.py` — `apply` raises NIE
-- [ ] 14. Create `nomadworkloadprovisioner.py` — `apply` raises NIE
-- [ ] 15. NIE messages include a stable issue-tracker pointer
+- [x] 11. Create `kubernetesworkloadprovisioner.py` — full v1 impl shell
+- [x] 12. Create `slurmworkloadprovisioner.py` — `apply` raises NIE
+- [x] 13. Create `rayworkloadprovisioner.py` — `apply` raises NIE
+- [x] 14. Create `nomadworkloadprovisioner.py` — `apply` raises NIE
+- [x] 15. NIE messages include a stable issue-tracker pointer
 
 ## Validation Hooks
 
-- [ ] 16. Resolve `credential_ref` from vault during validate
-- [ ] 17. Verify credential type matches `kind`
-- [ ] 18. Validate node-pool accelerators against catalog + venue capability matrix
-- [ ] 19. Reject `LoadBalancer` exposure on venues without LB support
+- [x] 16. Resolve `credential_ref` from vault during validate
+- [x] 17. Verify credential type matches `kind`
+- [x] 18. Validate node-pool accelerators against catalog + venue capability matrix
+- [x] 19. Reject `LoadBalancer` exposure on venues without LB support
 
 ## Tests — Examples
 
@@ -37,14 +37,14 @@
 - [x] 21. `test_workload_venue_roundtrip`
 - [x] 22. `test_workload_job_rejects_zero_replicas`
 - [x] 23. `test_workload_cluster_with_node_pools_roundtrip`
-- [ ] 24. `test_workload_service_loadbalancer_exposure_validates`
-- [ ] 25. `test_slurm_provisioner_apply_raises_nie`
-- [ ] 26. `test_ray_provisioner_apply_raises_nie`
-- [ ] 27. `test_nomad_provisioner_apply_raises_nie`
-- [ ] 28. `test_composition_drives_cloud_before_workload`
-- [ ] 29. `test_node_pool_accelerator_rejected_when_unsupported`
+- [x] 24. `test_workload_service_loadbalancer_exposure_validates`
+- [x] 25. `test_slurm_provisioner_apply_raises_nie`
+- [x] 26. `test_ray_provisioner_apply_raises_nie`
+- [x] 27. `test_nomad_provisioner_apply_raises_nie`
+- [x] 28. `test_composition_drives_cloud_before_workload`
+- [x] 29. `test_node_pool_accelerator_rejected_when_unsupported`
 
 ## Documentation
 
-- [ ] 30. Document the §7.6 ECS/ACI/Cloud Run exclusion in module docstring
-- [ ] 31. Cross-link to `automojo-interop-kubernetes`
+- [ ] 30. Document the §7.6 ECS/ACI/Cloud Run exclusion in module docstring (deferred: documentation not yet authored)
+- [ ] 31. Cross-link to `automojo-interop-kubernetes` (deferred: cross-repo documentation link not yet authored)

@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/libvirt/` tree per `design.md`.
-- [ ] 2. Add `automojo-interop-libvirt` + `libvirt-python` deps.
+- [ ] 2. Add `automojo-interop-libvirt` + `libvirt-python` deps. (deferred: cross-repo dependency wiring owned by package packaging step)
 - [x] 3. Declare `LvValidationError`, `LvConflictError`,
   `ConfirmationRequiredError` in `lverrors.py`.
 
@@ -44,7 +44,7 @@
 
 ## Integration tests (gated)
 
-- [ ] 20. `RUN_LIVE_LIBVIRT=1` end-to-end against a local libvirt daemon.
+- [ ] 20. `RUN_LIVE_LIBVIRT=1` end-to-end against a local libvirt daemon. (deferred: live-integration end-to-end test gated on real hardware/account)
 
 ## Documentation
 

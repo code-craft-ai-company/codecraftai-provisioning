@@ -41,7 +41,7 @@
 
 ## Integration tests (gated)
 
-- [ ] 21. `RUN_LIVE_NUTANIX=1` end-to-end against a homelab Prism Central.
+- [ ] 21. `RUN_LIVE_NUTANIX=1` end-to-end against a homelab Prism Central. (deferred: live-integration end-to-end test gated on real hardware/account)
 
 ## Documentation
 

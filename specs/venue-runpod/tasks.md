@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/runpod/` tree per `design.md`.
-- [ ] 2. Add `automojo-interop-runpod` dep.
+- [ ] 2. Add `automojo-interop-runpod` dep. (deferred: cross-repo dependency wiring owned by package packaging step)
 - [x] 3. Declare `RpValidationError`, `RpCapacityError`,
   `ConfirmationRequiredError` in `rperrors.py`.
 
@@ -45,7 +45,7 @@
 
 ## Integration tests (gated)
 
-- [ ] 21. `RUN_LIVE_RUNPOD=1` end-to-end against a sandbox account.
+- [ ] 21. `RUN_LIVE_RUNPOD=1` end-to-end against a sandbox account. (deferred: live-integration end-to-end test gated on real hardware/account)
 
 ## Documentation
 

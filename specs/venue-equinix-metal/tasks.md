@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/equinix/` tree per `design.md`.
-- [ ] 2. Add `automojo-interop-equinix-metal` + `packet-python` deps.
+- [ ] 2. Add `automojo-interop-equinix-metal` + `packet-python` deps. (deferred: cross-repo dependency wiring owned by package packaging step)
 - [x] 3. Declare `MetalValidationError`, `MetalConflictError`,
   `ConfirmationRequiredError` in `metalerrors.py`.
 
@@ -39,10 +39,10 @@
 
 ## Integration tests (gated)
 
-- [ ] 18. `RUN_LIVE_METAL=1` end-to-end against a sandbox project (long
+- [ ] 18. `RUN_LIVE_METAL=1` end-to-end against a sandbox project (long (deferred: live-integration end-to-end test gated on real hardware/account)
   runtime; not on PR CI).
 
 ## Documentation
 
-- [ ] 19. Author `provisioning/venues/equinix/README.md` cross-linking the
+- [ ] 19. Author `provisioning/venues/equinix/README.md` cross-linking the (deferred: README.md not yet authored)
   resource model, lifecycle, vpn-join, and the Metal interop client.

@@ -156,6 +156,36 @@ class LandscapeEmitterTests(unittest.TestCase):
         self.assertNotIn("overlay", device["addresses"])
         return
 
+    def test_landscape_emit_includes_policy(self) -> None:
+        spec = {
+            "apod": {"name": "lab"},
+            "venues": [],
+            "instances": [
+                {"name": "spot-01", "preemption_policy": "REACQUIRE"},
+                {"name": "fixed-01"},
+            ],
+        }
+        inventory = {"aws-east": [
+            ProvisionedResource(kind="instance", name="spot-01",
+                                venue_id="i-1",
+                                attributes={"public_ip": "1.2.3.4"},
+                                preemption_policy="REACQUIRE"),
+            ProvisionedResource(kind="instance", name="fixed-01",
+                                venue_id="i-2",
+                                attributes={"public_ip": "1.2.3.5"}),
+        ]}
+        emitter = LandscapeEmitter(spec=spec, inventory=inventory)
+        doc = emitter.emit(aspects=ProvisioningAspects())
+        by_name = {d["name"]: d for d in doc["apod"]["devices"]}
+        # Every emitted device entry carries a preemption_policy.
+        self.assertIn("preemption_policy", by_name["spot-01"])
+        self.assertIn("preemption_policy", by_name["fixed-01"])
+        # The policy threaded from the ProvisionedResource is honoured.
+        self.assertEqual(by_name["spot-01"]["preemption_policy"], "REACQUIRE")
+        # An instance without an explicit policy falls back to fail-loud.
+        self.assertEqual(by_name["fixed-01"]["preemption_policy"], "FAIL")
+        return
+
     def test_emit_caches_list_devices_per_provider(self) -> None:
         spec = {
             "apod": {"name": "lab"},

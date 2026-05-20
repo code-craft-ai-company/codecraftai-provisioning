@@ -19,9 +19,20 @@ from hypothesis import assume, given, settings, strategies as st
 from automojo.provisioning.model.exceptions import (
     SchemaValidationError, SchemaSemanticError
 )
+from automojo.credentials.tailscaleoauthcredential import TailscaleOAuthCredential
+from automojo.credentials.tailscaleauthkeycredential import (
+    TailscaleAuthKeyCredential
+)
+from automojo.credentials.twingateserviceaccountcredential import (
+    TwingateServiceAccountCredential
+)
+
 from automojo.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
 from automojo.provisioning.model.vpn.hostnametemplate import (
     render_hostname, render_hostnames
+)
+from automojo.provisioning.model.vpn.vpncredentialresolver import (
+    resolve_control_plane_credential
 )
 
 
@@ -130,6 +141,99 @@ class HostnameRendererPropertyTests(unittest.TestCase):
         a = render_hostname(template=template, context={"index": index})
         b = render_hostname(template=template, context={"index": index})
         self.assertEqual(a, b)
+        return
+
+
+def _tailscale_oauth() -> TailscaleOAuthCredential:
+    rtnval = TailscaleOAuthCredential(identifier="ts-oauth",
+                                      categories=["tailscale-oauth"],
+                                      client_id="cid", client_secret="secret")
+    return rtnval
+
+
+def _tailscale_authkey() -> TailscaleAuthKeyCredential:
+    rtnval = TailscaleAuthKeyCredential(identifier="ts-key",
+                                        categories=["tailscale-authkey"],
+                                        authkey="tskey-abc")
+    return rtnval
+
+
+def _twingate_service_account() -> TwingateServiceAccountCredential:
+    rtnval = TwingateServiceAccountCredential(identifier="tg-svc",
+                                              categories=["twingate-service-account"],
+                                              api_token="token",
+                                              network_slug="net-slug")
+    return rtnval
+
+
+class CredentialResolverTests(unittest.TestCase):
+
+    def test_resolves_tailscale_oauth_credential(self) -> None:
+        spec = VPNJoinSpec(provider="tailscale",
+                           control_plane_credential="ts-oauth",
+                           hostname_template="node-{index}")
+        vault = {"ts-oauth": _tailscale_oauth()}
+        resolved = resolve_control_plane_credential(
+            spec=spec, credential_lookup=lambda ref: vault.get(ref, None)
+        )
+        self.assertIsInstance(resolved, TailscaleOAuthCredential)
+        return
+
+    def test_resolves_tailscale_authkey_credential(self) -> None:
+        spec = VPNJoinSpec(provider="tailscale",
+                           control_plane_credential="ts-key",
+                           hostname_template="node-{index}")
+        vault = {"ts-key": _tailscale_authkey()}
+        resolved = resolve_control_plane_credential(
+            spec=spec, credential_lookup=lambda ref: vault.get(ref, None)
+        )
+        self.assertIsInstance(resolved, TailscaleAuthKeyCredential)
+        return
+
+    def test_resolves_twingate_service_account_credential(self) -> None:
+        spec = VPNJoinSpec(provider="twingate",
+                           control_plane_credential="tg-svc",
+                           hostname_template="conn-{index}",
+                           connector_only=True)
+        vault = {"tg-svc": _twingate_service_account()}
+        resolved = resolve_control_plane_credential(
+            spec=spec, credential_lookup=lambda ref: vault.get(ref, None)
+        )
+        self.assertIsInstance(resolved, TwingateServiceAccountCredential)
+        return
+
+    def test_missing_credential_raises_semantic_error(self) -> None:
+        spec = VPNJoinSpec(provider="tailscale",
+                           control_plane_credential="absent",
+                           hostname_template="node-{index}")
+        with self.assertRaises(SchemaSemanticError):
+            resolve_control_plane_credential(
+                spec=spec, credential_lookup=lambda ref: None
+            )
+        return
+
+    def test_mismatched_credential_class_raises_semantic_error(self) -> None:
+        # Tailscale provider but a Twingate credential is resolved.
+        spec = VPNJoinSpec(provider="tailscale",
+                           control_plane_credential="tg-svc",
+                           hostname_template="node-{index}")
+        vault = {"tg-svc": _twingate_service_account()}
+        with self.assertRaises(SchemaSemanticError):
+            resolve_control_plane_credential(
+                spec=spec, credential_lookup=lambda ref: vault.get(ref, None)
+            )
+        return
+
+    def test_twingate_provider_rejects_tailscale_credential(self) -> None:
+        spec = VPNJoinSpec(provider="twingate",
+                           control_plane_credential="ts-oauth",
+                           hostname_template="conn-{index}",
+                           connector_only=True)
+        vault = {"ts-oauth": _tailscale_oauth()}
+        with self.assertRaises(SchemaSemanticError):
+            resolve_control_plane_credential(
+                spec=spec, credential_lookup=lambda ref: vault.get(ref, None)
+            )
         return
 
 

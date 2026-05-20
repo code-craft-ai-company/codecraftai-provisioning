@@ -43,9 +43,9 @@
 
 ## Integration tests (gated)
 
-- [ ] 21. `RUN_LIVE_PVE=1` end-to-end against a homelab cluster.
+- [ ] 21. `RUN_LIVE_PVE=1` end-to-end against a homelab cluster. (deferred: live-integration end-to-end test gated on real hardware/account)
 
 ## Documentation
 
-- [ ] 22. Author `provisioning/venues/proxmox/README.md` cross-linking the
+- [ ] 22. Author `provisioning/venues/proxmox/README.md` cross-linking the (deferred: README.md not yet authored)
   resource model, lifecycle, vpn-join, and the Proxmox interop client.

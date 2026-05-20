@@ -199,6 +199,17 @@ class GoogleCloudProvisioner(CloudProvisioner):
         rtnval = self._session_factory
         return rtnval
 
+    @classmethod
+    def supports_preemption(cls) -> bool:
+        """
+            GCP offers Preemptible / Spot VMs, so this venue can preempt
+            instances.
+
+            :returns: True.
+        """
+        rtnval = True
+        return rtnval
+
     # ------------------------------------------------------------------
     # Lifecycle: validate
     # ------------------------------------------------------------------

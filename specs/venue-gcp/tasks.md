@@ -67,9 +67,9 @@
 
 ## Integration tests (gated)
 
-- [ ] 28. `RUN_LIVE_GCP=1` end-to-end against a sandbox project.
+- [ ] 28. `RUN_LIVE_GCP=1` end-to-end against a sandbox project. (deferred: live-integration end-to-end test gated on real hardware/account)
 
 ## Documentation
 
-- [ ] 29. Author `provisioning/venues/google/README.md` cross-linking the
+- [ ] 29. Author `provisioning/venues/google/README.md` cross-linking the (deferred: README.md not yet authored)
   resource model, lifecycle, vpn-join, and `automojo-interop-gcp`.

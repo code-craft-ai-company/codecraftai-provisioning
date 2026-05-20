@@ -40,9 +40,9 @@
 
 ## Integration tests (gated)
 
-- [ ] 20. `RUN_LIVE_XCPNG=1` end-to-end against a homelab pool.
+- [ ] 20. `RUN_LIVE_XCPNG=1` end-to-end against a homelab pool. (deferred: live-integration end-to-end test gated on real hardware/account)
 
 ## Documentation
 
-- [ ] 21. Author `provisioning/venues/xcpng/README.md` cross-linking the
+- [ ] 21. Author `provisioning/venues/xcpng/README.md` cross-linking the (deferred: README.md not yet authored)
   resource model, lifecycle, vpn-join, and the Xen interop client.

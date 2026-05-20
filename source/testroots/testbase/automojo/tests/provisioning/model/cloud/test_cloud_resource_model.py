@@ -311,5 +311,125 @@ class CloudResourcePropertyTests(unittest.TestCase):
         return
 
 
+# Per-class builders mapping a hypothesis-drawn seed to a valid instance.
+def _build_network(seed: int):
+    rtnval = CloudNetwork(name="net-{}".format(seed),
+                          cidr="10.{}.0.0/16".format(seed % 256),
+                          region="region-{}".format(seed),
+                          tags=[{"env": "test"}])
+    return rtnval
+
+
+def _build_subnet(seed: int):
+    rtnval = CloudSubnet(name="sub-{}".format(seed), network="net-a",
+                         cidr="10.{}.1.0/24".format(seed % 256),
+                         zone="zone-{}".format(seed), public=(seed % 2 == 0))
+    return rtnval
+
+
+def _build_ingress(seed: int):
+    rtnval = CloudIngressRule(protocol="tcp", from_port=seed % 1000,
+                              to_port=(seed % 1000) + 1,
+                              source_cidrs=["10.0.0.0/8"],
+                              description="ing-{}".format(seed))
+    return rtnval
+
+
+def _build_egress(seed: int):
+    rtnval = CloudEgressRule(protocol="udp", from_port=seed % 1000,
+                             to_port=(seed % 1000) + 1,
+                             dest_cidrs=["10.0.0.0/8"],
+                             description="egr-{}".format(seed))
+    return rtnval
+
+
+def _build_security_group(seed: int):
+    rtnval = CloudSecurityGroup(name="sg-{}".format(seed), network="net-a",
+                                ingress_rules=[_build_ingress(seed)],
+                                egress_rules=[_build_egress(seed)])
+    return rtnval
+
+
+def _build_keypair(seed: int):
+    rtnval = CloudKeyPair(name="kp-{}".format(seed),
+                          public_key_material="ssh-ed25519 AAAAseed{}".format(seed))
+    return rtnval
+
+
+def _build_image(seed: int):
+    rtnval = CloudImage(family="ubuntu", version="24.{}".format(seed % 12),
+                        architecture="x86_64", owner="owner-{}".format(seed))
+    return rtnval
+
+
+def _build_instance(seed: int):
+    rtnval = CloudInstance(name="inst-{}".format(seed),
+                           profile_ref="prof-{}".format(seed),
+                           image=_basic_image(),
+                           size="size-{}".format(seed),
+                           subnet="sub-a", public_ip=(seed % 2 == 0))
+    return rtnval
+
+
+def _build_volume(seed: int):
+    rtnval = CloudStorageVolume(name="vol-{}".format(seed),
+                                size_gb=(seed % 500) + 1, type="ssd")
+    return rtnval
+
+
+def _build_bucket(seed: int):
+    rtnval = CloudObjectBucket(name="bkt-{}".format(seed),
+                               region="region-{}".format(seed),
+                               versioning=(seed % 2 == 0))
+    return rtnval
+
+
+def _build_load_balancer(seed: int):
+    rtnval = CloudLoadBalancer(name="lb-{}".format(seed), scheme="internal",
+                               target_instance_names=["inst-a"])
+    return rtnval
+
+
+def _build_dns_record(seed: int):
+    rtnval = CloudDnsRecord(zone="example.com", name="rec-{}".format(seed),
+                            record_type="A", values=["10.0.0.1"],
+                            ttl_seconds=(seed % 3600) + 1)
+    return rtnval
+
+
+_MODEL_CLASS_BUILDERS = (
+    (CloudNetwork, _build_network),
+    (CloudSubnet, _build_subnet),
+    (CloudIngressRule, _build_ingress),
+    (CloudEgressRule, _build_egress),
+    (CloudSecurityGroup, _build_security_group),
+    (CloudKeyPair, _build_keypair),
+    (CloudImage, _build_image),
+    (CloudInstance, _build_instance),
+    (CloudStorageVolume, _build_volume),
+    (CloudObjectBucket, _build_bucket),
+    (CloudLoadBalancer, _build_load_balancer),
+    (CloudDnsRecord, _build_dns_record),
+)
+
+
+class AllModelClassesPropertyTests(unittest.TestCase):
+
+    @settings(max_examples=60, deadline=None)
+    @given(st.integers(min_value=0, max_value=100000))
+    def test_property_all_model_classes_roundtrip(self, seed) -> None:
+        # Every cloud model class must satisfy from_dict(to_dict(x)) == x.
+        for model_cls, builder in _MODEL_CLASS_BUILDERS:
+            original = builder(seed)
+            rebuilt = model_cls.from_dict(original.to_dict())
+            self.assertEqual(
+                original, rebuilt,
+                "{} failed round-trip for seed {}".format(
+                    model_cls.__name__, seed
+                )
+            )
+        return
+
+
 if __name__ == "__main__":
     unittest.main()

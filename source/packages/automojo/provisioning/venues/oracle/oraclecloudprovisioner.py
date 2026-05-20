@@ -229,6 +229,17 @@ class OracleCloudProvisioner(CloudProvisioner):
         self._last_vpn_records: List[Dict[str, Any]] = []
         return
 
+    @classmethod
+    def supports_preemption(cls) -> bool:
+        """
+            Oracle Cloud offers Preemptible Instances, so this venue can
+            preempt instances.
+
+            :returns: True.
+        """
+        rtnval = True
+        return rtnval
+
     # ------------------------------------------------------------------
     # Lifecycle: validate
     # ------------------------------------------------------------------
