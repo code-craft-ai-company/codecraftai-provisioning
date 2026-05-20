@@ -78,6 +78,32 @@ class VSphereOps:
         self._client: Any = client
         return
 
+    @staticmethod
+    def _vsphere_aspects(*, aspects: Any) -> Any:
+        """
+            Adapt a provisioning-layer aspects object into the
+            ``AspectsVSphere`` the interop client groups expect.
+
+            The VSphere venue forwards a ``ProvisioningAspects``; the
+            ``automojo-interop-vsphere`` client groups and task handles
+            require an ``AspectsVSphere`` (timeout / interval field
+            names differ).  When the interop package is unavailable
+            (mock-backed tests substitute a plain object) the original
+            aspects object is returned unchanged.
+
+            :param aspects: A provisioning-layer aspects object.
+
+            :returns: An ``AspectsVSphere`` or the original object.
+        """
+        try:
+            from automojo.interop.vsphere.aspectsvsphere import AspectsVSphere
+        except ImportError:
+            rtnval = aspects
+            return rtnval
+
+        rtnval = AspectsVSphere.from_aspects(aspects)
+        return rtnval
+
     @property
     def client(self) -> Any:
         """
@@ -119,7 +145,8 @@ class VSphereOps:
 
             :returns: A list of network summary objects.
         """
-        rtnval = self._client.Network.list(aspects=aspects)
+        vaspects = self._vsphere_aspects(aspects=aspects)
+        rtnval = self._client.Network.list(aspects=vaspects)
         return rtnval
 
     def create_port_group(self, *, name: str, vlan_id: int,
@@ -134,9 +161,11 @@ class VSphereOps:
 
             :returns: A dict describing the created port group.
         """
-        rtnval = self._client.Network.create_port_group(
-            name=name, vlan_id=vlan_id, switch=switch, aspects=aspects,
+        vaspects = self._vsphere_aspects(aspects=aspects)
+        handle = self._client.Network.create_port_group(
+            name=name, vlan_id=vlan_id, switch=switch, aspects=vaspects,
         )
+        rtnval = self._wait(handle=handle, aspects=vaspects)
         return rtnval
 
     def delete_port_group(self, *, network_id: str, aspects: Any) -> None:
@@ -146,9 +175,11 @@ class VSphereOps:
             :param network_id: Port group identifier.
             :param aspects: Behaviour controls.
         """
-        self._client.Network.delete_port_group(
-            network_id=network_id, aspects=aspects,
+        vaspects = self._vsphere_aspects(aspects=aspects)
+        handle = self._client.Network.delete_port_group(
+            network_id=network_id, aspects=vaspects,
         )
+        self._wait(handle=handle, aspects=vaspects)
         return
 
     # ------------------------------------------------------------------
@@ -167,8 +198,9 @@ class VSphereOps:
 
             :returns: A library item summary object.
         """
+        vaspects = self._vsphere_aspects(aspects=aspects)
         rtnval = self._client.Content.find_item(
-            name=name, tag=tag, all_library_ids=library_ids, aspects=aspects,
+            name=name, tag=tag, all_library_ids=library_ids, aspects=vaspects,
         )
         return rtnval
 
@@ -184,11 +216,12 @@ class VSphereOps:
 
             :returns: The completed task result payload.
         """
+        vaspects = self._vsphere_aspects(aspects=aspects)
         handle = self._client.Content.deploy_ovf_item(
             item_id=item_id, target=target, deploy_spec=deploy_spec,
-            aspects=aspects,
+            aspects=vaspects,
         )
-        rtnval = self._wait(handle=handle, aspects=aspects)
+        rtnval = self._wait(handle=handle, aspects=vaspects)
         return rtnval
 
     def find_template_vm(self, *, name: str, folder: Optional[str],
@@ -202,8 +235,9 @@ class VSphereOps:
 
             :returns: A virtual machine summary object.
         """
+        vaspects = self._vsphere_aspects(aspects=aspects)
         rtnval = self._client.Inventory.find_vm_by_name(
-            name=name, aspects=aspects,
+            name=name, aspects=vaspects,
         )
         return rtnval
 
@@ -221,8 +255,9 @@ class VSphereOps:
 
             :returns: A datastore summary object.
         """
+        vaspects = self._vsphere_aspects(aspects=aspects)
         rtnval = self._client.Inventory.find_datastore_with_free_gb(
-            min_free_gb=min_free_gb, aspects=aspects,
+            min_free_gb=min_free_gb, aspects=vaspects,
         )
         return rtnval
 
@@ -238,7 +273,8 @@ class VSphereOps:
 
             :returns: A list of virtual machine summary objects.
         """
-        rtnval = self._client.Vm.list(aspects=aspects)
+        vaspects = self._vsphere_aspects(aspects=aspects)
+        rtnval = self._client.Vm.list(aspects=vaspects)
         return rtnval
 
     def create_vm(self, *, spec: Any, aspects: Any) -> Dict[str, Any]:
@@ -250,8 +286,9 @@ class VSphereOps:
 
             :returns: The completed task result payload.
         """
-        handle = self._client.Vm.create(spec=spec, aspects=aspects)
-        rtnval = self._wait(handle=handle, aspects=aspects)
+        vaspects = self._vsphere_aspects(aspects=aspects)
+        handle = self._client.Vm.create(spec=spec, aspects=vaspects)
+        rtnval = self._wait(handle=handle, aspects=vaspects)
         return rtnval
 
     def delete_vm(self, *, vm_id: str, aspects: Any) -> None:
@@ -261,7 +298,8 @@ class VSphereOps:
             :param vm_id: VM identifier.
             :param aspects: Behaviour controls.
         """
-        self._client.Vm.delete(id=vm_id, aspects=aspects)
+        vaspects = self._vsphere_aspects(aspects=aspects)
+        self._client.Vm.delete(id=vm_id, aspects=vaspects)
         return
 
     def power(self, *, vm_id: str, action: str, aspects: Any) -> Dict[str, Any]:
@@ -274,9 +312,10 @@ class VSphereOps:
 
             :returns: The completed task result payload.
         """
+        vaspects = self._vsphere_aspects(aspects=aspects)
         handle = self._client.Vm.power(vm_id=vm_id, action=action,
-                                       aspects=aspects)
-        rtnval = self._wait(handle=handle, aspects=aspects)
+                                       aspects=vaspects)
+        rtnval = self._wait(handle=handle, aspects=vaspects)
         return rtnval
 
     def attach_disk(self, *, vm_id: str, datastore_id: str,
@@ -291,11 +330,12 @@ class VSphereOps:
 
             :returns: A dict describing the attached disk.
         """
+        vaspects = self._vsphere_aspects(aspects=aspects)
         handle = self._client.Vm.attach_disk(
             vm_id=vm_id, datastore_id=datastore_id, size_gb=size_gb,
-            aspects=aspects,
+            aspects=vaspects,
         )
-        rtnval = self._wait(handle=handle, aspects=aspects)
+        rtnval = self._wait(handle=handle, aspects=vaspects)
         return rtnval
 
     def apply_guest_customization(self, *, vm_id: str, spec: Any,
@@ -311,11 +351,12 @@ class VSphereOps:
 
             :returns: The completed task result payload.
         """
+        vaspects = self._vsphere_aspects(aspects=aspects)
         handle = self._client.Guest.apply_guest_customization_spec(
             vm=vm_id, spec=spec, guest_os_family=guest_os_family,
-            aspects=aspects,
+            aspects=vaspects,
         )
-        rtnval = self._wait(handle=handle, aspects=aspects)
+        rtnval = self._wait(handle=handle, aspects=vaspects)
         return rtnval
 
     # ------------------------------------------------------------------
