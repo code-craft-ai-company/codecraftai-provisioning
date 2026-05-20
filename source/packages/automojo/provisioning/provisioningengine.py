@@ -1,75 +1,539 @@
+"""
+    .. module:: provisioningengine
+    :platform: Darwin, Linux, Unix, Windows
+    :synopsis: Eight-stage provisioning pipeline driver.
+
+    The engine drives the same five-verb lifecycle (validate / plan / apply /
+    destroy / inventory) over every registered CloudProvisioner in a fixed
+    stage order:
+
+        1. LOAD_VALIDATE
+        2. PLAN
+        3. APPLY_NETWORKING
+        4. APPLY_COMPUTE
+        5. APPLY_DNS_AND_STORAGE_AND_LB
+        6. BOOTSTRAP_VPN
+        7. VERIFY
+        8. EMIT_LANDSCAPE_INVENTORY
+
+    Within a stage, the engine respects the resource dependency graph's
+    topological sort (Kahn's algorithm, stable tiebreaker).  Cycles raise
+    SchemaSemanticError listing the offending nodes.
+
+    Dry-run halts at the end of PLAN and returns a MultiVenueProvisioningPlan.
+
+    .. moduleauthor:: Myron Walker <myron.walker@gmail.com>
+"""
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2025, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Automation Mojo LLC"
 __credits__ = []
 
 
+import datetime
+import logging
+import os
+import uuid
+
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 import yaml
 
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
+from automojo.provisioning.model.exceptions import (
+    SchemaSemanticError, SchemaValidationError
+)
+from automojo.provisioning.model.cloud.cloudprovisioner import CloudProvisioner
+from automojo.provisioning.model.cloud.provisioningplan import ProvisioningPlan
+from automojo.provisioning.model.cloud.provisioningresult import (
+    ProvisioningResult
+)
+from automojo.provisioning.model.cloud.provisionedresource import (
+    ProvisionedResource
+)
+from automojo.provisioning.aspects.provisioningaspects import (
+    ProvisioningAspects
+)
+from automojo.provisioning.cloudprovisionerregistry import (
+    CloudProvisionerRegistry
+)
+from automojo.provisioning.dependencygraph import (
+    build_dependency_graph, DependencyGraph
+)
+from automojo.provisioning.pipelineplan import (
+    PipelinePlan, MultiVenueProvisioningPlan
+)
+from automojo.provisioning.pipelinestage import (
+    PipelineStage, PIPELINE_STAGE_ORDER
+)
+from automojo.provisioning.provisioningverifyerror import (
+    ProvisioningVerifyError
+)
+from automojo.provisioning.state.provisioningstatestore import (
+    ProvisioningStateStore
+)
+from automojo.provisioning.state.runstate import RunState
+from automojo.provisioning.state.runstatus import RunStatus
+from automojo.provisioning.landscape.landscapeemitter import LandscapeEmitter
+
+
+logger = logging.getLogger(__name__)
+
 
 class ProvisioningEngine:
     """
-    The ProvisioningEngine class is responsible for managing the provisioning of resources.
-    It handles the creation, deletion, and management of resources in a cloud environment.
+        Eight-stage venue-agnostic provisioning pipeline driver.
+
+        The engine owns no venue-specific knowledge; venues land in M7+
+        through CloudProvisionerRegistry registrations made by callers.
     """
 
-    def __init__(self, *, specinfo: dict):
+    def __init__(self, *, spec: Dict[str, Any],
+                 registry: CloudProvisionerRegistry,
+                 runid: Optional[str] = None,
+                 state_store: Optional[ProvisioningStateStore] = None,
+                 control_planes: Optional[Dict[str, Any]] = None) -> None:
         """
-        Initializes the ProvisioningEngine instance.
+            Construct a ProvisioningEngine.
+
+            :param spec: Normalised spec dict.
+            :param registry: CloudProvisionerRegistry of venue provisioners.
+            :param runid: Optional run identifier (UUID4 minted if missing).
+            :param state_store: Optional ProvisioningStateStore for
+                                persistence; the engine omits persistence
+                                when None.
+            :param control_planes: Optional VPN control-plane registry.
         """
-        self._specinfo = specinfo
-        
-        self._apodinfo = specinfo["apod"]
-        self._envinfo = specinfo["environment"]
-        
-        self._cloud_venues = []
-        if "venues" in self._envinfo:
-            venues_list = self._envinfo["venues"]
-            for venue in venues_list:
-                self._cloud_venues.append(CloudVenue(**venue))
+        if spec is None:
+            raise SchemaValidationError("spec must not be None.")
+        if registry is None or len(registry) == 0:
+            raise SchemaValidationError(
+                "registry must contain at least one provisioner."
+            )
 
-        self._cloud_groups = []
-        if "groups" in self._envinfo:
-            groups_list = self._envinfo["groups"]
-            for group in groups_list:
-                self._cloud_groups.append(group)
+        self._spec: Dict[str, Any] = spec
+        self._registry: CloudProvisionerRegistry = registry
+        self._runid: str = runid if runid is not None else str(uuid.uuid4())
+        self._state_store: Optional[ProvisioningStateStore] = state_store
+        self._control_planes: Dict[str, Any] = (
+            control_planes if control_planes is not None else {}
+        )
 
-        self._cloud_resource_profiles = []
-        if "profiles" in self._specinfo:
-            profiles_list = self._specinfo["profiles"]
-            for profile in profiles_list:
-                self._cloud_resource_profiles.append(profile)
+        self._dependency_graph: DependencyGraph = build_dependency_graph(
+            spec=spec
+        )
+        self._topo_order: List[Tuple[str, str]] = (
+            self._dependency_graph.topological_sort()
+        )
 
-        self._cloud_devices = []
-        if "devices" in self._apodinfo:
-            devices_list = self._apodinfo["devices"]
-            for device in devices_list:
-                self._cloud_devices.append(device)
-
-        self._cloud_provisioners = []
+        self._results: Dict[str, ProvisioningResult] = {}
+        self._inventory: Dict[str, List[ProvisionedResource]] = {}
+        self._plan: Optional[PipelinePlan] = None
+        self._landscape: Optional[Dict[str, Any]] = None
 
         return
 
+    # ------------------------------------------------------------------
+    # Properties
+    # ------------------------------------------------------------------
+
+    @property
+    def runid(self) -> str:
+        """
+            Return the run identifier.
+
+            :returns: The runid string.
+        """
+        rtnval = self._runid
+        return rtnval
+
+    @property
+    def topological_order(self) -> List[Tuple[str, str]]:
+        """
+            Return the cached topological order.
+
+            :returns: List of (kind, name).
+        """
+        rtnval = self._topo_order
+        return rtnval
+
+    @property
+    def dependency_graph(self) -> DependencyGraph:
+        """
+            Return the cached DependencyGraph.
+
+            :returns: The DependencyGraph.
+        """
+        rtnval = self._dependency_graph
+        return rtnval
+
+    @property
+    def landscape(self) -> Optional[Dict[str, Any]]:
+        """
+            Return the last-emitted landscape dict, if any.
+
+            :returns: Landscape dict or None.
+        """
+        rtnval = self._landscape
+        return rtnval
+
+    # ------------------------------------------------------------------
+    # Public verbs
+    # ------------------------------------------------------------------
+
     @classmethod
-    def create_provisioning_engine(cls, specification: str) -> "ProvisioningEngine":
+    def from_spec_file(cls, *, path: str,
+                       registry: CloudProvisionerRegistry,
+                       runid: Optional[str] = None,
+                       state_store: Optional[ProvisioningStateStore] = None,
+                       control_planes: Optional[Dict[str, Any]] = None
+                       ) -> "ProvisioningEngine":
         """
-        Create a new ProvisioningEngine instance.
+            Construct an engine from a YAML spec file.
 
-        :param specification: The path to a specification file to use when creating the provisioning engine.
+            :param path: Path to the YAML spec.
+            :param registry: A populated CloudProvisionerRegistry.
+            :param runid: Optional runid override.
+            :param state_store: Optional state store.
+            :param control_planes: Optional VPN control planes.
 
-        :return: A new ProvisioningEngine instance.
+            :returns: A configured ProvisioningEngine.
         """
-        pengine = None
-        specinfo = None
+        with open(path, "r") as fh:
+            data = yaml.safe_load(fh)
+        rtnval = cls(spec=data, registry=registry, runid=runid,
+                     state_store=state_store,
+                     control_planes=control_planes)
+        return rtnval
 
-        if specification is not None:
-            with open(specification, "r") as specfile:
-                specinfo = yaml.safe_load(specfile)
-            
-            pengine = cls(specinfo=specinfo)
+    def validate(self, *, aspects: ProvisioningAspects) -> None:
+        """
+            Run the LOAD_VALIDATE stage against every venue.
 
-        else:
-            raise ValueError("Specification file path is required.")
+            :param aspects: ProvisioningAspects.
+            :raises: SchemaSemanticError
+        """
+        self._log_stage(stage=PipelineStage.LOAD_VALIDATE, event="enter")
+        for venue_name, provisioner in self._registry.items():
+            provisioner.validate(aspects=aspects)
+        self._log_stage(stage=PipelineStage.LOAD_VALIDATE, event="exit")
+        return
 
-        return pengine
+    def plan(self, *,
+             aspects: ProvisioningAspects) -> MultiVenueProvisioningPlan:
+        """
+            Run LOAD_VALIDATE then PLAN and return the aggregate plan.
+
+            When ``aspects.dry_run`` is True the engine halts here (the
+            apply/bootstrap/verify/emit stages are skipped).
+
+            :param aspects: ProvisioningAspects.
+
+            :returns: A MultiVenueProvisioningPlan.
+        """
+        self.validate(aspects=aspects)
+
+        self._log_stage(stage=PipelineStage.PLAN, event="enter")
+        per_venue: Dict[str, ProvisioningPlan] = {}
+        for venue_name, provisioner in self._registry.items():
+            per_venue[venue_name] = provisioner.plan(aspects=aspects)
+
+        self._plan = PipelinePlan(per_venue_plans=per_venue,
+                                  topological_order=self._topo_order)
+        self._log_stage(stage=PipelineStage.PLAN, event="exit")
+
+        rtnval = self._plan
+        return rtnval
+
+    def apply(self, *,
+              aspects: ProvisioningAspects) -> Dict[str, ProvisioningResult]:
+        """
+            Run the full pipeline.
+
+            Honours ``aspects.dry_run`` by stopping after PLAN.
+
+            :param aspects: ProvisioningAspects.
+
+            :returns: Per-venue ProvisioningResult map.
+        """
+        plan_result = self.plan(aspects=aspects)
+
+        if aspects.dry_run is True:
+            rtnval: Dict[str, ProvisioningResult] = {}
+            return rtnval
+
+        if self._state_store is not None:
+            self._state_store.create_run(runid=self._runid,
+                                         venues=self._registry.names())
+
+        self._stage_apply_networking(aspects=aspects)
+        self._stage_apply_compute(aspects=aspects)
+        self._stage_apply_dns_storage_lb(aspects=aspects)
+        self._stage_bootstrap_vpn(aspects=aspects)
+        self._stage_verify(aspects=aspects)
+        self._stage_emit_landscape_inventory(aspects=aspects)
+
+        if self._state_store is not None:
+            self._persist_state()
+            self._state_store.mark_finished(runid=self._runid,
+                                            status=RunStatus.APPLIED)
+
+        rtnval = self._results
+        return rtnval
+
+    def destroy(self, *, aspects: ProvisioningAspects) -> None:
+        """
+            Tear down every venue in reverse registration order.
+
+            Requires ``aspects.confirm = True``.  When ``aspects.runid`` is
+            set, the inventory is loaded from the persisted state store
+            before dispatching to each provisioner's destroy.
+
+            :param aspects: ProvisioningAspects.
+            :raises: SchemaSemanticError
+        """
+        if aspects.confirm is not True:
+            raise SchemaSemanticError(
+                "ProvisioningEngine.destroy requires aspects.confirm=True."
+            )
+
+        if aspects.runid is None and self._state_store is not None:
+            raise SchemaSemanticError(
+                "ProvisioningEngine.destroy requires aspects.runid when "
+                "a state store is configured."
+            )
+
+        for venue_name, provisioner in reversed(self._registry.items()):
+            provisioner.destroy(aspects=aspects)
+
+        if self._state_store is not None and aspects.runid is not None:
+            self._state_store.mark_destroyed(runid=aspects.runid)
+
+        return
+
+    def inventory(self, *, aspects: ProvisioningAspects
+                  ) -> Dict[str, List[ProvisionedResource]]:
+        """
+            Collect inventories from every venue.
+
+            :param aspects: ProvisioningAspects.
+
+            :returns: Per-venue inventory map.
+        """
+        rtnval: Dict[str, List[ProvisionedResource]] = {}
+        for venue_name, provisioner in self._registry.items():
+            rtnval[venue_name] = provisioner.inventory(aspects=aspects)
+        self._inventory = rtnval
+        return rtnval
+
+    # ------------------------------------------------------------------
+    # Stage bodies
+    # ------------------------------------------------------------------
+
+    _NETWORKING_KINDS = ("network", "subnet", "sg", "security_group",
+                         "keypair")
+    _COMPUTE_KINDS = ("instance", "volume", "volume_attachment",
+                      "shared_filesystem")
+    _DNS_STORAGE_LB_KINDS = ("dns", "dns_record", "bucket", "lb",
+                             "load_balancer")
+
+    def _stage_apply_networking(self, *,
+                                aspects: ProvisioningAspects) -> None:
+        """
+            APPLY_NETWORKING stage.
+
+            :param aspects: ProvisioningAspects.
+        """
+        self._log_stage(stage=PipelineStage.APPLY_NETWORKING, event="enter")
+        for venue_name, provisioner in self._registry.items():
+            result = provisioner.apply_subset(
+                kinds=list(self._NETWORKING_KINDS),
+                aspects=aspects,
+            )
+            self._merge_result(venue=venue_name, partial=result)
+        self._log_stage(stage=PipelineStage.APPLY_NETWORKING, event="exit")
+        return
+
+    def _stage_apply_compute(self, *,
+                             aspects: ProvisioningAspects) -> None:
+        """
+            APPLY_COMPUTE stage.
+
+            :param aspects: ProvisioningAspects.
+        """
+        self._log_stage(stage=PipelineStage.APPLY_COMPUTE, event="enter")
+        for venue_name, provisioner in self._registry.items():
+            result = provisioner.apply_subset(
+                kinds=list(self._COMPUTE_KINDS),
+                aspects=aspects,
+            )
+            self._merge_result(venue=venue_name, partial=result)
+        self._log_stage(stage=PipelineStage.APPLY_COMPUTE, event="exit")
+        return
+
+    def _stage_apply_dns_storage_lb(self, *,
+                                    aspects: ProvisioningAspects) -> None:
+        """
+            APPLY_DNS_AND_STORAGE_AND_LB stage.
+
+            :param aspects: ProvisioningAspects.
+        """
+        self._log_stage(
+            stage=PipelineStage.APPLY_DNS_AND_STORAGE_AND_LB,
+            event="enter",
+        )
+        for venue_name, provisioner in self._registry.items():
+            result = provisioner.apply_subset(
+                kinds=list(self._DNS_STORAGE_LB_KINDS),
+                aspects=aspects,
+            )
+            self._merge_result(venue=venue_name, partial=result)
+        self._log_stage(
+            stage=PipelineStage.APPLY_DNS_AND_STORAGE_AND_LB,
+            event="exit",
+        )
+        return
+
+    def _stage_bootstrap_vpn(self, *,
+                             aspects: ProvisioningAspects) -> None:
+        """
+            BOOTSTRAP_VPN stage — cloud-init was injected at instance create
+            time; this stage exists for verify-only re-checks.
+
+            :param aspects: ProvisioningAspects.
+        """
+        self._log_stage(stage=PipelineStage.BOOTSTRAP_VPN, event="enter")
+        # No-op in the engine itself.  Venue subclasses inject cloud-init at
+        # create time via the cloudinit renderer; this hook is here so
+        # subclasses or callers may extend.
+        self._log_stage(stage=PipelineStage.BOOTSTRAP_VPN, event="exit")
+        return
+
+    def _stage_verify(self, *, aspects: ProvisioningAspects) -> None:
+        """
+            VERIFY stage — collect inventory and check that every created
+            instance is present.
+
+            :param aspects: ProvisioningAspects.
+            :raises: ProvisioningVerifyError
+        """
+        self._log_stage(stage=PipelineStage.VERIFY, event="enter")
+        self.inventory(aspects=aspects)
+
+        missing: List[str] = []
+        for venue_name, result in self._results.items():
+            inv = {r.name for r in self._inventory.get(venue_name, [])}
+            for created in result.created:
+                if created.name not in inv:
+                    missing.append("{}/{}".format(venue_name, created.name))
+
+        if len(missing) > 0:
+            err_msg_lines = ["VERIFY found instances missing from inventory."]
+            err_msg_lines.append("MISSING:")
+            for entry in missing:
+                err_msg_lines.append("    {}".format(entry))
+            err_msg = os.linesep.join(err_msg_lines)
+            raise ProvisioningVerifyError(err_msg)
+
+        self._log_stage(stage=PipelineStage.VERIFY, event="exit")
+        return
+
+    def _stage_emit_landscape_inventory(self, *,
+                                        aspects: ProvisioningAspects
+                                        ) -> None:
+        """
+            EMIT_LANDSCAPE_INVENTORY stage.
+
+            :param aspects: ProvisioningAspects.
+        """
+        self._log_stage(
+            stage=PipelineStage.EMIT_LANDSCAPE_INVENTORY,
+            event="enter",
+        )
+        emitter = LandscapeEmitter(spec=self._spec,
+                                   inventory=self._inventory,
+                                   control_planes=self._control_planes)
+        self._landscape = emitter.emit(aspects=aspects)
+
+        if self._state_store is not None:
+            self._state_store.write_landscape(runid=self._runid,
+                                              landscape=self._landscape)
+
+        self._log_stage(
+            stage=PipelineStage.EMIT_LANDSCAPE_INVENTORY,
+            event="exit",
+        )
+        return
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+
+    def _merge_result(self, *, venue: str,
+                      partial: ProvisioningResult) -> None:
+        """
+            Merge a stage's per-venue partial result into the running map.
+
+            :param venue: Venue name.
+            :param partial: Stage partial result.
+        """
+        prior = self._results.get(venue, None)
+        if prior is None:
+            self._results[venue] = ProvisioningResult(
+                created=list(partial.created),
+                updated=list(partial.updated),
+                skipped=list(partial.skipped),
+                errors=list(partial.errors),
+            )
+            return
+
+        merged_created = list(prior.created) + list(partial.created)
+        merged_updated = list(prior.updated) + list(partial.updated)
+        merged_skipped = list(prior.skipped) + list(partial.skipped)
+        merged_errors = list(prior.errors) + list(partial.errors)
+        self._results[venue] = ProvisioningResult(
+            created=merged_created, updated=merged_updated,
+            skipped=merged_skipped, errors=merged_errors,
+        )
+        return
+
+    def _log_stage(self, *, stage: PipelineStage, event: str) -> None:
+        """
+            Log a stage entry/exit transition.
+
+            :param stage: The PipelineStage.
+            :param event: "enter" or "exit".
+        """
+        ts = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        line = "{} runid={} stage={} event={}".format(
+            ts, self._runid, stage.value, event,
+        )
+        logger.info(line)
+        if self._state_store is not None:
+            try:
+                self._state_store.append_log(runid=self._runid, line=line)
+            except Exception:
+                # Persistence must never break the pipeline; we already log
+                # via the module logger.
+                logger.warning("Failed to append stage log line.")
+        return
+
+    def _persist_state(self) -> None:
+        """
+            Write the current state to the store.
+        """
+        if self._state_store is None:
+            return
+        plan_dict: Dict[str, Any] = {}
+        if self._plan is not None:
+            plan_dict = self._plan.to_dict()
+
+        state = RunState(
+            runid=self._runid,
+            spec=self._spec,
+            plan=plan_dict,
+            results=self._results,
+            inventory=self._inventory,
+        )
+        self._state_store.write_state(runid=self._runid, state=state)
+        return

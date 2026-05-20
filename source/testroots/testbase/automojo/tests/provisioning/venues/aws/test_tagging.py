@@ -1,0 +1,93 @@
+"""
+    .. module:: test_tagging
+    :platform: Darwin, Linux, Unix, Windows
+    :synopsis: Tests for awstagging round-trip identity.
+
+    .. moduleauthor:: Myron Walker <myron.walker@gmail.com>
+"""
+
+__author__ = "Myron Walker"
+__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__credits__ = []
+
+
+import pytest
+
+from hypothesis import given, settings
+from hypothesis import strategies as st
+
+from automojo.provisioning.venues.aws.awserrors import AwsValidationError
+from automojo.provisioning.venues.aws.awstagging import (
+    AWS_TAG_VALUE_MAX, from_aws, to_aws, base_resource_tags
+)
+
+
+def test_to_aws_basic() -> None:
+    """
+        Convert a small tag list and inspect the shape.
+    """
+    out = to_aws(neutral_tags=[{"a": "1"}, {"b": "2"}])
+    assert out == [{"Key": "a", "Value": "1"}, {"Key": "b", "Value": "2"}]
+    return
+
+
+def test_from_aws_basic() -> None:
+    """
+        Reverse direction.
+    """
+    out = from_aws(aws_tags=[{"Key": "a", "Value": "1"},
+                             {"Key": "b", "Value": "2"}])
+    assert out == [{"a": "1"}, {"b": "2"}]
+    return
+
+
+def test_base_resource_tags_contains_owner_run_name_kind() -> None:
+    """
+        ``base_resource_tags`` includes the required keys.
+    """
+    tags = base_resource_tags(
+        run_id="r1", resource_name="vpc-a", resource_kind="network",
+        extra=[{"team": "ml"}], defaults=[{"component": "test"}],
+    )
+    flat = {}
+    for entry in tags:
+        flat.update(entry)
+    assert flat["automojo:owned-by"] == "automojo-provisioning"
+    assert flat["automojo:owner"] == "r1"
+    assert flat["automojo:resource-name"] == "vpc-a"
+    assert flat["automojo:resource-kind"] == "network"
+    assert flat["team"] == "ml"
+    assert flat["component"] == "test"
+    return
+
+
+def test_to_aws_rejects_oversize_value() -> None:
+    """
+        Tag values longer than 256 chars are rejected at translate time.
+    """
+    big_value = "x" * (AWS_TAG_VALUE_MAX + 1)
+    with pytest.raises(AwsValidationError):
+        to_aws(neutral_tags=[{"k": big_value}])
+    return
+
+
+@settings(max_examples=25, deadline=None)
+@given(st.dictionaries(
+    keys=st.text(min_size=1, max_size=20,
+                 alphabet=st.characters(min_codepoint=0x41,
+                                        max_codepoint=0x7a)),
+    values=st.text(min_size=0, max_size=20,
+                   alphabet=st.characters(min_codepoint=0x41,
+                                          max_codepoint=0x7a)),
+    min_size=0, max_size=8,
+))
+def test_round_trip_identity(tag_map) -> None:
+    """
+        from_aws(to_aws(x)) == sorted(x).
+    """
+    neutral = [{k: v} for k, v in tag_map.items()]
+    aws_form = to_aws(neutral_tags=neutral)
+    rebuilt = from_aws(aws_tags=aws_form)
+    expected = sorted(neutral, key=lambda d: list(d.keys())[0])
+    assert rebuilt == expected
+    return
