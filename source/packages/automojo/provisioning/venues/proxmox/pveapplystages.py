@@ -30,10 +30,10 @@ from automojo.provisioning.venues.proxmox.pvetagtranslator import (
 )
 from automojo.provisioning.venues.proxmox.proxmoxspec import ProxmoxSpec
 
-from automojo.interop.proxmox.specs.proxmoxvmclonespec import (
+from automojo.restclient.proxmox.specs.proxmoxvmclonespec import (
     ProxmoxVmCloneSpec
 )
-from automojo.interop.proxmox.specs.proxmoxdiskspec import ProxmoxDiskSpec
+from automojo.restclient.proxmox.specs.proxmoxdiskspec import ProxmoxDiskSpec
 
 
 # The base VMID the venue allocates clones from; each new VM takes the
@@ -266,7 +266,7 @@ class PveApplyStages:
         if instance_groups is None or len(instance_groups) == 0:
             return
 
-        from automojo.interop.proxmox.specs.proxmoxfirewallrulespec import (
+        from automojo.restclient.proxmox.specs.proxmoxfirewallrulespec import (
             ProxmoxFirewallRuleSpec
         )
 

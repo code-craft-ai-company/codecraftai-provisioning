@@ -105,7 +105,7 @@ class NebiusGpuCluster:
             :returns: A dict mapping interconnect-group key to Nebius
                 placement-group id.
         """
-        from automojo.interop.nebius.specs.nebiusplacementgroupspec import (
+        from automojo.restclient.nebius.specs.nebiusplacementgroupspec import (
             NebiusPlacementGroupSpec
         )
 

@@ -14,11 +14,11 @@ __credits__ = []
 
 from typing import Any, Dict, List
 
-from automojo.interop.proxmox.model.proxmoxnetworkinterface import (
+from automojo.restclient.proxmox.model.proxmoxnetworkinterface import (
     ProxmoxNetworkInterface
 )
-from automojo.interop.proxmox.model.proxmoxnode import ProxmoxNode
-from automojo.interop.proxmox.model.proxmoxvmstatus import ProxmoxVmStatus
+from automojo.restclient.proxmox.model.proxmoxnode import ProxmoxNode
+from automojo.restclient.proxmox.model.proxmoxvmstatus import ProxmoxVmStatus
 
 
 class _MockTaskHandle:

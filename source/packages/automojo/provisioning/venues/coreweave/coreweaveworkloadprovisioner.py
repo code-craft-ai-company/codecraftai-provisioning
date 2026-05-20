@@ -19,7 +19,7 @@ from typing import Any, List, Optional
 
 from automojo.aspects.aspects import Aspects
 
-from automojo.interop.coreweave.coreweaveclient import CoreweaveClient
+from automojo.restclient.coreweave.coreweaveclient import CoreweaveClient
 from automojo.interop.kubernetes.kubernetesclient import KubernetesClient
 from automojo.interop.kubernetes.specs.workloadspecs import NamespaceSpec
 

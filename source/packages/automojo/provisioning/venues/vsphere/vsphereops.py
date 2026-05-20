@@ -96,7 +96,7 @@ class VSphereOps:
             :returns: An ``AspectsVSphere`` or the original object.
         """
         try:
-            from automojo.interop.vsphere.aspectsvsphere import AspectsVSphere
+            from automojo.restclient.vsphere.aspectsvsphere import AspectsVSphere
         except ImportError:
             rtnval = aspects
             return rtnval
@@ -126,7 +126,7 @@ class VSphereOps:
 
             :returns: A VSphereOps wrapping a freshly-constructed client.
         """
-        from automojo.interop.vsphere.vsphereclient import VSphereClient
+        from automojo.restclient.vsphere.vsphereclient import VSphereClient
 
         basic = basic_credential_from_vsphere(credential=credential)
         client = VSphereClient(host=host, credential=basic, port=port)

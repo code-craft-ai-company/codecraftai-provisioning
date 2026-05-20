@@ -34,18 +34,18 @@ automojo-credentials = { git = "https://github.com/automationmojo/automojo-crede
 automojo-restclient-base = { git = "https://github.com/automationmojo/automojo-restclient-base.git", branch = "main" }
 automojo-configuration = { git = "https://github.com/automationmojo/automojo-configuration.git", branch = "main" }
 automojo-landscaping = { git = "https://github.com/automationmojo/automojo-landscaping.git", branch = "main" }
-automojo-interop-vsphere = { git = "https://github.com/automationmojo/automojo-interop-vsphere.git", branch = "main" }
+automojo-restclient-vsphere = { git = "https://github.com/automationmojo/automojo-restclient-vsphere.git", branch = "main" }
 automojo-interop-kubernetes = { git = "https://github.com/automationmojo/automojo-interop-kubernetes.git", branch = "main" }
-automojo-interop-coreweave = { git = "https://github.com/automationmojo/automojo-interop-coreweave.git", branch = "main" }
-automojo-interop-lambdalabs = { git = "https://github.com/automationmojo/automojo-interop-lambdalabs.git", branch = "main" }
-automojo-interop-crusoe = { git = "https://github.com/automationmojo/automojo-interop-crusoe.git", branch = "main" }
-automojo-interop-nebius = { git = "https://github.com/automationmojo/automojo-interop-nebius.git", branch = "main" }
-automojo-interop-runpod = { git = "https://github.com/automationmojo/automojo-interop-runpod.git", branch = "main" }
-automojo-interop-proxmox = { git = "https://github.com/automationmojo/automojo-interop-proxmox.git", branch = "main" }
+automojo-restclient-coreweave = { git = "https://github.com/automationmojo/automojo-restclient-coreweave.git", branch = "main" }
+automojo-restclient-lambdalabs = { git = "https://github.com/automationmojo/automojo-restclient-lambdalabs.git", branch = "main" }
+automojo-restclient-crusoe = { git = "https://github.com/automationmojo/automojo-restclient-crusoe.git", branch = "main" }
+automojo-restclient-nebius = { git = "https://github.com/automationmojo/automojo-restclient-nebius.git", branch = "main" }
+automojo-restclient-runpod = { git = "https://github.com/automationmojo/automojo-restclient-runpod.git", branch = "main" }
+automojo-restclient-proxmox = { git = "https://github.com/automationmojo/automojo-restclient-proxmox.git", branch = "main" }
 automojo-interop-libvirt = { git = "https://github.com/automationmojo/automojo-interop-libvirt.git", branch = "main" }
 automojo-interop-xen = { git = "https://github.com/automationmojo/automojo-interop-xen.git", branch = "main" }
 automojo-interop-hyperv = { git = "https://github.com/automationmojo/automojo-interop-hyperv.git", branch = "main" }
-automojo-interop-nutanix = { git = "https://github.com/automationmojo/automojo-interop-nutanix.git", branch = "main" }
+automojo-restclient-nutanix = { git = "https://github.com/automationmojo/automojo-restclient-nutanix.git", branch = "main" }
 
 [tool.poetry.group.cloud-sdks]
 optional = true
