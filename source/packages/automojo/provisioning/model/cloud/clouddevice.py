@@ -1,85 +1,98 @@
+"""
+    .. module:: clouddevice
+    :platform: Darwin, Linux, Unix, Windows
+    :synopsis: Provisioned cloud device record with addresses and optional VPN.
 
+    .. moduleauthor:: Myron Walker <myron.walker@gmail.com>
+"""
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2025, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Automation Mojo LLC"
 __credits__ = []
 
 
 from typing import Any, Dict, List, Optional
 
+from automojo.restclient.base.schemaobject import SchemaObject
+from automojo.restclient.base.schemafield import Field
 
-class CloudDevice:
+from automojo.provisioning.model.cloud.deviceaddressset import DeviceAddressSet
+from automojo.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+
+
+class CloudDevice(SchemaObject):
     """
-    A class representing a cloud device.
+        Provisioned cloud device record.
 
-        :param identifier: The unique identifier of the cloud device.
-        :param category: The category of the cloud device.
-        :param group: The group of the cloud device.
-        :param profile: The profile of the cloud device.
-        :param role: The role of the cloud device.
-        :param tags: A list of tags to attach to the cloud device.
+        The model layer carries the descriptive fields plus optional address
+        set and VPN join spec; behaviour (SSH, attach, etc.) lives in the
+        landscaping / interop layers.
     """
 
-    def __init__(self, *, identifier: str, category: str, group: str, profile: str, role: str, tags: Optional[List[Dict[str, str]]] = None):
-        self._identifier = identifier
-        self._category = category
-        self._group = group
-        self._profile = profile
-        self._role = role
-        self._tags = tags if tags is not None else []
+    identifier = Field(str, required=True)
+    category = Field(str, required=True)
+    group = Field(str, required=True)
+    profile = Field(str, required=True)
+    role = Field(str, required=True)
+    addresses = Field(DeviceAddressSet, required=False, default=None)
+    vpn_join = Field(VPNJoinSpec, required=False, default=None)
+    tags = Field(list, required=False, default=None)
+
+    def __init__(self, *, identifier: str, category: str, group: str,
+                 profile: str, role: str,
+                 addresses: Optional[DeviceAddressSet] = None,
+                 vpn_join: Optional[VPNJoinSpec] = None,
+                 tags: Optional[List[Dict[str, str]]] = None) -> None:
+        """
+            Construct a CloudDevice.
+
+            :param identifier: Unique device identifier.
+            :param category: Device category.
+            :param group: Group name.
+            :param profile: CloudResourceProfile name backing this device.
+            :param role: Functional role.
+            :param addresses: Optional DeviceAddressSet.
+            :param vpn_join: Optional VPNJoinSpec.
+            :param tags: Optional list of single-entry tag dicts.
+        """
+        effective_tags = tags if tags is not None else []
+        super().__init__(identifier=identifier, category=category, group=group,
+                         profile=profile, role=role, addresses=addresses,
+                         vpn_join=vpn_join, tags=effective_tags)
         return
-    
-    @property
-    def category(self) -> str:
-        """
-        Get the category of the cloud device.
 
-        :return: The category of the cloud device.
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "CloudDevice":
         """
-        return self._category
-    
-    @property
-    def group(self) -> str:
-        """
-        Get the group of the cloud device.
+            Construct from serialised payload, promoting nested types.
 
-        :return: The group of the cloud device.
-        """
-        return self._group
-    
-    @property
-    def identifier(self) -> str:
-        """
-        Get the identifier of the cloud device.
+            :param data: Serialised payload.
 
-        :return: The identifier of the cloud device.
+            :returns: A CloudDevice instance.
         """
-        return self._identifier
-    
-    @property
-    def profile(self) -> str:
-        """
-        Get the profile of the cloud device.
+        if not isinstance(data, dict):
+            return data  # type: ignore
 
-        :return: The profile of the cloud device.
-        """
-        return self._profile
-    
-    @property
-    def role(self) -> str:
-        """
-        Get the role of the cloud device.
+        addr_payload = data.get("addresses", None)
+        promoted_addrs: Optional[DeviceAddressSet] = None
+        if addr_payload is not None:
+            if isinstance(addr_payload, DeviceAddressSet):
+                promoted_addrs = addr_payload
+            else:
+                promoted_addrs = DeviceAddressSet.from_dict(addr_payload)
 
-        :return: The role of the cloud device.
-        """
-        return self._role
+        vpn_payload = data.get("vpn_join", None)
+        promoted_vpn: Optional[VPNJoinSpec] = None
+        if vpn_payload is not None:
+            if isinstance(vpn_payload, VPNJoinSpec):
+                promoted_vpn = vpn_payload
+            else:
+                promoted_vpn = VPNJoinSpec.from_dict(vpn_payload)
 
-    @property
-    def tags(self) -> List[Dict[str, str]]:
-        """
-        Get the tags of the cloud device.
-
-        :return: The tags of the cloud device.
-        """
-        return self._tags
-    
+        rtnval = cls(identifier=data["identifier"],
+                     category=data["category"],
+                     group=data["group"], profile=data["profile"],
+                     role=data["role"], addresses=promoted_addrs,
+                     vpn_join=promoted_vpn,
+                     tags=data.get("tags", None))
+        return rtnval

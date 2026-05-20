@@ -1,0 +1,128 @@
+# accelerators.yaml — neutral accelerator name → per-venue SKU catalog.
+#
+# Each entry binds one neutral name (e.g. H100_SXM) to:
+#   - kind: GPU | TPU | IPU | ASIC
+#   - memory_gb: per-accelerator HBM / SRAM capacity in GB
+#   - interconnect: NONE | PCIE | NVLINK | NVSWITCH | INFINITY_FABRIC
+#   - venue_skus: mapping of provisioning-venue-name to venue-side SKU string.
+#
+# Loader invariants enforced at load time:
+#   - Each neutral_name is unique.
+#   - Within any single venue, no two neutral_names map to the same SKU.
+
+version: 1
+entries:
+  - neutral_name: H100_SXM
+    kind: GPU
+    memory_gb: 80
+    interconnect: NVSWITCH
+    default: true
+    venue_skus:
+      aws: p5.48xlarge
+      azure: Standard_ND96isr_H100_v5
+      gcp: a3-highgpu-8g
+      oracle: BM.GPU.H100.8
+      crusoe: h100-80gb-sxm5.8x
+      coreweave: gd-8xh100ib-i128
+      lambdalabs: gpu_8x_h100_sxm5
+      nebius: gpu-h100-sxm-8
+
+  - neutral_name: H200_NVL
+    kind: GPU
+    memory_gb: 141
+    interconnect: NVLINK
+    default: true
+    venue_skus:
+      aws: p5e.48xlarge
+      azure: Standard_ND96isr_H200_v5
+      gcp: a3-megagpu-8g
+      crusoe: h200-141gb-nvl.8x
+      lambdalabs: gpu_8x_h200
+
+  - neutral_name: B200_SXM
+    kind: GPU
+    memory_gb: 192
+    interconnect: NVSWITCH
+    venue_skus:
+      aws: p6.48xlarge
+      azure: Standard_ND96isr_B200_v6
+      crusoe: b200-192gb-sxm.8x
+      coreweave: gd-8xb200ib
+
+  - neutral_name: A100_80G_SXM
+    kind: GPU
+    memory_gb: 80
+    interconnect: NVSWITCH
+    venue_skus:
+      aws: p4de.24xlarge
+      azure: Standard_ND96amsr_A100_v4
+      gcp: a2-ultragpu-8g
+      oracle: BM.GPU.A100-v2.8
+      lambdalabs: gpu_8x_a100_80gb_sxm4
+      nebius: gpu-a100-sxm-8
+
+  - neutral_name: A100_40G_PCIE
+    kind: GPU
+    memory_gb: 40
+    interconnect: PCIE
+    venue_skus:
+      aws: p4d.24xlarge
+      azure: Standard_NC96ads_A100_v4
+      gcp: a2-highgpu-8g
+      lambdalabs: gpu_8x_a100
+
+  - neutral_name: L40S
+    kind: GPU
+    memory_gb: 48
+    interconnect: PCIE
+    venue_skus:
+      aws: g6e.48xlarge
+      azure: Standard_NV96ads_A10_v5
+      gcp: g2-standard-96
+      lambdalabs: gpu_1x_l40s
+
+  - neutral_name: L4
+    kind: GPU
+    memory_gb: 24
+    interconnect: PCIE
+    venue_skus:
+      aws: g6.xlarge
+      gcp: g2-standard-4
+
+  - neutral_name: GH200
+    kind: GPU
+    memory_gb: 96
+    interconnect: NVLINK
+    venue_skus:
+      aws: p5g.48xlarge
+      lambdalabs: gpu_1x_gh200
+      coreweave: gd-1xgh200
+
+  - neutral_name: MI300X
+    kind: GPU
+    memory_gb: 192
+    interconnect: INFINITY_FABRIC
+    venue_skus:
+      azure: Standard_ND96isr_MI300X_v5
+      oracle: BM.GPU.MI300X.8
+
+  - neutral_name: MI250X
+    kind: GPU
+    memory_gb: 128
+    interconnect: INFINITY_FABRIC
+    venue_skus:
+      oracle: BM.GPU.MI250X.4
+
+  - neutral_name: TPU_V5P
+    kind: TPU
+    memory_gb: 95
+    interconnect: NONE
+    venue_skus:
+      gcp: tpu-v5p
+
+  - neutral_name: TPU_V5E
+    kind: TPU
+    memory_gb: 16
+    interconnect: NONE
+    venue_skus:
+      gcp: tpu-v5e
