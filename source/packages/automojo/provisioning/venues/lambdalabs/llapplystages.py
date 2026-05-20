@@ -28,10 +28,10 @@ from automojo.provisioning.venues.lambdalabs.lambdalabsspec import (
     LambdalabsSpec
 )
 
-from automojo.interop.lambdalabs.specs.lambdalabsclusterspec import (
+from automojo.restclient.lambdalabs.specs.lambdalabsclusterspec import (
     LambdalabsClusterSpec
 )
-from automojo.interop.lambdalabs.specs.lambdalabslaunchspec import (
+from automojo.restclient.lambdalabs.specs.lambdalabslaunchspec import (
     LambdalabsLaunchSpec
 )
 

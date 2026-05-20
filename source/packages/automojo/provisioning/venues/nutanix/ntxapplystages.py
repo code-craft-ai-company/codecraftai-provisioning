@@ -32,7 +32,7 @@ from automojo.provisioning.venues.nutanix.ntxcloudinitrenderer import (
 from automojo.provisioning.venues.nutanix.ntxnaming import resource_name_for
 from automojo.provisioning.venues.nutanix.ntxresolver import NtxResolver
 
-from automojo.interop.nutanix.specs.nutanixspecs import (
+from automojo.restclient.nutanix.specs.nutanixspecs import (
     SecurityPolicySpec, SubnetSpec, VmSpec, VolumeGroupSpec, VpcSpec
 )
 

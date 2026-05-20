@@ -18,14 +18,14 @@ import os
 
 from typing import Any, Dict, List, Optional
 
-from automojo.interop.crusoe.crusoeclient import CrusoeClient
-from automojo.interop.crusoe.specs.crusoediskspec import CrusoeDiskSpec
-from automojo.interop.crusoe.specs.crusoesecuritygroupspec import (
+from automojo.restclient.crusoe.crusoeclient import CrusoeClient
+from automojo.restclient.crusoe.specs.crusoediskspec import CrusoeDiskSpec
+from automojo.restclient.crusoe.specs.crusoesecuritygroupspec import (
     CrusoeSecurityGroupSpec
 )
-from automojo.interop.crusoe.specs.crusoesubnetspec import CrusoeSubnetSpec
-from automojo.interop.crusoe.specs.crusoevmlaunchspec import CrusoeVmLaunchSpec
-from automojo.interop.crusoe.specs.crusoevpcspec import CrusoeVpcSpec
+from automojo.restclient.crusoe.specs.crusoesubnetspec import CrusoeSubnetSpec
+from automojo.restclient.crusoe.specs.crusoevmlaunchspec import CrusoeVmLaunchSpec
+from automojo.restclient.crusoe.specs.crusoevpcspec import CrusoeVpcSpec
 
 from automojo.provisioning.model.cloud.cloudacceleratorcatalog import (
     CloudAcceleratorCatalog, default_accelerator_catalog

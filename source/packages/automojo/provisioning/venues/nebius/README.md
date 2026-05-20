@@ -10,7 +10,7 @@ filesystem service suited to distributed-training workloads.
 - Neutral resource model — [`cloud-resource-model`](../../../../../../specs/cloud-resource-model/design.md)
 - Provisioner lifecycle — [`cloud-provisioner-lifecycle`](../../../../../../specs/cloud-provisioner-lifecycle/design.md)
 - VPN cloud-init injection — [`vpn-join-spec`](../../../../../../specs/vpn-join-spec/design.md)
-- Nebius REST client — `automojo-interop-nebius` (`automojo.interop.nebius.NebiusClient`)
+- Nebius REST client — `automojo-interop-nebius` (`automojo.restclient.nebius.NebiusClient`)
 
 ## Mapping table
 

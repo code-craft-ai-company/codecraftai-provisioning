@@ -14,11 +14,11 @@ __credits__ = []
 
 from typing import Any, Dict, List, Optional
 
-from automojo.interop.runpod.enums.runpodcloudtype import RunpodCloudType
-from automojo.interop.runpod.specs.runpodnetworkvolumespec import (
+from automojo.restclient.runpod.enums.runpodcloudtype import RunpodCloudType
+from automojo.restclient.runpod.specs.runpodnetworkvolumespec import (
     RunpodNetworkVolumeSpec
 )
-from automojo.interop.runpod.specs.runpodpodlaunchspec import (
+from automojo.restclient.runpod.specs.runpodpodlaunchspec import (
     RunpodPodLaunchSpec
 )
 

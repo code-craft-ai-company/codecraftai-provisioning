@@ -89,11 +89,11 @@ class NebiusApplyStages:
             :returns: A dict carrying ``created``, ``skipped``, and the
                 resolved ``vpc``, ``subnet``, ``sg``, ``keypair`` id maps.
         """
-        from automojo.interop.nebius.specs.nebiusvpcspec import NebiusVpcSpec
-        from automojo.interop.nebius.specs.nebiussubnetspec import (
+        from automojo.restclient.nebius.specs.nebiusvpcspec import NebiusVpcSpec
+        from automojo.restclient.nebius.specs.nebiussubnetspec import (
             NebiusSubnetSpec
         )
-        from automojo.interop.nebius.specs.nebiussecuritygroupspec import (
+        from automojo.restclient.nebius.specs.nebiussecuritygroupspec import (
             NebiusSecurityGroupSpec
         )
 
@@ -230,8 +230,8 @@ class NebiusApplyStages:
             :returns: A dict carrying ``created``, ``skipped``, and the
                 ``vpn_records`` list.
         """
-        from automojo.interop.nebius.specs.nebiusvmspec import NebiusVmSpec
-        from automojo.interop.nebius.specs.nebiusdiskspec import (
+        from automojo.restclient.nebius.specs.nebiusvmspec import NebiusVmSpec
+        from automojo.restclient.nebius.specs.nebiusdiskspec import (
             NebiusDiskSpec
         )
 
@@ -376,7 +376,7 @@ class NebiusApplyStages:
 
             :returns: A dict carrying ``created`` and ``skipped``.
         """
-        from automojo.interop.nebius.specs.nebiusmounttargetspec import (
+        from automojo.restclient.nebius.specs.nebiusmounttargetspec import (
             NebiusMountTargetSpec
         )
 

@@ -14,17 +14,17 @@ __credits__ = []
 
 from typing import Any, Dict, List
 
-from automojo.interop.lambdalabs.model.lambdalabscluster import (
+from automojo.restclient.lambdalabs.model.lambdalabscluster import (
     LambdalabsCluster
 )
-from automojo.interop.lambdalabs.model.lambdalabsfilesystem import (
+from automojo.restclient.lambdalabs.model.lambdalabsfilesystem import (
     LambdalabsFilesystem
 )
-from automojo.interop.lambdalabs.model.lambdalabsinstance import (
+from automojo.restclient.lambdalabs.model.lambdalabsinstance import (
     LambdalabsInstance
 )
-from automojo.interop.lambdalabs.model.lambdalabssshkey import LambdalabsSshKey
-from automojo.interop.lambdalabs.model.lambdalabsterminationresult import (
+from automojo.restclient.lambdalabs.model.lambdalabssshkey import LambdalabsSshKey
+from automojo.restclient.lambdalabs.model.lambdalabsterminationresult import (
     LambdalabsTerminationResult
 )
 

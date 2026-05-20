@@ -49,7 +49,7 @@ def test_live_apply_inventory_destroy() -> None:
     from automojo.credentials.nebiusserviceaccountcredential import (
         NebiusServiceAccountCredential
     )
-    from automojo.interop.nebius.nebiusclient import NebiusClient
+    from automojo.restclient.nebius.nebiusclient import NebiusClient
 
     credential = NebiusServiceAccountCredential(
         identifier="nebius-live", categories=["hpc-venue"], token=token,

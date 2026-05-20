@@ -14,20 +14,20 @@ __credits__ = []
 
 from typing import Any, List, Optional, Tuple
 
-from automojo.interop.nebius.model.nebiusvpc import NebiusVpc
-from automojo.interop.nebius.model.nebiussubnet import NebiusSubnet
-from automojo.interop.nebius.model.nebiussecuritygroup import (
+from automojo.restclient.nebius.model.nebiusvpc import NebiusVpc
+from automojo.restclient.nebius.model.nebiussubnet import NebiusSubnet
+from automojo.restclient.nebius.model.nebiussecuritygroup import (
     NebiusSecurityGroup
 )
-from automojo.interop.nebius.model.nebiussshkey import NebiusSshKey
-from automojo.interop.nebius.model.nebiusdisk import NebiusDisk
-from automojo.interop.nebius.model.nebiusplacementgroup import (
+from automojo.restclient.nebius.model.nebiussshkey import NebiusSshKey
+from automojo.restclient.nebius.model.nebiusdisk import NebiusDisk
+from automojo.restclient.nebius.model.nebiusplacementgroup import (
     NebiusPlacementGroup
 )
-from automojo.interop.nebius.model.nebiusvm import NebiusVm
-from automojo.interop.nebius.model.nebiusfilesystem import NebiusFilesystem
-from automojo.interop.nebius.model.nebiusmounttarget import NebiusMountTarget
-from automojo.interop.nebius.model.nebiustaskhandle import NebiusTaskHandle
+from automojo.restclient.nebius.model.nebiusvm import NebiusVm
+from automojo.restclient.nebius.model.nebiusfilesystem import NebiusFilesystem
+from automojo.restclient.nebius.model.nebiusmounttarget import NebiusMountTarget
+from automojo.restclient.nebius.model.nebiustaskhandle import NebiusTaskHandle
 
 
 class _State:

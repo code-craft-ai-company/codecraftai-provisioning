@@ -14,19 +14,19 @@ __credits__ = []
 
 from typing import Any, Dict, List, Optional
 
-from automojo.interop.nutanix.model.nutanixcategory import NutanixCategory
-from automojo.interop.nutanix.model.nutanixcluster import NutanixCluster
-from automojo.interop.nutanix.model.nutaniximage import NutanixImage
-from automojo.interop.nutanix.model.nutanixsecuritypolicy import (
+from automojo.restclient.nutanix.model.nutanixcategory import NutanixCategory
+from automojo.restclient.nutanix.model.nutanixcluster import NutanixCluster
+from automojo.restclient.nutanix.model.nutaniximage import NutanixImage
+from automojo.restclient.nutanix.model.nutanixsecuritypolicy import (
     NutanixSecurityPolicy
 )
-from automojo.interop.nutanix.model.nutanixsubnet import NutanixSubnet
-from automojo.interop.nutanix.model.nutanixtaskstatus import NutanixTaskStatus
-from automojo.interop.nutanix.model.nutanixvm import NutanixVm
-from automojo.interop.nutanix.model.nutanixvolumegroup import (
+from automojo.restclient.nutanix.model.nutanixsubnet import NutanixSubnet
+from automojo.restclient.nutanix.model.nutanixtaskstatus import NutanixTaskStatus
+from automojo.restclient.nutanix.model.nutanixvm import NutanixVm
+from automojo.restclient.nutanix.model.nutanixvolumegroup import (
     NutanixVolumeGroup
 )
-from automojo.interop.nutanix.model.nutanixvpc import NutanixVpc
+from automojo.restclient.nutanix.model.nutanixvpc import NutanixVpc
 
 
 class _MockTaskHandle:

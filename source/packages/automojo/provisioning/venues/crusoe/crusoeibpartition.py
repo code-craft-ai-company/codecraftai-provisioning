@@ -14,7 +14,7 @@ __credits__ = []
 
 from typing import Any, Dict
 
-from automojo.interop.crusoe.specs.crusoeplacementgroupspec import (
+from automojo.restclient.crusoe.specs.crusoeplacementgroupspec import (
     CrusoePlacementGroupSpec
 )
 from automojo.provisioning.model.cloud.cloudinstance import CloudInstance

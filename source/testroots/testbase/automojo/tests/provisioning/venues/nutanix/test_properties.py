@@ -18,8 +18,8 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from automojo.interop.nutanix.aspectsnutanix import AspectsNutanix
-from automojo.interop.nutanix.model.nutanixtaskhandle import (
+from automojo.restclient.nutanix.aspectsnutanix import AspectsNutanix
+from automojo.restclient.nutanix.model.nutanixtaskhandle import (
     NutanixTaskHandle
 )
 

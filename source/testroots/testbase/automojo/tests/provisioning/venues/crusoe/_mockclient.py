@@ -14,17 +14,17 @@ __credits__ = []
 
 from typing import Any, Dict, List, Optional, Tuple
 
-from automojo.interop.crusoe.model.crusoedisk import CrusoeDisk
-from automojo.interop.crusoe.model.crusoeplacementgroup import (
+from automojo.restclient.crusoe.model.crusoedisk import CrusoeDisk
+from automojo.restclient.crusoe.model.crusoeplacementgroup import (
     CrusoePlacementGroup
 )
-from automojo.interop.crusoe.model.crusoesecuritygroup import (
+from automojo.restclient.crusoe.model.crusoesecuritygroup import (
     CrusoeSecurityGroup
 )
-from automojo.interop.crusoe.model.crusoesshkey import CrusoeSshKey
-from automojo.interop.crusoe.model.crusoesubnet import CrusoeSubnet
-from automojo.interop.crusoe.model.crusoevm import CrusoeVm
-from automojo.interop.crusoe.model.crusoevpc import CrusoeVpc
+from automojo.restclient.crusoe.model.crusoesshkey import CrusoeSshKey
+from automojo.restclient.crusoe.model.crusoesubnet import CrusoeSubnet
+from automojo.restclient.crusoe.model.crusoevm import CrusoeVm
+from automojo.restclient.crusoe.model.crusoevpc import CrusoeVpc
 
 
 class _Counter:

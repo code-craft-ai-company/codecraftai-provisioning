@@ -20,7 +20,7 @@ import tempfile
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from automojo.interop.runpod.enums.runpodcloudtype import RunpodCloudType
+from automojo.restclient.runpod.enums.runpodcloudtype import RunpodCloudType
 from automojo.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
 
 from automojo.provisioning.venues.runpod.rpapplystages import RpApplyStages
