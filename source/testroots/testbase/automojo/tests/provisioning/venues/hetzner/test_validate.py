@@ -1,0 +1,191 @@
+"""
+    .. module:: test_validate
+    :platform: Darwin, Linux, Unix, Windows
+    :synopsis: Tests for HetznerCloudProvisioner.validate happy + rejections.
+
+    .. moduleauthor:: Myron Walker <myron.walker@gmail.com>
+"""
+
+__author__ = "Myron Walker"
+__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__credits__ = []
+
+
+import pytest
+
+from automojo.credentials.basecredential import BaseCredential
+from automojo.provisioning.model.cloud.cloudimage import CloudImage
+from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
+from automojo.provisioning.model.cloud.cloudinterconnect import (
+    CloudInterconnect
+)
+from automojo.provisioning.model.cloud.cloudobjectbucket import (
+    CloudObjectBucket
+)
+from automojo.provisioning.model.cloud.cloudsharedfilesystem import (
+    CloudSharedFilesystem
+)
+from automojo.provisioning.venues.hetzner.hetznercloudprovisioner import (
+    HetznerCloudProvisioner
+)
+from automojo.provisioning.venues.hetzner.hetznererrors import (
+    HetznerValidationError
+)
+from automojo.provisioning.venues.hetzner.hetznerspec import HetznerSpec
+
+from ._specfactory import basic_spec
+
+
+def test_validate_happy_path(venue, credential, location_config, client,
+                             aspects) -> None:
+    """
+        A clean spec validates successfully.
+    """
+    spec = basic_spec()
+    provisioner = HetznerCloudProvisioner(
+        venue=venue, credential=credential,
+        location_config=location_config, spec=spec, client=client)
+    result = provisioner.validate(aspects=aspects)
+    assert result.ok is True
+    return
+
+
+def test_validate_rejects_non_hetzner_credential(venue, location_config,
+                                                 client, aspects) -> None:
+    """
+        A non-HetznerApiTokenCredential is rejected at validate-time.
+    """
+    bogus = BaseCredential(identifier="x", categories=["other"])
+    spec = basic_spec()
+    provisioner = HetznerCloudProvisioner(
+        venue=venue, credential=bogus, location_config=location_config,
+        spec=spec, client=client)
+    with pytest.raises(HetznerValidationError):
+        provisioner.validate(aspects=aspects)
+    return
+
+
+def test_validate_rejects_object_bucket(venue, credential,
+                                        location_config, client,
+                                        aspects) -> None:
+    """
+        A spec carrying a CloudObjectBucket is rejected.
+    """
+    spec = basic_spec()
+    spec.buckets = [CloudObjectBucket(name="bkt-a", region="nbg1")]
+    provisioner = HetznerCloudProvisioner(
+        venue=venue, credential=credential,
+        location_config=location_config, spec=spec, client=client)
+    with pytest.raises(HetznerValidationError) as excinfo:
+        provisioner.validate(aspects=aspects)
+    assert "object-storage" in str(excinfo.value)
+    return
+
+
+def test_validate_rejects_interconnect(venue, credential, location_config,
+                                       client, aspects) -> None:
+    """
+        A non-NONE CloudInterconnect is rejected.
+    """
+    spec = basic_spec()
+    image = CloudImage(family="ubuntu", version="24.04",
+                       architecture="x86_64")
+    interconnect = CloudInterconnect(kind="INFINIBAND_NDR",
+                                     bandwidth_gbps=400)
+    spec.instances = [CloudInstance(
+        name="srv-hpc", profile_ref="p", image=image, size="cx22",
+        subnet="sub-a", interconnect=interconnect)]
+    provisioner = HetznerCloudProvisioner(
+        venue=venue, credential=credential,
+        location_config=location_config, spec=spec, client=client)
+    with pytest.raises(HetznerValidationError) as excinfo:
+        provisioner.validate(aspects=aspects)
+    assert "interconnect" in str(excinfo.value)
+    return
+
+
+def test_validate_rejects_shared_filesystem(venue, credential,
+                                            location_config, client,
+                                            aspects) -> None:
+    """
+        A WEKA/Lustre-class CloudSharedFilesystem is rejected.
+    """
+    spec = basic_spec()
+    spec.shared_filesystems = [CloudSharedFilesystem(
+        name="fs-a", kind="WEKA", size_tb=10)]
+    provisioner = HetznerCloudProvisioner(
+        venue=venue, credential=credential,
+        location_config=location_config, spec=spec, client=client)
+    with pytest.raises(HetznerValidationError) as excinfo:
+        provisioner.validate(aspects=aspects)
+    assert "shared" in str(excinfo.value).lower()
+    return
+
+
+def test_validate_rejects_unknown_image_family(venue, credential,
+                                               location_config, client,
+                                               aspects) -> None:
+    """
+        An image family unknown to the resolver fails validation.
+    """
+    spec = basic_spec()
+    image = CloudImage(family="windows-server", version="2022",
+                       architecture="x86_64")
+    spec.instances = [CloudInstance(
+        name="srv-win", profile_ref="p", image=image, size="cx22",
+        subnet="sub-a")]
+    provisioner = HetznerCloudProvisioner(
+        venue=venue, credential=credential,
+        location_config=location_config, spec=spec, client=client)
+    with pytest.raises(HetznerValidationError) as excinfo:
+        provisioner.validate(aspects=aspects)
+    assert "Image" in str(excinfo.value)
+    return
+
+
+def test_validate_rejects_unknown_server_type(venue, credential,
+                                              location_config, client,
+                                              aspects) -> None:
+    """
+        A size hint unknown to the resolver fails validation.
+    """
+    spec = basic_spec(instance_size="cx22")
+    spec.instances[0] = CloudInstance(
+        name="srv-a", profile_ref="p",
+        image=CloudImage(family="ubuntu", version="24.04",
+                         architecture="x86_64"),
+        size="m5.unknown", subnet="sub-a")
+    provisioner = HetznerCloudProvisioner(
+        venue=venue, credential=credential,
+        location_config=location_config, spec=spec, client=client)
+    with pytest.raises(HetznerValidationError):
+        provisioner.validate(aspects=aspects)
+    return
+
+
+def test_validate_none_spec_is_ok(venue, credential, location_config,
+                                  client, aspects) -> None:
+    """
+        Validation of a None spec succeeds (inventory/destroy-only mode).
+    """
+    provisioner = HetznerCloudProvisioner(
+        venue=venue, credential=credential,
+        location_config=location_config, spec=None, client=client)
+    result = provisioner.validate(aspects=aspects)
+    assert result.ok is True
+    return
+
+
+def test_validate_defaults_aspects_when_omitted(venue, credential,
+                                                location_config,
+                                                client) -> None:
+    """
+        validate may be called without aspects (default substitution).
+    """
+    spec = basic_spec()
+    provisioner = HetznerCloudProvisioner(
+        venue=venue, credential=credential,
+        location_config=location_config, spec=spec, client=client)
+    result = provisioner.validate()
+    assert result.ok is True
+    return

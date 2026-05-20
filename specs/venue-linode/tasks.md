@@ -2,39 +2,39 @@
 
 ## Scaffolding
 
-- [ ] 1. Create `provisioning/venues/linode/` tree per `design.md`.
+- [x] 1. Create `provisioning/venues/linode/` tree per `design.md`.
 - [ ] 2. Add `automojo-interop-linode` + `linode_api4` deps.
-- [ ] 3. Declare `LinodeValidationError`, `LinodeConflictError`,
+- [x] 3. Declare `LinodeValidationError`, `LinodeConflictError`,
   `ConfirmationRequiredError` in `linodeerrors.py`.
 
 ## Resolver and Translator
 
-- [ ] 4. Implement `LinodeResolver.image_to_id(family, version, arch)`.
-- [ ] 5. Implement `LinodeResolver.size_to_type(size_hint, accelerators)`.
-- [ ] 6. Implement `LinodeTagTranslator.to_linode(neutral_tags)` /
+- [x] 4. Implement `LinodeResolver.image_to_id(family, version, arch)`.
+- [x] 5. Implement `LinodeResolver.size_to_type(size_hint, accelerators)`.
+- [x] 6. Implement `LinodeTagTranslator.to_linode(neutral_tags)` /
   `from_linode(strings)` with round-trip identity.
 
 ## Validate / Plan / Apply / Destroy / Inventory
 
-- [ ] 7. Implement `LinodeCloudProvisioner.validate(spec, aspects)` rejecting
+- [x] 7. Implement `LinodeCloudProvisioner.validate(spec, aspects)` rejecting
   interconnect and shared-FS asks.
-- [ ] 8. Implement `LinodePlanBuilder.plan(spec, aspects)`.
-- [ ] 9. Implement `LinodeApplyStages.apply_network_and_firewall`.
-- [ ] 10. Implement `LinodeApplyStages.apply_instances_and_volumes` with
+- [x] 8. Implement `LinodePlanBuilder.plan(spec, aspects)`.
+- [x] 9. Implement `LinodeApplyStages.apply_network_and_firewall`.
+- [x] 10. Implement `LinodeApplyStages.apply_instances_and_volumes` with
   `metadata.user_data` rendering.
-- [ ] 11. Implement `LinodeApplyStages.apply_object_storage_and_dns`.
-- [ ] 12. Implement `LinodeDestroyStages.destroy(spec, aspects)` reversing
+- [x] 11. Implement `LinodeApplyStages.apply_object_storage_and_dns`.
+- [x] 12. Implement `LinodeDestroyStages.destroy(spec, aspects)` reversing
   apply, calling `IVPNControlPlane.delete_device` after Instance delete.
-- [ ] 13. Implement `LinodeInventory.list_run(spec, aspects)`.
-- [ ] 14. Persist inventory under
+- [x] 13. Implement `LinodeInventory.list_run(spec, aspects)`.
+- [x] 14. Persist inventory under
   `.output/provisioning/<runid>/linode-inventory.json`.
 
 ## Property tests (hypothesis)
 
-- [ ] 15. `test_apply_idempotent`.
-- [ ] 16. `test_destroy_is_inverse_of_apply`.
-- [ ] 17. `test_tag_round_trip_identity`.
-- [ ] 18. `test_validate_rejects_interconnect_and_shared_fs`.
+- [x] 15. `test_apply_idempotent`.
+- [x] 16. `test_destroy_is_inverse_of_apply`.
+- [x] 17. `test_tag_round_trip_identity`.
+- [x] 18. `test_validate_rejects_interconnect_and_shared_fs`.
 
 ## Integration tests (gated)
 
