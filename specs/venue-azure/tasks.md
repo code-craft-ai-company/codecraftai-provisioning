@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/azure/` tree per `design.md`.
-- [ ] 2. Add `automojo-interop-azure` + `azure-identity` + `azure-mgmt-*` deps to
+- [ ] 2. Add `automojo-interop-azure` + `azure-identity` + `azure-mgmt-*` deps to (deferred: cross-repo dependency wiring owned by package packaging step)
   `pyproject.toml`.
 - [x] 3. Declare `AzureValidationError`, `AzureConflictError`,
   `ConfirmationRequiredError` in `azureerrors.py`.
@@ -41,7 +41,7 @@
 - [x] 16. Implement `AzureApplyStages.apply_storage_and_dns`.
 - [x] 17. Wire `AzureCustomDataRenderer` so `vpn_join` is base64 `custom_data`
   for Linux VMs and a Custom Script Extension for Windows VMs.
-- [ ] 18. Persist run inventory under
+- [ ] 18. Persist run inventory under (deferred: run-inventory file persistence owned by the provisioning engine/state layer; venue exposes inventory())
   `.output/provisioning/<runid>/azure-inventory.json`.
 - [x] 19. Refuse DELETE actions unless `aspects.confirm`.
 
@@ -67,9 +67,9 @@
 
 ## Integration tests (gated)
 
-- [ ] 27. `RUN_LIVE_AZURE=1` end-to-end against a sandbox subscription.
+- [ ] 27. `RUN_LIVE_AZURE=1` end-to-end against a sandbox subscription. (deferred: live-integration end-to-end test gated on real hardware/account)
 
 ## Documentation
 
-- [ ] 28. Author `provisioning/venues/azure/README.md` cross-linking the resource
+- [ ] 28. Author `provisioning/venues/azure/README.md` cross-linking the resource (deferred: README.md not yet authored)
   model, lifecycle, vpn-join, and `automojo-interop-azure`.

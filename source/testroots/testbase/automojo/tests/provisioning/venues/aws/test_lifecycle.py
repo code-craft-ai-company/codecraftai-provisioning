@@ -30,6 +30,7 @@ from automojo.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
 from automojo.provisioning.venues.aws.awscloudprovisioner import (
     AwsCloudProvisioner
 )
+from automojo.provisioning.venues.aws.awsspec import AwsSpec
 
 from ._specfactory import basic_spec
 
@@ -320,6 +321,50 @@ class _RecordingVPN:
         """
         self.deleted_ids.append(device_id)
         return
+
+
+@mock_aws
+def test_plan_emits_delete_for_owned_orphan(venue, credential,
+                                            region_config, aspects) -> None:
+    """
+        An owner-tagged resource that is absent from the desired spec is
+        surfaced as a DELETE action by the plan-side orphan scan.
+    """
+    full_spec = basic_spec()
+    provisioner = _new_provisioner(
+        venue=venue, credential=credential, region_config=region_config,
+        spec=full_spec,
+    )
+    # Realise the full spec so the instance carries automojo:owner tags.
+    provisioner.apply(aspects=aspects)
+
+    # Re-plan against a spec from which the instance has been dropped; the
+    # instance is now an owner-tagged orphan.  Networking is kept so the
+    # remaining resources still SKIP cleanly.
+    spec_without_instance = AwsSpec(
+        networks=list(full_spec.networks),
+        subnets=list(full_spec.subnets),
+        security_groups=list(full_spec.security_groups),
+        keypairs=list(full_spec.keypairs),
+        instances=[],
+        volumes=[],
+        buckets=list(full_spec.buckets),
+    )
+    orphan_provisioner = _new_provisioner(
+        venue=venue, credential=credential, region_config=region_config,
+        spec=spec_without_instance,
+    )
+    plan = orphan_provisioner.plan(aspects=aspects)
+
+    delete_actions = [
+        a for a in plan.actions
+        if a.intent == PlannedActionIntent.DELETE.value
+    ]
+    deleted_names = {a.resource_name for a in delete_actions}
+    assert "inst-a" in deleted_names
+    orphan = next(a for a in delete_actions if a.resource_name == "inst-a")
+    assert orphan.resource_kind == "instance"
+    return
 
 
 @mock_aws

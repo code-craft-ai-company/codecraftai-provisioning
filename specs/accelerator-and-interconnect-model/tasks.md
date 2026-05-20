@@ -20,9 +20,9 @@
 - [x] 10. Validate `count > 0` and `bandwidth_gbps > 0` at construction
 - [x] 11. Validate `mount_path` starts with `/` and is non-empty
 - [x] 12. Validate `existing_id XOR size_tb` for shared FS
-- [ ] 13. Add venue-capability stub function used by lifecycle `validate`
-- [ ] 14. Emit warning when `interconnect` set but `placement_group` is None
-- [ ] 15. Emit warning when `vpn_join` and training-fabric `interconnect` co-occur
+- [x] 13. Add venue-capability stub function used by lifecycle `validate`
+- [x] 14. Emit warning when `interconnect` set but `placement_group` is None
+- [x] 15. Emit warning when `vpn_join` and training-fabric `interconnect` co-occur
 
 ## Tests — Examples
 
@@ -33,11 +33,11 @@
 - [x] 20. `test_shared_fs_rejects_no_size_no_existing_id`
 - [x] 21. `test_mount_spec_rejects_relative_path`
 - [x] 22. `test_cloudinstance_baseline_unchanged`
-- [ ] 23. `test_cloudinstance_with_accelerators_roundtrip`
-- [ ] 24. `test_mount_target_resolution_during_validate`
-- [ ] 25. `test_vpn_join_plus_training_fabric_warns`
+- [x] 23. `test_cloudinstance_with_accelerators_roundtrip`
+- [x] 24. `test_mount_target_resolution_during_validate`
+- [x] 25. `test_vpn_join_plus_training_fabric_warns`
 
 ## Documentation
 
-- [ ] 26. Document the v1 attach-only constraint for shared FS in module docstring
-- [ ] 27. Cross-link `accelerator-catalog` from `CloudAcceleratorSpec` docstring
+- [x] 26. Document the v1 attach-only constraint for shared FS in module docstring
+- [ ] 27. Cross-link `accelerator-catalog` from `CloudAcceleratorSpec` docstring (deferred: docstring-only cross-link not yet authored)

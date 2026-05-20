@@ -4,7 +4,7 @@
 
 - [x] 1. Author `accelerators.yaml` with v1 entries (H100, H200, B200, A100, L40S, L4,
         GH200, MI300X, MI250X, TPU_V5P, TPU_V5E)
-- [ ] 2. Declare `accelerators.yaml` as package data in `pyproject.toml`
+- [x] 2. Declare `accelerators.yaml` as package data in `pyproject.toml`
 - [x] 3. Document the file format in the file's header comments
 
 ## Loader Classes
@@ -28,7 +28,7 @@
 
 - [x] 15. Raise `ConfigurationError` on malformed YAML or schema violation
 - [x] 16. Raise `SchemaSemanticError` for missing entries / unsupported venues
-- [ ] 17. Include line numbers in load-time errors
+- [x] 17. Include line numbers in load-time errors
 
 ## Tests — Examples
 
@@ -37,7 +37,7 @@
 - [x] 20. `test_resolve_raises_for_unknown_neutral_name`
 - [x] 21. `test_resolve_raises_for_unsupported_venue`
 - [x] 22. `test_neutral_name_reverse_lookup`
-- [ ] 23. `test_supported_venues_returns_all_listed_venues`
+- [x] 23. `test_supported_venues_returns_all_listed_venues`
 - [x] 24. `test_loader_rejects_duplicate_sku_within_venue`
 - [x] 25. `test_env_var_override_loads_alternate_catalog`
 
@@ -50,5 +50,5 @@
 
 ## Documentation
 
-- [ ] 30. Document the §7.6 single-file-PR addition workflow
-- [ ] 31. Cross-link `accelerator-and-interconnect-model`
+- [ ] 30. Document the §7.6 single-file-PR addition workflow (deferred: documentation not yet authored)
+- [ ] 31. Cross-link `accelerator-and-interconnect-model` (deferred: documentation cross-link not yet authored)

@@ -69,6 +69,40 @@ class CatalogLoaderTests(unittest.TestCase):
             self._catalog.resolve(neutral_name="TPU_V5P", venue="aws")
         return
 
+    def test_supported_venues_returns_all_listed_venues(self) -> None:
+        for entry in self._catalog.entries():
+            expected = sorted(entry.venue_skus.keys())
+            actual = self._catalog.supported_venues(
+                neutral_name=entry.neutral_name
+            )
+            self.assertEqual(actual, expected)
+        with self.assertRaises(SchemaSemanticError):
+            self._catalog.supported_venues(neutral_name="DOES_NOT_EXIST")
+        return
+
+    def test_load_error_includes_line_number(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            yaml_path = os.path.join(td, "bad-entry.yaml")
+            content = (
+                "version: 1\n"
+                "entries:\n"
+                "  - neutral_name: GOOD\n"
+                "    kind: GPU\n"
+                "    memory_gb: 80\n"
+                "    interconnect: NONE\n"
+                "    venue_skus: {aws: good-sku}\n"
+                "  - kind: GPU\n"
+                "    memory_gb: 40\n"
+                "    interconnect: NONE\n"
+                "    venue_skus: {aws: bad-sku}\n"
+            )
+            with open(yaml_path, "w") as fh:
+                fh.write(content)
+            with self.assertRaises(ConfigurationError) as ctx:
+                CloudAcceleratorCatalog.from_path(path=yaml_path)
+            self.assertIn("LINE:", str(ctx.exception))
+        return
+
     def test_load_rejects_sku_collision(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             yaml_path = os.path.join(td, "bad.yaml")

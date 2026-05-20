@@ -253,11 +253,17 @@ class InstanceManager:
 
         if existing is not None:
             attributes = self._instance_attributes(existing=existing)
+            existing_policy = desired.preemption_policy
+            if isinstance(existing_policy, PreemptionPolicy):
+                existing_policy_value = existing_policy.value
+            else:
+                existing_policy_value = str(existing_policy)
             rtnval_resource = ProvisionedResource(
                 kind=self.KIND, name=desired.name,
                 venue_id=existing.get("InstanceId", ""),
                 attributes=attributes,
                 tags=from_aws(aws_tags=existing.get("Tags", [])),
+                preemption_policy=existing_policy_value,
             )
             info["vpn_device_id"] = self._vpn_device_id_from_tags(
                 existing=existing
@@ -366,6 +372,7 @@ class InstanceManager:
             kind=self.KIND, name=desired.name,
             venue_id=instance_id, attributes=attributes,
             tags=from_aws(aws_tags=created.get("Tags", [])),
+            preemption_policy=policy_value,
         )
         info["vpn_device_id"] = None
         info["user_data_body"] = user_data_body

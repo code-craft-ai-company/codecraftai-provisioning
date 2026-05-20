@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/hyperv/` tree per `design.md`.
-- [ ] 2. Add `automojo-interop-hyperv` dep.
+- [ ] 2. Add `automojo-interop-hyperv` dep. (deferred: cross-repo dependency wiring owned by package packaging step)
 - [x] 3. Declare `HvValidationError`, `HvConflictError`,
   `ConfirmationRequiredError` in `hverrors.py`.
 
@@ -42,7 +42,7 @@
 
 ## Integration tests (gated)
 
-- [ ] 19. `RUN_LIVE_HYPERV=1` end-to-end against a homelab host.
+- [ ] 19. `RUN_LIVE_HYPERV=1` end-to-end against a homelab host. (deferred: live-integration end-to-end test gated on real hardware/account)
 
 ## Documentation
 

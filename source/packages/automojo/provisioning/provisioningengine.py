@@ -44,6 +44,8 @@ from automojo.provisioning.model.exceptions import (
     SchemaSemanticError, SchemaValidationError
 )
 from automojo.provisioning.model.cloud.cloudprovisioner import CloudProvisioner
+from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
+from automojo.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
 from automojo.provisioning.model.cloud.provisioningplan import ProvisioningPlan
 from automojo.provisioning.model.cloud.provisioningresult import (
     ProvisioningResult
@@ -75,6 +77,9 @@ from automojo.provisioning.state.provisioningstatestore import (
 from automojo.provisioning.state.runstate import RunState
 from automojo.provisioning.state.runstatus import RunStatus
 from automojo.provisioning.landscape.landscapeemitter import LandscapeEmitter
+from automojo.provisioning.preemption.preemptionhandler import (
+    handle_preemption
+)
 
 
 logger = logging.getLogger(__name__)
@@ -367,6 +372,10 @@ class ProvisioningEngine:
                 kinds=list(self._COMPUTE_KINDS),
                 aspects=aspects,
             )
+            result = self._handle_apply_preemptions(
+                venue_name=venue_name, provisioner=provisioner,
+                result=result, aspects=aspects,
+            )
             self._merge_result(venue=venue_name, partial=result)
         self._log_stage(stage=PipelineStage.APPLY_COMPUTE, event="exit")
         return
@@ -422,10 +431,32 @@ class ProvisioningEngine:
 
         missing: List[str] = []
         for venue_name, result in self._results.items():
+            provisioner = self._registry.get(name=venue_name)
             inv = {r.name for r in self._inventory.get(venue_name, [])}
             for created in result.created:
-                if created.name not in inv:
+                if created.name in inv:
+                    continue
+                if created.kind != "instance":
                     missing.append("{}/{}".format(venue_name, created.name))
+                    continue
+                # An instance present in `created` but absent from a fresh
+                # inventory was terminated mid-poll: a venue-signalled
+                # preemption.  Dispatch the policy handler; a FAIL policy
+                # re-raises here, REACQUIRE / BEST_EFFORT recover quietly.
+                replacement = self._dispatch_preemption(
+                    venue_name=venue_name, provisioner=provisioner,
+                    instance_name=created.name, venue_id=created.venue_id,
+                    stage="verify", aspects=aspects,
+                    reason="instance terminated mid-poll during VERIFY",
+                )
+                if replacement is None:
+                    # BEST_EFFORT dropped the instance; it is no longer
+                    # expected in inventory and is not a verify failure.
+                    continue
+                # REACQUIRE produced a replacement; record it and accept it.
+                self._absorb_replacement(venue_name=venue_name,
+                                         original_name=created.name,
+                                         replacement=replacement)
 
         if len(missing) > 0:
             err_msg_lines = ["VERIFY found instances missing from inventory."]
@@ -496,6 +527,194 @@ class ProvisioningEngine:
             skipped=merged_skipped, errors=merged_errors,
         )
         return
+
+    # ------------------------------------------------------------------
+    # Preemption integration
+    # ------------------------------------------------------------------
+
+    def _instance_spec_for(self, *, name: str) -> Optional[CloudInstance]:
+        """
+            Build the CloudInstance spec for a named instance, if declared.
+
+            The engine spec is a normalised dict; the preemption handler needs
+            a typed CloudInstance (it reads ``vpn_join`` and the policy).
+
+            :param name: Logical instance name.
+
+            :returns: A CloudInstance, or None when the name is not declared
+                      as an instance in the spec.
+        """
+        for entry in self._spec.get("instances", []):
+            if entry.get("name", None) != name:
+                continue
+            if isinstance(entry, CloudInstance):
+                rtnval: Optional[CloudInstance] = entry
+                return rtnval
+            try:
+                rtnval = CloudInstance.from_dict(entry)
+            except Exception:
+                # A spec entry too thin to promote (no image / size) cannot
+                # drive a typed preemption decision; fall back to None so the
+                # caller treats it as a plain verify miss.
+                rtnval = None
+            return rtnval
+        rtnval = None
+        return rtnval
+
+    def _dispatch_preemption(self, *, venue_name: str,
+                             provisioner: CloudProvisioner,
+                             instance_name: str, venue_id: str,
+                             stage: str, aspects: ProvisioningAspects,
+                             reason: str
+                             ) -> Optional[ProvisionedResource]:
+        """
+            Build a PreemptionEvent and dispatch it to ``handle_preemption``.
+
+            The instance's ``preemption_policy`` drives the branch: FAIL
+            re-raises (ProvisioningPreemptionError bubbles), REACQUIRE returns
+            a replacement ProvisionedResource, BEST_EFFORT returns None.
+
+            :param venue_name: Venue the preemption was observed on.
+            :param provisioner: The venue provisioner.
+            :param instance_name: Logical name of the preempted instance.
+            :param venue_id: Venue-side id that was reclaimed (may be empty
+                             when the venue lost track of it).
+            :param stage: "apply" or "verify".
+            :param aspects: ProvisioningAspects.
+            :param reason: Human-readable preemption reason.
+
+            :returns: A replacement ProvisionedResource on REACQUIRE; None on
+                      BEST_EFFORT.
+            :raises: ProvisioningPreemptionError
+        """
+        spec_instance = self._instance_spec_for(name=instance_name)
+        if spec_instance is None:
+            err_msg_lines = [
+                "VERIFY found an instance missing from inventory."
+            ]
+            err_msg_lines.append("MISSING:")
+            err_msg_lines.append("    {}/{}".format(venue_name,
+                                                    instance_name))
+            err_msg = os.linesep.join(err_msg_lines)
+            raise ProvisioningVerifyError(err_msg)
+
+        effective_venue_id = venue_id if venue_id is not None and len(
+            venue_id) > 0 else "unknown"
+
+        logger.warning(
+            "runid=%s venue=%s stage=%s detected preemption of instance=%s "
+            "(policy=%s); dispatching handler.",
+            self._runid, venue_name, stage, instance_name,
+            spec_instance.preemption_policy,
+        )
+
+        replacement = handle_preemption(
+            spec=spec_instance,
+            policy=spec_instance.preemption_policy,
+            provisioner=provisioner, stage=stage, aspects=aspects,
+            venue_id=effective_venue_id, reason=reason,
+        )
+        rtnval = replacement
+        return rtnval
+
+    def _absorb_replacement(self, *, venue_name: str, original_name: str,
+                            replacement: ProvisionedResource) -> None:
+        """
+            Record a REACQUIRE replacement into the running results/inventory.
+
+            The replacement carries the same logical name but a new venue id;
+            it supersedes the original entry so VERIFY and EMIT see the live
+            resource.
+
+            :param venue_name: Venue the replacement belongs to.
+            :param original_name: Logical name of the superseded instance.
+            :param replacement: The replacement ProvisionedResource.
+        """
+        prior = self._results.get(venue_name, None)
+        if prior is not None:
+            new_created = [
+                r for r in prior.created if r.name != original_name
+            ]
+            new_created.append(replacement)
+            self._results[venue_name] = ProvisioningResult(
+                created=new_created,
+                updated=list(prior.updated),
+                skipped=list(prior.skipped),
+                errors=list(prior.errors),
+            )
+
+        venue_inv = self._inventory.get(venue_name, None)
+        if venue_inv is None:
+            self._inventory[venue_name] = [replacement]
+            return
+        refreshed = [r for r in venue_inv if r.name != original_name]
+        refreshed.append(replacement)
+        self._inventory[venue_name] = refreshed
+        return
+
+    def _handle_apply_preemptions(self, *, venue_name: str,
+                                  provisioner: CloudProvisioner,
+                                  result: ProvisioningResult,
+                                  aspects: ProvisioningAspects
+                                  ) -> ProvisioningResult:
+        """
+            Inspect an apply-stage result for venue-signalled preemptions.
+
+            A venue signals a preemption noticed during apply's match-then-act
+            with an error entry whose ``kind`` is ``"preemption"`` (carrying
+            the reclaimed ``resource`` name and, when known, its ``venue_id``).
+            Each is dispatched to ``handle_preemption``; a FAIL policy
+            re-raises, REACQUIRE swaps in the replacement, BEST_EFFORT drops
+            the entry.
+
+            :param venue_name: Venue the result came from.
+            :param provisioner: The venue provisioner.
+            :param result: The apply-stage ProvisioningResult.
+            :param aspects: ProvisioningAspects.
+
+            :returns: The result with any REACQUIRE / BEST_EFFORT fix-ups
+                      applied.
+            :raises: ProvisioningPreemptionError
+        """
+        preempted: List[Dict[str, str]] = []
+
+        for err in result.errors:
+            if not isinstance(err, dict):
+                continue
+            if err.get("kind", None) != "preemption":
+                continue
+            preempted.append({
+                "name": err.get("resource", ""),
+                "venue_id": err.get("venue_id", ""),
+            })
+
+        if len(preempted) == 0:
+            rtnval = result
+            return rtnval
+
+        created = list(result.created)
+        for entry in preempted:
+            inst_name = entry["name"]
+            replacement = self._dispatch_preemption(
+                venue_name=venue_name, provisioner=provisioner,
+                instance_name=inst_name, venue_id=entry["venue_id"],
+                stage="apply", aspects=aspects,
+                reason="venue reported instance preempted during APPLY",
+            )
+            created = [r for r in created if r.name != inst_name]
+            if replacement is not None:
+                created.append(replacement)
+
+        kept_errors = [
+            e for e in result.errors
+            if not (isinstance(e, dict)
+                    and e.get("kind", None) == "preemption")
+        ]
+        rtnval = ProvisioningResult(
+            created=created, updated=list(result.updated),
+            skipped=list(result.skipped), errors=kept_errors,
+        )
+        return rtnval
 
     def _log_stage(self, *, stage: PipelineStage, event: str) -> None:
         """

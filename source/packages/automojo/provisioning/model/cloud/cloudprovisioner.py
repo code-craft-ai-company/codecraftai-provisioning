@@ -264,6 +264,23 @@ class CloudProvisioner(ABC):
         return rtnval
 
     @classmethod
+    def supports_preemption(cls) -> bool:
+        """
+            Whether this venue offers spot / preemptible / interruptible
+            capacity.
+
+            Consulted by the spec validator for documentation purposes only;
+            it does not change behaviour — the ``preemption_policy`` field is
+            honoured on every venue (on venues that never preempt, all three
+            policy values are simply equivalent).
+
+            :returns: True when the venue can reclaim instances; False by
+                      default.
+        """
+        rtnval = False
+        return rtnval
+
+    @classmethod
     def _planned_action_for(cls, *, intent: PlannedActionIntent,
                             resource_kind: str, resource_name: str,
                             diff: Optional[Dict[str, Any]] = None

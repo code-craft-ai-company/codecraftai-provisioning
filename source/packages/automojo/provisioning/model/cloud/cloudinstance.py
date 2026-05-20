@@ -11,6 +11,9 @@ __copyright__ = "Copyright 2026, Automation Mojo LLC"
 __credits__ = []
 
 
+import os
+import warnings
+
 from typing import Any, Dict, List, Optional, Union
 
 from automojo.restclient.base.schemaobject import SchemaObject
@@ -28,6 +31,15 @@ from automojo.provisioning.model.cloud.cloudinterconnect import CloudInterconnec
 from automojo.provisioning.model.cloud.sharedfsmountspec import SharedFsMountSpec
 from automojo.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
 from automojo.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+
+
+_TRAINING_FABRIC_KINDS = (
+    "INFINIBAND_HDR",
+    "INFINIBAND_NDR",
+    "INFINIBAND_XDR",
+    "EFA",
+    "OCI_RDMA",
+)
 
 
 class CloudInstance(SchemaObject):
@@ -132,6 +144,35 @@ class CloudInstance(SchemaObject):
                     "Twingate vpn_join requires connector_only=True on the "
                     "owning instance; non-connector hosts must use Tailscale."
                 )
+
+        if interconnect is not None and placement_group is None:
+            warn_msg_lines = [
+                "CloudInstance {!r} declares an interconnect but no "
+                "placement_group.".format(name)
+            ]
+            warn_msg_lines.append(
+                "Placement will be best-effort and the requested fabric "
+                "topology may not be honored."
+            )
+            warn_msg = os.linesep.join(warn_msg_lines)
+            warnings.warn(warn_msg, stacklevel=2)
+
+        if vpn_join is not None and interconnect is not None:
+            if interconnect.kind in _TRAINING_FABRIC_KINDS:
+                warn_msg_lines = [
+                    "CloudInstance {!r} declares both a vpn_join and a "
+                    "training-fabric interconnect ({}).".format(
+                        name, interconnect.kind
+                    )
+                ]
+                warn_msg_lines.append(
+                    "The overlay VPN covers the control plane only (per "
+                    "PLAN-VPN-AND-CLOUD-PROVISIONING.md sec 7.4); training "
+                    "traffic and shared-filesystem traffic must use the "
+                    "native VPC plane, not the VPN overlay."
+                )
+                warn_msg = os.linesep.join(warn_msg_lines)
+                warnings.warn(warn_msg, stacklevel=2)
 
         super().__init__(name=name, profile_ref=profile_ref, image=image,
                          size=size, subnet=subnet,

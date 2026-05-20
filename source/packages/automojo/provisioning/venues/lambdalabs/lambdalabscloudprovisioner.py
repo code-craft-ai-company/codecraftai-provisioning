@@ -130,6 +130,17 @@ class LambdalabsCloudProvisioner(CloudProvisioner):
         rtnval = [dict(entry) for entry in self._last_vpn_records]
         return rtnval
 
+    @classmethod
+    def supports_preemption(cls) -> bool:
+        """
+            Lambda Labs offers interruptible capacity, so this venue can
+            preempt instances.
+
+            :returns: True.
+        """
+        rtnval = True
+        return rtnval
+
     # ------------------------------------------------------------------
     # Lifecycle: validate
     # ------------------------------------------------------------------

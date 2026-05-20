@@ -43,7 +43,7 @@
 
 ## Integration tests (gated)
 
-- [ ] 21. `RUN_LIVE_CRUSOE=1` end-to-end against a sandbox project.
+- [ ] 21. `RUN_LIVE_CRUSOE=1` end-to-end against a sandbox project. (deferred: live-integration end-to-end test gated on real hardware/account)
 
 ## Documentation
 

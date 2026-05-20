@@ -15,6 +15,7 @@ import logging
 
 from typing import Any, Dict, List, Optional
 
+from automojo.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
 from automojo.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )
@@ -100,6 +101,9 @@ class LandscapeEmitter:
                     "venue": venue_name,
                     "addresses": block.to_emitted_dict(),
                     "tags": list(resource.tags),
+                    "preemption_policy": self._resolve_policy(
+                        resource=resource, instance_spec=ispec,
+                    ),
                 }
                 group = groups_index.get(resource.name, None)
                 if group is not None:
@@ -121,6 +125,33 @@ class LandscapeEmitter:
         if any_vpn_join is True:
             rtnval["vpn"] = self._build_vpn_block()
 
+        return rtnval
+
+    def _resolve_policy(self, *, resource: ProvisionedResource,
+                        instance_spec: Dict[str, Any]) -> str:
+        """
+            Resolve the preemption policy for an emitted device entry.
+
+            The policy is read from the ProvisionedResource when the venue
+            threaded it through; otherwise it falls back to the instance
+            spec, and finally to the fail-loud default.
+
+            :param resource: The ProvisionedResource for the device.
+            :param instance_spec: The matching instance spec dict.
+
+            :returns: A PreemptionPolicy value string.
+        """
+        from_resource = getattr(resource, "preemption_policy", None)
+        if from_resource is not None and len(str(from_resource)) > 0:
+            rtnval = str(from_resource)
+            return rtnval
+
+        from_spec = instance_spec.get("preemption_policy", None)
+        if from_spec is not None and len(str(from_spec)) > 0:
+            rtnval = str(from_spec)
+            return rtnval
+
+        rtnval = PreemptionPolicy.FAIL.value
         return rtnval
 
     def _instance_spec_index(self) -> Dict[str, Dict[str, Any]]:

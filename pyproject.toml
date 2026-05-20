@@ -20,6 +20,9 @@ keywords = [
     "cloud"
 ]
 packages = [{include="automojo", from="source/packages"}]
+include = [
+    { path = "source/packages/automojo/provisioning/model/cloud/accelerators.yaml", format = ["sdist", "wheel"] }
+]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"

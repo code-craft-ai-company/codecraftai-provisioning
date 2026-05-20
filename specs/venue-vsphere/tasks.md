@@ -49,7 +49,7 @@
 
 ## Integration tests (gated)
 
-- [ ] 23. `RUN_LIVE_VSPHERE=1` end-to-end against a homelab vCenter.
+- [ ] 23. `RUN_LIVE_VSPHERE=1` end-to-end against a homelab vCenter. (deferred: live-integration end-to-end test gated on real hardware/account)
 
 ## Documentation
 

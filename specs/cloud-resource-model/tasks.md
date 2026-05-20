@@ -46,9 +46,9 @@
 - [x] 30. `test_property_sibling_subnets_no_overlap`
 - [x] 31. `test_property_ingress_egress_pair_roundtrip`
 - [x] 32. `test_property_resource_profile_dispatch_total`
-- [ ] 33. `test_property_all_model_classes_roundtrip`
+- [x] 33. `test_property_all_model_classes_roundtrip`
 
 ## Documentation
 
-- [ ] 34. Add usage examples to module docstrings
-- [ ] 35. Cross-link to `cloud-provisioner-lifecycle` in `See Also`
+- [ ] 34. Add usage examples to module docstrings (deferred: documentation not yet authored)
+- [ ] 35. Cross-link to `cloud-provisioner-lifecycle` in `See Also` (deferred: documentation cross-link not yet authored)

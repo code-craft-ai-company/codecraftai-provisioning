@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/linode/` tree per `design.md`.
-- [ ] 2. Add `automojo-interop-linode` + `linode_api4` deps.
+- [ ] 2. Add `automojo-interop-linode` + `linode_api4` deps. (deferred: cross-repo dependency wiring owned by package packaging step)
 - [x] 3. Declare `LinodeValidationError`, `LinodeConflictError`,
   `ConfirmationRequiredError` in `linodeerrors.py`.
 
@@ -38,9 +38,9 @@
 
 ## Integration tests (gated)
 
-- [ ] 19. `RUN_LIVE_LINODE=1` end-to-end against a sandbox account.
+- [ ] 19. `RUN_LIVE_LINODE=1` end-to-end against a sandbox account. (deferred: live-integration end-to-end test gated on real hardware/account)
 
 ## Documentation
 
-- [ ] 20. Author `provisioning/venues/linode/README.md` cross-linking the
+- [ ] 20. Author `provisioning/venues/linode/README.md` cross-linking the (deferred: README.md not yet authored)
   resource model, lifecycle, vpn-join, and the Linode interop client.

@@ -30,6 +30,60 @@ _DEFAULT_CATALOG_FILENAME = "accelerators.yaml"
 
 _ENV_OVERRIDE = "AUTOMOJO_ACCELERATOR_CATALOG"
 
+_LINE_KEY = "__line__"
+
+
+class _LineMarkingSafeLoader(yaml.SafeLoader):
+    """
+        A SafeLoader variant that records the 1-based source line of every
+        mapping node under the ``__line__`` key so that load-time catalog
+        errors can point at the offending YAML line.
+    """
+
+
+def _construct_mapping_with_line(loader: "_LineMarkingSafeLoader",
+                                 node: yaml.MappingNode) -> Dict[str, Any]:
+    """
+        Construct a mapping and inject the source line number.
+
+        :param loader: The active YAML loader.
+        :param node: The mapping node being constructed.
+
+        :returns: The constructed mapping with a ``__line__`` entry.
+    """
+    mapping = loader.construct_mapping(node, deep=True)
+    mapping[_LINE_KEY] = node.start_mark.line + 1
+    rtnval = mapping
+    return rtnval
+
+
+_LineMarkingSafeLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+    _construct_mapping_with_line
+)
+
+
+def _strip_line_marks(value: Any) -> Any:
+    """
+        Recursively remove injected ``__line__`` keys from a loaded document.
+
+        :param value: A loaded YAML value (dict, list, or scalar).
+
+        :returns: The same value with all ``__line__`` keys removed.
+    """
+    if isinstance(value, dict):
+        cleaned: Dict[str, Any] = {}
+        for key, item in value.items():
+            if key == _LINE_KEY:
+                continue
+            cleaned[key] = _strip_line_marks(item)
+        rtnval: Any = cleaned
+    elif isinstance(value, list):
+        rtnval = [_strip_line_marks(item) for item in value]
+    else:
+        rtnval = value
+    return rtnval
+
 
 class CloudAcceleratorCatalog:
     """
@@ -108,10 +162,18 @@ class CloudAcceleratorCatalog:
 
         with open(path, "r", encoding="utf-8") as fh:
             try:
-                raw_document = yaml.safe_load(fh)
+                raw_document = yaml.load(fh, Loader=_LineMarkingSafeLoader)
             except yaml.YAMLError as xcpt:
                 err_msg_lines = ["Malformed YAML in accelerator catalog file."]
                 err_msg_lines.append("PATH: {}".format(path))
+                problem_mark = getattr(xcpt, "problem_mark", None)
+                if problem_mark is not None:
+                    err_msg_lines.append(
+                        "LINE: {}".format(problem_mark.line + 1)
+                    )
+                    err_msg_lines.append(
+                        "COLUMN: {}".format(problem_mark.column + 1)
+                    )
                 err_msg_lines.append("CAUSE: {}".format(xcpt))
                 err_msg = os.linesep.join(err_msg_lines)
                 raise ConfigurationError(err_msg) from None
@@ -133,12 +195,19 @@ class CloudAcceleratorCatalog:
                 raise ConfigurationError(
                     "Accelerator catalog entry #{} is not a mapping.".format(index)
                 )
+
+            entry_line = entry_payload.get(_LINE_KEY, None)
+            clean_payload = _strip_line_marks(entry_payload)
+
             try:
-                entry = CloudAcceleratorCatalogEntry.from_dict(entry_payload)
+                entry = CloudAcceleratorCatalogEntry.from_dict(clean_payload)
             except Exception as xcpt:
                 err_msg_lines = ["Invalid accelerator catalog entry."]
+                err_msg_lines.append("PATH: {}".format(path))
                 err_msg_lines.append("INDEX: {}".format(index))
-                err_msg_lines.append("PAYLOAD: {!r}".format(entry_payload))
+                if entry_line is not None:
+                    err_msg_lines.append("LINE: {}".format(entry_line))
+                err_msg_lines.append("PAYLOAD: {!r}".format(clean_payload))
                 err_msg_lines.append("CAUSE: {}".format(xcpt))
                 err_msg = os.linesep.join(err_msg_lines)
                 raise ConfigurationError(err_msg) from None

@@ -14,9 +14,11 @@ __credits__ = []
 import ipaddress
 import os
 
-from typing import Optional
+from typing import List, Optional
 
-from automojo.provisioning.model.exceptions import SchemaValidationError
+from automojo.provisioning.model.exceptions import (
+    SchemaValidationError, SchemaSemanticError
+)
 
 
 _DEFAULT_NAME_MAX_LEN = 63
@@ -210,6 +212,67 @@ def subnet_contained_in_network(*, subnet_cidr: str, network_cidr: str) -> bool:
     net = ipaddress.ip_network(network_cidr, strict=False)
     rtnval = sub.subnet_of(net)
     return rtnval
+
+
+def resolve_mount_targets(*, mount_specs: List["object"],
+                          instance_names: List[str],
+                          filesystem_names: Optional[List[str]] = None) -> None:
+    """
+        Resolve every shared-fs mount reference against the declared resources.
+
+        This is the validate-time cross-resource check for the
+        accelerator-and-interconnect model: a ``SharedFsMountSpec`` carries a
+        ``target_instance`` (and ``filesystem_name``) by name, and those names
+        must resolve to declared resources in the same spec.
+
+        :param mount_specs: The SharedFsMountSpec objects to resolve.
+        :param instance_names: Names of every declared CloudInstance.
+        :param filesystem_names: Names of every declared CloudSharedFilesystem;
+                                 when None, filesystem references are not
+                                 checked.
+
+        :raises: SchemaSemanticError
+    """
+    known_instances = set(instance_names)
+    known_filesystems = None
+    if filesystem_names is not None:
+        known_filesystems = set(filesystem_names)
+
+    unresolved_lines: List[str] = []
+
+    for mount in mount_specs:
+        target_instance = getattr(mount, "target_instance", None)
+        if target_instance not in known_instances:
+            unresolved_lines.append(
+                "    target_instance {!r} does not match a declared "
+                "CloudInstance.".format(target_instance)
+            )
+
+        if known_filesystems is not None:
+            filesystem_name = getattr(mount, "filesystem_name", None)
+            if filesystem_name not in known_filesystems:
+                unresolved_lines.append(
+                    "    filesystem_name {!r} does not match a declared "
+                    "CloudSharedFilesystem.".format(filesystem_name)
+                )
+
+    if len(unresolved_lines) > 0:
+        err_msg_lines = ["Unresolved shared-fs mount references during validate."]
+        err_msg_lines.append(
+            "KNOWN INSTANCES: {}".format(", ".join(sorted(known_instances)))
+        )
+        if known_filesystems is not None:
+            err_msg_lines.append(
+                "KNOWN FILESYSTEMS: {}".format(
+                    ", ".join(sorted(known_filesystems))
+                )
+            )
+        err_msg_lines.append("UNRESOLVED:")
+        err_msg_lines.extend(unresolved_lines)
+        err_msg = os.linesep.join(err_msg_lines)
+        raise SchemaSemanticError(err_msg)
+
+    return
 
 
 def cidrs_overlap(*, cidr_a: str, cidr_b: str) -> bool:

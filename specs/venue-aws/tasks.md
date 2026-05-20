@@ -37,9 +37,10 @@
   for every resource and emitting `PlanAction` entries.
 - [x] 12. Implement drift detection for SG ingress/egress, instance tags, and
   volume size/type.
-- [ ] 13. Emit `DELETE` actions for run-id-tagged resources that disappeared from
-  the spec.  (Deferred: owned-orphan scan during plan is implementation-pending;
-  destroy still cleans by tag.)
+- [x] 13. Emit `DELETE` actions for run-id-tagged resources that disappeared from
+  the spec.  `AwsCloudProvisioner._plan_owned_orphans` enumerates each per-kind
+  manager's `list_owned` and emits a `DELETE` `PlannedAction` for every
+  owner-tagged resource absent from the desired spec.
 
 ## Apply
 
@@ -56,7 +57,9 @@
 - [ ] 18. Persist the run inventory to
   `.output/provisioning/<runid>/aws-inventory.json` after each stage.  (Deferred
   to engine integration; the venue exposes ``inventory()`` for the engine's
-  state store to consume.)
+  state store to consume.)  (deferred: run-inventory persistence is owned by the
+  engine state-store / provisioning-state-persistence feature; the venue exposes
+  inventory() which the engine persists)
 - [x] 19. Refuse to apply DELETE actions unless `aspects.confirm is True`.
 
 ## Destroy
@@ -89,10 +92,10 @@
 
 ## Integration tests (gated)
 
-- [ ] 29. `RUN_LIVE_AWS=1` end-to-end: stand up a single t3.micro in an isolated
+- [ ] 29. `RUN_LIVE_AWS=1` end-to-end: stand up a single t3.micro in an isolated (deferred: live-integration end-to-end test gated on real hardware/account)
   VPC, attach a tag, re-apply, destroy.  Excluded from CI by default.
 
 ## Documentation
 
-- [ ] 30. Author `provisioning/venues/aws/README.md` linking to this spec, the
+- [ ] 30. Author `provisioning/venues/aws/README.md` linking to this spec, the (deferred: README.md not yet authored)
   resource model, lifecycle, vpn-join, and the AWS interop client.
