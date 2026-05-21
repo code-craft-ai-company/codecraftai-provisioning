@@ -302,7 +302,7 @@ class NtxApplyStages:
                 kind="volume", name=volume.name, venue_id=entity_uuid,
                 attributes={"venue_name": venue_name,
                             "size_gb": volume.size_gb,
-                            "type": volume.type},
+                            "storage_class": volume.storage_class.value},
                 tags=volume.tags if volume.tags is not None else [],
             )
             if existed:

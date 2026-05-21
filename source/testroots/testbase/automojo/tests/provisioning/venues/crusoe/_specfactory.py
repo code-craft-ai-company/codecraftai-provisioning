@@ -77,7 +77,7 @@ def basic_spec(*, with_vpn: bool = False,
                              interconnect=interconnect,
                              vpn_join=vpn_join)
 
-    volume = CloudStorageVolume(name="vol-0", size_gb=100, type="ssd",
+    volume = CloudStorageVolume(name="vol-0", size_gb=100, storage_class="standard",
                                 attached_to="node-0")
 
     rtnval = CrusoeSpec(networks=[network], subnets=[subnet],

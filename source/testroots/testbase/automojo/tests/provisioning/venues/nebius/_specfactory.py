@@ -90,7 +90,7 @@ def basic_spec(*, with_vpn: bool = False,
         interconnect=interconnect, placement_group=placement_group,
     )
 
-    volume = CloudStorageVolume(name="vol-a", size_gb=100, type="ssd",
+    volume = CloudStorageVolume(name="vol-a", size_gb=100, storage_class="standard",
                                 attached_to="inst-a", mount="/dev/sdb")
 
     rtnval = NebiusSpec(

@@ -434,7 +434,7 @@ def test_apply_idempotent_property(volume_count) -> None:
     spec.volumes = []
     for index in range(volume_count):
         spec.volumes.append(CloudStorageVolume(
-            name="vol-{}".format(index), size_gb=50, type="ssd"))
+            name="vol-{}".format(index), size_gb=50, storage_class="standard"))
     prov = CrusoeCloudProvisioner(venue=crusoe_venue, client=client,
                                   project_config=project_config, spec=spec)
     aspects = _Aspects(runid="run-prop")

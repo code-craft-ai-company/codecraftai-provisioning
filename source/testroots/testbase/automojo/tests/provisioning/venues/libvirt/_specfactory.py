@@ -139,7 +139,7 @@ def volume_spec() -> LibvirtSpec:
 
         :returns: A LibvirtSpec instance.
     """
-    volume = CloudStorageVolume(name="data", size_gb=10, type="ssd")
+    volume = CloudStorageVolume(name="data", size_gb=10, storage_class="standard")
     rtnval = LibvirtSpec(networks=[make_network()],
                          keypairs=[make_keypair()],
                          instances=[make_instance()],

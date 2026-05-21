@@ -396,11 +396,11 @@ def test_preemption_policy_reacquire_uses_spot(venue, credential,
     return
 
 
-def test_apply_disk_uses_premium_lrs(venue, credential, region_config,
-                                     session_factory, world,
-                                     aspects) -> None:
+def test_apply_disk_uses_standard_ssd_lrs(venue, credential, region_config,
+                                          session_factory, world,
+                                          aspects) -> None:
     """
-        An ``ssd`` neutral volume maps to a Premium_LRS managed disk.
+        A ``standard`` neutral StorageClass maps to a StandardSSD_LRS disk.
     """
     spec = basic_spec()
     provisioner = _provisioner(venue=venue, credential=credential,
@@ -408,7 +408,7 @@ def test_apply_disk_uses_premium_lrs(venue, credential, region_config,
                                session_factory=session_factory, spec=spec)
     provisioner.apply(aspects=aspects)
     disk = world.disks["rg-testrun01/vol-a"]
-    assert disk.sku.name == "Premium_LRS"
+    assert disk.sku.name == "StandardSSD_LRS"
     return
 
 

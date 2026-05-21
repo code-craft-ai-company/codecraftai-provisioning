@@ -156,7 +156,7 @@ def volume_spec() -> NutanixSpec:
 
         :returns: A NutanixSpec instance.
     """
-    volume = CloudStorageVolume(name="data", size_gb=10, type="ssd")
+    volume = CloudStorageVolume(name="data", size_gb=10, storage_class="standard")
     rtnval = NutanixSpec(networks=[make_network()],
                          subnets=[make_subnet()],
                          keypairs=[make_keypair()],

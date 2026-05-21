@@ -11,12 +11,15 @@ __copyright__ = "Copyright 2026, Automation Mojo LLC"
 __credits__ = []
 
 
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from automojo.restclient.base.schemaobject import SchemaObject
 from automojo.restclient.base.schemafield import Field
 
 from automojo.provisioning.model.exceptions import SchemaValidationError
+from automojo.provisioning.model.cloud.cloudloadbalancerlistener import (
+    CloudLoadBalancerListener
+)
 from automojo.provisioning.model.cloud.validators import validate_name
 
 
@@ -38,7 +41,7 @@ class CloudLoadBalancer(SchemaObject):
     tags = Field(list, required=False, default=None)
 
     def __init__(self, *, name: str, scheme: str,
-                 listeners: Optional[List[Dict[str, Any]]] = None,
+                 listeners: Optional[List[CloudLoadBalancerListener]] = None,
                  target_instance_names: Optional[List[str]] = None,
                  tags: Optional[List[Dict[str, str]]] = None) -> None:
         """
@@ -46,7 +49,7 @@ class CloudLoadBalancer(SchemaObject):
 
             :param name: Load balancer name.
             :param scheme: One of internet-facing or internal.
-            :param listeners: Optional list of listener dicts.
+            :param listeners: Optional list of CloudLoadBalancerListener objects.
             :param target_instance_names: Optional list of target instance names.
             :param tags: Optional list of single-entry tag dicts.
 

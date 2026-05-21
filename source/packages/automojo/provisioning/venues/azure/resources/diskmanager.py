@@ -16,6 +16,7 @@ from typing import Any, Dict, List, Optional
 from automojo.provisioning.model.cloud.cloudstoragevolume import (
     CloudStorageVolume
 )
+from automojo.provisioning.model.cloud.storageclass import StorageClass
 from automojo.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )
@@ -31,29 +32,24 @@ from automojo.provisioning.venues.azure.azuretagging import (
 from automojo.provisioning.venues.azure.azuretask import resolve_poller
 
 
-# Neutral volume type → Azure Managed Disk storage account type.
-_TYPE_MAP: Dict[str, str] = {
-    "ssd": "Premium_LRS",
-    "premium": "Premium_LRS",
-    "standardssd": "StandardSSD_LRS",
-    "gp3": "StandardSSD_LRS",
-    "gp2": "StandardSSD_LRS",
-    "nvme": "PremiumV2_LRS",
-    "io2": "UltraSSD_LRS",
-    "ultra": "UltraSSD_LRS",
-    "hdd": "Standard_LRS",
+# Neutral StorageClass → Azure Managed Disk storage account type.
+_STORAGE_CLASS_MAP: Dict[StorageClass, str] = {
+    StorageClass.STANDARD: "StandardSSD_LRS",
+    StorageClass.BALANCED: "StandardSSD_LRS",
+    StorageClass.PERFORMANCE: "Premium_LRS",
+    StorageClass.ARCHIVE: "Standard_LRS",
 }
 
 
-def map_type(*, neutral_type: str) -> str:
+def map_storage_class(*, storage_class: StorageClass) -> str:
     """
-        Map a neutral volume type hint to an Azure disk SKU name.
+        Map a neutral StorageClass to an Azure disk SKU name.
 
-        :param neutral_type: Neutral type string.
+        :param storage_class: Neutral StorageClass member.
 
         :returns: Azure storage-account-type string.
     """
-    rtnval = _TYPE_MAP.get(neutral_type, "Premium_LRS")
+    rtnval = _STORAGE_CLASS_MAP.get(storage_class, "StandardSSD_LRS")
     return rtnval
 
 
@@ -123,7 +119,7 @@ class DiskManager:
         client = self._compute()
         existing = self.find(resource_group=resource_group,
                              name=desired.name)
-        disk_sku = map_type(neutral_type=desired.type)
+        disk_sku = map_storage_class(storage_class=desired.storage_class)
 
         if existing is None:
             tags = azure_tags_for(run_id=run_id, resource_name=desired.name,

@@ -161,7 +161,7 @@ def volume_spec() -> ProxmoxSpec:
 
         :returns: A ProxmoxSpec instance.
     """
-    volume = CloudStorageVolume(name="data", size_gb=10, type="ssd",
+    volume = CloudStorageVolume(name="data", size_gb=10, storage_class="standard",
                                 attached_to="node")
     rtnval = ProxmoxSpec(networks=[make_network()],
                          keypairs=[make_keypair()],
