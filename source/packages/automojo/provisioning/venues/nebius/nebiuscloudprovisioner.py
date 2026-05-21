@@ -33,6 +33,8 @@ from automojo.provisioning.model.cloud.provisioningresult import (
     ProvisioningResult
 )
 from automojo.provisioning.model.cloud.validationresult import ValidationResult
+from automojo.provisioning.model.exceptions import SchemaSemanticError
+
 from automojo.provisioning.venues.nebius.nebiusapplystages import (
     NebiusApplyStages
 )
@@ -239,7 +241,7 @@ class NebiusCloudProvisioner(CloudProvisioner):
                     resolved_preset = self._catalog.resolve(
                         neutral_name=first.model, venue=self.VENUE_NAME,
                     )
-                except Exception as xcpt:
+                except SchemaSemanticError as xcpt:
                     errors.append({
                         "resource": instance.name,
                         "error": "Accelerator not on Nebius: {}".format(
@@ -331,14 +333,16 @@ class NebiusCloudProvisioner(CloudProvisioner):
                                     default=False)
         plan = self._plan_builder.plan(spec=spec, run_id=run_id,
                                        aspects=aspects)
-        has_delete = False
+        destructive_intents = (PlannedActionIntent.UPDATE.value,
+                               PlannedActionIntent.DELETE.value)
+        has_destructive = False
         for action in plan.actions:
-            if action.intent == PlannedActionIntent.UPDATE.value:
-                has_delete = True
-        if has_delete is True and confirm is not True:
+            if action.intent in destructive_intents:
+                has_destructive = True
+        if has_destructive is True and confirm is not True:
             err_msg = (
-                "NebiusCloudProvisioner.apply has UPDATE-by-recreate "
-                "actions which require aspects.confirm=True."
+                "NebiusCloudProvisioner.apply has UPDATE-by-recreate or "
+                "DELETE actions which require aspects.confirm=True."
             )
             raise ConfirmationRequiredError(err_msg)
 

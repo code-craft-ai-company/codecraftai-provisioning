@@ -64,7 +64,7 @@ def resolve_control_plane_credential(*, spec: VPNJoinSpec,
 
     try:
         resolved = credential_lookup(reference)
-    except Exception as xcpt:
+    except (LookupError, ValueError, RuntimeError) as xcpt:
         err_msg_lines = ["Failed to resolve VPN control-plane credential."]
         err_msg_lines.append("PROVIDER: {}".format(spec.provider))
         err_msg_lines.append("REFERENCE: {!r}".format(reference))

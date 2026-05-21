@@ -39,6 +39,8 @@ from automojo.provisioning.model.cloud.provisioningresult import (
 )
 from automojo.provisioning.model.cloud.validationresult import ValidationResult
 from automojo.provisioning.model.exceptions import SchemaSemanticError
+from automojo.provisioning.venues.vpncleanup import delete_vpn_device
+
 from automojo.provisioning.venues.google.gcperrors import (
     GcpValidationError, ConfirmationRequiredError
 )
@@ -819,22 +821,16 @@ class GoogleCloudProvisioner(CloudProvisioner):
                 device_id = record.get("vpn_device_id", None)
                 if device_id is None or len(str(device_id)) == 0:
                     continue
-                try:
-                    self._vpn_control_plane.delete_device(
-                        device_id=device_id, aspects=aspects
-                    )
-                except Exception:
-                    pass
+                delete_vpn_device(
+                    vpn_control_plane=self._vpn_control_plane,
+                    device_id=device_id, aspects=aspects)
             for record in terminated:
                 device_id = record.get("vpn_device_id", None)
                 if device_id is None or len(str(device_id)) == 0:
                     continue
-                try:
-                    self._vpn_control_plane.delete_device(
-                        device_id=device_id, aspects=aspects
-                    )
-                except Exception:
-                    pass
+                delete_vpn_device(
+                    vpn_control_plane=self._vpn_control_plane,
+                    device_id=device_id, aspects=aspects)
 
         # 7. Compact-placement ResourcePolicies.
         self._placement_mgr.destroy(run_id=run_id, region=region,

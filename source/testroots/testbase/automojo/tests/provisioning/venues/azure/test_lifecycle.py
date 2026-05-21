@@ -16,6 +16,8 @@ import base64
 
 import pytest
 
+from automojo.provisioning.model.exceptions import SchemaSemanticError
+
 from hypothesis import given, HealthCheck, settings
 from hypothesis import strategies as st
 
@@ -198,6 +200,28 @@ def test_apply_vpn_join_records_device(venue, credential, region_config,
     return
 
 
+def test_inventory_enumerates_subnets_and_nics(venue, credential,
+                                               region_config,
+                                               session_factory,
+                                               aspects) -> None:
+    """
+        Regression for PV-H1: ``inventory`` enumerates the subnets and NICs
+        that ``apply`` creates — not just the top-level resources — so an
+        inventory-driven destroy does not leak them.
+    """
+    spec = basic_spec()
+    provisioner = _provisioner(venue=venue, credential=credential,
+                               region_config=region_config,
+                               session_factory=session_factory, spec=spec)
+    provisioner.apply(aspects=aspects)
+
+    kinds = {resource.kind
+             for resource in provisioner.inventory(aspects=aspects)}
+    assert "subnet" in kinds
+    assert "nic" in kinds
+    return
+
+
 def test_destroy_requires_confirm(venue, credential, region_config,
                                   session_factory, aspects) -> None:
     """
@@ -208,7 +232,7 @@ def test_destroy_requires_confirm(venue, credential, region_config,
                                region_config=region_config,
                                session_factory=session_factory, spec=spec)
     provisioner.apply(aspects=aspects)
-    with pytest.raises(Exception):
+    with pytest.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     return
 

@@ -157,14 +157,16 @@ def dns_record_spec() -> XcpngSpec:
     return rtnval
 
 
-def interconnect_spec() -> XcpngSpec:
+def interconnect_spec(*, kind: str = "INFINIBAND_NDR") -> XcpngSpec:
     """
         Build an XcpngSpec whose instance requests an HPC interconnect —
         a validate-error on XCP-ng.
 
+        :param kind: The CloudInterconnect kind to request.
+
         :returns: An XcpngSpec instance.
     """
-    interconnect = CloudInterconnect(kind="INFINIBAND_NDR",
+    interconnect = CloudInterconnect(kind=kind,
                                      bandwidth_gbps=400,
                                      topology="RAIL_OPTIMIZED")
     instance = make_instance(name="hpc-node", interconnect=interconnect)

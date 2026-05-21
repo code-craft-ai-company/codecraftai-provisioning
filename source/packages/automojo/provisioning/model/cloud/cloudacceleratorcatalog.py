@@ -20,7 +20,9 @@ import yaml
 
 from automojo.errors.exceptions import ConfigurationError
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
+from automojo.provisioning.model.exceptions import (
+    SchemaSemanticError, SchemaValidationError
+)
 from automojo.provisioning.model.cloud.cloudacceleratorcatalogentry import (
     CloudAcceleratorCatalogEntry
 )
@@ -201,7 +203,8 @@ class CloudAcceleratorCatalog:
 
             try:
                 entry = CloudAcceleratorCatalogEntry.from_dict(clean_payload)
-            except Exception as xcpt:
+            except (SchemaValidationError, TypeError,
+                    KeyError, ValueError) as xcpt:
                 err_msg_lines = ["Invalid accelerator catalog entry."]
                 err_msg_lines.append("PATH: {}".format(path))
                 err_msg_lines.append("INDEX: {}".format(index))

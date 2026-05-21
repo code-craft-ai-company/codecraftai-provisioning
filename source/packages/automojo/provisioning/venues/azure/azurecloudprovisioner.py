@@ -39,6 +39,8 @@ from automojo.provisioning.model.cloud.provisioningresult import (
 )
 from automojo.provisioning.model.cloud.validationresult import ValidationResult
 from automojo.provisioning.model.exceptions import SchemaSemanticError
+from automojo.provisioning.venues.vpncleanup import delete_vpn_device
+
 from automojo.provisioning.venues.azure.azureerrors import (
     AzureValidationError
 )
@@ -906,22 +908,16 @@ class AzureCloudProvisioner(CloudProvisioner):
                 device_id = record.get("vpn_device_id", None)
                 if device_id is None or len(str(device_id)) == 0:
                     continue
-                try:
-                    self._vpn_control_plane.delete_device(
-                        device_id=device_id, aspects=aspects
-                    )
-                except Exception:
-                    pass
+                delete_vpn_device(
+                    vpn_control_plane=self._vpn_control_plane,
+                    device_id=device_id, aspects=aspects)
             for record in terminated:
                 device_id = record.get("vpn_device_id", None)
                 if device_id is None or len(str(device_id)) == 0:
                     continue
-                try:
-                    self._vpn_control_plane.delete_device(
-                        device_id=device_id, aspects=aspects
-                    )
-                except Exception:
-                    pass
+                delete_vpn_device(
+                    vpn_control_plane=self._vpn_control_plane,
+                    device_id=device_id, aspects=aspects)
 
         # 5. NICs.
         self._nic_mgr.destroy(resource_group=resource_group,
@@ -977,10 +973,22 @@ class AzureCloudProvisioner(CloudProvisioner):
         out: List[ProvisionedResource] = []
         out.extend(self._rg_mgr.list_owned(name=resource_group,
                                            run_id=run_id))
-        out.extend(self._vnet_mgr.list_owned(resource_group=resource_group,
-                                             run_id=run_id))
+        owned_vnets = self._vnet_mgr.list_owned(
+            resource_group=resource_group, run_id=run_id)
+        out.extend(owned_vnets)
+
+        # Subnets carry no tags; enumerate them under each owned VNet.
+        for vnet_resource in owned_vnets:
+            out.extend(self._subnet_mgr.list_owned(
+                resource_group=resource_group,
+                vnet_name=vnet_resource.name))
+
         out.extend(self._nsg_mgr.list_owned(resource_group=resource_group,
                                             run_id=run_id))
+        out.extend(self._nic_mgr.list_owned(resource_group=resource_group,
+                                            run_id=run_id))
+        out.extend(self._placement_mgr.list_owned(
+            resource_group=resource_group, run_id=run_id))
         out.extend(self._vm_mgr.list_owned(resource_group=resource_group,
                                            run_id=run_id))
         out.extend(self._disk_mgr.list_owned(resource_group=resource_group,

@@ -33,6 +33,8 @@ from automojo.provisioning.model.cloud.provisioningresult import (
     ProvisioningResult
 )
 from automojo.provisioning.model.cloud.validationresult import ValidationResult
+from automojo.provisioning.venues.vpncleanup import delete_vpn_device
+
 from automojo.provisioning.venues.digitalocean.doclient import (
     DigitalOceanClient
 )
@@ -691,22 +693,16 @@ class DigitalOceanCloudProvisioner(CloudProvisioner):
                 device_id = record.get("vpn_device_id", None)
                 if device_id is None or len(str(device_id)) == 0:
                     continue
-                try:
-                    self._vpn_control_plane.delete_device(
-                        device_id=device_id, aspects=aspects
-                    )
-                except Exception:
-                    pass
+                delete_vpn_device(
+                    vpn_control_plane=self._vpn_control_plane,
+                    device_id=device_id, aspects=aspects)
             for record in destroyed:
                 device_id = record.get("vpn_device_id", None)
                 if device_id is None or len(str(device_id)) == 0:
                     continue
-                try:
-                    self._vpn_control_plane.delete_device(
-                        device_id=device_id, aspects=aspects
-                    )
-                except Exception:
-                    pass
+                delete_vpn_device(
+                    vpn_control_plane=self._vpn_control_plane,
+                    device_id=device_id, aspects=aspects)
 
         # 6. SSH keys.
         if spec is not None:

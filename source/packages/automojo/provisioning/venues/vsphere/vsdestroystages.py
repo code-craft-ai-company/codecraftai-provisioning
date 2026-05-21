@@ -15,6 +15,8 @@ __credits__ = []
 
 from typing import Any, Dict, List
 
+from automojo.provisioning.venues.vpncleanup import delete_vpn_device
+
 
 class VsDestroyStages:
     """
@@ -86,12 +88,8 @@ class VsDestroyStages:
                 device_id = record.get("vpn_device_id", None)
                 if device_id is None or len(str(device_id)) == 0:
                     continue
-                try:
-                    vpn_control_plane.delete_device(
-                        device_id=device_id, aspects=aspects,
-                    )
-                except Exception:
-                    pass
+                delete_vpn_device(vpn_control_plane=vpn_control_plane,
+                                  device_id=device_id, aspects=aspects)
 
         # 3. Delete distributed port groups created by the run.
         existing_networks = self._ops.list_networks(aspects=aspects)

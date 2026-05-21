@@ -10,6 +10,8 @@ __author__ = "Myron Walker"
 __copyright__ = "Copyright 2026, Automation Mojo LLC"
 __credits__ = []
 
+from automojo.errors.exceptions import SemanticError
+
 
 class SchemaValidationError(ValueError):
     """
@@ -21,11 +23,17 @@ class SchemaValidationError(ValueError):
     """
 
 
-class SchemaSemanticError(RuntimeError):
+class SchemaSemanticError(SemanticError):
     """
         Raised when a model object fails *cross-resource* semantic validation.
 
         Semantic validation includes subnet-in-network containment, sibling-subnet
         non-overlap, accelerator support on the chosen venue, and other invariants
         that require looking across more than one object.
+
+        This derives from :class:`automojo.errors.exceptions.SemanticError` (which
+        is rooted at ``BaseException``) so that an ordinary ``except Exception`` or
+        ``except RuntimeError`` does NOT silently swallow a semantic-validation
+        failure. Per the project coding standards, ``SemanticError`` must never be
+        caught -- it always bubbles.
     """

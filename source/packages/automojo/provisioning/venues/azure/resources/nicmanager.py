@@ -151,6 +151,44 @@ class NicManager:
         )
         return rtnval
 
+    def list_owned(self, *, resource_group: str,
+                   run_id: str) -> List[ProvisionedResource]:
+        """
+            Return every owned NIC in the ResourceGroup for the run.
+
+            :param resource_group: ResourceGroup name.
+            :param run_id: Run identifier.
+
+            :returns: List of ProvisionedResource entries.
+        """
+        client = self._network()
+        out: List[ProvisionedResource] = []
+        try:
+            listing = list(client.network_interfaces.list(
+                resource_group_name=resource_group
+            ))
+        except Exception:
+            rtnval = out
+            return rtnval
+
+        for nic in listing:
+            live_tags = getattr(nic, "tags", None)
+            if not belongs_to_run(azure_tags=live_tags, run_id=run_id):
+                continue
+            nic_name = getattr(nic, "name", "")
+            attributes: Dict[str, Any] = {}
+            attributes["nic_name"] = nic_name
+            attributes["resource_group"] = resource_group
+            out.append(ProvisionedResource(
+                kind=self.KIND, name=nic_name,
+                venue_id=getattr(nic, "id", nic_name),
+                attributes=attributes,
+                tags=from_azure(azure_tags=live_tags),
+            ))
+
+        rtnval = out
+        return rtnval
+
     def destroy(self, *, resource_group: str,
                 run_id: str, aspects: Any) -> List[str]:
         """

@@ -17,6 +17,8 @@ from pathlib import Path
 
 import pytest
 
+from automojo.provisioning.model.exceptions import SchemaSemanticError
+
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
@@ -256,6 +258,29 @@ def test_apply_idempotent_second_run_makes_no_creates(
     return
 
 
+def test_apply_reapply_makes_no_vpc_or_sshkey_mutations(
+        crusoe_venue, mock_client, project_config, crusoe_aspects) -> None:
+    """
+        Regression for C9 / C10: a second ``apply`` must not call
+        ``vpcs.create`` or ``ssh_keys.register`` again — re-applying an
+        already-realised VPC / SSH key reuses the existing record.
+    """
+    spec = basic_spec()
+    prov = make_provisioner(venue=crusoe_venue, client=mock_client,
+                            project_config=project_config, spec=spec)
+
+    prov.apply(aspects=crusoe_aspects)
+    vpc_creates_after_first = mock_client.vpcs.create_calls
+    key_registers_after_first = mock_client.ssh_keys.register_calls
+    assert vpc_creates_after_first > 0
+    assert key_registers_after_first > 0
+
+    prov.apply(aspects=crusoe_aspects)
+    assert mock_client.vpcs.create_calls == vpc_creates_after_first
+    assert mock_client.ssh_keys.register_calls == key_registers_after_first
+    return
+
+
 def test_apply_resolves_gpu_sku(crusoe_venue, mock_client, project_config,
                                 crusoe_aspects) -> None:
     """
@@ -307,7 +332,7 @@ def test_destroy_requires_confirm(crusoe_venue, mock_client, project_config,
     prov = make_provisioner(venue=crusoe_venue, client=mock_client,
                             project_config=project_config, spec=spec)
     prov.apply(aspects=crusoe_aspects)
-    with pytest.raises(Exception):
+    with pytest.raises(SchemaSemanticError):
         prov.destroy(aspects=crusoe_aspects)
     return
 

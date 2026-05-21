@@ -17,6 +17,8 @@ import os
 
 import pytest
 
+from automojo.provisioning.model.exceptions import SchemaSemanticError
+
 from automojo.provisioning.venues.lambdalabs.lambdalabscloudprovisioner import (
     LambdalabsCloudProvisioner
 )
@@ -182,7 +184,7 @@ def test_destroy_requires_confirm(venue, credential, aspects, tmp_path):
                                spec=basic_spec(), client=client,
                                output_root=str(tmp_path))
     provisioner.apply(aspects=aspects)
-    with pytest.raises(Exception):
+    with pytest.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     assert len(client.list_instances(aspects=aspects)) == 1
     return

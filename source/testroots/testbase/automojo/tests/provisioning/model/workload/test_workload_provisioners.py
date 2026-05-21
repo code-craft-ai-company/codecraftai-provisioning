@@ -350,7 +350,7 @@ class CompositionTests(unittest.TestCase):
         journal.append("workload-apply")
 
         # Engine ordering on destroy: workload first, then cloud.
-        provisioner.destroy(aspects=None)
+        provisioner.destroy(aspects={"confirm": True})
         journal.append("workload-destroy")
         provisioner.cloud_provisioner.destroy(aspects=None)
 
@@ -509,7 +509,7 @@ class KubernetesWorkloadProvisionerLifecycleTests(unittest.TestCase):
         """
         provisioner = _k8s_provisioner()
         provisioner.apply()
-        provisioner.destroy(aspects=None)
+        provisioner.destroy(aspects={"confirm": True})
         inventory = provisioner.inventory()
         self.assertEqual(len(inventory), 0)
         return
@@ -522,6 +522,34 @@ class KubernetesWorkloadProvisionerLifecycleTests(unittest.TestCase):
         provisioner.apply()
         with self.assertRaises(SchemaSemanticError):
             provisioner.destroy(aspects={"confirm": False})
+        return
+
+    def test_destroy_defaults_to_gated_when_no_aspects(self) -> None:
+        """
+            destroy with no aspects (aspects=None) is gated by default --
+            the confirm-gate defaults to False (PC-H1 / PC-H3 regression).
+        """
+        provisioner = _k8s_provisioner()
+        provisioner.apply()
+        with self.assertRaises(SchemaSemanticError):
+            provisioner.destroy(aspects=None)
+        return
+
+    def test_destroy_removes_the_namespace_apply_created(self) -> None:
+        """
+            destroy deletes the namespace that apply created so that
+            destroy inverts apply (PC-H2 regression).
+        """
+        kube = FakeKubernetesClient()
+        provisioner = _k8s_provisioner(kube=kube)
+        provisioner.apply()
+        # apply created the namespace.
+        self.assertIsNotNone(kube.namespaces.get(
+            name=provisioner.spec.namespace))
+        provisioner.destroy(aspects={"confirm": True})
+        # destroy removed the namespace.
+        with self.assertRaises(KeyError):
+            kube.namespaces.get(name=provisioner.spec.namespace)
         return
 
 

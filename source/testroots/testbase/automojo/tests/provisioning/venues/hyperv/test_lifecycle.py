@@ -12,6 +12,10 @@ __copyright__ = "Copyright 2026, Automation Mojo LLC"
 __credits__ = []
 
 
+import pytest
+
+from automojo.provisioning.model.exceptions import SchemaSemanticError
+
 from automojo.provisioning.venues.hyperv.hypervcloudprovisioner import (
     HypervCloudProvisioner
 )
@@ -205,13 +209,9 @@ def test_destroy_requires_confirm(venue, client, host_config, aspects):
                                host_config=host_config, spec=spec)
     provisioner.apply(aspects=aspects)
 
-    raised = False
-    try:
+    with pytest.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
-    except Exception:
-        raised = True
 
-    assert raised is True
     assert "vm-app" in client.vms_state
     return
 
