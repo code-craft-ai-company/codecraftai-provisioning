@@ -311,28 +311,22 @@ class KubernetesWorkloadProvisioner(WorkloadProvisioner):
     # destroy
     # ------------------------------------------------------------------
 
-    def destroy(self, *, aspects: Any = None) -> None:
+    def _destroy_impl(self, *, aspects: Any = None) -> None:
         """
             Destroy previously-applied resources in reverse dependency
-            order: Service -> Deployment -> Job.
+            order: Service -> Deployment -> Job -> Namespace.
 
-            :param aspects: Behaviour control.  When an ``aspects.confirm``
-                attribute is present it must be ``True``.
+            This hook runs only after the base
+            :meth:`WorkloadProvisioner.destroy` confirm-gate (which defaults
+            ``aspects.confirm`` to ``False``) has passed.  The namespace that
+            :meth:`apply` created is deleted last so that ``destroy``
+            inverts ``apply`` (no orphaned namespace is left behind).
+
+            :param aspects: Behaviour control (unused here; the confirm-gate
+                is enforced by the base class).
 
             :returns: None
-
-            :raises: SchemaSemanticError
         """
-        confirm = self._aspect_attr(aspects=aspects, name="confirm",
-                                    default=True)
-        if confirm is not True:
-            err_msg_lines = ["KubernetesWorkloadProvisioner.destroy requires "
-                             "aspects.confirm=True to prevent accidental "
-                             "destruction."]
-            err_msg_lines.append("VENUE: {}".format(self._venue.name))
-            err_msg = os.linesep.join(err_msg_lines)
-            raise SchemaSemanticError(err_msg)
-
         kube = self._kubernetes_client
         namespace = self._spec.namespace
 
@@ -342,6 +336,8 @@ class KubernetesWorkloadProvisioner(WorkloadProvisioner):
 
         for job in self._spec.jobs:
             kube.jobs.delete(name=job.name, namespace=namespace)
+
+        kube.namespaces.delete(name=namespace)
 
         return
 
@@ -400,11 +396,16 @@ class KubernetesWorkloadProvisioner(WorkloadProvisioner):
             :param getter: A zero-argument callable issuing a ``get``.
 
             :returns: ``True`` when the resource exists, ``False`` when the
-                getter raises (treated as absent).
+                getter raises a lookup-style error (treated as absent).
+
+            :raises: SchemaSemanticError
         """
         try:
             getter()
-        except Exception:
+        except (LookupError, FileNotFoundError):
+            # A lookup-style failure means the resource is absent. Any other
+            # error (transport, auth, semantic) must bubble rather than be
+            # silently reported as "absent" and trigger a spurious create.
             rtnval = False
             return rtnval
 
@@ -442,26 +443,6 @@ class KubernetesWorkloadProvisioner(WorkloadProvisioner):
             port_value = port_dict.get("port", None)
             if port_value is not None:
                 rtnval.append(port_value)
-        return rtnval
-
-    @staticmethod
-    def _aspect_attr(*, aspects: Any, name: str, default: Any) -> Any:
-        """
-            Read a named attribute from an aspects object or dict.
-
-            :param aspects: Aspects object, dict, or ``None``.
-            :param name: Attribute name.
-            :param default: Default if missing.
-
-            :returns: The attribute value or default.
-        """
-        if aspects is None:
-            rtnval = default
-            return rtnval
-        if isinstance(aspects, dict):
-            rtnval = aspects.get(name, default)
-            return rtnval
-        rtnval = getattr(aspects, name, default)
         return rtnval
 
 

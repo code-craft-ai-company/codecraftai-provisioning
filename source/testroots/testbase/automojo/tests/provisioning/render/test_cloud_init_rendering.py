@@ -130,7 +130,41 @@ class AzureCSETests(unittest.TestCase):
         text = json.dumps(doc)
         parsed = json.loads(text)
         self.assertIn("settings", parsed)
-        self.assertIn("commandToExecute", parsed["settings"])
+        # C6: the secret-bearing commandToExecute lives in protectedSettings,
+        # never in the public settings block.
+        self.assertNotIn("commandToExecute", parsed["settings"])
+        self.assertIn("commandToExecute", parsed["protectedSettings"])
+        return
+
+    def test_linux_azure_cse_authkey_not_in_public_settings(self) -> None:
+        """
+            C6 regression: the auth-key file content must not appear in the
+            public ``settings`` block of the Azure CSE payload.
+        """
+        doc = render_azure_cse(spec=_tailscale_spec(),
+                               authkey="tskey-SECRET-LINUX",
+                               rendered_hostname="web-01",
+                               image_family="ubuntu")
+        public_text = json.dumps(doc["settings"])
+        self.assertNotIn("tskey-SECRET-LINUX", public_text)
+        protected_text = json.dumps(doc["protectedSettings"])
+        self.assertIn("tskey-SECRET-LINUX", protected_text)
+        return
+
+    def test_windows_azure_cse_authkey_not_in_public_settings(self) -> None:
+        """
+            C6 regression: the Windows CSE auth key must not appear in the
+            public ``settings`` block.
+        """
+        doc = render_azure_cse(spec=_tailscale_spec(),
+                               authkey="tskey-SECRET-WIN",
+                               rendered_hostname="web-01",
+                               image_family="windows-server")
+        public_text = json.dumps(doc["settings"])
+        self.assertNotIn("tskey-SECRET-WIN", public_text)
+        self.assertNotIn("commandToExecute", doc["settings"])
+        protected_text = json.dumps(doc["protectedSettings"])
+        self.assertIn("tskey-SECRET-WIN", protected_text)
         return
 
 

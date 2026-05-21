@@ -259,16 +259,23 @@ def render_azure_cse(*, spec: VPNJoinSpec, authkey: str,
             )
         )
         ps_script = "; ".join(ps_lines)
+        command_to_execute = (
+            "powershell -ExecutionPolicy Unrestricted -Command \""
+            + ps_script.replace("\"", "\\\"")
+            + "\""
+        )
+        # The auth key is embedded in commandToExecute. The Azure CSE
+        # treats the ``settings`` block as public (visible in plain VM
+        # extension settings) and the ``protectedSettings`` block as
+        # encrypted; the secret-bearing commandToExecute therefore lives
+        # in protectedSettings, never in the public settings block.
         rtnval = {
             "settings": {
                 "fileUris": [],
-                "commandToExecute": (
-                    "powershell -ExecutionPolicy Unrestricted -Command \""
-                    + ps_script.replace("\"", "\\\"")
-                    + "\""
-                ),
             },
-            "protectedSettings": {},
+            "protectedSettings": {
+                "commandToExecute": command_to_execute,
+            },
         }
         return rtnval
 
@@ -292,12 +299,16 @@ def render_azure_cse(*, spec: VPNJoinSpec, authkey: str,
         else:
             shell_lines.append(str(entry))
 
+    # The shell script writes the auth-key file content (a secret) inline.
+    # Place the secret-bearing commandToExecute in protectedSettings (the
+    # Azure-encrypted block) and never in the public ``settings`` block.
     rtnval = {
         "settings": {
             "fileUris": [],
+        },
+        "protectedSettings": {
             "commandToExecute": "; ".join(shell_lines),
         },
-        "protectedSettings": {},
     }
     return rtnval
 
@@ -324,9 +335,10 @@ def render_vsphere_guest_customization(*, spec: VPNJoinSpec, authkey: str,
         cse = render_azure_cse(spec=spec, authkey=authkey,
                                rendered_hostname=rendered_hostname,
                                image_family=image_family)
+        command_to_execute = cse["protectedSettings"]["commandToExecute"]
         rtnval = {
             "hostname": rendered_hostname,
-            "runOnceCommands": [cse["settings"]["commandToExecute"]],
+            "runOnceCommands": [command_to_execute],
         }
         return rtnval
 

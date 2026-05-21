@@ -339,15 +339,80 @@ class WorkloadProvisioner(ABC):
             )
         )
 
-    @abstractmethod
-    def destroy(self, *, aspects: Any) -> None:
+    def destroy(self, *, aspects: Any = None) -> None:
         """
             Destroy previously-applied resources.
 
+            This base implementation provides the central confirm-gate that
+            mirrors :class:`CloudProvisioner.destroy`.  Teardown is gated by
+            ``aspects.confirm = True``; without confirmation this method
+            raises :class:`SchemaSemanticError` before dispatching to the
+            subclass :meth:`_destroy_impl` hook.
+
+            Subclasses should implement :meth:`_destroy_impl` rather than
+            overriding :meth:`destroy`, so the confirm-gate cannot be
+            bypassed.  Subclasses that still override :meth:`destroy`
+            directly remain responsible for their own confirm-gating.
+
+            :param aspects: Aspects controlling destroy behaviour.  When an
+                ``aspects.confirm`` attribute is present it must be ``True``.
+
+            :raises: SchemaSemanticError
+        """
+        confirm = self._destroy_confirm_value(aspects=aspects)
+        if confirm is not True:
+            err_msg_lines = ["{}.destroy requires aspects.confirm=True "
+                             "to prevent accidental destruction.".format(
+                                 type(self).__name__)]
+            err_msg_lines.append("VENUE: {}".format(self._venue.name))
+            err_msg = os.linesep.join(err_msg_lines)
+            raise SchemaSemanticError(err_msg)
+
+        self._destroy_impl(aspects=aspects)
+        return
+
+    @staticmethod
+    def _destroy_confirm_value(*, aspects: Any) -> Any:
+        """
+            Read the ``confirm`` aspect from an aspects object or dict.
+
+            The confirm-gate defaults to ``False`` (destruction denied)
+            when no aspects are supplied or the attribute is absent.
+
+            :param aspects: Aspects object, dict, or ``None``.
+
+            :returns: The ``confirm`` value, defaulting to ``False``.
+        """
+        if aspects is None:
+            rtnval = False
+            return rtnval
+        if isinstance(aspects, dict):
+            rtnval = aspects.get("confirm", False)
+            return rtnval
+        rtnval = getattr(aspects, "confirm", False)
+        return rtnval
+
+    def _destroy_impl(self, *, aspects: Any) -> None:
+        """
+            Subclass hook for destroy after confirm-gating.
+
+            Subclasses implement teardown here.  The base :meth:`destroy`
+            enforces the ``aspects.confirm=True`` gate before this hook is
+            invoked.
+
+            This hook is intentionally a concrete (non-abstract) method so
+            that legacy subclasses which override :meth:`destroy` directly
+            (and therefore never reach this hook) remain instantiable.
+            Subclasses that rely on the base confirm-gate MUST override this
+            hook; the default implementation raises ``NotImplementedError``.
+
             :param aspects: Aspects controlling destroy behaviour.
+
+            :raises: NotImplementedError
         """
         raise NotImplementedError(
-            "{}.destroy must be implemented by subclasses.".format(
+            "{}._destroy_impl must be implemented by subclasses that rely "
+            "on the WorkloadProvisioner.destroy confirm-gate.".format(
                 type(self).__name__
             )
         )

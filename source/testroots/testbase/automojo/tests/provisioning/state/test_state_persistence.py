@@ -12,6 +12,7 @@ __credits__ = []
 
 
 import tempfile
+import threading
 import unittest
 
 from pathlib import Path
@@ -98,6 +99,34 @@ class RedactionTests(unittest.TestCase):
         self.assertEqual(after[1], "plain")
         return
 
+    def test_redacts_authkey_write_files_content(self) -> None:
+        """
+            C7 regression: a cloud-init write_files entry whose path names an
+            auth-key file has its (innocuously-named) ``content`` redacted.
+        """
+        before = {"write_files": [
+            {"path": "/etc/tailscale/authkey",
+             "content": "tskey-leaked-via-content"},
+            {"path": "/etc/motd", "content": "welcome"},
+        ]}
+        after = redact_for_persistence(value=before)
+        self.assertEqual(after["write_files"][0]["content"],
+                         REDACTED_PLACEHOLDER)
+        # A non-secret file path keeps its content.
+        self.assertEqual(after["write_files"][1]["content"], "welcome")
+        return
+
+    def test_redacts_twingate_connector_content(self) -> None:
+        """
+            C7 regression: a Twingate connector file write_files entry has
+            its ``content`` redacted by value-context.
+        """
+        before = {"path": "/etc/twingate/connector.conf",
+                  "content": "twingate-token-leaked"}
+        after = redact_for_persistence(value=before)
+        self.assertEqual(after["content"], REDACTED_PLACEHOLDER)
+        return
+
 
 class StoreLayoutTests(unittest.TestCase):
 
@@ -172,6 +201,76 @@ class StoreLayoutTests(unittest.TestCase):
             store.append_log(runid="run-1", line="world")
             log_path = Path(tmp) / "run-1" / "stages.log"
             self.assertEqual(log_path.read_text(), "hello\nworld\n")
+        return
+
+    def test_concurrent_create_run_does_not_lose_index_entries(self) -> None:
+        """
+            C5 regression: many concurrent create_run calls must all land
+            in index.yaml -- the read-modify-write is serialised by the
+            cross-platform advisory lock, so no entry is lost.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            store = ProvisioningStateStore(root=Path(tmp))
+            run_count = 24
+            errors: list = []
+
+            def _create(index: int) -> None:
+                try:
+                    store.create_run(runid="run-{:03d}".format(index),
+                                     venues=[])
+                except Exception as xcpt:  # noqa: BLE001
+                    errors.append(xcpt)
+                return
+
+            workers = []
+            for index in range(run_count):
+                worker = threading.Thread(target=_create, args=(index,))
+                workers.append(worker)
+            for worker in workers:
+                worker.start()
+            for worker in workers:
+                worker.join()
+
+            self.assertEqual(len(errors), 0)
+            entries = store.list_runs()
+            self.assertEqual(len(entries), run_count)
+            recorded = sorted(entry.runid for entry in entries)
+            expected = sorted("run-{:03d}".format(i)
+                              for i in range(run_count))
+            self.assertEqual(recorded, expected)
+        return
+
+    def test_concurrent_index_status_updates_preserve_all_entries(self
+                                                                  ) -> None:
+        """
+            C5 regression: concurrent mark_finished updates against a shared
+            index.yaml must not clobber sibling entries.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            store = ProvisioningStateStore(root=Path(tmp))
+            run_count = 16
+            for index in range(run_count):
+                store.create_run(runid="run-{:03d}".format(index),
+                                 venues=[])
+
+            def _finish(index: int) -> None:
+                store.mark_finished(runid="run-{:03d}".format(index),
+                                    status=RunStatus.APPLIED)
+                return
+
+            workers = []
+            for index in range(run_count):
+                worker = threading.Thread(target=_finish, args=(index,))
+                workers.append(worker)
+            for worker in workers:
+                worker.start()
+            for worker in workers:
+                worker.join()
+
+            entries = store.list_runs()
+            self.assertEqual(len(entries), run_count)
+            for entry in entries:
+                self.assertEqual(entry.status, RunStatus.APPLIED.value)
         return
 
 
