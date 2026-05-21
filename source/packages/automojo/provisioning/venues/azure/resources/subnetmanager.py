@@ -118,6 +118,46 @@ class SubnetManager:
         )
         return rtnval
 
+    def list_owned(self, *, resource_group: str,
+                   vnet_name: str) -> List[ProvisionedResource]:
+        """
+            Return every subnet under an owned VNet.
+
+            Azure subnets carry no tags; ownership is inferred from the
+            enclosing run-id-tagged VNet, so the caller must only pass
+            VNet names it has already confirmed are owned.
+
+            :param resource_group: ResourceGroup name.
+            :param vnet_name: Parent VNet name (already confirmed owned).
+
+            :returns: List of ProvisionedResource entries.
+        """
+        client = self._network()
+        out: List[ProvisionedResource] = []
+        try:
+            listing = list(client.subnets.list(
+                resource_group_name=resource_group,
+                virtual_network_name=vnet_name,
+            ))
+        except Exception:
+            rtnval = out
+            return rtnval
+
+        for subnet in listing:
+            subnet_name = getattr(subnet, "name", "")
+            attributes: Dict[str, Any] = {}
+            attributes["subnet_name"] = subnet_name
+            attributes["vnet_name"] = vnet_name
+            attributes["resource_group"] = resource_group
+            out.append(ProvisionedResource(
+                kind=self.KIND, name=subnet_name,
+                venue_id=getattr(subnet, "id", subnet_name),
+                attributes=attributes, tags={},
+            ))
+
+        rtnval = out
+        return rtnval
+
     def destroy(self, *, resource_group: str, vnet_name: str,
                 subnet_names: List[str], aspects: Any) -> List[str]:
         """

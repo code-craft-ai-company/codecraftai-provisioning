@@ -84,6 +84,20 @@ def test_validate_rejects_hpc_interconnect(venue, aspects):
     return
 
 
+def test_validate_rejects_efa_and_oci_rdma_interconnect(venue, aspects):
+    """
+        Cross-cutting #5: EFA and OCI_RDMA interconnect kinds — rejected by
+        every sibling VM venue — are validate-errors on XCP-ng too.
+    """
+    for kind in ("EFA", "OCI_RDMA"):
+        provisioner = _provisioner(venue=venue,
+                                   spec=interconnect_spec(kind=kind))
+        with pytest.raises(XenValidationError) as excinfo:
+            provisioner.validate(aspects=aspects)
+        assert kind in str(excinfo.value)
+    return
+
+
 def test_validate_rejects_unresolvable_size(venue, aspects):
     """
         An instance whose size resolves to neither a slug nor the

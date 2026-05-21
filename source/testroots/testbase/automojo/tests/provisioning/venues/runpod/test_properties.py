@@ -79,8 +79,11 @@ def test_destroy_is_inverse_of_apply(job_count, volume_count):
     client = MockRunpodClient()
     provisioner = make_provisioner(spec=spec, runpod_client=client)
 
+    class _Confirm:
+        confirm = True
+
     provisioner.apply()
-    provisioner.destroy()
+    provisioner.destroy(aspects=_Confirm())
 
     assert len(client.list_pods()) == 0
     assert len(client.list_network_volumes()) == 0

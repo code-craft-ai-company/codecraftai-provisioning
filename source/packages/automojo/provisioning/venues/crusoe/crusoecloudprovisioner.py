@@ -43,6 +43,7 @@ from automojo.provisioning.model.cloud.provisioningresult import (
     ProvisioningResult
 )
 from automojo.provisioning.model.cloud.validationresult import ValidationResult
+from automojo.provisioning.model.exceptions import SchemaSemanticError
 
 from automojo.provisioning.venues.crusoe.crusoeerrors import (
     CrusoeValidationError
@@ -239,7 +240,7 @@ class CrusoeCloudProvisioner(CloudProvisioner):
                 family=instance.image.family,
                 version=instance.image.version,
                 arch=instance.image.architecture)
-        except Exception as xcpt:
+        except SchemaSemanticError as xcpt:
             errors.append({
                 "resource": instance.name,
                 "error": "Image not resolvable on Crusoe: {}".format(xcpt),
@@ -252,7 +253,7 @@ class CrusoeCloudProvisioner(CloudProvisioner):
                 size_hint=instance.size,
                 accelerators=instance.accelerators,
                 interconnect=instance.interconnect)
-        except Exception as xcpt:
+        except SchemaSemanticError as xcpt:
             errors.append({
                 "resource": instance.name,
                 "error": "Instance type not resolvable on Crusoe: {}".format(
@@ -432,17 +433,18 @@ class CrusoeCloudProvisioner(CloudProvisioner):
         vpc_state: Dict[str, Any] = {}
         for net in spec.networks:
             existed = net.name in existing_vpcs
-            vpc_spec = CrusoeVpcSpec(name=net.name, cidr=net.cidr,
-                                     project_id=project_id,
-                                     labels=self._labels_for(net.tags,
-                                                              run_labels))
-            record = self._client.vpcs.create(spec=vpc_spec)
-            vpc_state[net.name] = record
             if existed:
+                record = existing_vpcs[net.name]
                 skipped.append(net.name)
             else:
+                vpc_spec = CrusoeVpcSpec(name=net.name, cidr=net.cidr,
+                                         project_id=project_id,
+                                         labels=self._labels_for(net.tags,
+                                                                  run_labels))
+                record = self._client.vpcs.create(spec=vpc_spec)
                 created.append(self._provisioned(kind="network",
                                name=net.name, venue_id=record.vpc_id))
+            vpc_state[net.name] = record
 
         subnet_state: Dict[str, Any] = {}
         for subnet in spec.subnets:
@@ -493,15 +495,16 @@ class CrusoeCloudProvisioner(CloudProvisioner):
             self._client.ssh_keys.list(project_id=project_id))
         for kp in spec.keypairs:
             existed = kp.name in existing_keys
-            record = self._client.ssh_keys.register(
-                project_id=project_id, name=kp.name,
-                public_key=kp.public_key_material)
-            key_state[kp.name] = record
             if existed:
+                record = existing_keys[kp.name]
                 skipped.append(kp.name)
             else:
+                record = self._client.ssh_keys.register(
+                    project_id=project_id, name=kp.name,
+                    public_key=kp.public_key_material)
                 created.append(self._provisioned(kind="keypair",
                                name=kp.name, venue_id=record.ssh_key_id))
+            key_state[kp.name] = record
 
         # --- IB partitions for InfiniBand-grouped instances ---
         ib_partition_ids: Dict[str, str] = {}

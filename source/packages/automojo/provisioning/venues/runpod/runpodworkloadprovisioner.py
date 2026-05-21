@@ -284,7 +284,7 @@ class RunpodWorkloadProvisioner(WorkloadProvisioner):
             rtnval = ProvisioningResult(created=[], skipped=skipped_names)
             return rtnval
 
-        confirm = getattr(aspects, "confirm", True)
+        confirm = getattr(aspects, "confirm", False)
         if confirm is False and self._plan_has_destructive(plan=plan):
             err_msg_lines = ["The RunPod apply carries a recreate / delete "
                              "action."]
@@ -309,6 +309,8 @@ class RunpodWorkloadProvisioner(WorkloadProvisioner):
         created = self._apply_stages.apply_pods(
             spec=spec, client=self._runpod_client, volume_ids=volume_ids,
             existing_pods=existing_pods, authkeys=authkeys)
+
+        self._record_vpn_devices(resources=created)
 
         self._persist_tags(resources=created)
 
@@ -389,6 +391,50 @@ class RunpodWorkloadProvisioner(WorkloadProvisioner):
 
         return rtnval
 
+    def _record_vpn_devices(self, *,
+                            resources: List[ProvisionedResource]) -> None:
+        """
+            Record the Tailscale device identifier of every VPN-joined pod
+            that ``apply`` realised so ``destroy`` can de-register them.
+
+            A RunPod pod joins the tailnet under a hostname equal to its
+            composed pod name, which is the device identifier the VPN
+            control plane de-registers.
+
+            :param resources: The :class:`ProvisionedResource` records the
+                apply stage realised.
+
+            :returns: ``None``.
+        """
+        if self._vpn_control_plane is None:
+            return
+
+        run_short = self._spec.run_id_short
+        realised_names: Dict[str, bool] = {}
+        for resource in resources:
+            if resource.kind == "Pod":
+                realised_names[resource.name] = True
+
+        for workload_name in self._spec.vpn_joins.keys():
+            device_id = pod_name(workload_name=workload_name,
+                                 run_id_short=run_short)
+            if device_id not in realised_names:
+                continue
+            if device_id not in self._registered_vpn_devices:
+                self._registered_vpn_devices.append(device_id)
+
+        return
+
+    @property
+    def registered_vpn_devices(self) -> List[str]:
+        """
+            The Tailscale device identifiers recorded by the last apply.
+
+            :returns: A defensive copy of the recorded device id list.
+        """
+        rtnval = list(self._registered_vpn_devices)
+        return rtnval
+
     # ------------------------------------------------------------------
     # destroy
     # ------------------------------------------------------------------
@@ -408,7 +454,7 @@ class RunpodWorkloadProvisioner(WorkloadProvisioner):
             :raises: :class:`ConfirmationRequiredError` when confirmation is
                 withheld.
         """
-        confirm = getattr(aspects, "confirm", True)
+        confirm = getattr(aspects, "confirm", False)
         if confirm is False:
             err_msg_lines = ["The RunPod destroy requires confirmation."]
             err_msg_lines.append("Set aspects.confirm=True to proceed.")

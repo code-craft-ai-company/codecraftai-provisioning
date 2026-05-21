@@ -74,8 +74,11 @@ def test_destroy_is_inverse_of_apply(job_names: List[str]):
     provisioner = make_provisioner(spec=make_spec(jobs=jobs),
                                    kubernetes_client=kube)
 
+    class _Confirm:
+        confirm = True
+
     provisioner.apply()
-    provisioner.destroy()
+    provisioner.destroy(aspects=_Confirm())
 
     inventory = provisioner.inventory()
     assert len(inventory) == 0

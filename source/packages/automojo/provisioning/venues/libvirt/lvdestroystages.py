@@ -15,6 +15,8 @@ __credits__ = []
 
 from typing import Any, Dict, List, Optional
 
+from automojo.provisioning.venues.vpncleanup import delete_vpn_device
+
 from automojo.provisioning.venues.libvirt.libvirtspec import LibvirtSpec
 from automojo.provisioning.venues.libvirt.libvirtvenueconfig import (
     LibvirtVenueConfig
@@ -231,12 +233,8 @@ class LvDestroyStages:
             device_id = record.get("vpn_device_id", None)
             if device_id is None or len(str(device_id)) == 0:
                 continue
-            try:
-                vpn_control_plane.delete_device(device_id=device_id,
-                                                aspects=aspects)
-            except Exception:
-                # Best-effort cleanup — a missing device is acceptable.
-                pass
+            delete_vpn_device(vpn_control_plane=vpn_control_plane,
+                              device_id=device_id, aspects=aspects)
         return
 
     def _owned_domain_names(self, *, spec: Optional[LibvirtSpec],

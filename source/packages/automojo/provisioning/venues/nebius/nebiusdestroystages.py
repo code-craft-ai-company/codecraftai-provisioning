@@ -13,6 +13,8 @@ __credits__ = []
 
 from typing import Any, Dict, List
 
+from automojo.provisioning.venues.vpncleanup import delete_vpn_device
+
 
 class NebiusDestroyStages:
     """
@@ -84,12 +86,9 @@ class NebiusDestroyStages:
                 device_id = record.get("vpn_device_id", None)
                 if device_id is None or len(str(device_id)) == 0:
                     continue
-                try:
-                    self._vpn_control_plane.delete_device(
-                        device_id=device_id, aspects=aspects,
-                    )
-                except Exception:
-                    pass
+                delete_vpn_device(
+                    vpn_control_plane=self._vpn_control_plane,
+                    device_id=device_id, aspects=aspects)
 
         # 3. Disks.
         existing_disks = self._client.disks.list(project_id=parent_id,

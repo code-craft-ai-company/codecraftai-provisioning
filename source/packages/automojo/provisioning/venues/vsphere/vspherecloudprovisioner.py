@@ -50,11 +50,17 @@ from automojo.provisioning.venues.vsphere.vsresolver import VsResolver
 _UNSUPPORTED_FS_KINDS = frozenset({"LUSTRE", "WEKA", "VAST", "GPFS",
                                    "BEEGFS"})
 
-_REJECTED_INTERCONNECT_TOPOLOGIES = frozenset({"INFINIBAND_HDR",
-                                               "INFINIBAND_NDR",
-                                               "INFINIBAND_XDR",
-                                               "EFA", "OCI_RDMA",
-                                               "RAIL_OPTIMIZED"})
+# HPC interconnect kinds vSphere cannot realise — only NONE is acceptable.
+_REJECTED_INTERCONNECT_KINDS = frozenset({"INFINIBAND_HDR",
+                                          "INFINIBAND_NDR",
+                                          "INFINIBAND_XDR",
+                                          "ROCE", "EFA", "OCI_RDMA",
+                                          "NVLINK", "NVSWITCH"})
+
+# HPC fabric topologies vSphere cannot realise — only NONE is acceptable.
+_REJECTED_INTERCONNECT_TOPOLOGIES = frozenset({"RAIL_OPTIMIZED",
+                                               "FAT_TREE",
+                                               "DRAGONFLY"})
 
 
 class VSphereCloudProvisioner(CloudProvisioner):
@@ -186,12 +192,17 @@ class VSphereCloudProvisioner(CloudProvisioner):
             if interconnect is not None:
                 kind = interconnect.kind
                 topology = getattr(interconnect, "topology", "NONE")
-                if kind != "NONE" or topology in _REJECTED_INTERCONNECT_TOPOLOGIES:
+                kind_rejected = (kind != "NONE"
+                                 or kind in _REJECTED_INTERCONNECT_KINDS)
+                topology_rejected = (
+                    topology in _REJECTED_INTERCONNECT_TOPOLOGIES)
+                if kind_rejected or topology_rejected:
                     errors.append({
                         "resource": instance.name,
                         "error": ("vSphere does not expose an HPC "
-                                  "interconnect; CloudInterconnect kind={} "
-                                  "is unsupported.").format(kind),
+                                  "interconnect; CloudInterconnect "
+                                  "kind={} topology={} is unsupported."
+                                  ).format(kind, topology),
                     })
 
         # Shared filesystems — managed parallel FS unsupported; NFS attach

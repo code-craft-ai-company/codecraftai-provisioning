@@ -61,9 +61,11 @@ class _MockVpcs:
                  counter: _Counter) -> None:
         self._store = store
         self._counter = counter
+        self.create_calls = 0
         return
 
     def create(self, *, spec: Any) -> CrusoeVpc:
+        self.create_calls = self.create_calls + 1
         for record in self._store.values():
             if record.name == spec.name:
                 return record
@@ -153,10 +155,12 @@ class _MockSshKeys:
                  counter: _Counter) -> None:
         self._store = store
         self._counter = counter
+        self.register_calls = 0
         return
 
     def register(self, *, project_id: str, name: str,
                  public_key: str) -> CrusoeSshKey:
+        self.register_calls = self.register_calls + 1
         for record in self._store.values():
             if record.name == name:
                 return record
