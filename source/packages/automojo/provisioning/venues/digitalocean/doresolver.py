@@ -19,13 +19,16 @@ from typing import Any, List, Optional
 from automojo.provisioning.model.cloud.cloudinstancesizecatalog import (
     CloudInstanceSizeCatalog
 )
+from automojo.provisioning.model.cloud.imagefamily import normalize_family
+from automojo.provisioning.model.exceptions import SchemaSemanticError
 
 from automojo.provisioning.venues.digitalocean.doerrors import (
     DoValidationError
 )
 
 
-# Image family + version -> DigitalOcean image slug.
+# Image family + version -> DigitalOcean image slug.  Families are the
+# canonical tokens from the shared image vocabulary.
 _IMAGE_SLUGS = {
     ("ubuntu", "24.04"): "ubuntu-24-04-x64",
     ("ubuntu", "22.04"): "ubuntu-22-04-x64",
@@ -34,9 +37,11 @@ _IMAGE_SLUGS = {
     ("debian", "11"): "debian-11-x64",
     ("fedora", "40"): "fedora-40-x64",
     ("rhel", "9"): "rockylinux-9-x64",
-    ("rockylinux", "9"): "rockylinux-9-x64",
-    ("centos", "9"): "centos-stream-9-x64",
+    ("rocky", "9"): "rockylinux-9-x64",
 }
+
+# Canonical image families the DigitalOcean resolver can serve.
+_SUPPORTED_FAMILIES = frozenset(fam for (fam, ver) in _IMAGE_SLUGS)
 
 # GPU accelerator model -> DigitalOcean GPU droplet size slug.
 _GPU_SIZE_SLUGS = {
@@ -74,16 +79,29 @@ class DoResolver:
             :param architecture: Image architecture (e.g. ``x86_64``).
 
             :returns: A DigitalOcean image slug.
-            :raises: DoValidationError
+            :raises: DoValidationError, SchemaSemanticError
         """
-        key = (family.lower(), version)
+        canonical_family = normalize_family(value=family)
+        family_token = canonical_family.value
+
+        if family_token not in _SUPPORTED_FAMILIES:
+            supported = ", ".join(sorted(_SUPPORTED_FAMILIES))
+            err_msg_lines = ["The digitalocean venue does not support the "
+                             "image family."]
+            err_msg_lines.append("VENUE: digitalocean")
+            err_msg_lines.append("FAMILY: {}".format(family_token))
+            err_msg_lines.append("SUPPORTED: {}".format(supported))
+            err_msg = os.linesep.join(err_msg_lines)
+            raise SchemaSemanticError(err_msg)
+
+        key = (family_token, version)
         slug = _IMAGE_SLUGS.get(key, None)
         if slug is None:
             supported = sorted(
                 "{}/{}".format(fam, ver) for (fam, ver) in _IMAGE_SLUGS
             )
             err_msg_lines = ["DigitalOcean has no image slug for the image."]
-            err_msg_lines.append("FAMILY: {}".format(family))
+            err_msg_lines.append("FAMILY: {}".format(family_token))
             err_msg_lines.append("VERSION: {}".format(version))
             err_msg_lines.append("SUPPORTED: {}".format(", ".join(supported)))
             err_msg = os.linesep.join(err_msg_lines)

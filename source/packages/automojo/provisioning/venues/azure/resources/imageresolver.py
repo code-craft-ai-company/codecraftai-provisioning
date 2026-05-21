@@ -16,6 +16,8 @@ import os
 from typing import Dict
 
 from automojo.provisioning.model.cloud.cloudimage import CloudImage
+from automojo.provisioning.model.cloud.imagefamily import normalize_family
+from automojo.provisioning.model.exceptions import SchemaSemanticError
 from automojo.provisioning.venues.azure.azureerrors import AzureValidationError
 
 
@@ -62,20 +64,23 @@ class ImageResolver:
             :param image: The neutral CloudImage.
 
             :returns: A dict with publisher, offer, sku, version keys.
-            :raises: AzureValidationError
+            :raises: AzureValidationError, SchemaSemanticError
         """
-        family = image.family
+        canonical_family = normalize_family(value=image.family)
+        family = canonical_family.value
         version = image.version
 
         publisher_offer = _FAMILY_PUBLISHER_OFFER.get(family, None)
         if publisher_offer is None:
-            err_msg_lines = ["Azure ImageResolver does not support family."]
+            err_msg_lines = ["The azure venue does not support the image "
+                             "family."]
+            err_msg_lines.append("VENUE: azure")
             err_msg_lines.append("FAMILY: {}".format(family))
             err_msg_lines.append("SUPPORTED: {}".format(
                 ", ".join(sorted(_FAMILY_PUBLISHER_OFFER.keys()))
             ))
             err_msg = os.linesep.join(err_msg_lines)
-            raise AzureValidationError(err_msg)
+            raise SchemaSemanticError(err_msg)
 
         publisher = publisher_offer["publisher"]
         offer = publisher_offer["offer"]

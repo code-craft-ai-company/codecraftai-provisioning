@@ -114,14 +114,14 @@ def test_validate_rejects_unknown_image(venue, aspects):
         naming the lookup attempted.
     """
     instance = make_instance()
-    instance.image = CloudImage(family="gentoo", version="rolling",
+    instance.image = CloudImage(family="rhel", version="9",
                                 architecture="x86_64")
     spec = LibvirtSpec(networks=[make_network()],
                        keypairs=[make_keypair()], instances=[instance])
     provisioner = _provisioner(venue=venue, spec=spec)
     with pytest.raises(LvValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
-    assert "gentoo/rolling" in str(excinfo.value)
+    assert "rhel/9" in str(excinfo.value)
     return
 
 

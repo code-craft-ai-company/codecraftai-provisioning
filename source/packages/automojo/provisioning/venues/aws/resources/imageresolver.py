@@ -16,6 +16,8 @@ import os
 from typing import Any, Dict, Optional
 
 from automojo.provisioning.model.cloud.cloudimage import CloudImage
+from automojo.provisioning.model.cloud.imagefamily import normalize_family
+from automojo.provisioning.model.exceptions import SchemaSemanticError
 from automojo.provisioning.venues.aws.awsboto3sessionfactory import (
     AwsBoto3SessionFactory
 )
@@ -24,7 +26,7 @@ from automojo.provisioning.venues.aws.awserrors import AwsValidationError
 
 # Canonical SSM parameter prefixes per family (where available).
 _SSM_PREFIXES: Dict[str, str] = {
-    "amazonlinux": "/aws/service/ami-amazon-linux-latest",
+    "amazon-linux": "/aws/service/ami-amazon-linux-latest",
     "ubuntu": "/aws/service/canonical/ubuntu/server",
     "debian": "/aws/service/debian/release",
     "rhel": "/aws/service/marketplace/prod-redhat",
@@ -32,7 +34,7 @@ _SSM_PREFIXES: Dict[str, str] = {
 
 # DescribeImages owner ids per family (fallback path).
 _AMI_OWNERS: Dict[str, str] = {
-    "amazonlinux": "amazon",
+    "amazon-linux": "amazon",
     "ubuntu": "099720109477",
     "debian": "136693071363",
     "rhel": "309956199498",
@@ -45,8 +47,11 @@ _NAME_PATTERNS: Dict[str, str] = {
     ),
     "debian": "debian-{version}-{arch}-*",
     "rhel": "RHEL-{version}*_HVM-*-{arch}-*",
-    "amazonlinux": "amzn2-ami-hvm-*-{arch}-gp2",
+    "amazon-linux": "amzn2-ami-hvm-*-{arch}-gp2",
 }
+
+# Canonical image families the AWS resolver can serve.
+_SUPPORTED_FAMILIES = frozenset(_AMI_OWNERS.keys())
 
 
 class ImageResolver:
@@ -76,11 +81,22 @@ class ImageResolver:
             :param image: The neutral CloudImage.
 
             :returns: The AMI id string.
-            :raises: AwsValidationError
+            :raises: AwsValidationError, SchemaSemanticError
         """
-        family = image.family
+        canonical_family = normalize_family(value=image.family)
+        family = canonical_family.value
         version = image.version
         arch = image.architecture
+
+        if family not in _SUPPORTED_FAMILIES:
+            supported = ", ".join(sorted(_SUPPORTED_FAMILIES))
+            err_msg_lines = ["The aws venue does not support the image "
+                             "family."]
+            err_msg_lines.append("VENUE: aws")
+            err_msg_lines.append("FAMILY: {}".format(family))
+            err_msg_lines.append("SUPPORTED: {}".format(supported))
+            err_msg = os.linesep.join(err_msg_lines)
+            raise SchemaSemanticError(err_msg)
 
         ami_id = self._try_describe_images(family=family, version=version,
                                            arch=arch)

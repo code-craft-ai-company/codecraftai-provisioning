@@ -21,6 +21,8 @@ from automojo.provisioning.model.cloud.cloudinstancesizecatalog import (
 from automojo.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
+from automojo.provisioning.model.cloud.imagefamily import normalize_family
+from automojo.provisioning.model.exceptions import SchemaSemanticError
 from automojo.provisioning.venues.vultr.vultrclient import VultrClient
 from automojo.provisioning.venues.vultr.vultrerrors import VultrValidationError
 
@@ -33,14 +35,14 @@ _GPU_PLAN_CATALOG: Dict[str, str] = {
     "L40S": "vcg-l40s-12c-64g-24vram",
 }
 
-# Image family + version to OS-name substring used against ``GET /os``.
+# Canonical image family to OS-name substring used against ``GET /os``.
 _OS_FAMILY_HINTS: Dict[str, str] = {
     "ubuntu": "Ubuntu",
     "debian": "Debian",
     "rhel": "Rocky Linux",
+    "rocky": "Rocky Linux",
     "fedora": "Fedora",
     "almalinux": "AlmaLinux",
-    "centos": "CentOS",
 }
 
 
@@ -115,16 +117,19 @@ class VultrResolver:
             :param arch: The CPU architecture hint.
 
             :returns: The integer Vultr ``os_id``.
-            :raises: VultrValidationError
+            :raises: VultrValidationError, SchemaSemanticError
         """
-        family_lower = family.lower()
+        canonical_family = normalize_family(value=family)
+        family_lower = canonical_family.value
         if family_lower not in _OS_FAMILY_HINTS:
             known = sorted(_OS_FAMILY_HINTS.keys())
-            err_msg_lines = ["Unknown OS family for the Vultr resolver."]
-            err_msg_lines.append("FAMILY: {!r}".format(family))
-            err_msg_lines.append("KNOWN: {}".format(", ".join(known)))
+            err_msg_lines = ["The vultr venue does not support the image "
+                             "family."]
+            err_msg_lines.append("VENUE: vultr")
+            err_msg_lines.append("FAMILY: {}".format(family_lower))
+            err_msg_lines.append("SUPPORTED: {}".format(", ".join(known)))
             err_msg = os.linesep.join(err_msg_lines)
-            raise VultrValidationError(err_msg)
+            raise SchemaSemanticError(err_msg)
 
         name_hint = _OS_FAMILY_HINTS[family_lower]
         os_entries = self._load_os()

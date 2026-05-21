@@ -26,6 +26,7 @@ from automojo.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
 from automojo.provisioning.model.cloud.cloudinterconnect import CloudInterconnect
+from automojo.provisioning.model.cloud.imagefamily import normalize_family
 from automojo.provisioning.model.exceptions import SchemaSemanticError
 
 
@@ -79,10 +80,14 @@ class CrusoeResolver:
 
             :raises: SchemaSemanticError when the family is unsupported.
         """
-        base = _IMAGE_FAMILY_ALIASES.get(family, None)
+        canonical_family = normalize_family(value=family)
+        family_token = canonical_family.value
+        base = _IMAGE_FAMILY_ALIASES.get(family_token, None)
         if base is None:
-            err_msg_lines = ["Crusoe venue does not support image family."]
-            err_msg_lines.append("FAMILY: {!r}".format(family))
+            err_msg_lines = ["The crusoe venue does not support the image "
+                             "family."]
+            err_msg_lines.append("VENUE: crusoe")
+            err_msg_lines.append("FAMILY: {}".format(family_token))
             err_msg_lines.append("SUPPORTED: {}".format(
                 ", ".join(sorted(_IMAGE_FAMILY_ALIASES.keys()))))
             err_msg = os.linesep.join(err_msg_lines)

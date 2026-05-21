@@ -16,17 +16,21 @@ import os
 from typing import Any, Dict, Optional
 
 from automojo.provisioning.model.cloud.cloudimage import CloudImage
+from automojo.provisioning.model.cloud.imagefamily import normalize_family
 from automojo.provisioning.venues.oracle.ocisessionfactory import (
     OciSessionFactory
 )
 from automojo.provisioning.venues.oracle.ocierrors import OciValidationError
 
 
-# Neutral image family → OCI operating_system string.
+# Canonical image family → OCI operating_system string.  Families absent
+# from this map pass through verbatim; OCI resolves them live via
+# ``list_images``.
 _OS_NAMES: Dict[str, str] = {
     "ubuntu": "Canonical Ubuntu",
-    "oraclelinux": "Oracle Linux",
-    "centos": "CentOS",
+    "rhel": "Oracle Linux",
+    "rocky": "Oracle Linux",
+    "almalinux": "Oracle Linux",
     "windows-server": "Windows",
 }
 
@@ -35,11 +39,18 @@ def os_name_for(*, family: str) -> str:
     """
         Map a neutral image family to an OCI operating_system string.
 
-        :param family: Neutral image family.
+        The family is first coerced onto the canonical image vocabulary so
+        that aliases resolve consistently with every other venue.
+
+        :param family: Neutral image family (canonical token or alias).
 
         :returns: An OCI operating_system string.
+
+        :raises: SchemaSemanticError when the family is not canonical.
     """
-    rtnval = _OS_NAMES.get(family, family)
+    canonical_family = normalize_family(value=family)
+    family_token = canonical_family.value
+    rtnval = _OS_NAMES.get(family_token, family_token)
     return rtnval
 
 

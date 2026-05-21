@@ -18,20 +18,22 @@ from typing import List, Optional
 from automojo.provisioning.model.cloud.cloudinstancesizecatalog import (
     CloudInstanceSizeCatalog
 )
+from automojo.provisioning.model.cloud.imagefamily import normalize_family
+from automojo.provisioning.model.exceptions import SchemaSemanticError
 
 from automojo.provisioning.venues.hetzner.hetznererrors import (
     HetznerValidationError
 )
 
 
-# Image families Hetzner publishes as Cloud images.  Maps the neutral
-# family to the Hetzner image-name prefix.
+# Image families Hetzner publishes as Cloud images.  Keyed by the canonical
+# image-vocabulary family; the value is the Hetzner image-name prefix.
 _IMAGE_FAMILY_PREFIX = {
     "ubuntu": "ubuntu",
     "debian": "debian",
     "fedora": "fedora",
     "rhel": "rocky",  # Hetzner ships Rocky as the RHEL-class image.
-    "centos": "centos",
+    "rocky": "rocky",
 }
 
 # Server-type catalog Hetzner publishes.  Shared CPU (cx/cpx), dedicated
@@ -75,16 +77,19 @@ class HetznerResolver:
             :param arch: Architecture (x86_64 or arm64).
 
             :returns: The Hetzner image name slug.
-            :raises: HetznerValidationError
+            :raises: HetznerValidationError, SchemaSemanticError
         """
-        normalized_family = family.lower()
+        canonical_family = normalize_family(value=family)
+        normalized_family = canonical_family.value
         if normalized_family not in _IMAGE_FAMILY_PREFIX:
             known = ", ".join(sorted(_IMAGE_FAMILY_PREFIX.keys()))
-            err_msg_lines = ["Image family is unknown to the Hetzner resolver."]
-            err_msg_lines.append("KNOWN: {}".format(known))
-            err_msg_lines.append("ACTUAL: {!r}".format(family))
+            err_msg_lines = ["The hetzner venue does not support the image "
+                             "family."]
+            err_msg_lines.append("VENUE: hetzner")
+            err_msg_lines.append("SUPPORTED: {}".format(known))
+            err_msg_lines.append("FAMILY: {}".format(normalized_family))
             err_msg = os.linesep.join(err_msg_lines)
-            raise HetznerValidationError(err_msg)
+            raise SchemaSemanticError(err_msg)
 
         if version is None or len(version) == 0:
             raise HetznerValidationError(

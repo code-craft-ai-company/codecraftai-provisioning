@@ -16,6 +16,7 @@ import pytest
 from automojo.credentials.basecredential import BaseCredential
 from automojo.provisioning.model.cloud.cloudimage import CloudImage
 from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
+from automojo.provisioning.model.exceptions import SchemaSemanticError
 from automojo.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
@@ -126,7 +127,8 @@ def test_validate_rejects_unknown_image_family(venue, credential,
                                                location_config, client,
                                                aspects) -> None:
     """
-        An image family unknown to the resolver fails validation.
+        An image family the hetzner venue cannot serve is rejected with a
+        consistent SchemaSemanticError naming the venue and family.
     """
     spec = basic_spec()
     image = CloudImage(family="windows-server", version="2022",
@@ -137,9 +139,10 @@ def test_validate_rejects_unknown_image_family(venue, credential,
     provisioner = HetznerCloudProvisioner(
         venue=venue, credential=credential,
         location_config=location_config, spec=spec, client=client)
-    with pytest.raises(HetznerValidationError) as excinfo:
+    with pytest.raises(SchemaSemanticError) as excinfo:
         provisioner.validate(aspects=aspects)
-    assert "Image" in str(excinfo.value)
+    assert "windows-server" in str(excinfo.value)
+    assert "hetzner" in str(excinfo.value)
     return
 
 
