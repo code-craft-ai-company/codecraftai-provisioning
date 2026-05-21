@@ -117,7 +117,7 @@ def test_validate_rejects_unknown_image_family(venue, client, host_config,
     """
         An instance whose image family has no parent VHD is rejected.
     """
-    instance = _specfactory.make_instance(image_family="gentoo")
+    instance = _specfactory.make_instance(image_family="rocky")
     spec = HypervSpec(networks=[_specfactory.make_network()],
                       instances=[instance])
     provisioner = _provisioner(venue=venue, client=client,

@@ -19,6 +19,8 @@ from typing import Dict, List, Optional
 from automojo.provisioning.model.cloud.cloudinstancesizecatalog import (
     CloudInstanceSizeCatalog
 )
+from automojo.provisioning.model.cloud.imagefamily import normalize_family
+from automojo.provisioning.model.exceptions import SchemaSemanticError
 
 from automojo.provisioning.venues.equinix_metal.metalerrors import (
     MetalValidationError
@@ -131,7 +133,7 @@ class MetalResolver:
             :param arch: Architecture (x86_64 or arm64).
 
             :returns: An Equinix Metal OS slug.
-            :raises: MetalValidationError
+            :raises: MetalValidationError, SchemaSemanticError
         """
         if family is None or len(family) == 0:
             err_msg = "Equinix Metal image family must not be empty."
@@ -142,16 +144,19 @@ class MetalResolver:
             raise MetalValidationError(err_msg)
 
         known_families = frozenset({"ubuntu", "debian", "rhel", "rocky",
-                                    "almalinux", "centos", "fedora"})
-        normalized_family = family.strip().lower()
+                                    "almalinux", "fedora"})
+        canonical_family = normalize_family(value=family)
+        normalized_family = canonical_family.value
         if normalized_family not in known_families:
-            err_msg_lines = ["Unsupported Equinix Metal image family."]
-            err_msg_lines.append("FAMILY: {!r}".format(family))
-            err_msg_lines.append("KNOWN: {}".format(
+            err_msg_lines = ["The equinix-metal venue does not support the "
+                             "image family."]
+            err_msg_lines.append("VENUE: equinix-metal")
+            err_msg_lines.append("FAMILY: {}".format(normalized_family))
+            err_msg_lines.append("SUPPORTED: {}".format(
                 ", ".join(sorted(known_families))
             ))
             err_msg = os.linesep.join(err_msg_lines)
-            raise MetalValidationError(err_msg)
+            raise SchemaSemanticError(err_msg)
 
         normalized_version = version.strip().replace(".", "_")
         rtnval = "{}_{}".format(normalized_family, normalized_version)

@@ -17,9 +17,13 @@ from automojo.restclient.base.schemaobject import SchemaObject
 from automojo.restclient.base.schemafield import Field
 
 from automojo.provisioning.model.exceptions import SchemaValidationError
-
-
-_SUPPORTED_ARCHITECTURES = ("x86_64", "arm64")
+from automojo.provisioning.model.cloud.imagefamily import (
+    ImageArchitecture,
+    ImageFamily,
+    normalize_architecture,
+    normalize_family,
+    validate_version,
+)
 
 
 class CloudImage(SchemaObject):
@@ -28,6 +32,10 @@ class CloudImage(SchemaObject):
 
         A venue resolver converts (family, version, architecture) into an AMI id,
         GCP image family resource, Azure SKU triple, etc.
+
+        The (family, version, architecture) triple is normalized and validated
+        against the canonical image vocabulary at construction time so that an
+        unsupported request is rejected once, consistently, regardless of venue.
     """
 
     family = Field(str, required=True)
@@ -41,11 +49,11 @@ class CloudImage(SchemaObject):
             Construct a CloudImage.
 
             :param family: Image family (ubuntu, debian, rhel, windows-server, ...).
-            :param version: Image version string.
-            :param architecture: One of x86_64 or arm64.
+            :param version: Image version string (dotted numeric, e.g. 24.04).
+            :param architecture: One of x86_64 or arm64 (aliases accepted).
             :param owner: Optional venue-side owner / account / publisher.
 
-            :raises: SchemaValidationError
+            :raises: SchemaValidationError, SchemaSemanticError
         """
         if family is None or len(family) == 0:
             raise SchemaValidationError("family must not be empty.")
@@ -53,13 +61,34 @@ class CloudImage(SchemaObject):
         if version is None or len(version) == 0:
             raise SchemaValidationError("version must not be empty.")
 
-        if architecture not in _SUPPORTED_ARCHITECTURES:
-            raise SchemaValidationError(
-                "architecture must be one of {}, got {!r}".format(
-                    ", ".join(_SUPPORTED_ARCHITECTURES), architecture
-                )
-            )
+        if architecture is None or len(architecture) == 0:
+            raise SchemaValidationError("architecture must not be empty.")
 
-        super().__init__(family=family, version=version,
-                         architecture=architecture, owner=owner)
+        canonical_family = normalize_family(value=family)
+        canonical_architecture = normalize_architecture(value=architecture)
+        validate_version(version=version)
+
+        super().__init__(family=canonical_family.value, version=version,
+                         architecture=canonical_architecture.value,
+                         owner=owner)
         return
+
+    @property
+    def image_family(self) -> ImageFamily:
+        """
+            The canonical :class:`ImageFamily` member for this image.
+
+            :returns: The canonical ImageFamily.
+        """
+        rtnval = normalize_family(value=self.family)
+        return rtnval
+
+    @property
+    def image_architecture(self) -> ImageArchitecture:
+        """
+            The canonical :class:`ImageArchitecture` member for this image.
+
+            :returns: The canonical ImageArchitecture.
+        """
+        rtnval = normalize_architecture(value=self.architecture)
+        return rtnval

@@ -156,8 +156,27 @@ class KeyPairAndImageTests(unittest.TestCase):
         return
 
     def test_image_rejects_unknown_architecture(self) -> None:
-        with self.assertRaises(SchemaValidationError):
+        with self.assertRaises(SchemaSemanticError):
             CloudImage(family="ubuntu", version="24.04", architecture="ppc64")
+        return
+
+    def test_image_rejects_unknown_family(self) -> None:
+        with self.assertRaises(SchemaSemanticError):
+            CloudImage(family="gentoo", version="24.04",
+                       architecture="x86_64")
+        return
+
+    def test_image_rejects_malformed_version(self) -> None:
+        with self.assertRaises(SchemaSemanticError):
+            CloudImage(family="ubuntu", version="rolling",
+                       architecture="x86_64")
+        return
+
+    def test_image_normalizes_family_and_architecture(self) -> None:
+        img = CloudImage(family="amazonlinux", version="2",
+                         architecture="amd64")
+        self.assertEqual(img.family, "amazon-linux")
+        self.assertEqual(img.architecture, "x86_64")
         return
 
     def test_image_roundtrip(self) -> None:

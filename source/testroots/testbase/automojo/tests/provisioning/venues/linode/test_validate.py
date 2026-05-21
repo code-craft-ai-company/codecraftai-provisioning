@@ -103,13 +103,15 @@ def test_validate_rejects_shared_fs(venue, credential, region_config,
 def test_validate_rejects_unknown_image(venue, credential, region_config,
                                         aspects, mock_client) -> None:
     """
-        An image family unknown to the resolver is a validate-error.
+        An image family the linode venue cannot serve is rejected with a
+        consistent SchemaSemanticError naming the venue and family.
     """
     from automojo.provisioning.model.cloud.cloudimage import CloudImage
     from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
+    from automojo.provisioning.model.exceptions import SchemaSemanticError
 
     spec = basic_spec()
-    bad_image = CloudImage(family="plan9", version="4",
+    bad_image = CloudImage(family="windows-server", version="2022",
                            architecture="x86_64")
     spec.instances[0] = CloudInstance(
         name="inst-a", profile_ref="default", image=bad_image,
@@ -119,6 +121,8 @@ def test_validate_rejects_unknown_image(venue, credential, region_config,
     provisioner = _provisioner(venue=venue, credential=credential,
                                region_config=region_config, spec=spec,
                                mock_client=mock_client)
-    with pytest.raises(LinodeValidationError):
+    with pytest.raises(SchemaSemanticError) as excinfo:
         provisioner.validate(aspects=aspects)
+    assert "windows-server" in str(excinfo.value)
+    assert "linode" in str(excinfo.value)
     return

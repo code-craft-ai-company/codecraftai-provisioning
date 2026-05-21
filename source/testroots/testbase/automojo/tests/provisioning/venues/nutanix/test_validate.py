@@ -119,8 +119,8 @@ def test_validate_rejects_unresolvable_image(venue, aspects):
         An image absent from the catalog is a validate-error.
     """
     instance = CloudInstance(name="node", profile_ref="vm-profile",
-                             image=CloudImage(family="plan9",
-                                              version="4",
+                             image=CloudImage(family="windows-server",
+                                              version="2022",
                                               architecture="x86_64"),
                              size="medium", subnet="appsubnet")
     spec = NutanixSpec(networks=[make_network()], subnets=[make_subnet()],

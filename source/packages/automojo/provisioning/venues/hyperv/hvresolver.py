@@ -17,6 +17,7 @@ import posixpath
 
 from typing import Dict
 
+from automojo.provisioning.model.cloud.imagefamily import normalize_family
 from automojo.provisioning.venues.hyperv.hvhardware import HvHardware
 from automojo.provisioning.venues.hyperv.hverrors import HvValidationError
 
@@ -41,9 +42,9 @@ _SIZE_TABLE: Dict[str, HvHardware] = {
                          disk_bytes=320 * _GIB),
 }
 
-# Image families known to ship a packaged parent VHDX template.
+# Canonical image families known to ship a packaged parent VHDX template.
 _KNOWN_FAMILIES = frozenset({
-    "ubuntu", "debian", "rhel", "fedora", "amazonlinux", "windows-server"
+    "ubuntu", "debian", "rhel", "fedora", "amazon-linux", "windows-server"
 })
 
 _WINDOWS_FAMILIES = frozenset({"windows-server"})
@@ -83,18 +84,23 @@ class HvResolver:
 
             :returns: The host path of the parent VHDX template.
 
-            :raises: HvValidationError when the family is unknown.
+            :raises: HvValidationError when the family is unknown or the
+                     hyperv venue cannot serve it.
         """
-        if family not in _KNOWN_FAMILIES:
-            err_msg_lines = ["Image family has no Hyper-V parent VHD."]
-            err_msg_lines.append("KNOWN: {}".format(
+        canonical_family = normalize_family(value=family)
+        family_token = canonical_family.value
+        if family_token not in _KNOWN_FAMILIES:
+            err_msg_lines = ["The hyperv venue does not support the image "
+                             "family."]
+            err_msg_lines.append("VENUE: hyperv")
+            err_msg_lines.append("SUPPORTED: {}".format(
                 ", ".join(sorted(_KNOWN_FAMILIES))))
-            err_msg_lines.append("ACTUAL: {!r}".format(family))
+            err_msg_lines.append("FAMILY: {}".format(family_token))
             err_msg_lines.append("LOOKUP-ROOT: {}".format(self._image_root))
             err_msg = os.linesep.join(err_msg_lines)
             raise HvValidationError(err_msg)
 
-        filename = "{}-{}-{}.vhdx".format(family, version, arch)
+        filename = "{}-{}-{}.vhdx".format(family_token, version, arch)
         rtnval = self._join(root=self._image_root, leaf=filename)
         return rtnval
 

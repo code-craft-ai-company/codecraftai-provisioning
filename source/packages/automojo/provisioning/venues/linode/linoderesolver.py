@@ -19,19 +19,20 @@ from typing import Dict, List, Optional
 from automojo.provisioning.model.cloud.cloudinstancesizecatalog import (
     CloudInstanceSizeCatalog
 )
+from automojo.provisioning.model.cloud.imagefamily import normalize_family
+from automojo.provisioning.model.exceptions import SchemaSemanticError
 
 from automojo.provisioning.venues.linode.linodeerrors import (
     LinodeValidationError
 )
 
 
-# Neutral image family -> Linode image id prefix.  Version is appended.
+# Canonical image family -> Linode image id prefix.  Version is appended.
 _IMAGE_FAMILY_MAP: Dict[str, str] = {
     "ubuntu": "linode/ubuntu",
     "debian": "linode/debian",
     "rhel": "linode/rhel",
     "fedora": "linode/fedora",
-    "centos": "linode/centos-stream",
     "almalinux": "linode/almalinux",
     "rocky": "linode/rocky",
 }
@@ -91,17 +92,20 @@ class LinodeResolver:
             :param architecture: Image architecture (informational).
 
             :returns: A Linode image id, e.g. ``linode/ubuntu24.04``.
-            :raises: LinodeValidationError
+            :raises: LinodeValidationError, SchemaSemanticError
         """
-        normalized = family.lower()
+        canonical_family = normalize_family(value=family)
+        normalized = canonical_family.value
         prefix = _IMAGE_FAMILY_MAP.get(normalized, None)
         if prefix is None:
             known = ", ".join(sorted(_IMAGE_FAMILY_MAP.keys()))
-            err_msg_lines = ["Unknown image family for the Linode venue."]
-            err_msg_lines.append("KNOWN: {}".format(known))
-            err_msg_lines.append("ACTUAL: {!r}".format(family))
+            err_msg_lines = ["The linode venue does not support the image "
+                             "family."]
+            err_msg_lines.append("VENUE: linode")
+            err_msg_lines.append("SUPPORTED: {}".format(known))
+            err_msg_lines.append("FAMILY: {}".format(normalized))
             err_msg = os.linesep.join(err_msg_lines)
-            raise LinodeValidationError(err_msg)
+            raise SchemaSemanticError(err_msg)
 
         compact_version = version.replace(".", "").replace("-", "")
         rtnval = "{}{}".format(prefix, compact_version)
