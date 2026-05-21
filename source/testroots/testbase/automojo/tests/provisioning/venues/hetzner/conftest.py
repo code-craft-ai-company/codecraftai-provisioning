@@ -56,9 +56,7 @@ def venue() -> CloudVenue:
     """
     rtnval = CloudVenue(
         name="hetzner-test", provider="hetzner",
-        management_url="https://api.hetzner.cloud",
-        subscription="test-project", region="nbg1",
-        credential="hetzner-test")
+        region="nbg1", credential="hetzner-test")
     return rtnval
 
 

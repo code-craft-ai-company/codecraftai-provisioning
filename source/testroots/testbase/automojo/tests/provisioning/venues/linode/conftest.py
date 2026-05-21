@@ -58,8 +58,6 @@ def venue() -> CloudVenue:
     """
     rtnval = CloudVenue(
         name="linode-test", provider="linode",
-        management_url="https://api.linode.com",
-        subscription="test-account",
         region="us-east", credential="linode-test",
     )
     return rtnval

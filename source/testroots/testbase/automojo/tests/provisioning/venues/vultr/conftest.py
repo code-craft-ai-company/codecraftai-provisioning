@@ -47,8 +47,7 @@ def venue() -> CloudVenue:
     """
     rtnval = CloudVenue(
         name="vultr-test", provider="vultr",
-        management_url="https://api.vultr.com",
-        subscription="test-account", region="ewr", credential="vultr-test",
+        region="ewr", credential="vultr-test",
     )
     return rtnval
 

@@ -96,9 +96,7 @@ class _SideEffectFreeProvisioner(CloudProvisioner):
 
 def _venue(name: str) -> CloudVenue:
     rtnval = CloudVenue(name=name, provider="mock",
-                        management_url="https://mock",
-                        subscription="s", region="r",
-                        credential="cred")
+                        region="r", credential="cred")
     return rtnval
 
 

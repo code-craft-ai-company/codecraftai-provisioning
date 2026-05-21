@@ -77,9 +77,7 @@ def crusoe_venue() -> CloudVenue:
         :returns: A CloudVenue.
     """
     rtnval = CloudVenue(name="crusoe-test", provider="crusoe",
-                        management_url="https://api.crusoecloud.com",
-                        subscription="proj-1", region="us-east1",
-                        credential="crusoe-cred")
+                        region="us-east1", credential="crusoe-cred")
     return rtnval
 
 

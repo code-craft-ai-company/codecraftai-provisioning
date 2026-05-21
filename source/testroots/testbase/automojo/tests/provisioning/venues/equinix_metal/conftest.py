@@ -58,8 +58,7 @@ def venue() -> CloudVenue:
     """
     rtnval = CloudVenue(
         name="metal-test", provider="equinix-metal",
-        management_url="https://api.equinix.com/metal/v1",
-        subscription="proj-test", region="sv", credential="equinix-test",
+        account="proj-test", region="sv", credential="equinix-test",
     )
     return rtnval
 

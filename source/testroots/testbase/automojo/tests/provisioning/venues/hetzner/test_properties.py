@@ -46,9 +46,7 @@ def _build_provisioner(*, client: MockHetznerClient, with_vpn: bool
         token="test-token")
     location_config = HetznerLocationConfig(location="nbg1")
     venue = CloudVenue(name="hetzner-test", provider="hetzner",
-                       management_url="https://api.hetzner.cloud",
-                       subscription="test-project", region="nbg1",
-                       credential="hetzner-test")
+                       region="nbg1", credential="hetzner-test")
     spec = basic_spec(with_vpn=with_vpn, with_volume=True)
     rtnval = HetznerCloudProvisioner(
         venue=venue, credential=credential,

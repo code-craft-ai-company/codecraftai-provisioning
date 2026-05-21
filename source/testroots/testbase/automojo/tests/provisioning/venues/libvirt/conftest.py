@@ -25,9 +25,8 @@ def venue() -> CloudVenue:
         Return a CloudVenue for the libvirt venue tests.
     """
     rtnval = CloudVenue(name="libvirt-test", provider="libvirt",
-                        management_url="qemu:///system",
-                        subscription="test-host", region="local",
-                        credential="lv-test")
+                        endpoint="qemu:///system",
+                        region="local", credential="lv-test")
     return rtnval
 
 

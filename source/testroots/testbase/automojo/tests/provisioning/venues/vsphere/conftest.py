@@ -42,8 +42,7 @@ def venue() -> CloudVenue:
     """
     rtnval = CloudVenue(
         name="vsphere-test", provider="vsphere",
-        management_url="https://vcenter.lab",
-        subscription="homelab", region="homelab",
+        endpoint="https://vcenter.lab", region="homelab",
         credential="vsphere-test",
     )
     return rtnval

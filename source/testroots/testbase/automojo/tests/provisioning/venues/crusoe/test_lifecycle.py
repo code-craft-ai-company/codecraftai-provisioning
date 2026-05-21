@@ -413,9 +413,7 @@ def _make_venue_and_config():
         CrusoeProjectConfig
     )
     venue = CloudVenue(name="crusoe-test", provider="crusoe",
-                       management_url="https://api.crusoecloud.com",
-                       subscription="proj-1", region="us-east1",
-                       credential="crusoe-cred")
+                       region="us-east1", credential="crusoe-cred")
     config = CrusoeProjectConfig(project_id="proj-1", location="us-east1-a")
     rtnval = (venue, config)
     return rtnval

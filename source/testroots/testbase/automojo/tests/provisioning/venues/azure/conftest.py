@@ -63,8 +63,7 @@ def venue() -> CloudVenue:
     """
     rtnval = CloudVenue(
         name="azure-test", provider="azure",
-        management_url="https://management.azure.com",
-        subscription="sub-test-0001",
+        account="sub-test-0001",
         region="eastus", credential="azure-test",
     )
     return rtnval

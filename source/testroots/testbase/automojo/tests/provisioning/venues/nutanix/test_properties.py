@@ -45,9 +45,8 @@ def _venue() -> CloudVenue:
         :returns: A CloudVenue instance.
     """
     rtnval = CloudVenue(name="nutanix-prop", provider="nutanix",
-                        management_url="https://prism.example.com:9440",
-                        subscription="homelab", region="homelab",
-                        credential="ntx-test")
+                        endpoint="https://prism.example.com:9440",
+                        region="homelab", credential="ntx-test")
     return rtnval
 
 

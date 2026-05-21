@@ -25,9 +25,8 @@ def venue() -> CloudVenue:
         Return a CloudVenue for the XCP-ng venue tests.
     """
     rtnval = CloudVenue(name="xcpng-test", provider="xcpng",
-                        management_url="https://xen-master.lab",
-                        subscription="homelab", region="homelab",
-                        credential="xen-cred")
+                        endpoint="https://xen-master.lab",
+                        region="homelab", credential="xen-cred")
     return rtnval
 
 

@@ -45,9 +45,8 @@ def _build(*, with_vpn: bool, with_volume: bool):
         :returns: A (provisioner, client) tuple.
     """
     venue = CloudVenue(name="hyperv-prop", provider="hyperv",
-                       management_url="winrm://hv:5985",
-                       subscription="lab", region="lab",
-                       credential="hv-cred")
+                       endpoint="winrm://hv:5985",
+                       region="lab", credential="hv-cred")
     host_config = HvHostConfig(host="hv-host")
     client = MockHypervClient()
     spec = _specfactory.make_basic_spec(with_vpn=with_vpn,

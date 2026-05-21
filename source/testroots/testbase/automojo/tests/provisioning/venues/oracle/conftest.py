@@ -66,8 +66,7 @@ def venue() -> CloudVenue:
     """
     rtnval = CloudVenue(
         name="oci-test", provider="oracle",
-        management_url="https://cloud.oracle.com",
-        subscription="test-tenancy",
+        account="test-tenancy",
         region="us-ashburn-1", credential="oci-test",
     )
     return rtnval

@@ -78,8 +78,7 @@ def venue() -> CloudVenue:
     """
     rtnval = CloudVenue(
         name="aws-test", provider="aws",
-        management_url="https://aws.amazon.com",
-        subscription="test-account",
+        account="test-account",
         region="us-east-1", credential="aws-test",
     )
     return rtnval

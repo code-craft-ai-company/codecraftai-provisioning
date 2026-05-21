@@ -31,9 +31,7 @@ from automojo.provisioning.aspects.provisioningaspects import (
 
 def _make_venue() -> CloudVenue:
     rtnval = CloudVenue(name="lab", provider="fake",
-                        management_url="https://fake",
-                        subscription="sub", region="r1",
-                        credential="cred")
+                        region="r1", credential="cred")
     return rtnval
 
 

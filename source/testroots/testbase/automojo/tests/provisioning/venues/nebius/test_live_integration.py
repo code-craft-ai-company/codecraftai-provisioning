@@ -61,8 +61,7 @@ def test_live_apply_inventory_destroy() -> None:
 
     venue = CloudVenue(
         name="nebius-live", provider="nebius",
-        management_url="https://api.nebius.cloud",
-        subscription=parent_id, region="eu-north1",
+        account=parent_id, region="eu-north1",
         credential="nebius-live",
     )
     aspects = ProvisioningAspects(runid="liverun01")

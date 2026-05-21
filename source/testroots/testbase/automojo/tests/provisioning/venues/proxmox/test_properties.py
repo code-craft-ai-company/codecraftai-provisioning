@@ -47,9 +47,8 @@ def _venue() -> CloudVenue:
         :returns: A CloudVenue instance.
     """
     rtnval = CloudVenue(name="proxmox-prop", provider="proxmox",
-                        management_url="https://pve.test:8006",
-                        subscription="cluster", region="local",
-                        credential="pve")
+                        endpoint="https://pve.test:8006",
+                        region="local", credential="pve")
     return rtnval
 
 
