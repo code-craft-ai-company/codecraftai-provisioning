@@ -38,7 +38,7 @@ from automojo.provisioning.venues.hetzner.hetznerdestroystages import (
     HetznerDestroyStages
 )
 from automojo.provisioning.venues.hetzner.hetznererrors import (
-    ConfirmationRequiredError, HetznerValidationError
+    HetznerValidationError,
 )
 from automojo.provisioning.venues.hetzner.hetznerinventory import (
     HetznerInventory

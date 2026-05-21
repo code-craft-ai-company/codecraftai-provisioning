@@ -22,6 +22,13 @@ from automojo.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
 from automojo.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
+from automojo.provisioning.venues.google.gcpsessionfactory import (
+    SERVICE_COMPUTE, SERVICE_TPU, SERVICE_STORAGE, SERVICE_DNS
+)
+from automojo.provisioning.venues.google.gcpspec import GcpSpec
+from automojo.provisioning.venues.google.googlecloudprovisioner import (
+    GoogleCloudProvisioner
+)
 
 from ._specfactory import basic_spec, gpu_compact_spec, tpu_spec
 
@@ -289,4 +296,50 @@ def test_destroy_calls_vpn_delete_device(make_provisioner, aspects,
     provisioner.destroy(aspects=confirm_aspects)
 
     assert "device-abc" in vpn.deleted_ids
+    return
+
+
+def test_plan_emits_delete_for_owned_orphan(make_provisioner, venue,
+                                            credential, region_config,
+                                            aspects) -> None:
+    """
+        An owner-tagged resource that is absent from the desired spec is
+        surfaced as a DELETE action by the plan-side orphan scan.
+    """
+    full_spec = basic_spec()
+    provisioner, fakes = make_provisioner(spec=full_spec)
+    # Realise the full spec so the instance carries automojo owner labels.
+    provisioner.apply(aspects=aspects)
+
+    # Build a second provisioner over the SAME fake clients but a spec
+    # from which the instance + volume have been dropped.  Those resources
+    # are now owner-tagged orphans.
+    spec_without_instance = GcpSpec(
+        networks=list(full_spec.networks),
+        subnets=list(full_spec.subnets),
+        security_groups=list(full_spec.security_groups),
+        instances=[],
+        volumes=[],
+        buckets=list(full_spec.buckets),
+    )
+    orphan_provisioner = GoogleCloudProvisioner(
+        venue=venue, credential=credential, region_config=region_config,
+        spec=spec_without_instance,
+    )
+    factory = orphan_provisioner.session_factory
+    factory.set_client(service_name=SERVICE_COMPUTE, client=fakes["compute"])
+    factory.set_client(service_name=SERVICE_TPU, client=fakes["tpu"])
+    factory.set_client(service_name=SERVICE_STORAGE, client=fakes["storage"])
+    factory.set_client(service_name=SERVICE_DNS, client=fakes["dns"])
+
+    plan = orphan_provisioner.plan(aspects=aspects)
+
+    delete_actions = [
+        a for a in plan.actions
+        if a.intent == PlannedActionIntent.DELETE.value
+    ]
+    deleted_names = {a.resource_name for a in delete_actions}
+    assert "inst-a" in deleted_names
+    orphan = next(a for a in delete_actions if a.resource_name == "inst-a")
+    assert orphan.resource_kind == "instance"
     return

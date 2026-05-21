@@ -287,7 +287,6 @@ class CrusoeCloudProvisioner(CloudProvisioner):
 
             :returns: A ProvisioningPlan.
         """
-        run_id = self._run_id(aspects=aspects)
         spec = self._spec
         actions: List[Any] = []
 

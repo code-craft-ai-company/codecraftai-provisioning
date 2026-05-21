@@ -13,7 +13,7 @@ __credits__ = []
 
 import xml.etree.ElementTree as ElementTree
 
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 
 # The custom namespace under which the provisioner records the run id and

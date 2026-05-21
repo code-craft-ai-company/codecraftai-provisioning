@@ -13,7 +13,7 @@ __credits__ = []
 
 import os
 
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 from automojo.provisioning.model.cloud.cloudimage import CloudImage
 from automojo.provisioning.model.cloud.imagefamily import normalize_family

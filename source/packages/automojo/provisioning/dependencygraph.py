@@ -13,7 +13,7 @@ __credits__ = []
 
 import os
 
-from typing import Dict, List, Set, Tuple
+from typing import Any, Dict, List, Set, Tuple
 
 from automojo.provisioning.model.exceptions import SchemaSemanticError
 
@@ -157,8 +157,8 @@ class DependencyGraph:
         return rtnval
 
 
-def build_dependency_graph(*, spec: Dict[str, "Any"]
-                           ) -> DependencyGraph:  # type: ignore[name-defined]
+def build_dependency_graph(*, spec: Dict[str, Any]
+                           ) -> DependencyGraph:
     """
         Build a DependencyGraph from a normalised spec dict.
 

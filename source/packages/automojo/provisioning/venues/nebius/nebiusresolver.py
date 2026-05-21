@@ -14,7 +14,7 @@ __credits__ = []
 
 import os
 
-from typing import Any, List, Optional
+from typing import List, Optional
 
 from automojo.provisioning.model.cloud.cloudacceleratorcatalog import (
     CloudAcceleratorCatalog

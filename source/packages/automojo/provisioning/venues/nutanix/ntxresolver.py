@@ -14,7 +14,7 @@ __credits__ = []
 
 import os
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from automojo.provisioning.venues.nutanix.nutanixvenueconfig import (
     NutanixVenueConfig

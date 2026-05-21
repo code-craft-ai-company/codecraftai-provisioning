@@ -26,9 +26,7 @@ from automojo.provisioning.venues.libvirt.libvirtvenueconfig import (
 from automojo.provisioning.venues.libvirt.lvdomainxmlbuilder import (
     LvDomainXmlBuilder
 )
-from automojo.provisioning.venues.libvirt.lvnaming import (
-    boot_volume_name_for, resource_name_for
-)
+from automojo.provisioning.venues.libvirt.lvnaming import resource_name_for
 
 
 class LvPlanBuilder:

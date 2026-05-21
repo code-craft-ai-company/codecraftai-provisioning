@@ -149,6 +149,48 @@ def test_destroy_requires_confirm(venue, credential, region_config,
     return
 
 
+def test_destroy_tears_down_instances_before_cluster_network(
+        venue, credential, region_config, aspects, confirm_aspects) -> None:
+    """
+        Teardown ordering: RDMA instances sit on the cluster network, so
+        destroy must terminate the compute instances before tearing down
+        the RDMA cluster network they belong to.
+    """
+    spec = rdma_spec(member_count=3)
+    provisioner, fakes = _new_provisioner(
+        venue=venue, credential=credential, region_config=region_config,
+        spec=spec,
+    )
+    provisioner.apply(aspects=aspects)
+
+    call_order = []
+
+    original_compute_destroy = provisioner._compute_mgr.destroy
+    original_cluster_destroy = provisioner._cluster_mgr.destroy
+
+    def _spy_compute_destroy(*, run_id, aspects):
+        call_order.append("instances")
+        rtnval = original_compute_destroy(run_id=run_id, aspects=aspects)
+        return rtnval
+
+    def _spy_cluster_destroy(*, run_id, aspects):
+        call_order.append("cluster_network")
+        rtnval = original_cluster_destroy(run_id=run_id, aspects=aspects)
+        return rtnval
+
+    provisioner._compute_mgr.destroy = _spy_compute_destroy
+    provisioner._cluster_mgr.destroy = _spy_cluster_destroy
+
+    provisioner.destroy(aspects=confirm_aspects)
+
+    assert "instances" in call_order
+    assert "cluster_network" in call_order
+    instances_idx = call_order.index("instances")
+    cluster_idx = call_order.index("cluster_network")
+    assert instances_idx < cluster_idx
+    return
+
+
 def test_destroy_reverses_apply(venue, credential, region_config, aspects,
                                 confirm_aspects) -> None:
     """

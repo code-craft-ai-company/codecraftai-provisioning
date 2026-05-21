@@ -37,6 +37,7 @@ from automojo.provisioning.venues.azure.azurecloudprovisioner import (
 from automojo.provisioning.venues.azure.azuresessionfactory import (
     AzureSessionFactory
 )
+from automojo.provisioning.venues.azure.azurespec import AzureSpec
 
 from ._fakeazure import FakeAzureWorld
 from ._specfactory import basic_spec, ib_instance
@@ -480,4 +481,47 @@ def test_destroy_preserves_foreign_resource_group(venue, credential,
     provisioner.destroy(aspects=confirm_aspects)
     # The foreign resource keeps the group alive.
     assert "rg-testrun01" in world.resource_groups
+    return
+
+
+def test_plan_emits_delete_for_owned_orphan(venue, credential,
+                                            region_config, session_factory,
+                                            aspects) -> None:
+    """
+        An owner-tagged resource that is absent from the desired spec is
+        surfaced as a DELETE action by the plan-side orphan scan.
+    """
+    full_spec = basic_spec()
+    provisioner = _provisioner(venue=venue, credential=credential,
+                               region_config=region_config,
+                               session_factory=session_factory,
+                               spec=full_spec)
+    # Realise the full spec so the instance carries automojo owner tags.
+    provisioner.apply(aspects=aspects)
+
+    # Re-plan against a spec from which the instance + volume have been
+    # dropped; those resources are now owner-tagged orphans.
+    spec_without_instance = AzureSpec(
+        networks=list(full_spec.networks),
+        subnets=list(full_spec.subnets),
+        security_groups=list(full_spec.security_groups),
+        keypairs=list(full_spec.keypairs),
+        instances=[],
+        volumes=[],
+        buckets=list(full_spec.buckets),
+    )
+    orphan_provisioner = _provisioner(venue=venue, credential=credential,
+                                      region_config=region_config,
+                                      session_factory=session_factory,
+                                      spec=spec_without_instance)
+    plan = orphan_provisioner.plan(aspects=aspects)
+
+    delete_actions = [
+        a for a in plan.actions
+        if a.intent == PlannedActionIntent.DELETE.value
+    ]
+    deleted_names = {a.resource_name for a in delete_actions}
+    assert "inst-a" in deleted_names
+    orphan = next(a for a in delete_actions if a.resource_name == "inst-a")
+    assert orphan.resource_kind == "instance"
     return

@@ -16,7 +16,7 @@ __credits__ = []
 import logging
 import re
 
-from typing import Dict, List
+from typing import Dict
 
 
 # A Kubernetes label value/key segment is at most 63 chars, must start and

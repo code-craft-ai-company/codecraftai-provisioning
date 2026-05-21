@@ -307,7 +307,6 @@ class LvApplyStages:
         boot_name = boot_volume_name_for(
             instance_spec_name=instance.name, run_id=run_id
         )
-        sizing = self._domain_builder.resolve_size(size=instance.size)
         capacity_bytes = 20 * _GIB
 
         boot_spec = LibvirtVolumeSpec(name=boot_name,

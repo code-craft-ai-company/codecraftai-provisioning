@@ -11,7 +11,7 @@ __copyright__ = "Copyright 2026, Automation Mojo LLC"
 __credits__ = []
 
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from automojo.provisioning.venues.google.gcpsessionfactory import (
     GcpSessionFactory, SERVICE_COMPUTE

@@ -31,9 +31,7 @@ from automojo.provisioning.venues.vsphere.vsapplystages import VsApplyStages
 from automojo.provisioning.venues.vsphere.vsdestroystages import (
     VsDestroyStages
 )
-from automojo.provisioning.venues.vsphere.vserrors import (
-    ConfirmationRequiredError, VsValidationError
-)
+from automojo.provisioning.venues.vsphere.vserrors import VsValidationError
 from automojo.provisioning.venues.vsphere.vsguestcustomrenderer import (
     VsGuestCustomRenderer
 )

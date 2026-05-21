@@ -47,7 +47,7 @@ from automojo.provisioning.venues.runpod.rpplanbuilder import RpPlanBuilder
 from automojo.provisioning.venues.runpod.rpresolver import RpResolver
 from automojo.provisioning.venues.runpod.rpsidecartag import RpSidecarTag
 from automojo.provisioning.venues.runpod.runpodworkloadspec import (
-    RUNPOD_TIER_COMMUNITY, RUNPOD_TIER_SECURE
+    RUNPOD_TIER_SECURE,
 )
 
 
