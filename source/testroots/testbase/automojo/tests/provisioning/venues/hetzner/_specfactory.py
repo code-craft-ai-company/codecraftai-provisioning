@@ -85,7 +85,7 @@ def basic_spec(*, with_vpn: bool = False,
     volumes: List[CloudStorageVolume] = []
     if with_volume is True:
         volumes.append(CloudStorageVolume(
-            name="vol-a", size_gb=20, type="ssd", attached_to="srv-a",
+            name="vol-a", size_gb=20, storage_class="standard", attached_to="srv-a",
             mount="/data"))
 
     dns_records: List[CloudDnsRecord] = []

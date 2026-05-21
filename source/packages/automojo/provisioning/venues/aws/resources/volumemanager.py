@@ -16,6 +16,7 @@ from typing import Any, Dict, List, Optional
 from automojo.provisioning.model.cloud.cloudstoragevolume import (
     CloudStorageVolume
 )
+from automojo.provisioning.model.cloud.storageclass import StorageClass
 from automojo.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )
@@ -30,29 +31,24 @@ from automojo.provisioning.venues.aws.awstagging import (
 )
 
 
-# Neutral type → AWS VolumeType.
-_TYPE_MAP: Dict[str, str] = {
-    "ssd": "gp3",
-    "gp3": "gp3",
-    "gp2": "gp2",
-    "nvme": "io2",
-    "io2": "io2",
-    "io1": "io1",
-    "hdd": "st1",
-    "st1": "st1",
-    "sc1": "sc1",
+# Neutral StorageClass → AWS VolumeType.
+_STORAGE_CLASS_MAP: Dict[StorageClass, str] = {
+    StorageClass.STANDARD: "gp3",
+    StorageClass.BALANCED: "gp3",
+    StorageClass.PERFORMANCE: "io2",
+    StorageClass.ARCHIVE: "st1",
 }
 
 
-def map_type(*, neutral_type: str) -> str:
+def map_storage_class(*, storage_class: StorageClass) -> str:
     """
-        Map a neutral volume type hint to an AWS VolumeType.
+        Map a neutral StorageClass to an AWS VolumeType.
 
-        :param neutral_type: Neutral type string.
+        :param storage_class: Neutral StorageClass member.
 
         :returns: AWS VolumeType string.
     """
-    rtnval = _TYPE_MAP.get(neutral_type, "gp3")
+    rtnval = _STORAGE_CLASS_MAP.get(storage_class, "gp3")
     return rtnval
 
 
@@ -127,7 +123,7 @@ class VolumeManager:
             created = client.create_volume(
                 AvailabilityZone=availability_zone,
                 Size=desired.size_gb,
-                VolumeType=map_type(neutral_type=desired.type),
+                VolumeType=map_storage_class(storage_class=desired.storage_class),
                 TagSpecifications=tag_specs,
             )
             existing = created
@@ -149,7 +145,7 @@ class VolumeManager:
         attributes["volume_id"] = vol_id
         attributes["size_gb"] = existing.get("Size", desired.size_gb)
         attributes["volume_type"] = existing.get(
-            "VolumeType", map_type(neutral_type=desired.type)
+            "VolumeType", map_storage_class(storage_class=desired.storage_class)
         )
         attributes["availability_zone"] = existing.get(
             "AvailabilityZone", availability_zone

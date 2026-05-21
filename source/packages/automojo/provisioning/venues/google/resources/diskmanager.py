@@ -16,6 +16,7 @@ from typing import Any, Dict, List, Optional
 from automojo.provisioning.model.cloud.cloudstoragevolume import (
     CloudStorageVolume
 )
+from automojo.provisioning.model.cloud.storageclass import StorageClass
 from automojo.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )
@@ -30,24 +31,24 @@ from automojo.provisioning.venues.google.gcptagging import (
 )
 
 
-# Neutral volume type hint → GCP Persistent Disk type.
-_DISK_TYPE_TABLE: Dict[str, str] = {
-    "ssd": "pd-ssd",
-    "nvme": "pd-ssd",
-    "hdd": "pd-standard",
-    "balanced": "pd-balanced",
+# Neutral StorageClass → GCP Persistent Disk type.
+_DISK_TYPE_TABLE: Dict[StorageClass, str] = {
+    StorageClass.STANDARD: "pd-ssd",
+    StorageClass.BALANCED: "pd-balanced",
+    StorageClass.PERFORMANCE: "pd-ssd",
+    StorageClass.ARCHIVE: "pd-standard",
 }
 
 
-def resolve_disk_type(*, neutral_type: str) -> str:
+def resolve_disk_type(*, storage_class: StorageClass) -> str:
     """
-        Resolve a neutral volume type hint to a GCP Persistent Disk type.
+        Resolve a neutral StorageClass to a GCP Persistent Disk type.
 
-        :param neutral_type: Neutral type hint (ssd, hdd, nvme, balanced).
+        :param storage_class: Neutral StorageClass member.
 
         :returns: A GCP Persistent Disk type string.
     """
-    rtnval = _DISK_TYPE_TABLE.get(neutral_type.lower(), "pd-balanced")
+    rtnval = _DISK_TYPE_TABLE.get(storage_class, "pd-balanced")
     return rtnval
 
 
@@ -142,7 +143,7 @@ class DiskManager:
                 resource_kind=self.KIND, extra=list(desired.tags),
                 defaults=default_tags,
             )
-            disk_type = resolve_disk_type(neutral_type=desired.type)
+            disk_type = resolve_disk_type(storage_class=desired.storage_class)
             body: Dict[str, Any] = {
                 "name": gcp_name,
                 "size_gb": desired.size_gb,
@@ -157,7 +158,7 @@ class DiskManager:
         attributes["gcp_name"] = gcp_name
         attributes["zone"] = zone
         attributes["size_gb"] = existing.get("size_gb", desired.size_gb)
-        attributes["disk_type"] = resolve_disk_type(neutral_type=desired.type)
+        attributes["disk_type"] = resolve_disk_type(storage_class=desired.storage_class)
 
         rtnval = ProvisionedResource(
             kind=self.KIND, name=desired.name, venue_id=gcp_name,

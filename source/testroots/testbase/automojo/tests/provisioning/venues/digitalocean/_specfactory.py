@@ -83,7 +83,7 @@ def basic_spec(*, with_vpn: bool = False,
         keypair="kp-a", vpn_join=vpn_join, accelerators=accelerators,
     )
 
-    volume = CloudStorageVolume(name="vol-a", size_gb=10, type="ssd",
+    volume = CloudStorageVolume(name="vol-a", size_gb=10, storage_class="standard",
                                 attached_to="droplet-a", mount="/mnt/data")
     bucket = CloudObjectBucket(name="bkt-a", region="nyc3")
 

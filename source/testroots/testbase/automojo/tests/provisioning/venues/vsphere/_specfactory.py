@@ -71,7 +71,7 @@ def basic_spec(*, with_vpn: bool = False,
     volumes = []
     if with_volume:
         volumes.append(CloudStorageVolume(
-            name="vol-a", size_gb=64, type="ssd", attached_to="inst-a",
+            name="vol-a", size_gb=64, storage_class="standard", attached_to="inst-a",
         ))
 
     rtnval = VSphereSpec(

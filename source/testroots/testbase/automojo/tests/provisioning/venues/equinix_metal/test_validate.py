@@ -150,7 +150,7 @@ def test_validate_rejects_block_volume_without_existing_id(
     """
     spec = basic_spec()
     spec.volumes.append(
-        CloudStorageVolume(name="vol-a", size_gb=100, type="nvme")
+        CloudStorageVolume(name="vol-a", size_gb=100, storage_class="performance")
     )
     provisioner = _provisioner(
         venue=venue, credential=credential, project_config=project_config,

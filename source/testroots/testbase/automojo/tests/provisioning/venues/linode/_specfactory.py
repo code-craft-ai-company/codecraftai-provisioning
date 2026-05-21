@@ -93,7 +93,7 @@ def basic_spec(*, with_vpn: bool = False,
         keypair="kp-a", vpn_join=vpn_join, interconnect=interconnect,
     )
 
-    volume = CloudStorageVolume(name="vol-a", size_gb=20, type="ssd",
+    volume = CloudStorageVolume(name="vol-a", size_gb=20, storage_class="standard",
                                 attached_to="inst-a", mount="/mnt/data")
     bucket = CloudObjectBucket(name="bkt-a", region="us-east-1")
     dns_record = CloudDnsRecord(zone="example.com", name="host",

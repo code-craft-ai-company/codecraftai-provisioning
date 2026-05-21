@@ -123,7 +123,7 @@ def make_volume(*, name: str = "data-vol", size_gb: int = 50,
 
         :returns: A CloudStorageVolume instance.
     """
-    rtnval = CloudStorageVolume(name=name, size_gb=size_gb, type="ssd",
+    rtnval = CloudStorageVolume(name=name, size_gb=size_gb, storage_class="standard",
                                 attached_to=attached_to)
     return rtnval
 

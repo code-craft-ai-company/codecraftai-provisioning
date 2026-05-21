@@ -101,7 +101,7 @@ def basic_spec(*, with_vpn: bool = False,
         preemption_policy=preemption,
     )
 
-    volume = CloudStorageVolume(name="vol-a", size_gb=64, type="ssd",
+    volume = CloudStorageVolume(name="vol-a", size_gb=64, storage_class="standard",
                                 attached_to="inst-a", mount="/dev/sdc")
 
     bucket = CloudObjectBucket(name="bkta", region="eastus")

@@ -18,10 +18,32 @@ from typing import Any, Dict, List, Optional
 from automojo.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )
+from automojo.provisioning.model.cloud.storageclass import StorageClass
 from automojo.provisioning.venues.nebius.nebiusgpucluster import (
     NebiusGpuCluster
 )
 from automojo.provisioning.venues.nebius.nebiusspec import NebiusSpec
+
+
+# Neutral StorageClass → Nebius disk type.
+_STORAGE_CLASS_MAP: Dict[StorageClass, str] = {
+    StorageClass.STANDARD: "network-ssd",
+    StorageClass.BALANCED: "network-ssd",
+    StorageClass.PERFORMANCE: "network-ssd-io-m3",
+    StorageClass.ARCHIVE: "network-hdd",
+}
+
+
+def map_storage_class(*, storage_class: StorageClass) -> str:
+    """
+        Map a neutral StorageClass to a Nebius disk type.
+
+        :param storage_class: Neutral StorageClass member.
+
+        :returns: Nebius disk type string.
+    """
+    rtnval = _STORAGE_CLASS_MAP.get(storage_class, "network-ssd")
+    return rtnval
 
 
 class NebiusApplyStages:
@@ -333,7 +355,8 @@ class NebiusApplyStages:
             disk_spec = NebiusDiskSpec(
                 parent_id=spec.parent_id, name=vol.name,
                 size_bytes=int(vol.size_gb) * 1_000_000_000,
-                type=vol.type, labels=labels,
+                type=map_storage_class(storage_class=vol.storage_class),
+                labels=labels,
             )
             disk, disk_handle = self._client.disks.create(spec=disk_spec,
                                                           aspects=aspects)

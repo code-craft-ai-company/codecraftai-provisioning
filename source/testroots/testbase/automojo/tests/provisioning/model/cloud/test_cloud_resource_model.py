@@ -31,6 +31,10 @@ from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
 from automojo.provisioning.model.cloud.cloudstoragevolume import CloudStorageVolume
 from automojo.provisioning.model.cloud.cloudobjectbucket import CloudObjectBucket
 from automojo.provisioning.model.cloud.cloudloadbalancer import CloudLoadBalancer
+from automojo.provisioning.model.cloud.cloudloadbalancerlistener import (
+    CloudLoadBalancerListener
+)
+from automojo.provisioning.model.cloud.storageclass import StorageClass
 from automojo.provisioning.model.cloud.clouddnsrecord import CloudDnsRecord
 from automojo.provisioning.model.cloud.cloudresourcekind import CloudResourceKind
 from automojo.provisioning.model.cloud.cloudresourceprofile import (
@@ -206,7 +210,7 @@ class StorageBucketLBDnsTests(unittest.TestCase):
 
     def test_storage_volume_rejects_zero_size(self) -> None:
         with self.assertRaises(SchemaValidationError):
-            CloudStorageVolume(name="v", size_gb=0, type="ssd")
+            CloudStorageVolume(name="v", size_gb=0, storage_class="standard")
         return
 
     def test_bucket_roundtrip(self) -> None:
@@ -226,6 +230,129 @@ class StorageBucketLBDnsTests(unittest.TestCase):
             CloudDnsRecord(zone="example.com", name="www",
                            record_type="NOPE", values=["1.2.3.4"],
                            ttl_seconds=60)
+        return
+
+
+class StorageClassTests(unittest.TestCase):
+
+    def test_storage_class_member_values_are_lowercase_names(self) -> None:
+        for member in StorageClass:
+            self.assertEqual(member.value, member.name.lower())
+        return
+
+    def test_storage_class_default_is_standard(self) -> None:
+        volume = CloudStorageVolume(name="v", size_gb=10)
+        self.assertEqual(volume.storage_class, StorageClass.STANDARD)
+        return
+
+    def test_volume_accepts_enum_storage_class(self) -> None:
+        volume = CloudStorageVolume(name="v", size_gb=10,
+                                    storage_class=StorageClass.PERFORMANCE)
+        self.assertEqual(volume.storage_class, StorageClass.PERFORMANCE)
+        return
+
+    def test_volume_coerces_string_storage_class(self) -> None:
+        volume = CloudStorageVolume(name="v", size_gb=10,
+                                    storage_class="archive")
+        self.assertEqual(volume.storage_class, StorageClass.ARCHIVE)
+        return
+
+    def test_volume_coerces_mixed_case_string(self) -> None:
+        volume = CloudStorageVolume(name="v", size_gb=10,
+                                    storage_class="Balanced")
+        self.assertEqual(volume.storage_class, StorageClass.BALANCED)
+        return
+
+    def test_volume_rejects_unknown_storage_class_string(self) -> None:
+        with self.assertRaises(SchemaSemanticError):
+            CloudStorageVolume(name="v", size_gb=10, storage_class="gp3")
+        return
+
+
+class CloudLoadBalancerListenerTests(unittest.TestCase):
+
+    def test_listener_construction(self) -> None:
+        listener = CloudLoadBalancerListener(protocol="HTTP", port=80,
+                                             target_port=8080)
+        self.assertEqual(listener.protocol, "HTTP")
+        self.assertEqual(listener.port, 80)
+        self.assertEqual(listener.target_port, 8080)
+        self.assertIsNone(listener.tls_certificate_ref)
+        return
+
+    def test_listener_roundtrip(self) -> None:
+        listener = CloudLoadBalancerListener(protocol="HTTPS", port=443,
+                                             target_port=8443,
+                                             tls_certificate_ref="cert-1")
+        rebuilt = CloudLoadBalancerListener.from_dict(listener.to_dict())
+        self.assertEqual(listener, rebuilt)
+        return
+
+    def test_listener_rejects_unknown_protocol(self) -> None:
+        with self.assertRaises(SchemaValidationError):
+            CloudLoadBalancerListener(protocol="FTP", port=21,
+                                      target_port=21)
+        return
+
+    def test_listener_rejects_out_of_range_port(self) -> None:
+        with self.assertRaises(SchemaValidationError):
+            CloudLoadBalancerListener(protocol="TCP", port=70000,
+                                      target_port=80)
+        return
+
+    def test_load_balancer_accepts_typed_listeners(self) -> None:
+        listener = CloudLoadBalancerListener(protocol="TCP", port=6379,
+                                             target_port=6379)
+        lb = CloudLoadBalancer(name="lb-a", scheme="internal",
+                               listeners=[listener])
+        self.assertEqual(len(lb.listeners), 1)
+        self.assertEqual(lb.listeners[0].protocol, "TCP")
+        return
+
+
+class VenueStorageClassMappingTests(unittest.TestCase):
+
+    def test_aws_volume_class_mapping(self) -> None:
+        from automojo.provisioning.venues.aws.resources.volumemanager import (
+            map_storage_class
+        )
+        self.assertEqual(
+            map_storage_class(storage_class=StorageClass.STANDARD), "gp3")
+        self.assertEqual(
+            map_storage_class(storage_class=StorageClass.BALANCED), "gp3")
+        self.assertEqual(
+            map_storage_class(storage_class=StorageClass.PERFORMANCE), "io2")
+        self.assertEqual(
+            map_storage_class(storage_class=StorageClass.ARCHIVE), "st1")
+        return
+
+    def test_azure_volume_class_mapping(self) -> None:
+        from automojo.provisioning.venues.azure.resources.diskmanager import (
+            map_storage_class
+        )
+        self.assertEqual(
+            map_storage_class(storage_class=StorageClass.STANDARD),
+            "StandardSSD_LRS")
+        self.assertEqual(
+            map_storage_class(storage_class=StorageClass.PERFORMANCE),
+            "Premium_LRS")
+        self.assertEqual(
+            map_storage_class(storage_class=StorageClass.ARCHIVE),
+            "Standard_LRS")
+        return
+
+    def test_gcp_volume_class_mapping(self) -> None:
+        from automojo.provisioning.venues.google.resources.diskmanager import (
+            resolve_disk_type
+        )
+        self.assertEqual(
+            resolve_disk_type(storage_class=StorageClass.STANDARD), "pd-ssd")
+        self.assertEqual(
+            resolve_disk_type(storage_class=StorageClass.BALANCED),
+            "pd-balanced")
+        self.assertEqual(
+            resolve_disk_type(storage_class=StorageClass.ARCHIVE),
+            "pd-standard")
         return
 
 
@@ -404,7 +531,7 @@ def _build_instance(seed: int):
 
 def _build_volume(seed: int):
     rtnval = CloudStorageVolume(name="vol-{}".format(seed),
-                                size_gb=(seed % 500) + 1, type="ssd")
+                                size_gb=(seed % 500) + 1, storage_class="standard")
     return rtnval
 
 
