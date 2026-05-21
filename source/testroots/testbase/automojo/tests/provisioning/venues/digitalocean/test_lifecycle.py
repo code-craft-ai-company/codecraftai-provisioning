@@ -13,6 +13,8 @@ __credits__ = []
 
 import pytest
 
+from automojo.provisioning.model.exceptions import SchemaSemanticError
+
 from hypothesis import HealthCheck, given, settings, strategies as st
 
 from automojo.provisioning.aspects.provisioningaspects import (
@@ -141,7 +143,7 @@ def test_destroy_requires_confirm(venue, credential, region_config,
         do_client=do_client, spec=spec,
     )
     provisioner.apply(aspects=aspects)
-    with pytest.raises(Exception):
+    with pytest.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     return
 

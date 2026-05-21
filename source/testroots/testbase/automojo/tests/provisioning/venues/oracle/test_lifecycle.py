@@ -16,6 +16,8 @@ import base64
 
 import pytest
 
+from automojo.provisioning.model.exceptions import SchemaSemanticError
+
 from automojo.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
@@ -142,7 +144,7 @@ def test_destroy_requires_confirm(venue, credential, region_config,
         spec=spec,
     )
     provisioner.apply(aspects=aspects)
-    with pytest.raises(Exception):
+    with pytest.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     return
 

@@ -17,6 +17,8 @@ import os
 
 import pytest
 
+from automojo.provisioning.model.exceptions import SchemaSemanticError
+
 from automojo.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
@@ -176,7 +178,7 @@ def test_destroy_requires_confirm(venue, aspects, tmp_path):
     provisioner = _provisioner(venue=venue, spec=basic_spec(),
                                client=client, output_root=str(tmp_path))
     provisioner.apply(aspects=aspects)
-    with pytest.raises(Exception):
+    with pytest.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     assert len(client.all_vms()) == 1
     return

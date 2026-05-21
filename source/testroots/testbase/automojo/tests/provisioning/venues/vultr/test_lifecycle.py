@@ -15,6 +15,8 @@ import base64
 
 import pytest
 
+from automojo.provisioning.model.exceptions import SchemaSemanticError
+
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
@@ -121,7 +123,7 @@ def test_destroy_requires_confirm(fake_vultr, provisioner_factory,
     spec = basic_spec()
     provisioner = provisioner_factory(client=client, spec=spec)
     provisioner.apply(aspects=aspects)
-    with pytest.raises(Exception):
+    with pytest.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     return
 

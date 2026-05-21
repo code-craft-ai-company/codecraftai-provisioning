@@ -14,6 +14,8 @@ __credits__ = []
 
 import pytest
 
+from automojo.provisioning.model.exceptions import SchemaSemanticError
+
 from hypothesis import given, settings, strategies as st
 
 from automojo.provisioning.model.cloud.plannedactionintent import (
@@ -159,7 +161,7 @@ def test_destroy_requires_confirm(venue, credential, config,
     provisioner = _provisioner(venue=venue, credential=credential,
                                config=config, spec=spec)
     provisioner.apply(aspects=aspects)
-    with pytest.raises(Exception):
+    with pytest.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     return
 

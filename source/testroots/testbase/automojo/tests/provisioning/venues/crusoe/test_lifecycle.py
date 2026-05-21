@@ -17,6 +17,8 @@ from pathlib import Path
 
 import pytest
 
+from automojo.provisioning.model.exceptions import SchemaSemanticError
+
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
@@ -330,7 +332,7 @@ def test_destroy_requires_confirm(crusoe_venue, mock_client, project_config,
     prov = make_provisioner(venue=crusoe_venue, client=mock_client,
                             project_config=project_config, spec=spec)
     prov.apply(aspects=crusoe_aspects)
-    with pytest.raises(Exception):
+    with pytest.raises(SchemaSemanticError):
         prov.destroy(aspects=crusoe_aspects)
     return
 
