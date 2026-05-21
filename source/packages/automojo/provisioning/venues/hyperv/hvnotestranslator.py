@@ -14,7 +14,7 @@ __credits__ = []
 
 import json
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 
 _ENVELOPE_KEY = "automojo"

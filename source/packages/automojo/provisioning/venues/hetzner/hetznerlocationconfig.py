@@ -11,7 +11,7 @@ __copyright__ = "Copyright 2026, Automation Mojo LLC"
 __credits__ = []
 
 
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 
 HETZNER_LOCATIONS = frozenset({"nbg1", "fsn1", "hel1", "ash", "hil", "sin"})

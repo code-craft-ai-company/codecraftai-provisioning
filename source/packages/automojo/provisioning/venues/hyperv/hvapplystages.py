@@ -12,7 +12,7 @@ __copyright__ = "Copyright 2026, Automation Mojo LLC"
 __credits__ = []
 
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from automojo.interop.hyperv.specs.hypervadapterspec import HypervAdapterSpec
 from automojo.interop.hyperv.specs.hypervswitchspec import HypervSwitchSpec

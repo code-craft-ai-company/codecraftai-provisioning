@@ -39,9 +39,7 @@ from automojo.provisioning.model.cloud.validationresult import ValidationResult
 from automojo.provisioning.model.exceptions import SchemaSemanticError
 from automojo.provisioning.venues.vpncleanup import delete_vpn_device
 
-from automojo.provisioning.venues.oracle.ocierrors import (
-    OciValidationError, ConfirmationRequiredError
-)
+from automojo.provisioning.venues.oracle.ocierrors import OciValidationError
 from automojo.provisioning.venues.oracle.ociregionconfig import OciRegionConfig
 from automojo.provisioning.venues.oracle.ocisessionfactory import (
     OciSessionFactory

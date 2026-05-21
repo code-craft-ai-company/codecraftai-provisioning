@@ -317,9 +317,6 @@ class InstanceManager:
             metadata_items.append({"key": "user-data",
                                    "value": user_data_body})
 
-        # SSH key metadata when a keypair is present (OS Login bypassed).
-        ssh_public_key = info.get("ssh_public_key", None)
-
         body: Dict[str, Any] = {
             "name": gcp_name,
             "machine_type": "zones/{}/machineTypes/{}".format(

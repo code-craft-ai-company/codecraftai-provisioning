@@ -27,6 +27,7 @@ from automojo.provisioning.model.cloud.cloudacceleratorcatalog import (
 )
 from automojo.provisioning.model.cloud.cloudprovisioner import CloudProvisioner
 from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
+from automojo.provisioning.model.cloud.plannedaction import PlannedAction
 from automojo.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
@@ -595,7 +596,74 @@ class AzureCloudProvisioner(CloudProvisioner):
                               "v1.5."},
             ))
 
+        # Owned-orphan scan: any resource still tagged automojo:owner=<run_id>
+        # that no longer appears in the desired spec is an orphan and is
+        # planned for DELETE.  Mirrors the AWS venue's approach so that drift
+        # is surfaced up front.
+        orphan_actions = self._plan_owned_orphans(
+            run_id=run_id, resource_group=resource_group, spec=spec)
+        for action in orphan_actions:
+            actions.append(action)
+
         rtnval = ProvisioningPlan(actions=actions)
+        return rtnval
+
+    def _plan_owned_orphans(self, *, run_id: str, resource_group: str,
+                            spec: AzureSpec) -> List[PlannedAction]:
+        """
+            Build DELETE actions for owner-tagged resources absent from spec.
+
+            Enumerates the run's owned Azure resources through each per-kind
+            manager's ``list_owned`` and emits a ``DELETE`` PlannedAction for
+            every resource whose ``(kind, name)`` pair is not declared in the
+            desired spec.
+
+            :param run_id: The provisioning run identifier.
+            :param resource_group: The Azure resource group name.
+            :param spec: The desired AzureSpec.
+
+            :returns: A list of DELETE PlannedAction entries.
+        """
+        desired_by_kind: Dict[str, set] = {
+            "network": {net.name for net in spec.networks},
+            "subnet": {subnet.name for subnet in spec.subnets},
+            "sg": {sg.name for sg in spec.security_groups},
+            "instance": {inst.name for inst in spec.instances},
+            "volume": {vol.name for vol in spec.volumes},
+            "bucket": {bucket.name for bucket in spec.buckets},
+        }
+
+        owned: List[ProvisionedResource] = []
+        owned_vnets = self._vnet_mgr.list_owned(
+            resource_group=resource_group, run_id=run_id)
+        owned.extend(owned_vnets)
+        for vnet_resource in owned_vnets:
+            owned.extend(self._subnet_mgr.list_owned(
+                resource_group=resource_group,
+                vnet_name=vnet_resource.name))
+        owned.extend(self._nsg_mgr.list_owned(
+            resource_group=resource_group, run_id=run_id))
+        owned.extend(self._vm_mgr.list_owned(
+            resource_group=resource_group, run_id=run_id))
+        owned.extend(self._disk_mgr.list_owned(
+            resource_group=resource_group, run_id=run_id))
+        owned.extend(self._blob_mgr.list_owned(
+            resource_group=resource_group, run_id=run_id))
+
+        out: List[PlannedAction] = []
+        for resource in owned:
+            declared = desired_by_kind.get(resource.kind, set())
+            if resource.name in declared:
+                continue
+            out.append(self._planned_action_for(
+                intent=PlannedActionIntent.DELETE,
+                resource_kind=resource.kind, resource_name=resource.name,
+                diff={"reason": ("Owner-tagged resource is absent from the "
+                                 "desired spec."),
+                      "venue_id": resource.venue_id},
+            ))
+
+        rtnval = out
         return rtnval
 
     # ------------------------------------------------------------------

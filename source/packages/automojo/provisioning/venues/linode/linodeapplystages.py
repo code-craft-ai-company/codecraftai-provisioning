@@ -222,7 +222,6 @@ class LinodeApplyStages:
         """
         defaults = self._region_config.default_tags
         firewall_state = state.get("firewalls", {})
-        subnet_state = state.get("subnets", {})
         keypair_state = state.get("keypairs", {})
 
         instance_state: Dict[str, Any] = {}

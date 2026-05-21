@@ -12,7 +12,7 @@ __copyright__ = "Copyright 2026, Automation Mojo LLC"
 __credits__ = []
 
 
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from automojo.provisioning.venues.nutanix.ntxnaming import RUN_ID_CATEGORY
 

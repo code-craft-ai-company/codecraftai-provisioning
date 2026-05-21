@@ -35,7 +35,6 @@ import logging
 import os
 import uuid
 
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import yaml
@@ -45,7 +44,6 @@ from automojo.provisioning.model.exceptions import (
 )
 from automojo.provisioning.model.cloud.cloudprovisioner import CloudProvisioner
 from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
-from automojo.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
 from automojo.provisioning.model.cloud.provisioningplan import ProvisioningPlan
 from automojo.provisioning.model.cloud.provisioningresult import (
     ProvisioningResult
@@ -65,9 +63,7 @@ from automojo.provisioning.dependencygraph import (
 from automojo.provisioning.pipelineplan import (
     PipelinePlan, MultiVenueProvisioningPlan
 )
-from automojo.provisioning.pipelinestage import (
-    PipelineStage, PIPELINE_STAGE_ORDER
-)
+from automojo.provisioning.pipelinestage import PipelineStage
 from automojo.provisioning.provisioningverifyerror import (
     ProvisioningVerifyError
 )
@@ -261,7 +257,8 @@ class ProvisioningEngine:
 
             :returns: Per-venue ProvisioningResult map.
         """
-        plan_result = self.plan(aspects=aspects)
+        # Populate self._plan; the returned plan is consumed via self._plan.
+        self.plan(aspects=aspects)
 
         if aspects.dry_run is True:
             rtnval: Dict[str, ProvisioningResult] = {}

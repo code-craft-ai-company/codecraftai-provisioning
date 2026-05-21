@@ -22,9 +22,7 @@ from automojo.provisioning.model.cloud.provisionedresource import (
 from automojo.provisioning.venues.aws.awsboto3sessionfactory import (
     AwsBoto3SessionFactory
 )
-from automojo.provisioning.venues.aws.awsidempotency import (
-    is_owned, tag_dict_from_aws
-)
+from automojo.provisioning.venues.aws.awsidempotency import tag_dict_from_aws
 from automojo.provisioning.venues.aws.awstagging import (
     base_resource_tags, to_aws, from_aws, RESOURCE_NAME_TAG_KEY,
     OWNER_TAG_KEY, OWNER_TAG_VALUE, RUN_ID_TAG_KEY

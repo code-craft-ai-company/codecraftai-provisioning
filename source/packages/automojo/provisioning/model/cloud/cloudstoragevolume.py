@@ -13,7 +13,7 @@ __credits__ = []
 
 import os
 
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional, Union
 
 from automojo.restclient.base.schemaobject import SchemaObject
 from automojo.restclient.base.schemafield import Field

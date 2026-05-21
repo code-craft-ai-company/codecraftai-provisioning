@@ -21,7 +21,8 @@ from automojo.provisioning.venues.aws.awsboto3sessionfactory import (
     AwsBoto3SessionFactory
 )
 from automojo.provisioning.venues.aws.awsidempotency import (
-    is_owned, owner_filters, tag_dict_from_aws
+    owner_filters,
+    tag_dict_from_aws,
 )
 from automojo.provisioning.venues.aws.awstagging import (
     base_resource_tags, tag_specifications, RESOURCE_NAME_TAG_KEY

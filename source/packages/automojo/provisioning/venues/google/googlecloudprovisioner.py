@@ -27,6 +27,7 @@ from automojo.provisioning.model.cloud.cloudacceleratorcatalog import (
 )
 from automojo.provisioning.model.cloud.cloudprovisioner import CloudProvisioner
 from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
+from automojo.provisioning.model.cloud.plannedaction import PlannedAction
 from automojo.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
@@ -41,9 +42,7 @@ from automojo.provisioning.model.cloud.validationresult import ValidationResult
 from automojo.provisioning.model.exceptions import SchemaSemanticError
 from automojo.provisioning.venues.vpncleanup import delete_vpn_device
 
-from automojo.provisioning.venues.google.gcperrors import (
-    GcpValidationError, ConfirmationRequiredError
-)
+from automojo.provisioning.venues.google.gcperrors import GcpValidationError
 from automojo.provisioning.venues.google.gcpregionconfig import GcpRegionConfig
 from automojo.provisioning.venues.google.gcpsessionfactory import (
     GcpSessionFactory
@@ -569,7 +568,72 @@ class GoogleCloudProvisioner(CloudProvisioner):
                 diff={"note": "Load balancer apply is deferred to v1.5."},
             ))
 
+        # Owned-orphan scan: any resource still tagged automojo:owner=<run_id>
+        # that no longer appears in the desired spec is an orphan and is
+        # planned for DELETE.  Mirrors the AWS venue's approach so that drift
+        # is surfaced up front.
+        orphan_actions = self._plan_owned_orphans(run_id=run_id, spec=spec)
+        for action in orphan_actions:
+            actions.append(action)
+
         rtnval = ProvisioningPlan(actions=actions)
+        return rtnval
+
+    def _plan_owned_orphans(self, *, run_id: str, spec: GcpSpec
+                            ) -> List[PlannedAction]:
+        """
+            Build DELETE actions for owner-tagged resources absent from spec.
+
+            Enumerates the run's owned GCP resources through each per-kind
+            manager's ``list_owned`` and emits a ``DELETE`` PlannedAction for
+            every resource whose ``(kind, name)`` pair is not declared in the
+            desired spec.
+
+            :param run_id: The provisioning run identifier.
+            :param spec: The desired GcpSpec.
+
+            :returns: A list of DELETE PlannedAction entries.
+        """
+        zone = self._region_config.zone
+        region = self._region_config.region
+
+        # Instances and TPU nodes both originate from spec.instances; the
+        # owned-resource kind is "instance" or "tpu" depending on the node.
+        instance_names = {inst.name for inst in spec.instances}
+        desired_by_kind: Dict[str, set] = {
+            "network": {net.name for net in spec.networks},
+            "subnet": {subnet.name for subnet in spec.subnets},
+            "firewall": {sg.name for sg in spec.security_groups},
+            "instance": instance_names,
+            "tpu": instance_names,
+            "volume": {vol.name for vol in spec.volumes},
+            "bucket": {bucket.name for bucket in spec.buckets},
+        }
+
+        owned: List[ProvisionedResource] = []
+        owned.extend(self._network_mgr.list_owned(run_id=run_id))
+        owned.extend(self._subnet_mgr.list_owned(run_id=run_id,
+                                                 region=region))
+        owned.extend(self._firewall_mgr.list_owned(run_id=run_id))
+        owned.extend(self._instance_mgr.list_owned(run_id=run_id, zone=zone))
+        owned.extend(self._tpu_mgr.list_owned(run_id=run_id, zone=zone))
+        owned.extend(self._disk_mgr.list_owned(run_id=run_id, zone=zone))
+        owned.extend(self._bucket_mgr.list_owned(run_id=run_id))
+
+        out: List[PlannedAction] = []
+        for resource in owned:
+            declared = desired_by_kind.get(resource.kind, set())
+            if resource.name in declared:
+                continue
+            out.append(self._planned_action_for(
+                intent=PlannedActionIntent.DELETE,
+                resource_kind=resource.kind, resource_name=resource.name,
+                diff={"reason": ("Owner-tagged resource is absent from the "
+                                 "desired spec."),
+                      "venue_id": resource.venue_id},
+            ))
+
+        rtnval = out
         return rtnval
 
     # ------------------------------------------------------------------

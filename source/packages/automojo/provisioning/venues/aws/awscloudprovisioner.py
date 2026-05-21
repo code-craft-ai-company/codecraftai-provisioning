@@ -40,9 +40,7 @@ from automojo.provisioning.venues.vpncleanup import delete_vpn_device
 from automojo.provisioning.venues.aws.awsboto3sessionfactory import (
     AwsBoto3SessionFactory
 )
-from automojo.provisioning.venues.aws.awserrors import (
-    AwsValidationError, ConfirmationRequiredError
-)
+from automojo.provisioning.venues.aws.awserrors import AwsValidationError
 from automojo.provisioning.venues.aws.awsregionconfig import AwsRegionConfig
 from automojo.provisioning.venues.aws.awsspec import AwsSpec
 from automojo.provisioning.venues.aws.awstagging import (

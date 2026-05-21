@@ -11,7 +11,7 @@ __copyright__ = "Copyright 2026, Automation Mojo LLC"
 __credits__ = []
 
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from automojo.restclient.base.schemaobject import SchemaObject
 from automojo.restclient.base.schemafield import Field

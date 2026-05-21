@@ -44,9 +44,6 @@ from automojo.provisioning.venues.nebius.nebiusdestroystages import (
 from automojo.provisioning.venues.nebius.nebiuserrors import (
     ConfirmationRequiredError, NebiusValidationError
 )
-from automojo.provisioning.venues.nebius.nebiusgpucluster import (
-    NebiusGpuCluster
-)
 from automojo.provisioning.venues.nebius.nebiusinventory import (
     NebiusInventory
 )
