@@ -138,7 +138,7 @@ class CloudResourceProfile(SchemaObject):
                 target_cls.from_dict(effective_payload)
             except SchemaValidationError:
                 raise
-            except Exception as xcpt:
+            except (TypeError, KeyError, ValueError) as xcpt:
                 err_msg_lines = [
                     "Payload failed shape validation for resource kind."
                 ]

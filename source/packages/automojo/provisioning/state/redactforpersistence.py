@@ -11,7 +11,7 @@ __copyright__ = "Copyright 2026, Automation Mojo LLC"
 __credits__ = []
 
 
-from typing import Any, Iterable
+from typing import Any
 
 
 REDACTED_PLACEHOLDER: str = "<redacted>"
@@ -20,6 +20,15 @@ REDACTED_PLACEHOLDER: str = "<redacted>"
 _SENSITIVE_KEY_FRAGMENTS: tuple = (
     "authkey", "auth_key", "secret", "password",
     "token", "private_key", "client_secret",
+)
+
+
+# Path fragments that mark a cloud-init ``write_files`` entry as carrying a
+# secret in its (innocuously-named) ``content`` field. The auth key or
+# connector token is written to one of these files on the target host.
+_SENSITIVE_PATH_FRAGMENTS: tuple = (
+    "authkey", "auth_key", "tailscale/authkey",
+    "twingate/connector", "connector.conf",
 )
 
 
@@ -40,12 +49,38 @@ def _is_sensitive_key(*, key: str) -> bool:
     return rtnval
 
 
+def _is_sensitive_path(*, path_value: Any) -> bool:
+    """
+        Return True when a ``write_files`` entry path names a secret file.
+
+        :param path_value: The ``path`` value of a write_files-style dict.
+
+        :returns: True when the path is a known secret-bearing file.
+    """
+    if not isinstance(path_value, str):
+        rtnval = False
+        return rtnval
+    lowered = path_value.lower()
+    for fragment in _SENSITIVE_PATH_FRAGMENTS:
+        if fragment in lowered:
+            rtnval = True
+            return rtnval
+    rtnval = False
+    return rtnval
+
+
 def redact_for_persistence(*, value: Any) -> Any:
     """
         Walk a JSON-shaped structure and replace sensitive values.
 
         Dicts: any key whose name contains a sensitive fragment has its
         value replaced with ``REDACTED_PLACEHOLDER``.
+
+        Value-context: a cloud-init ``write_files`` entry carries the secret
+        under an innocuously-named ``content`` key.  When a dict declares a
+        ``path`` naming a known secret-bearing file (an auth-key or Twingate
+        connector file), its ``content`` value is redacted even though the
+        key name ``content`` is not itself sensitive.
 
         Lists/tuples: each element is recursively redacted.
 
@@ -54,9 +89,15 @@ def redact_for_persistence(*, value: Any) -> Any:
         :returns: A new structure with sensitive values redacted.
     """
     if isinstance(value, dict):
+        content_is_sensitive = False
+        if "content" in value and "path" in value:
+            content_is_sensitive = _is_sensitive_path(
+                path_value=value.get("path"))
         rebuilt: dict = {}
         for k, v in value.items():
             if _is_sensitive_key(key=k):
+                rebuilt[k] = REDACTED_PLACEHOLDER
+            elif k == "content" and content_is_sensitive is True:
                 rebuilt[k] = REDACTED_PLACEHOLDER
             else:
                 rebuilt[k] = redact_for_persistence(value=v)

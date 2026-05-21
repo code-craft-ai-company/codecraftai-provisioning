@@ -241,6 +241,38 @@ class EngineStateIntegrationTests(unittest.TestCase):
             )
         return
 
+    def test_apply_seeds_runid_so_destroy_after_apply_succeeds(self
+                                                               ) -> None:
+        """
+            PC-H4 regression: apply seeds aspects.runid when a state store is
+            configured, so a destroy issued with the same aspects object
+            after apply locates the persisted run instead of raising.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            store = ProvisioningStateStore(root=Path(tmp))
+            registry = CloudProvisionerRegistry()
+            registry.register(name="mock-east",
+                              provisioner=MockCloudProvisioner(
+                                  venue=_venue("mock-east"),
+                                  venue_spec={"instances": [{"name": "w"}]}))
+            engine = ProvisioningEngine(
+                spec=_multi_venue_spec(), registry=registry,
+                state_store=store,
+            )
+
+            aspects = ProvisioningAspects()
+            engine.apply(aspects=aspects)
+            # apply seeded the runid onto the aspects object.
+            self.assertEqual(aspects.runid, engine.runid)
+
+            # destroy with the same aspects object must not raise.
+            aspects.confirm = True
+            engine.destroy(aspects=aspects)
+            self.assertTrue(
+                (Path(tmp) / "{}.destroyed".format(engine.runid)).exists()
+            )
+        return
+
 
 if __name__ == "__main__":
     unittest.main()

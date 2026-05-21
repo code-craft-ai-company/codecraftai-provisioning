@@ -270,6 +270,11 @@ class ProvisioningEngine:
         if self._state_store is not None:
             self._state_store.create_run(runid=self._runid,
                                          venues=self._registry.names())
+            # Seed the runid onto the aspects so a destroy issued with the
+            # same aspects object after this apply (a state store is wired)
+            # can locate the persisted inventory instead of raising.
+            if aspects.runid is None:
+                aspects.runid = self._runid
 
         self._stage_apply_networking(aspects=aspects)
         self._stage_apply_compute(aspects=aspects)
@@ -552,10 +557,11 @@ class ProvisioningEngine:
                 return rtnval
             try:
                 rtnval = CloudInstance.from_dict(entry)
-            except Exception:
+            except SchemaValidationError:
                 # A spec entry too thin to promote (no image / size) cannot
                 # drive a typed preemption decision; fall back to None so the
-                # caller treats it as a plain verify miss.
+                # caller treats it as a plain verify miss. A SchemaSemanticError
+                # is intentionally NOT caught -- it must bubble.
                 rtnval = None
             return rtnval
         rtnval = None
@@ -731,9 +737,9 @@ class ProvisioningEngine:
         if self._state_store is not None:
             try:
                 self._state_store.append_log(runid=self._runid, line=line)
-            except Exception:
-                # Persistence must never break the pipeline; we already log
-                # via the module logger.
+            except OSError:
+                # A filesystem error appending the stage log must never break
+                # the pipeline; we already log via the module logger.
                 logger.warning("Failed to append stage log line.")
         return
 

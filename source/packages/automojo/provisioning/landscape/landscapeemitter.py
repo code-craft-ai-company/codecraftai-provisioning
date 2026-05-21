@@ -211,7 +211,11 @@ class LandscapeEmitter:
                 cached_devices[provider] = control_plane.list_devices(
                     aspects=aspects
                 )
-            except Exception as xcpt:
+            except (RuntimeError, OSError) as xcpt:
+                # A transport / runtime failure querying the control plane is
+                # non-fatal for landscape emission -- the overlay block is
+                # simply omitted. A SchemaSemanticError is not caught here;
+                # it must bubble.
                 logger.warning(
                     "Overlay query failed for provider=%r: %s",
                     provider, xcpt,

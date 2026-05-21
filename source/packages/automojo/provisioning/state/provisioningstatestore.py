@@ -21,6 +21,7 @@ import yaml
 
 from automojo.provisioning.model.exceptions import SchemaSemanticError
 from automojo.provisioning.state.atomicwrite import write_tmp_then_rename
+from automojo.provisioning.state.crossplatformlock import cross_platform_lock
 from automojo.provisioning.state.redactforpersistence import (
     redact_for_persistence
 )
@@ -264,47 +265,72 @@ class ProvisioningStateStore:
         self._update_index_status(runid=runid, status=status)
         return
 
+    def _index_lock_path(self) -> Path:
+        """
+            Return the advisory lock-file Path guarding ``index.yaml``.
+
+            :returns: The lock-file Path.
+        """
+        rtnval = self._root / "index.yaml.lock"
+        return rtnval
+
     def _append_index_entry(self, *, entry: RunIndexEntry) -> None:
         """
-            Append an index entry.
+            Append an index entry under an advisory cross-platform lock.
+
+            The read-modify-write of ``index.yaml`` is serialised through
+            :func:`cross_platform_lock` so concurrent provisioning runs do
+            not lose each other's index entries.
 
             :param entry: The RunIndexEntry.
+
+            :raises: ProvisioningLockTimeoutError
         """
         index_path = self._root / "index.yaml"
-        if index_path.exists():
-            with open(str(index_path), "r") as fh:
-                data = yaml.safe_load(fh) or []
-        else:
-            data = []
-        data.append(entry.to_dict())
-        write_tmp_then_rename(
-            path=index_path,
-            content=yaml.safe_dump(data, sort_keys=False),
-        )
+        with cross_platform_lock(path=self._index_lock_path()):
+            if index_path.exists():
+                with open(str(index_path), "r") as fh:
+                    data = yaml.safe_load(fh) or []
+            else:
+                data = []
+            data.append(entry.to_dict())
+            write_tmp_then_rename(
+                path=index_path,
+                content=yaml.safe_dump(data, sort_keys=False),
+            )
         return
 
     def _update_index_status(self, *, runid: str,
                              status: RunStatus) -> None:
         """
-            Update the index entry's status + finished timestamp.
+            Update the index entry's status + finished timestamp under an
+            advisory cross-platform lock.
+
+            The read-modify-write of ``index.yaml`` is serialised through
+            :func:`cross_platform_lock` so concurrent provisioning runs do
+            not clobber each other's status updates.
 
             :param runid: Run identifier.
             :param status: New status.
+
+            :raises: ProvisioningLockTimeoutError
         """
         index_path = self._root / "index.yaml"
-        if not index_path.exists():
-            return
-        with open(str(index_path), "r") as fh:
-            data = yaml.safe_load(fh) or []
-        finished = datetime.datetime.now(datetime.timezone.utc).isoformat()
-        for entry in data:
-            if entry.get("runid") == runid:
-                entry["status"] = status.value
-                entry["finished"] = finished
-        write_tmp_then_rename(
-            path=index_path,
-            content=yaml.safe_dump(data, sort_keys=False),
-        )
+        with cross_platform_lock(path=self._index_lock_path()):
+            if not index_path.exists():
+                return
+            with open(str(index_path), "r") as fh:
+                data = yaml.safe_load(fh) or []
+            finished = datetime.datetime.now(
+                datetime.timezone.utc).isoformat()
+            for entry in data:
+                if entry.get("runid") == runid:
+                    entry["status"] = status.value
+                    entry["finished"] = finished
+            write_tmp_then_rename(
+                path=index_path,
+                content=yaml.safe_dump(data, sort_keys=False),
+            )
         return
 
     @staticmethod
