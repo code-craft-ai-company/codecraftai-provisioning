@@ -358,6 +358,53 @@ class MockKubernetesClient:
         return
 
 
+class MockVpnControlPlane:
+    """
+        A minimal mock of the ``IVPNControlPlane`` surface — auth-key
+        minting and device de-registration.
+    """
+
+    def __init__(self) -> None:
+        """
+            Initialise the mock VPN control plane.
+
+            :returns: ``None``.
+        """
+        self.deleted_devices: List[str] = []
+        self._mint_count = 0
+        return
+
+    def mint_authkey(self, *, reusable: bool, ephemeral: bool,
+                     tags: List[str], ttl_seconds: int,
+                     aspects: Any = None) -> str:
+        """
+            Mint a deterministic fake auth key.
+
+            :param reusable: Whether the key is reusable.
+            :param ephemeral: Whether the registration is ephemeral.
+            :param tags: The tags bound to the key.
+            :param ttl_seconds: The key TTL.
+            :param aspects: Ignored behaviour control.
+
+            :returns: A fake auth-key string.
+        """
+        self._mint_count = self._mint_count + 1
+        rtnval = "tskey-fake-{}".format(self._mint_count)
+        return rtnval
+
+    def delete_device(self, *, device_id: str, aspects: Any = None) -> None:
+        """
+            Record a device de-registration.
+
+            :param device_id: The device identifier.
+            :param aspects: Ignored behaviour control.
+
+            :returns: ``None``.
+        """
+        self.deleted_devices.append(device_id)
+        return
+
+
 # ----------------------------------------------------------------------
 # Fixture builders
 # ----------------------------------------------------------------------
@@ -414,26 +461,30 @@ def make_service(*, name: str = "inference") -> WorkloadService:
 
 
 def make_spec(*, jobs=None, services=None,
-              sub_mode: Optional[str] = None) -> CoreweaveWorkloadSpec:
+              sub_mode: Optional[str] = None,
+              vpn_joins: Optional[dict] = None) -> CoreweaveWorkloadSpec:
     """
         Build a :class:`CoreweaveWorkloadSpec`.
 
         :param jobs: Optional job list.
         :param services: Optional service list.
         :param sub_mode: Optional sub-mode flag.
+        :param vpn_joins: Optional ``workload-name -> VPNJoinSpec`` map.
 
         :returns: A :class:`CoreweaveWorkloadSpec`.
     """
     rtnval = CoreweaveWorkloadSpec(run_id="run-0001", cluster_id="cluster-1",
                                    namespace="default", jobs=jobs,
-                                   services=services, sub_mode=sub_mode)
+                                   services=services, sub_mode=sub_mode,
+                                   vpn_joins=vpn_joins)
     return rtnval
 
 
 def make_provisioner(*, spec: Optional[CoreweaveWorkloadSpec] = None,
                      venue: Optional[WorkloadVenue] = None,
                      coreweave_client: Optional[MockCoreweaveClient] = None,
-                     kubernetes_client: Optional[MockKubernetesClient] = None) -> CoreweaveWorkloadProvisioner:
+                     kubernetes_client: Optional[MockKubernetesClient] = None,
+                     vpn_control_plane: Optional[Any] = None) -> CoreweaveWorkloadProvisioner:
     """
         Build a :class:`CoreweaveWorkloadProvisioner` wired to mock clients.
 
@@ -441,6 +492,7 @@ def make_provisioner(*, spec: Optional[CoreweaveWorkloadSpec] = None,
         :param venue: Optional workload venue.
         :param coreweave_client: Optional mock CoreWeave client.
         :param kubernetes_client: Optional mock Kubernetes client.
+        :param vpn_control_plane: Optional mock VPN control plane.
 
         :returns: A :class:`CoreweaveWorkloadProvisioner`.
     """
@@ -455,5 +507,6 @@ def make_provisioner(*, spec: Optional[CoreweaveWorkloadSpec] = None,
 
     rtnval = CoreweaveWorkloadProvisioner(
         venue=venue, coreweave_client=coreweave_client, spec=spec,
-        kubernetes_client=kubernetes_client)
+        kubernetes_client=kubernetes_client,
+        vpn_control_plane=vpn_control_plane)
     return rtnval

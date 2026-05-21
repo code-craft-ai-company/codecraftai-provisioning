@@ -15,7 +15,7 @@ __credits__ = []
 import json
 import os
 
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from automojo.aspects.aspects import Aspects
 
@@ -464,7 +464,39 @@ class CoreweaveWorkloadProvisioner(WorkloadProvisioner):
             for entry in workload_resources:
                 created.append(entry)
 
+        self._record_vpn_devices()
+
         rtnval = ProvisioningResult(created=created)
+        return rtnval
+
+    def _record_vpn_devices(self) -> None:
+        """
+            Record the Tailscale device identifier of every VPN-joined
+            workload so :meth:`destroy` can de-register them.
+
+            A CoreWeave workload pod joins the tailnet under a hostname
+            equal to the workload name, which is the identifier the VPN
+            control plane de-registers.
+
+            :returns: ``None``.
+        """
+        if self._vpn_control_plane is None:
+            return
+
+        for workload_name in self._spec.vpn_joins.keys():
+            if workload_name not in self._registered_vpn_devices:
+                self._registered_vpn_devices.append(workload_name)
+
+        return
+
+    @property
+    def registered_vpn_devices(self) -> List[str]:
+        """
+            The Tailscale device identifiers recorded by the last apply.
+
+            :returns: A defensive copy of the recorded device id list.
+        """
+        rtnval = list(self._registered_vpn_devices)
         return rtnval
 
     def _apply_workloads(self, *, kube: KubernetesClient, namespace: str,
@@ -561,7 +593,7 @@ class CoreweaveWorkloadProvisioner(WorkloadProvisioner):
         if aspects is None:
             aspects = Aspects()
 
-        confirm = getattr(aspects, "confirm", True)
+        confirm = getattr(aspects, "confirm", False)
         if confirm is False:
             err_msg_lines = ["The CoreWeave destroy requires confirmation."]
             err_msg_lines.append("Set aspects.confirm=True to proceed.")
@@ -573,12 +605,20 @@ class CoreweaveWorkloadProvisioner(WorkloadProvisioner):
 
         # Reverse-order delete. The interop primitives treat an absent
         # resource as success (idempotent delete).
-        for service in self._spec.services:
-            kube.services.delete(name=service.name, namespace=namespace)
-            kube.deployments.delete(name=service.name, namespace=namespace)
+        if self._spec.sub_mode == "sunk":
+            self._destroy_sunk(kube=kube, namespace=namespace)
+        else:
+            for service in self._spec.services:
+                kube.services.delete(name=service.name, namespace=namespace)
+                kube.deployments.delete(name=service.name,
+                                        namespace=namespace)
 
-        for job in self._spec.jobs:
-            kube.jobs.delete(name=job.name, namespace=namespace)
+            for job in self._spec.jobs:
+                kube.jobs.delete(name=job.name, namespace=namespace)
+
+        # Shared-filesystem PVCs are torn down after the workloads that
+        # mount them.
+        self._destroy_pvcs(kube=kube, namespace=namespace)
 
         # De-register every VPN device that the apply registered.
         if self._vpn_control_plane is not None:
@@ -587,16 +627,89 @@ class CoreweaveWorkloadProvisioner(WorkloadProvisioner):
                                                       aspects=aspects)
 
         # The namespace is removed only when it is owned by this run.
+        ns_info = None
         try:
             ns_info = kube.namespaces.get(name=namespace)
+        except KeyError:
+            # An absent namespace is already destroyed.
+            ns_info = None
+
+        if ns_info is not None:
             ns_labels = getattr(ns_info, "labels", None)
             if ns_labels is not None:
                 owned = ns_labels.get(RUN_ID_LABEL, None) == self._spec.run_id
                 if owned is True:
                     kube.namespaces.delete(name=namespace)
-        except Exception:
-            # An absent namespace is already destroyed.
-            pass
+
+        return
+
+    def _destroy_sunk(self, *, kube: KubernetesClient,
+                      namespace: str) -> None:
+        """
+            Tear down the Sunk Slurm-on-K8s manifest bundle in reverse
+            render order.
+
+            The bundle is re-rendered deterministically so every manifest
+            it produced at apply-time is matched and deleted through the
+            owning Kubernetes primitive.
+
+            :param kube: The :class:`KubernetesClient`.
+            :param namespace: The target namespace.
+
+            :returns: ``None``.
+        """
+        workload_names = [job.name for job in self._spec.jobs]
+        bundle = self._sunk.render(namespace=namespace,
+                                   run_id=self._spec.run_id,
+                                   workload_names=workload_names)
+
+        primitive_for_kind = {
+            "StatefulSet": getattr(kube, "statefulsets", None),
+            "Deployment": getattr(kube, "deployments", None),
+            "DaemonSet": getattr(kube, "daemonsets", None),
+            "Job": getattr(kube, "jobs", None),
+            "Service": getattr(kube, "services", None),
+        }
+
+        for manifest in reversed(bundle):
+            kind = manifest["kind"]
+            name = manifest["metadata"]["name"]
+            primitive = primitive_for_kind.get(kind, None)
+            if primitive is None:
+                continue
+            primitive.delete(name=name, namespace=namespace)
+
+        return
+
+    def _destroy_pvcs(self, *, kube: KubernetesClient,
+                      namespace: str) -> None:
+        """
+            Delete the shared-filesystem PVCs declared by the spec.
+
+            Every shared-FS mount carried by a workload binds to a PVC
+            named after the filesystem; each is removed idempotently.
+
+            :param kube: The :class:`KubernetesClient`.
+            :param namespace: The target namespace.
+
+            :returns: ``None``.
+        """
+        pvcs = getattr(kube, "pvcs", None)
+        if pvcs is None:
+            return
+
+        seen: Dict[str, bool] = {}
+        all_workloads = list(self._spec.jobs) + list(self._spec.services)
+        for workload in all_workloads:
+            mounts = getattr(workload, "shared_fs_mounts", None)
+            if mounts is None:
+                continue
+            for mount in mounts:
+                fs_name = mount.filesystem_name
+                if fs_name in seen:
+                    continue
+                seen[fs_name] = True
+                pvcs.delete(name=fs_name, namespace=namespace)
 
         return
 

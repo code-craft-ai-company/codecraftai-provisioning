@@ -41,6 +41,24 @@ def test_validate_happy_path(fake_vultr, provisioner_factory, aspects) -> None:
     return
 
 
+def test_validate_rejects_unresolvable_region(fake_vultr,
+                                              provisioner_factory,
+                                              aspects) -> None:
+    """
+        Regression for PV-H2: a CloudNetwork region that does not resolve
+        to a real Vultr region is a validate-error, not an apply-time
+        surprise.
+    """
+    _fake, client = fake_vultr
+    spec = basic_spec()
+    spec.networks[0].region = "not-a-real-region"
+    provisioner = provisioner_factory(client=client, spec=spec)
+    with pytest.raises(VultrValidationError) as excinfo:
+        provisioner.validate(aspects=aspects)
+    assert "region" in str(excinfo.value).lower()
+    return
+
+
 @given(kind=st.sampled_from(["INFINIBAND_HDR", "INFINIBAND_NDR",
                              "INFINIBAND_XDR", "OCI_RDMA", "EFA"]))
 @settings(max_examples=10, deadline=None)

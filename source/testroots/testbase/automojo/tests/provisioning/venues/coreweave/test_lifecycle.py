@@ -22,9 +22,12 @@ from automojo.provisioning.venues.coreweave.cwerrors import (
     ConfirmationRequiredError, CwValidationError
 )
 
+from automojo.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+
 from automojo.tests.provisioning.venues.coreweave.testsupport import (
-    FakeNodePool, MockCoreweaveClient, MockKubernetesClient, make_gpu_job,
-    make_provisioner, make_service, make_slurm_venue, make_spec
+    FakeNodePool, MockCoreweaveClient, MockKubernetesClient,
+    MockVpnControlPlane, make_gpu_job, make_provisioner, make_service,
+    make_slurm_venue, make_spec
 )
 
 
@@ -174,6 +177,13 @@ def test_apply_sunk_sub_mode_renders_bundle():
 # destroy
 # ----------------------------------------------------------------------
 
+class _Confirm:
+    """
+        A minimal aspects stand-in carrying ``confirm=True``.
+    """
+    confirm = True
+
+
 def test_destroy_removes_workloads():
     """
         ``destroy`` removes the realised Job from the cluster.
@@ -182,7 +192,7 @@ def test_destroy_removes_workloads():
     provisioner = make_provisioner(spec=make_spec(jobs=[make_gpu_job()]),
                                    kubernetes_client=kube)
     provisioner.apply()
-    provisioner.destroy()
+    provisioner.destroy(aspects=_Confirm())
 
     with pytest.raises(KeyError):
         kube.jobs.get(name="trainer")
@@ -201,6 +211,92 @@ def test_destroy_without_confirm_raises():
 
     with pytest.raises(ConfirmationRequiredError):
         provisioner.destroy(aspects=_NoConfirm())
+    return
+
+
+def test_destroy_defaults_to_confirm_false():
+    """
+        ``destroy`` with no aspects defaults to ``confirm=False`` and
+        refuses to tear down — destruction is opt-in.
+    """
+    provisioner = make_provisioner(spec=make_spec(jobs=[make_gpu_job()]))
+    provisioner.apply()
+
+    with pytest.raises(ConfirmationRequiredError):
+        provisioner.destroy()
+    return
+
+
+def test_destroy_deregisters_recorded_vpn_devices():
+    """
+        Regression for PV-H5: ``apply`` records every VPN-joined workload's
+        device id and ``destroy`` de-registers each recorded id — the
+        cleanup path is no longer dead code.
+    """
+    vpn_join = VPNJoinSpec(provider="tailscale",
+                           control_plane_credential="ts-cred",
+                           hostname_template="trainer")
+    spec = make_spec(jobs=[make_gpu_job()],
+                     vpn_joins={"trainer": vpn_join})
+    vpn = MockVpnControlPlane()
+    provisioner = make_provisioner(spec=spec, vpn_control_plane=vpn)
+    provisioner.apply()
+
+    recorded = provisioner.registered_vpn_devices
+    assert len(recorded) == 1
+
+    provisioner.destroy(aspects=_Confirm())
+    assert vpn.deleted_devices == recorded
+    return
+
+
+class _SpecStub:
+    """
+        A minimal typed-spec stand-in carrying ``name`` and ``labels``.
+    """
+
+    def __init__(self, *, name: str) -> None:
+        self.name = name
+        self.labels = {}
+        return
+
+
+def test_destroy_sunk_tears_down_the_bundle():
+    """
+        Regression for PV-H6: a ``sub_mode='sunk'`` destroy tears down every
+        manifest in the rendered Sunk bundle through the Kubernetes
+        primitives, leaving the cluster clean.
+    """
+    kube = MockKubernetesClient()
+    spec = make_spec(jobs=[make_gpu_job()], sub_mode="sunk")
+    provisioner = make_provisioner(spec=spec, venue=make_slurm_venue(),
+                                   kubernetes_client=kube)
+    provisioner.apply()
+
+    # Re-render the bundle and seed the cluster store so destroy has
+    # something concrete to tear down.
+    from automojo.provisioning.venues.coreweave.cwsunkrenderer import (
+        CwSunkRenderer
+    )
+    bundle = CwSunkRenderer().render(namespace="default",
+                                     run_id=spec.run_id,
+                                     workload_names=["trainer"])
+    seeded = []
+    for manifest in bundle:
+        kind = manifest["kind"]
+        name = manifest["metadata"]["name"]
+        primitive = {"StatefulSet": kube.statefulsets,
+                     "Deployment": kube.deployments}.get(kind, None)
+        if primitive is not None:
+            primitive.apply(spec=_SpecStub(name=name), namespace="default")
+            seeded.append((primitive, name))
+    assert len(seeded) > 0
+
+    provisioner.destroy(aspects=_Confirm())
+
+    for primitive, name in seeded:
+        with pytest.raises(KeyError):
+            primitive.get(name=name, namespace="default")
     return
 
 

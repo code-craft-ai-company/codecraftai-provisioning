@@ -13,13 +13,18 @@ __credits__ = []
 
 from typing import Any, Dict, List
 
+from automojo.provisioning.model.cloud.provisionedresource import (
+    ProvisionedResource
+)
 from automojo.provisioning.venues.azure.azureidempotency import (
     belongs_to_run, get_or_none
 )
 from automojo.provisioning.venues.azure.azuresessionfactory import (
     AzureSessionFactory
 )
-from automojo.provisioning.venues.azure.azuretagging import azure_tags_for
+from automojo.provisioning.venues.azure.azuretagging import (
+    azure_tags_for, from_azure
+)
 
 
 class PlacementManager:
@@ -104,6 +109,46 @@ class PlacementManager:
             )
 
         rtnval = getattr(existing, "id", ppg_name)
+        return rtnval
+
+    def list_owned(self, *, resource_group: str,
+                   run_id: str) -> List[ProvisionedResource]:
+        """
+            Return every owned PPG in the ResourceGroup for the run.
+
+            :param resource_group: ResourceGroup name.
+            :param run_id: Run identifier.
+
+            :returns: List of ProvisionedResource entries.
+        """
+        client = self._compute()
+        out: List[ProvisionedResource] = []
+        try:
+            listing = list(
+                client.proximity_placement_groups.list_by_resource_group(
+                    resource_group_name=resource_group
+                )
+            )
+        except Exception:
+            rtnval = out
+            return rtnval
+
+        for ppg in listing:
+            live_tags = getattr(ppg, "tags", None)
+            if not belongs_to_run(azure_tags=live_tags, run_id=run_id):
+                continue
+            ppg_name = getattr(ppg, "name", "")
+            attributes: Dict[str, Any] = {}
+            attributes["ppg_name"] = ppg_name
+            attributes["resource_group"] = resource_group
+            out.append(ProvisionedResource(
+                kind=self.KIND, name=ppg_name,
+                venue_id=getattr(ppg, "id", ppg_name),
+                attributes=attributes,
+                tags=from_azure(azure_tags=live_tags),
+            ))
+
+        rtnval = out
         return rtnval
 
     def destroy(self, *, resource_group: str,

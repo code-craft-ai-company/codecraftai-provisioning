@@ -52,7 +52,7 @@ from automojo.provisioning.venues.xcpng.xcpngspec import XcpngSpec
 # acceptable.  A non-NONE interconnect is a validate-error.
 _REJECTED_INTERCONNECT_KINDS = frozenset({
     "INFINIBAND_HDR", "INFINIBAND_NDR", "INFINIBAND_XDR",
-    "ROCE", "NVLINK", "NVSWITCH",
+    "ROCE", "NVLINK", "NVSWITCH", "EFA", "OCI_RDMA",
 })
 
 

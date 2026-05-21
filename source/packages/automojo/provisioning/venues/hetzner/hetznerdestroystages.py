@@ -13,6 +13,8 @@ __credits__ = []
 
 from typing import Any, Dict, List, Optional
 
+from automojo.provisioning.venues.vpncleanup import delete_vpn_device
+
 from automojo.provisioning.venues.hetzner.hetznerlabeltranslator import (
     HetznerLabelTranslator
 )
@@ -96,11 +98,9 @@ class HetznerDestroyStages:
                 device_id = record.get("vpn_device_id", None)
                 if device_id is None or len(str(device_id)) == 0:
                     continue
-                try:
-                    self._vpn_control_plane.delete_device(
-                        device_id=device_id, aspects=aspects)
-                except Exception:
-                    pass
+                delete_vpn_device(
+                    vpn_control_plane=self._vpn_control_plane,
+                    device_id=device_id, aspects=aspects)
 
         # 4. SSH keys.
         for ssh_key in self._owned(collection=self._client.ssh_keys,

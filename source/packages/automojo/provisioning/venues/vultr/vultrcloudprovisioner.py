@@ -26,6 +26,8 @@ from automojo.provisioning.model.cloud.provisioningresult import (
     ProvisioningResult
 )
 from automojo.provisioning.model.cloud.validationresult import ValidationResult
+from automojo.provisioning.venues.vpncleanup import delete_vpn_device
+
 from automojo.provisioning.venues.vultr.vultrapplystages import (
     VultrApplyStages
 )
@@ -152,6 +154,24 @@ class VultrCloudProvisioner(CloudProvisioner):
             return rtnval
 
         errors: List[Dict[str, Any]] = []
+
+        # Confirm every declared network region resolves to a real Vultr
+        # region so an unresolvable region fails validate, not apply.
+        for net in spec.networks:
+            region = getattr(net, "region", None)
+            if region is None or len(region) == 0:
+                errors.append({
+                    "resource": net.name,
+                    "error": "CloudNetwork has no region; a Vultr region "
+                             "slug is required.",
+                })
+                continue
+            if not self._resolver.region_is_known(region=region):
+                errors.append({
+                    "resource": net.name,
+                    "error": ("Region {!r} does not resolve to a known "
+                              "Vultr region.").format(region),
+                })
 
         for sfs in spec.shared_filesystems:
             if sfs.kind in _REJECTED_FS_KINDS:
@@ -311,12 +331,8 @@ class VultrCloudProvisioner(CloudProvisioner):
             device_id = record.get("vpn_device_id", None)
             if device_id is None or len(str(device_id)) == 0:
                 continue
-            try:
-                self._vpn_control_plane.delete_device(
-                    device_id=device_id, aspects=aspects
-                )
-            except Exception:
-                pass
+            delete_vpn_device(vpn_control_plane=self._vpn_control_plane,
+                              device_id=device_id, aspects=aspects)
         return
 
     # ------------------------------------------------------------------

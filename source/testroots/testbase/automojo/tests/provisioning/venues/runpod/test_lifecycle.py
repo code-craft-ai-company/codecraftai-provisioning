@@ -267,6 +267,13 @@ def test_apply_renders_userspace_tailscale_for_vpn_pod():
 # destroy
 # ----------------------------------------------------------------------
 
+class _Confirm:
+    """
+        A minimal aspects stand-in carrying ``confirm=True``.
+    """
+    confirm = True
+
+
 def test_destroy_terminates_run_pods():
     """
         ``destroy`` stops and terminates every pod owned by the run.
@@ -276,7 +283,7 @@ def test_destroy_terminates_run_pods():
     provisioner = make_provisioner(spec=spec, runpod_client=client)
     provisioner.apply()
 
-    provisioner.destroy()
+    provisioner.destroy(aspects=_Confirm())
     assert client.terminate_count >= 1
     assert len(client.list_pods()) == 0
 
@@ -295,6 +302,40 @@ def test_destroy_without_confirm_raises():
         provisioner.destroy(aspects=_Aspects())
 
 
+def test_destroy_defaults_to_confirm_false():
+    """
+        ``destroy`` with no aspects defaults to ``confirm=False`` and
+        refuses to tear down — destruction is opt-in.
+    """
+    spec = make_spec(jobs=[make_gpu_job()])
+    provisioner = make_provisioner(spec=spec)
+    with pytest.raises(ConfirmationRequiredError):
+        provisioner.destroy()
+
+
+def test_destroy_deregisters_recorded_vpn_devices():
+    """
+        Regression for PV-H8: ``apply`` records every VPN-joined pod's
+        Tailscale device id and ``destroy`` de-registers each recorded id.
+    """
+    vpn_join = VPNJoinSpec(provider="tailscale",
+                           control_plane_credential="ts-cred",
+                           hostname_template="trainer-pod")
+    spec = make_spec(jobs=[make_gpu_job()],
+                     vpn_joins={"trainer": vpn_join})
+    client = MockRunpodClient()
+    vpn = MockVpnControlPlane()
+    provisioner = make_provisioner(spec=spec, runpod_client=client,
+                                   vpn_control_plane=vpn)
+    provisioner.apply()
+
+    recorded = provisioner.registered_vpn_devices
+    assert len(recorded) == 1
+
+    provisioner.destroy(aspects=_Confirm())
+    assert vpn.deleted_devices == recorded
+
+
 def test_destroy_deletes_run_network_volumes():
     """
         ``destroy`` deletes the Network Volumes owned by the run.
@@ -306,7 +347,7 @@ def test_destroy_deletes_run_network_volumes():
     provisioner.apply()
     assert len(client.list_network_volumes()) == 1
 
-    provisioner.destroy()
+    provisioner.destroy(aspects=_Confirm())
     assert len(client.list_network_volumes()) == 0
 
 
