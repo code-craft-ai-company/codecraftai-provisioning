@@ -25,9 +25,8 @@ def venue() -> CloudVenue:
         Return a CloudVenue for the Nutanix venue tests.
     """
     rtnval = CloudVenue(name="nutanix-test", provider="nutanix",
-                        management_url="https://prism.example.com:9440",
-                        subscription="homelab", region="homelab",
-                        credential="ntx-test")
+                        endpoint="https://prism.example.com:9440",
+                        region="homelab", credential="ntx-test")
     return rtnval
 
 

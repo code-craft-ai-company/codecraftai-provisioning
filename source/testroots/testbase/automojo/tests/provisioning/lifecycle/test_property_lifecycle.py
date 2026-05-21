@@ -30,9 +30,7 @@ _KINDS = ("network", "subnet", "sg", "instance", "volume", "bucket",
 
 def _venue() -> CloudVenue:
     rtnval = CloudVenue(name="lab", provider="fake",
-                        management_url="https://fake",
-                        subscription="sub", region="r1",
-                        credential="cred")
+                        region="r1", credential="cred")
     return rtnval
 
 

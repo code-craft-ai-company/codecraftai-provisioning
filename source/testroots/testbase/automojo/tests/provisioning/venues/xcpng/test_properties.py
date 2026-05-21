@@ -40,9 +40,8 @@ def _venue() -> CloudVenue:
         :returns: A CloudVenue instance.
     """
     rtnval = CloudVenue(name="xcpng-prop", provider="xcpng",
-                        management_url="https://xen.lab",
-                        subscription="homelab", region="homelab",
-                        credential="xen-cred")
+                        endpoint="https://xen.lab",
+                        region="homelab", credential="xen-cred")
     return rtnval
 
 

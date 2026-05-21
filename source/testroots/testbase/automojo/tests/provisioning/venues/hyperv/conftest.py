@@ -79,9 +79,8 @@ def venue() -> CloudVenue:
         :returns: A CloudVenue instance.
     """
     rtnval = CloudVenue(name="hyperv-test", provider="hyperv",
-                        management_url="winrm://hv-host:5985",
-                        subscription="lab", region="lab",
-                        credential="hv-cred")
+                        endpoint="winrm://hv-host:5985",
+                        region="lab", credential="hv-cred")
     return rtnval
 
 

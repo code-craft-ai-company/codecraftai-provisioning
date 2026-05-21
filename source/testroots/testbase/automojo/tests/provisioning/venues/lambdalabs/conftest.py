@@ -39,9 +39,7 @@ def venue() -> CloudVenue:
         Return a CloudVenue for the Lambda Labs venue tests.
     """
     rtnval = CloudVenue(name="lambdalabs-test", provider="lambdalabs",
-                        management_url="https://cloud.lambdalabs.com",
-                        subscription="test-account", region="us-east-1",
-                        credential="ll-test")
+                        region="us-east-1", credential="ll-test")
     return rtnval
 
 

@@ -19,6 +19,7 @@ from hypothesis import given, settings, strategies as st
 from automojo.provisioning.model.exceptions import (
     SchemaValidationError, SchemaSemanticError
 )
+from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
 from automojo.provisioning.model.cloud.cloudnetwork import CloudNetwork
 from automojo.provisioning.model.cloud.cloudsubnet import CloudSubnet
 from automojo.provisioning.model.cloud.cloudingressrule import CloudIngressRule
@@ -45,6 +46,36 @@ from automojo.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
 def _basic_image() -> CloudImage:
     rtnval = CloudImage(family="ubuntu", version="24.04", architecture="x86_64")
     return rtnval
+
+
+class CloudVenueTests(unittest.TestCase):
+
+    def test_optional_fields_default(self) -> None:
+        venue = CloudVenue(name="lab", provider="fake", region="r1",
+                           credential="cred")
+        self.assertIsNone(venue.account)
+        self.assertIsNone(venue.endpoint)
+        self.assertEqual(venue.settings, {})
+        return
+
+    def test_settings_default_not_shared(self) -> None:
+        venue_a = CloudVenue(name="a", provider="fake", region="r1",
+                             credential="cred")
+        venue_b = CloudVenue(name="b", provider="fake", region="r1",
+                             credential="cred")
+        venue_a.settings["key"] = "value"
+        self.assertEqual(venue_b.settings, {})
+        return
+
+    def test_accepts_account_endpoint_settings(self) -> None:
+        venue = CloudVenue(name="azure-lab", provider="azure", region="eastus",
+                           credential="azure-cred", account="sub-0001",
+                           endpoint="https://vcenter.lab",
+                           settings={"native_key": "native_value"})
+        self.assertEqual(venue.account, "sub-0001")
+        self.assertEqual(venue.endpoint, "https://vcenter.lab")
+        self.assertEqual(venue.settings, {"native_key": "native_value"})
+        return
 
 
 class CloudNetworkTests(unittest.TestCase):

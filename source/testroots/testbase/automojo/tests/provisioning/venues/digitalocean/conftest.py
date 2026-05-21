@@ -61,9 +61,7 @@ def venue() -> CloudVenue:
     """
     rtnval = CloudVenue(
         name="do-test", provider="digitalocean",
-        management_url="https://cloud.digitalocean.com",
-        subscription="test-account", region="nyc3",
-        credential="do-test",
+        region="nyc3", credential="do-test",
     )
     return rtnval
 

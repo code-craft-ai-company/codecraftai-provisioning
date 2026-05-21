@@ -57,8 +57,7 @@ def _make_provisioner(*, spec):
     )
     venue = CloudVenue(
         name="oci-test", provider="oracle",
-        management_url="https://cloud.oracle.com",
-        subscription="test-tenancy",
+        account="test-tenancy",
         region="us-ashburn-1", credential="oci-test",
     )
     provisioner = OracleCloudProvisioner(

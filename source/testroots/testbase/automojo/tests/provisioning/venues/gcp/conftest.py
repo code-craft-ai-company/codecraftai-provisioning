@@ -69,8 +69,7 @@ def venue() -> CloudVenue:
     """
     rtnval = CloudVenue(
         name="gcp-test", provider="gcp",
-        management_url="https://console.cloud.google.com",
-        subscription="automojo-test",
+        account="automojo-test",
         region="us-central1", credential="gcp-test",
     )
     return rtnval

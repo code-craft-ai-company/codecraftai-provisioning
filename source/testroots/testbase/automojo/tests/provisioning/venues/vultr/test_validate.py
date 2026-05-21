@@ -65,9 +65,7 @@ def test_validate_rejects_interconnect(kind) -> None:
     spec = basic_spec(interconnect=interconnect)
 
     venue = CloudVenue(name="vultr-test", provider="vultr",
-                       management_url="https://api.vultr.com",
-                       subscription="acct", region="ewr",
-                       credential="vultr-test")
+                       region="ewr", credential="vultr-test")
     credential = VultrApiKeyCredential(identifier="vultr-test",
                                        categories=["cloud-venue"],
                                        token="test-api-key")
@@ -108,9 +106,7 @@ def test_validate_rejects_shared_fs(kind) -> None:
     spec = basic_spec(shared_filesystems=[sfs])
 
     venue = CloudVenue(name="vultr-test", provider="vultr",
-                       management_url="https://api.vultr.com",
-                       subscription="acct", region="ewr",
-                       credential="vultr-test")
+                       region="ewr", credential="vultr-test")
     credential = VultrApiKeyCredential(identifier="vultr-test",
                                        categories=["cloud-venue"],
                                        token="test-api-key")

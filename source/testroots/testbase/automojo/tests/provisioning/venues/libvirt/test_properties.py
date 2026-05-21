@@ -48,9 +48,8 @@ def _venue() -> CloudVenue:
         :returns: A CloudVenue instance.
     """
     rtnval = CloudVenue(name="libvirt-prop", provider="libvirt",
-                        management_url="qemu:///system",
-                        subscription="host", region="local",
-                        credential="lv")
+                        endpoint="qemu:///system",
+                        region="local", credential="lv")
     return rtnval
 
 

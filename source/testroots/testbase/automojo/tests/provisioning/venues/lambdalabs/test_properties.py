@@ -52,9 +52,7 @@ def _venue() -> CloudVenue:
         :returns: A CloudVenue instance.
     """
     rtnval = CloudVenue(name="lambdalabs-prop", provider="lambdalabs",
-                        management_url="https://cloud.lambdalabs.com",
-                        subscription="acct", region="us-east-1",
-                        credential="ll")
+                        region="us-east-1", credential="ll")
     return rtnval
 
 

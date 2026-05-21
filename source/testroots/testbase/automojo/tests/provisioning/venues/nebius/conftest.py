@@ -41,8 +41,7 @@ def venue() -> CloudVenue:
     """
     rtnval = CloudVenue(
         name="nebius-test", provider="nebius",
-        management_url="https://api.nebius.cloud",
-        subscription="proj-test", region="eu-north1",
+        account="proj-test", region="eu-north1",
         credential="nebius-test",
     )
     return rtnval

@@ -287,7 +287,7 @@ def test_apply_idempotence_property(size) -> None:
 
     venue = CloudVenue(
         name="vsphere-prop", provider="vsphere",
-        management_url="https://vcenter.lab", subscription="homelab",
+        endpoint="https://vcenter.lab",
         region="homelab", credential="vsphere-prop",
     )
     credential = VSphereCredential(
