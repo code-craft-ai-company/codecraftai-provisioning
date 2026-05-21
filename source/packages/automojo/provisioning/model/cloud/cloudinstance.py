@@ -90,7 +90,11 @@ class CloudInstance(SchemaObject):
             :param name: Instance name.
             :param profile_ref: Reference to a CloudResourceProfile name.
             :param image: CloudImage descriptor.
-            :param size: Venue-neutral size identifier.
+            :param size: A neutral instance-size token from the
+                         CloudInstanceSizeCatalog (e.g. ``general.large``),
+                         OR a venue-native size string for power users.
+                         Venue resolvers translate neutral tokens via the
+                         catalog and pass native strings through unchanged.
             :param subnet: Name of the parent CloudSubnet.
             :param security_groups: Optional list of CloudSecurityGroup names.
             :param keypair: Optional CloudKeyPair name.

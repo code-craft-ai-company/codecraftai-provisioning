@@ -16,6 +16,10 @@ import os
 
 from typing import Any, List, Optional
 
+from automojo.provisioning.model.cloud.cloudinstancesizecatalog import (
+    CloudInstanceSizeCatalog
+)
+
 from automojo.provisioning.venues.digitalocean.doerrors import (
     DoValidationError
 )
@@ -109,6 +113,11 @@ class DoResolver:
             :returns: A DigitalOcean size slug.
             :raises: DoValidationError
         """
+        size_catalog = CloudInstanceSizeCatalog.default()
+        native = size_catalog.resolve(token=size_hint, venue="digitalocean")
+        effective = native if native is not None else size_hint
+        size_hint = effective
+
         effective_accels = accelerators if accelerators is not None else []
         if len(effective_accels) > 0:
             first = effective_accels[0]

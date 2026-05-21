@@ -16,6 +16,10 @@ import os
 
 from typing import Dict, List, Optional
 
+from automojo.provisioning.model.cloud.cloudinstancesizecatalog import (
+    CloudInstanceSizeCatalog
+)
+
 from automojo.provisioning.venues.linode.linodeerrors import (
     LinodeValidationError
 )
@@ -117,6 +121,11 @@ class LinodeResolver:
             :returns: A Linode type slug.
             :raises: LinodeValidationError
         """
+        size_catalog = CloudInstanceSizeCatalog.default()
+        native = size_catalog.resolve(token=size_hint, venue="linode")
+        effective = native if native is not None else size_hint
+        size_hint = effective
+
         effective_accelerators = accelerators if accelerators is not None else []
         if len(effective_accelerators) > 0:
             first_model = effective_accelerators[0]

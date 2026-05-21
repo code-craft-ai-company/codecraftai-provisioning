@@ -19,6 +19,9 @@ from typing import List, Optional
 from automojo.provisioning.model.cloud.cloudacceleratorcatalog import (
     CloudAcceleratorCatalog
 )
+from automojo.provisioning.model.cloud.cloudinstancesizecatalog import (
+    CloudInstanceSizeCatalog
+)
 from automojo.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
@@ -109,6 +112,11 @@ class CrusoeResolver:
             :raises: SchemaSemanticError when an accelerator is not on the
                 Crusoe venue.
         """
+        size_catalog = CloudInstanceSizeCatalog.default()
+        native = size_catalog.resolve(token=size_hint, venue=VENUE_NAME)
+        effective = native if native is not None else size_hint
+        size_hint = effective
+
         accel_list = accelerators if accelerators is not None else []
         if len(accel_list) > 0:
             first = accel_list[0]

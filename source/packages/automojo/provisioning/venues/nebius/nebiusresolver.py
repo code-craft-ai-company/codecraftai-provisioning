@@ -19,6 +19,9 @@ from typing import Any, List, Optional
 from automojo.provisioning.model.cloud.cloudacceleratorcatalog import (
     CloudAcceleratorCatalog
 )
+from automojo.provisioning.model.cloud.cloudinstancesizecatalog import (
+    CloudInstanceSizeCatalog
+)
 from automojo.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
@@ -109,6 +112,11 @@ class NebiusResolver:
             :raises: NebiusValidationError when the accelerator is not on
                 the Nebius venue.
         """
+        size_catalog = CloudInstanceSizeCatalog.default()
+        native = size_catalog.resolve(token=size_hint, venue=self.VENUE_NAME)
+        effective = native if native is not None else size_hint
+        size_hint = effective
+
         effective_accelerators = accelerators if accelerators is not None else []
 
         if len(effective_accelerators) > 0:

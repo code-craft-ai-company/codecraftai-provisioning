@@ -115,7 +115,8 @@ class CloudInstance(SchemaObject):
     name: str
     profile_ref: str
     image: CloudImage
-    size: str
+    size: str          # neutral instance-size token (CloudInstanceSizeCatalog,
+                       # e.g. "general.large") OR a venue-native size string.
     subnet: str
     security_groups: List[str]
     keypair: Optional[str]

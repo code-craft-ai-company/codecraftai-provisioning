@@ -15,6 +15,10 @@ import os
 
 from typing import List, Optional
 
+from automojo.provisioning.model.cloud.cloudinstancesizecatalog import (
+    CloudInstanceSizeCatalog
+)
+
 from automojo.provisioning.venues.hetzner.hetznererrors import (
     HetznerValidationError
 )
@@ -106,6 +110,11 @@ class HetznerResolver:
             :returns: The Hetzner server-type slug.
             :raises: HetznerValidationError
         """
+        size_catalog = CloudInstanceSizeCatalog.default()
+        native = size_catalog.resolve(token=size_hint, venue="hetzner")
+        effective = native if native is not None else size_hint
+        size_hint = effective
+
         effective_accelerators = accelerators if accelerators is not None else []
 
         if len(effective_accelerators) > 0:

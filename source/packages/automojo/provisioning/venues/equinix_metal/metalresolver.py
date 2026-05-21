@@ -16,6 +16,10 @@ import os
 
 from typing import Dict, List, Optional
 
+from automojo.provisioning.model.cloud.cloudinstancesizecatalog import (
+    CloudInstanceSizeCatalog
+)
+
 from automojo.provisioning.venues.equinix_metal.metalerrors import (
     MetalValidationError
 )
@@ -168,6 +172,11 @@ class MetalResolver:
             :returns: An Equinix Metal plan slug.
             :raises: MetalValidationError
         """
+        size_catalog = CloudInstanceSizeCatalog.default()
+        native = size_catalog.resolve(token=size_hint, venue="equinix_metal")
+        effective = native if native is not None else size_hint
+        size_hint = effective
+
         resolved_plan: Optional[str] = None
 
         effective_accelerators = accelerators if accelerators is not None else []
