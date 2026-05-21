@@ -111,7 +111,7 @@ class DnsManager:
         rtnval = ProvisionedResource(
             kind=self.KIND, name=desired.name,
             venue_id=str(existing.get("id", "")),
-            attributes=attributes, tags=[],
+            attributes=attributes, tags={},
         )
         return rtnval
 
@@ -162,7 +162,7 @@ class DnsManager:
             entry = ProvisionedResource(
                 kind=self.KIND, name=desired.name,
                 venue_id=str(existing.get("id", "")),
-                attributes=attributes, tags=[],
+                attributes=attributes, tags={},
             )
             out.append(entry)
         rtnval = out

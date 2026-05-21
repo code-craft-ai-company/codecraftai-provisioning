@@ -46,7 +46,7 @@ def project_config() -> MetalProjectConfig:
     """
     rtnval = MetalProjectConfig(
         project_id="proj-test", metro="sv",
-        default_tags=[{"automojo:component": "test"}],
+        default_tags={"automojo:component": "test"},
     )
     return rtnval
 

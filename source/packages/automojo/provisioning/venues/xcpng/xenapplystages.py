@@ -233,7 +233,7 @@ class XenApplyStages:
             architecture=inst.image.architecture, aspects=aspects)
         shape = self._resolver.size_to_hardware(size_hint=inst.size)
 
-        neutral_tags = inst.tags if inst.tags is not None else []
+        neutral_tags = inst.tags if inst.tags is not None else {}
         translated = self._translator.to_xen(neutral_tags=neutral_tags,
                                               run_id=run_id)
 

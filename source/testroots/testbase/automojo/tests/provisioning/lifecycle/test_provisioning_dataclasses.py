@@ -89,7 +89,7 @@ class ProvisionedResourceTests(unittest.TestCase):
         res = ProvisionedResource(kind="instance", name="web-01",
                                   venue_id="i-12345",
                                   attributes={"public_ip": "203.0.113.10"},
-                                  tags=[{"role": "web"}])
+                                  tags={"role": "web"})
         rebuilt = ProvisionedResource.from_dict(res.to_dict())
         self.assertEqual(res, rebuilt)
         return

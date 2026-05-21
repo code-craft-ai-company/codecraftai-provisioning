@@ -99,7 +99,7 @@ class VsApplyStages:
                                 "switch": switch},
                     tags=base_resource_tags(
                         run_id=run_id, resource_name=subnet.name,
-                        resource_kind="subnet", extra=list(subnet.tags),
+                        resource_kind="subnet", extra=dict(subnet.tags),
                         defaults=self._config.default_tags,
                     ),
                 )
@@ -116,7 +116,7 @@ class VsApplyStages:
                             "switch": switch},
                 tags=base_resource_tags(
                     run_id=run_id, resource_name=subnet.name,
-                    resource_kind="subnet", extra=list(subnet.tags),
+                    resource_kind="subnet", extra=dict(subnet.tags),
                     defaults=self._config.default_tags,
                 ),
             )
@@ -171,7 +171,7 @@ class VsApplyStages:
                     attributes={"vm_name": vm_name},
                     tags=base_resource_tags(
                         run_id=run_id, resource_name=instance.name,
-                        resource_kind="instance", extra=list(instance.tags),
+                        resource_kind="instance", extra=dict(instance.tags),
                         defaults=self._config.default_tags,
                     ),
                 )
@@ -262,7 +262,7 @@ class VsApplyStages:
                 attributes=attributes,
                 tags=base_resource_tags(
                     run_id=run_id, resource_name=instance.name,
-                    resource_kind="instance", extra=list(instance.tags),
+                    resource_kind="instance", extra=dict(instance.tags),
                     defaults=self._config.default_tags,
                 ),
             )
@@ -321,7 +321,7 @@ class VsApplyStages:
                             "attached_to_vm": target_vm_id},
                 tags=base_resource_tags(
                     run_id=run_id, resource_name=volume.name,
-                    resource_kind="volume", extra=list(volume.tags),
+                    resource_kind="volume", extra=dict(volume.tags),
                     defaults=self._config.default_tags,
                 ),
             )

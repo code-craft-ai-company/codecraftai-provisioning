@@ -105,9 +105,8 @@ _TAG_VALUES = st.text(alphabet="abcdefghijklmnop0123", min_size=0,
 
 
 @settings(max_examples=60, deadline=None)
-@given(tags=st.lists(st.dictionaries(keys=_TAG_KEYS, values=_TAG_VALUES,
-                                     min_size=1, max_size=1),
-                     max_size=6),
+@given(tags=st.dictionaries(keys=_TAG_KEYS, values=_TAG_VALUES,
+                            min_size=0, max_size=6),
        run_id=st.text(alphabet="abcdef0123-", min_size=1, max_size=20))
 def test_notes_json_tag_round_trip_identity(tags, run_id):
     """
@@ -133,5 +132,5 @@ def test_notes_decode_tolerates_garbage():
     envelope = translator.decode(notes_str="this is a free-text note")
 
     assert envelope.run_id is None
-    assert envelope.tags == []
+    assert envelope.tags == {}
     return

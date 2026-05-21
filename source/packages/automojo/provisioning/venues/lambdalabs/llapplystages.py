@@ -179,7 +179,7 @@ class LlApplyStages:
 
             result.created.append(resource)
 
-            tags = inst.tags if inst.tags is not None else []
+            tags = inst.tags if inst.tags is not None else {}
             sidecar.write(neutral_tags=tags,
                           instance_id=resource.venue_id)
 
@@ -286,7 +286,7 @@ class LlApplyStages:
                         "instance_type": first.instance_type_name,
                         "status": first.status,
                         "venue_name": venue_name},
-            tags=inst.tags if inst.tags is not None else [],
+            tags=inst.tags if inst.tags is not None else {},
         )
         return rtnval
 
@@ -327,7 +327,7 @@ class LlApplyStages:
                         "instance_ids": list(cluster.instance_ids),
                         "status": cluster.status,
                         "venue_name": venue_name},
-            tags=inst.tags if inst.tags is not None else [],
+            tags=inst.tags if inst.tags is not None else {},
         )
         return rtnval
 

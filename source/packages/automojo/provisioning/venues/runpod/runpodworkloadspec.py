@@ -50,7 +50,7 @@ class RunpodWorkloadSpec:
                  subnets: Optional[List[Any]] = None,
                  security_groups: Optional[List[Any]] = None,
                  key_pairs: Optional[List[Any]] = None,
-                 tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct a :class:`RunpodWorkloadSpec`.
 
@@ -95,7 +95,7 @@ class RunpodWorkloadSpec:
         self.subnets = subnets if subnets is not None else []
         self.security_groups = security_groups if security_groups is not None else []
         self.key_pairs = key_pairs if key_pairs is not None else []
-        self.tags = tags if tags is not None else []
+        self.tags = tags if tags is not None else {}
         return
 
     @property

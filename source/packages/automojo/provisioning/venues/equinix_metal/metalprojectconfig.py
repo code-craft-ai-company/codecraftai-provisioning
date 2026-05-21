@@ -26,13 +26,13 @@ class MetalProjectConfig:
     """
 
     def __init__(self, *, project_id: str, metro: str,
-                 default_tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 default_tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct a MetalProjectConfig.
 
             :param project_id: Equinix Metal project identifier.
             :param metro: Default Equinix metro slug (e.g. ``sv``).
-            :param default_tags: Optional list of single-entry tag dicts to
+            :param default_tags: Optional flat dict of tag key/value pairs to
                                  apply to every created resource.
         """
         if project_id is None or len(project_id) == 0:
@@ -41,11 +41,11 @@ class MetalProjectConfig:
         if metro is None or len(metro) == 0:
             raise ValueError("MetalProjectConfig.metro must not be empty.")
 
-        effective_tags = default_tags if default_tags is not None else []
+        effective_tags = default_tags if default_tags is not None else {}
 
         self._project_id: str = project_id
         self._metro: str = metro
-        self._default_tags: List[Dict[str, str]] = effective_tags
+        self._default_tags: Dict[str, str] = effective_tags
         return
 
     @property
@@ -69,11 +69,11 @@ class MetalProjectConfig:
         return rtnval
 
     @property
-    def default_tags(self) -> List[Dict[str, str]]:
+    def default_tags(self) -> Dict[str, str]:
         """
             Return the list of default tag dicts.
 
             :returns: A defensive copy of the default tag list.
         """
-        rtnval = list(self._default_tags)
+        rtnval = dict(self._default_tags)
         return rtnval

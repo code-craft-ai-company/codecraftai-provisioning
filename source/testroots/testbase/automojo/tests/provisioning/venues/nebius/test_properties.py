@@ -126,12 +126,11 @@ def test_label_round_trip_identity_for_conformant_inputs(pairs):
         from_nebius and back is the identity transformation.
     """
     translator = NebiusLabelTranslator()
-    neutral = [{key: value} for key, value in sorted(pairs.items())]
 
-    labels = translator.to_nebius(neutral_tags=neutral)
+    labels = translator.to_nebius(neutral_tags=pairs)
     recovered = translator.from_nebius(labels=labels)
 
-    assert recovered == neutral
+    assert recovered == pairs
 
     # A second round-trip is stable.
     labels_again = translator.to_nebius(neutral_tags=recovered)

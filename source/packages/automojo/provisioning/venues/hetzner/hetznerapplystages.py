@@ -70,7 +70,7 @@ class HetznerApplyStages:
     """
 
     def __init__(self, *, client: Any,
-                 default_labels: List[Dict[str, str]],
+                 default_labels: Dict[str, str],
                  dns_client: Optional[Any] = None) -> None:
         """
             Construct a HetznerApplyStages.
@@ -80,7 +80,7 @@ class HetznerApplyStages:
             :param dns_client: Optional Hetzner DNS API client (or mock).
         """
         self._client: Any = client
-        self._default_labels: List[Dict[str, str]] = list(default_labels)
+        self._default_labels: Dict[str, str] = dict(default_labels)
         self._dns_client: Optional[Any] = dns_client
         return
 
@@ -116,7 +116,7 @@ class HetznerApplyStages:
 
             labels = HetznerLabelTranslator.base_labels(
                 run_id=run_id, resource_name=net.name,
-                resource_kind="network", extra=list(net.tags),
+                resource_kind="network", extra=dict(net.tags),
                 defaults=self._default_labels)
             live = self._client.networks.create(
                 name=net.name, ip_range=net.cidr, labels=labels)
@@ -135,7 +135,7 @@ class HetznerApplyStages:
 
             labels = HetznerLabelTranslator.base_labels(
                 run_id=run_id, resource_name=sg.name,
-                resource_kind="security_group", extra=list(sg.tags),
+                resource_kind="security_group", extra=dict(sg.tags),
                 defaults=self._default_labels)
             rules = self._firewall_rules_for(sg=sg)
             live = self._client.firewalls.create(
@@ -236,7 +236,7 @@ class HetznerApplyStages:
 
             labels = HetznerLabelTranslator.base_labels(
                 run_id=run_id, resource_name=inst.name,
-                resource_kind="instance", extra=list(inst.tags),
+                resource_kind="instance", extra=dict(inst.tags),
                 defaults=self._default_labels)
 
             live = self._client.servers.create(
@@ -275,7 +275,7 @@ class HetznerApplyStages:
 
             labels = HetznerLabelTranslator.base_labels(
                 run_id=run_id, resource_name=vol.name,
-                resource_kind="volume", extra=list(vol.tags),
+                resource_kind="volume", extra=dict(vol.tags),
                 defaults=self._default_labels)
             live = self._client.volumes.create(
                 name=vol.name, size=vol.size_gb, labels=labels)

@@ -73,12 +73,12 @@ class VsCategoryTag:
         return rtnval
 
 
-def to_vs(*, neutral_tags: Optional[List[Dict[str, str]]]
+def to_vs(*, neutral_tags: Optional[Dict[str, str]]
           ) -> List[VsCategoryTag]:
     """
-        Convert neutral single-entry tag dicts to vSphere category+tag pairs.
+        Convert a neutral flat tag dict to vSphere category+tag pairs.
 
-        :param neutral_tags: List of single-entry ``{key: value}`` dicts.
+        :param neutral_tags: Flat ``{key: value}`` dict of tag pairs.
 
         :returns: A key-sorted list of :class:`VsCategoryTag`.
         :raises: VsValidationError
@@ -88,35 +88,15 @@ def to_vs(*, neutral_tags: Optional[List[Dict[str, str]]]
         return rtnval
 
     pairs: List[VsCategoryTag] = []
-    seen_keys: Dict[str, str] = {}
-    for entry in neutral_tags:
-        if not isinstance(entry, dict):
-            err_msg_lines = ["Neutral tag entry is not a dict."]
-            err_msg_lines.append("ENTRY: {!r}".format(entry))
-            err_msg = os.linesep.join(err_msg_lines)
-            raise VsValidationError(err_msg)
-        if len(entry) != 1:
-            err_msg_lines = ["Neutral tag entry must be a single-key dict."]
-            err_msg_lines.append("ENTRY: {!r}".format(entry))
+    for key, value in neutral_tags.items():
+        if not isinstance(key, str) or not isinstance(value, str):
+            err_msg_lines = ["Tag key and value must be strings."]
+            err_msg_lines.append("KEY: {!r}".format(key))
+            err_msg_lines.append("VALUE: {!r}".format(value))
             err_msg = os.linesep.join(err_msg_lines)
             raise VsValidationError(err_msg)
 
-        for key, value in entry.items():
-            if not isinstance(key, str) or not isinstance(value, str):
-                err_msg_lines = ["Tag key and value must be strings."]
-                err_msg_lines.append("KEY: {!r}".format(key))
-                err_msg_lines.append("VALUE: {!r}".format(value))
-                err_msg = os.linesep.join(err_msg_lines)
-                raise VsValidationError(err_msg)
-
-            if key in seen_keys:
-                err_msg_lines = ["Duplicate tag key in neutral tag set."]
-                err_msg_lines.append("KEY: {}".format(key))
-                err_msg = os.linesep.join(err_msg_lines)
-                raise VsValidationError(err_msg)
-
-            seen_keys[key] = value
-            pairs.append(VsCategoryTag(category=key, tag=value))
+        pairs.append(VsCategoryTag(category=key, tag=value))
 
     pairs.sort(key=lambda p: p.category)
     rtnval = pairs
@@ -124,25 +104,25 @@ def to_vs(*, neutral_tags: Optional[List[Dict[str, str]]]
 
 
 def from_vs(*, refs: Optional[List[VsCategoryTag]]
-            ) -> List[Dict[str, str]]:
+            ) -> Dict[str, str]:
     """
-        Convert vSphere category+tag pairs back to neutral single-entry dicts.
+        Convert vSphere category+tag pairs back to a neutral flat tag dict.
 
         This is the exact inverse of :func:`to_vs`; round-tripping
         ``neutral -> to_vs -> from_vs`` is the identity for any input.
 
         :param refs: List of :class:`VsCategoryTag`.
 
-        :returns: A category-sorted list of single-entry neutral dicts.
+        :returns: A neutral flat ``{key: value}`` dict, category-sorted.
     """
+    out: Dict[str, str] = {}
     if refs is None:
-        rtnval: List[Dict[str, str]] = []
+        rtnval = out
         return rtnval
 
     sorted_refs = sorted(refs, key=lambda p: p.category)
-    out: List[Dict[str, str]] = []
     for ref in sorted_refs:
-        out.append({ref.category: ref.tag})
+        out[ref.category] = ref.tag
 
     rtnval = out
     return rtnval
@@ -150,11 +130,11 @@ def from_vs(*, refs: Optional[List[VsCategoryTag]]
 
 def base_resource_tags(*, run_id: str, resource_name: str,
                        resource_kind: str,
-                       extra: Optional[List[Dict[str, str]]] = None,
-                       defaults: Optional[List[Dict[str, str]]] = None
-                       ) -> List[Dict[str, str]]:
+                       extra: Optional[Dict[str, str]] = None,
+                       defaults: Optional[Dict[str, str]] = None
+                       ) -> Dict[str, str]:
     """
-        Build the full neutral tag list for a created vSphere resource.
+        Build the full neutral tag dict for a created vSphere resource.
 
         :param run_id: The provisioning run identifier.
         :param resource_name: Neutral resource name.
@@ -162,32 +142,32 @@ def base_resource_tags(*, run_id: str, resource_name: str,
         :param extra: Optional user-declared tags.
         :param defaults: Optional venue default tags.
 
-        :returns: Combined neutral tag list.
+        :returns: Combined neutral flat tag dict.
     """
-    combined: List[Dict[str, str]] = []
-    combined.append({OWNER_TAG_KEY: OWNER_TAG_VALUE})
-    combined.append({RUN_ID_TAG_KEY: run_id})
-    combined.append({RESOURCE_NAME_TAG_KEY: resource_name})
-    combined.append({RESOURCE_KIND_TAG_KEY: resource_kind})
+    combined: Dict[str, str] = {}
+    combined[OWNER_TAG_KEY] = OWNER_TAG_VALUE
+    combined[RUN_ID_TAG_KEY] = run_id
+    combined[RESOURCE_NAME_TAG_KEY] = resource_name
+    combined[RESOURCE_KIND_TAG_KEY] = resource_kind
 
     if defaults is not None:
-        for entry in defaults:
-            combined.append(dict(entry))
+        for key, value in defaults.items():
+            combined[key] = value
 
     if extra is not None:
-        for entry in extra:
-            combined.append(dict(entry))
+        for key, value in extra.items():
+            combined[key] = value
 
     rtnval = combined
     return rtnval
 
 
-def belongs_to_run(*, neutral_tags: Optional[List[Dict[str, str]]],
+def belongs_to_run(*, neutral_tags: Optional[Dict[str, str]],
                    run_id: str) -> bool:
     """
-        Check whether a neutral tag list carries the (owner, run-id) pair.
+        Check whether a neutral tag dict carries the (owner, run-id) pair.
 
-        :param neutral_tags: Neutral tag list.
+        :param neutral_tags: Neutral flat tag dict.
         :param run_id: Expected run-id value.
 
         :returns: True when owned by automojo and matching the run id.
@@ -196,10 +176,7 @@ def belongs_to_run(*, neutral_tags: Optional[List[Dict[str, str]]],
         rtnval = False
         return rtnval
 
-    flat: Dict[str, str] = {}
-    for entry in neutral_tags:
-        for key, value in entry.items():
-            flat[key] = value
+    flat: Dict[str, str] = dict(neutral_tags)
 
     if flat.get(OWNER_TAG_KEY, None) != OWNER_TAG_VALUE:
         rtnval = False

@@ -95,40 +95,40 @@ class RpSidecarTag:
             json.dump(document, file_handle, indent=2, sort_keys=True)
         return
 
-    def write(self, *, neutral_tags: List[Dict[str, str]],
+    def write(self, *, neutral_tags: Dict[str, str],
               pod_id: str) -> None:
         """
-            Record the neutral tag list for a pod id.
+            Record the neutral tag dict for a pod id.
 
-            :param neutral_tags: The neutral tag list (single-entry dicts).
+            :param neutral_tags: The neutral flat tag dict.
             :param pod_id: The RunPod pod id key.
 
             :returns: ``None``.
         """
         document = self._load()
         if neutral_tags is not None:
-            document[pod_id] = [dict(tag) for tag in neutral_tags]
+            document[pod_id] = dict(neutral_tags)
         else:
-            document[pod_id] = []
+            document[pod_id] = {}
         self._store(document=document)
         return
 
-    def read(self, *, pod_id: str) -> List[Dict[str, str]]:
+    def read(self, *, pod_id: str) -> Dict[str, str]:
         """
-            Recover the neutral tag list for a pod id.
+            Recover the neutral tag dict for a pod id.
 
             :param pod_id: The RunPod pod id key.
 
-            :returns: The neutral tag list, or an empty list when the id is
-                not recorded.
+            :returns: The neutral flat tag dict, or an empty dict when the id
+                is not recorded.
         """
         document = self._load()
         entry = document.get(pod_id, None)
         if entry is None:
-            rtnval: List[Dict[str, str]] = []
+            rtnval: Dict[str, str] = {}
             return rtnval
 
-        rtnval = [dict(tag) for tag in entry]
+        rtnval = dict(entry)
         return rtnval
 
     def all_pod_ids(self) -> List[str]:

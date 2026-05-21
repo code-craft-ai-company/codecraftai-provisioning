@@ -25,7 +25,7 @@ def test_to_vs_builds_category_tag_pairs() -> None:
     """
         Each neutral key becomes a category; each value becomes a tag.
     """
-    refs = to_vs(neutral_tags=[{"env": "prod"}, {"team": "infra"}])
+    refs = to_vs(neutral_tags={"env": "prod", "team": "infra"})
     categories = {ref.category for ref in refs}
     assert categories == {"env", "team"}
     by_cat = {ref.category: ref.tag for ref in refs}
@@ -33,21 +33,12 @@ def test_to_vs_builds_category_tag_pairs() -> None:
     return
 
 
-def test_to_vs_rejects_multi_key_entry() -> None:
+def test_to_vs_rejects_non_string_value() -> None:
     """
-        A multi-key neutral entry is rejected.
-    """
-    with pytest.raises(VsValidationError):
-        to_vs(neutral_tags=[{"a": "1", "b": "2"}])
-    return
-
-
-def test_to_vs_rejects_duplicate_key() -> None:
-    """
-        A duplicated neutral key is rejected.
+        A non-string tag value is rejected.
     """
     with pytest.raises(VsValidationError):
-        to_vs(neutral_tags=[{"env": "prod"}, {"env": "stage"}])
+        to_vs(neutral_tags={"a": 1})
     return
 
 
@@ -77,14 +68,7 @@ def test_category_tag_round_trip_identity(mapping) -> None:
     """
         Property: from_vs(to_vs(neutral)) is the identity for any input.
     """
-    neutral = [{key: value} for key, value in mapping.items()]
-    refs = to_vs(neutral_tags=neutral)
+    refs = to_vs(neutral_tags=mapping)
     restored = from_vs(refs=refs)
-
-    restored_map = {}
-    for entry in restored:
-        for key, value in entry.items():
-            restored_map[key] = value
-
-    assert restored_map == mapping
+    assert restored == mapping
     return

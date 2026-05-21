@@ -25,14 +25,14 @@ class AzureRegionConfig:
 
     def __init__(self, *, subscription_id: str, location: str,
                  resource_group: str,
-                 default_tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 default_tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct an AzureRegionConfig.
 
             :param subscription_id: Azure subscription id.
             :param location: Azure location / region (e.g. ``eastus``).
             :param resource_group: Apex ResourceGroup name for the run.
-            :param default_tags: Optional list of single-entry tag dicts to
+            :param default_tags: Optional flat dict of tag key/value pairs to
                                  apply to every created resource.
 
             :raises: ValueError
@@ -50,12 +50,12 @@ class AzureRegionConfig:
                 "AzureRegionConfig.resource_group must not be empty."
             )
 
-        effective_tags = default_tags if default_tags is not None else []
+        effective_tags = default_tags if default_tags is not None else {}
 
         self._subscription_id: str = subscription_id
         self._location: str = location
         self._resource_group: str = resource_group
-        self._default_tags: List[Dict[str, str]] = effective_tags
+        self._default_tags: Dict[str, str] = effective_tags
         return
 
     @property
@@ -89,11 +89,11 @@ class AzureRegionConfig:
         return rtnval
 
     @property
-    def default_tags(self) -> List[Dict[str, str]]:
+    def default_tags(self) -> Dict[str, str]:
         """
             Return the list of default tag dicts.
 
             :returns: A defensive copy of the default tag list.
         """
-        rtnval = list(self._default_tags)
+        rtnval = dict(self._default_tags)
         return rtnval

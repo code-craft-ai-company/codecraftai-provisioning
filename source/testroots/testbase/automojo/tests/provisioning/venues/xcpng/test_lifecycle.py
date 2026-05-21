@@ -213,12 +213,12 @@ def test_inventory_enumerates_run_owned_vms(venue, aspects):
         Inventory enumerates the run-id-tagged VM and recovers its tags.
     """
     client = MockXenClient()
-    spec = basic_spec(tags=[{"team": "qa"}])
+    spec = basic_spec(tags={"team": "qa"})
     provisioner = _provisioner(venue=venue, spec=spec, client=client)
     provisioner.apply(aspects=aspects)
 
     resources = provisioner.inventory(aspects=aspects)
     assert len(resources) == 1
     assert resources[0].kind == "instance"
-    assert {"team": "qa"} in resources[0].tags
+    assert resources[0].tags.get("team") == "qa"
     return

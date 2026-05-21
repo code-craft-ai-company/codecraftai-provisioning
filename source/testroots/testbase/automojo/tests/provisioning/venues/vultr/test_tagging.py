@@ -38,16 +38,9 @@ def test_tag_round_trip_identity(pairs) -> None:
     """
         from_vultr(to_vultr(tags)) is the identity over the key/value set.
     """
-    neutral = [{key: value} for key, value in pairs.items()]
-    vultr_tags = VultrTagTranslator.to_vultr(neutral_tags=neutral)
+    vultr_tags = VultrTagTranslator.to_vultr(neutral_tags=pairs)
     recovered = VultrTagTranslator.from_vultr(strings=vultr_tags)
-
-    rebuilt = {}
-    for entry in recovered:
-        for key, value in entry.items():
-            rebuilt[key] = value
-
-    assert rebuilt == pairs
+    assert recovered == pairs
     return
 
 
@@ -55,7 +48,7 @@ def test_tag_pair_encoded_as_single_string() -> None:
     """
         Each key=value pair encodes to exactly one string tag.
     """
-    neutral = [{"env": "prod"}, {"team": "automation"}]
+    neutral = {"env": "prod", "team": "automation"}
     vultr_tags = VultrTagTranslator.to_vultr(neutral_tags=neutral)
     assert vultr_tags == ["env=prod", "team=automation"]
     return
@@ -63,8 +56,8 @@ def test_tag_pair_encoded_as_single_string() -> None:
 
 def test_none_round_trips_to_empty() -> None:
     """
-        None tag inputs translate to empty lists both ways.
+        None tag inputs translate to empty containers both ways.
     """
     assert VultrTagTranslator.to_vultr(neutral_tags=None) == []
-    assert VultrTagTranslator.from_vultr(strings=None) == []
+    assert VultrTagTranslator.from_vultr(strings=None) == {}
     return

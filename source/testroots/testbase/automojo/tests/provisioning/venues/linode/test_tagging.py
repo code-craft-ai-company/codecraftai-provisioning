@@ -41,16 +41,11 @@ def test_tag_round_trip_identity(pairs) -> None:
         ``from_linode(to_linode(x))`` recovers the original tag set.
     """
     translator = LinodeTagTranslator()
-    neutral = [{key: value} for key, value in sorted(pairs.items())]
 
-    encoded = translator.to_linode(neutral_tags=neutral)
+    encoded = translator.to_linode(neutral_tags=pairs)
     decoded = translator.from_linode(strings=encoded)
 
-    recovered = {}
-    for entry in decoded:
-        for key, value in entry.items():
-            recovered[key] = value
-    assert recovered == pairs
+    assert decoded == pairs
     return
 
 

@@ -130,7 +130,7 @@ class NebiusApplyStages:
                                        resource_name=net.name) is not None
             labels = self._labels.base_labels(
                 run_id=run_id, resource_name=net.name,
-                resource_kind="network", extra=list(net.tags),
+                resource_kind="network", extra=dict(net.tags),
             )
             vpc_spec = NebiusVpcSpec(parent_id=spec.parent_id, name=net.name,
                                      ipv4_cidr_block=net.cidr, labels=labels)
@@ -156,7 +156,7 @@ class NebiusApplyStages:
                                        resource_name=subnet.name) is not None
             labels = self._labels.base_labels(
                 run_id=run_id, resource_name=subnet.name,
-                resource_kind="subnet", extra=list(subnet.tags),
+                resource_kind="subnet", extra=dict(subnet.tags),
             )
             subnet_spec = NebiusSubnetSpec(
                 vpc_id=vpc_id, name=subnet.name,
@@ -187,7 +187,7 @@ class NebiusApplyStages:
                                        resource_name=sg.name) is not None
             labels = self._labels.base_labels(
                 run_id=run_id, resource_name=sg.name,
-                resource_kind="security_group", extra=list(sg.tags),
+                resource_kind="security_group", extra=dict(sg.tags),
             )
             sg_spec = NebiusSecurityGroupSpec(
                 vpc_id=vpc_id, name=sg.name, labels=labels,
@@ -308,7 +308,7 @@ class NebiusApplyStages:
 
             labels = self._labels.base_labels(
                 run_id=run_id, resource_name=inst.name,
-                resource_kind="vm", extra=list(inst.tags),
+                resource_kind="vm", extra=dict(inst.tags),
             )
             vm_spec = NebiusVmSpec(
                 parent_id=spec.parent_id, name=inst.name, platform=platform,
@@ -350,7 +350,7 @@ class NebiusApplyStages:
 
             labels = self._labels.base_labels(
                 run_id=run_id, resource_name=vol.name,
-                resource_kind="disk", extra=list(vol.tags),
+                resource_kind="disk", extra=dict(vol.tags),
             )
             disk_spec = NebiusDiskSpec(
                 parent_id=spec.parent_id, name=vol.name,

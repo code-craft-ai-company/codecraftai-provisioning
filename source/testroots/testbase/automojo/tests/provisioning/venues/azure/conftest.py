@@ -51,7 +51,7 @@ def region_config() -> AzureRegionConfig:
     rtnval = AzureRegionConfig(
         subscription_id="sub-test-0001", location="eastus",
         resource_group="rg-testrun01",
-        default_tags=[{"automojo:component": "test"}],
+        default_tags={"automojo:component": "test"},
     )
     return rtnval
 

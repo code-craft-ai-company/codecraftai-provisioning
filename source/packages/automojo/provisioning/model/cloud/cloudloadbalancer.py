@@ -38,12 +38,12 @@ class CloudLoadBalancer(SchemaObject):
     scheme = Field(str, required=True)
     listeners = Field(list, required=False, default=None)
     target_instance_names = Field(list, required=False, default=None)
-    tags = Field(list, required=False, default=None)
+    tags = Field(dict, required=False, default=None)
 
     def __init__(self, *, name: str, scheme: str,
                  listeners: Optional[List[CloudLoadBalancerListener]] = None,
                  target_instance_names: Optional[List[str]] = None,
-                 tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct a CloudLoadBalancer.
 
@@ -51,7 +51,7 @@ class CloudLoadBalancer(SchemaObject):
             :param scheme: One of internet-facing or internal.
             :param listeners: Optional list of CloudLoadBalancerListener objects.
             :param target_instance_names: Optional list of target instance names.
-            :param tags: Optional list of single-entry tag dicts.
+            :param tags: Optional flat dict of tag key/value pairs.
 
             :raises: SchemaValidationError
         """
@@ -66,7 +66,7 @@ class CloudLoadBalancer(SchemaObject):
 
         effective_listeners = listeners if listeners is not None else []
         effective_targets = target_instance_names if target_instance_names is not None else []
-        effective_tags = tags if tags is not None else []
+        effective_tags = tags if tags is not None else {}
 
         super().__init__(name=name, scheme=scheme, listeners=effective_listeners,
                          target_instance_names=effective_targets, tags=effective_tags)

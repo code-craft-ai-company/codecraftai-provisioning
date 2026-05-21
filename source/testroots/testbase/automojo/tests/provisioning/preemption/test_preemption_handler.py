@@ -75,7 +75,7 @@ class ReacquireFakeProvisioner(FakeCloudProvisioner):
         resource = ProvisionedResource(kind="instance", name=spec.name,
                                        venue_id=new_id,
                                        attributes={"recreated": True},
-                                       tags=[owner_tag])
+                                       tags=dict(owner_tag))
         self._state[("instance", spec.name)] = resource
         rtnval = resource
         return rtnval

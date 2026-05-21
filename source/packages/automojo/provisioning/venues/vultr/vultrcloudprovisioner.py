@@ -77,7 +77,7 @@ class VultrCloudProvisioner(CloudProvisioner):
                  credential: VultrApiKeyCredential,
                  spec: Optional[VultrSpec] = None,
                  client: Optional[VultrClient] = None,
-                 default_tags: Optional[List[Dict[str, str]]] = None,
+                 default_tags: Optional[Dict[str, str]] = None,
                  vpn_control_plane: Optional[Any] = None) -> None:
         """
             Construct a VultrCloudProvisioner.
@@ -98,9 +98,9 @@ class VultrCloudProvisioner(CloudProvisioner):
             self._client = VultrClient(token=credential.token)
 
         if default_tags is not None:
-            self._default_tags: List[Dict[str, str]] = list(default_tags)
+            self._default_tags: Dict[str, str] = dict(default_tags)
         else:
-            self._default_tags = []
+            self._default_tags = {}
 
         self._vpn_control_plane: Optional[Any] = vpn_control_plane
 

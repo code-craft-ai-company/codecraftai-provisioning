@@ -49,7 +49,7 @@ def region_config() -> DoRegionConfig:
     """
     rtnval = DoRegionConfig(
         region="nyc3", spaces_region="nyc3",
-        default_tags=[{"automojo:component": "test"}],
+        default_tags={"automojo:component": "test"},
     )
     return rtnval
 

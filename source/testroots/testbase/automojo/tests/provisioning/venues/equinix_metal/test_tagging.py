@@ -25,7 +25,7 @@ def test_to_metal_encodes_key_value_strings() -> None:
     """
         Each neutral pair becomes one ``key=value`` string, key-sorted.
     """
-    neutral = [{"b": "2"}, {"a": "1"}]
+    neutral = {"b": "2", "a": "1"}
     encoded = MetalTagTranslator.to_metal(neutral_tags=neutral)
     assert encoded == ["a=1", "b=2"]
     return
@@ -33,28 +33,28 @@ def test_to_metal_encodes_key_value_strings() -> None:
 
 def test_to_metal_none_returns_empty() -> None:
     """
-        A None neutral list encodes to an empty list.
+        A None neutral dict encodes to an empty list.
     """
     encoded = MetalTagTranslator.to_metal(neutral_tags=None)
     assert encoded == []
     return
 
 
-def test_from_metal_recovers_neutral_list() -> None:
+def test_from_metal_recovers_neutral_dict() -> None:
     """
-        from_metal recovers single-entry neutral dicts, key-sorted.
+        from_metal recovers a key-sorted flat neutral tag dict.
     """
     decoded = MetalTagTranslator.from_metal(strings=["x=9", "a=1"])
-    assert decoded == [{"a": "1"}, {"x": "9"}]
+    assert decoded == {"a": "1", "x": "9"}
     return
 
 
-def test_to_metal_rejects_multi_key_dict() -> None:
+def test_to_metal_rejects_non_string_value() -> None:
     """
-        A multi-key dict is rejected at encode time.
+        A non-string tag value is rejected at encode time.
     """
     with pytest.raises(MetalValidationError):
-        MetalTagTranslator.to_metal(neutral_tags=[{"a": "1", "b": "2"}])
+        MetalTagTranslator.to_metal(neutral_tags={"a": 1})
     return
 
 
@@ -63,18 +63,7 @@ def test_to_metal_rejects_equals_in_key() -> None:
         A key containing '=' is rejected — it would corrupt the round trip.
     """
     with pytest.raises(MetalValidationError):
-        MetalTagTranslator.to_metal(neutral_tags=[{"a=b": "1"}])
-    return
-
-
-def test_to_metal_rejects_duplicate_keys() -> None:
-    """
-        A duplicate key across entries is rejected.
-    """
-    with pytest.raises(MetalValidationError):
-        MetalTagTranslator.to_metal(
-            neutral_tags=[{"a": "1"}, {"a": "2"}]
-        )
+        MetalTagTranslator.to_metal(neutral_tags={"a=b": "1"})
     return
 
 

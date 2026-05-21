@@ -45,7 +45,7 @@ def location_config() -> HetznerLocationConfig:
     """
     rtnval = HetznerLocationConfig(
         location="nbg1",
-        default_labels=[{"automojo.component": "test"}])
+        default_labels={"automojo.component": "test"})
     return rtnval
 
 

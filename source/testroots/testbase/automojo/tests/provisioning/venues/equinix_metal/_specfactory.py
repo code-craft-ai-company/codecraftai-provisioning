@@ -71,7 +71,7 @@ def basic_spec(*, with_vpn: bool = False,
         name="dev-a", profile_ref="default", image=image, size=size,
         subnet="sub-a", keypair="kp-a", vpn_join=vpn_join,
         accelerators=accelerators, interconnect=interconnect,
-        tags=[{"automojo:purpose": "test"}],
+        tags={"automojo:purpose": "test"},
     )
 
     rtnval = MetalSpec(networks=[network], subnets=[subnet],

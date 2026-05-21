@@ -31,17 +31,17 @@ class CloudNetwork(SchemaObject):
     name = Field(str, required=True)
     cidr = Field(str, required=True)
     region = Field(str, required=True)
-    tags = Field(list, required=False, default=None)
+    tags = Field(dict, required=False, default=None)
 
     def __init__(self, *, name: str, cidr: str, region: str,
-                 tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct a CloudNetwork.
 
             :param name: Network name (≤ 63 chars).
             :param cidr: IPv4 or IPv6 CIDR.
             :param region: Venue-neutral region identifier.
-            :param tags: Optional list of single-entry tag dicts.
+            :param tags: Optional flat dict of tag key/value pairs.
 
             :raises: SchemaValidationError
         """
@@ -49,7 +49,7 @@ class CloudNetwork(SchemaObject):
         validate_cidr(value=cidr)
         validate_name(value=region, max_len=63)
 
-        effective_tags = tags if tags is not None else []
+        effective_tags = tags if tags is not None else {}
 
         super().__init__(name=name, cidr=cidr, region=region, tags=effective_tags)
         return

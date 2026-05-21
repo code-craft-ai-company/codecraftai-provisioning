@@ -844,17 +844,17 @@ class CrusoeCloudProvisioner(CloudProvisioner):
             rtnval = getattr(self._vpn_control_plane, "minted_authkey", None)
         return rtnval
 
-    def _labels_for(self, tags: Optional[List[Dict[str, str]]],
+    def _labels_for(self, tags: Optional[Dict[str, str]],
                     run_labels: Dict[str, str]) -> Dict[str, str]:
         """
             Build the Crusoe label dict for a resource from neutral tags.
 
-            :param tags: The neutral tag list, or ``None``.
+            :param tags: The neutral tag dict, or ``None``.
             :param run_labels: The run-id label dict.
 
             :returns: A merged Crusoe label dict.
         """
-        effective_tags = tags if tags is not None else []
+        effective_tags = tags if tags is not None else {}
         labels = self._labels.to_crusoe(neutral_tags=effective_tags)
         labels.update(run_labels)
         rtnval = labels
@@ -886,7 +886,7 @@ class CrusoeCloudProvisioner(CloudProvisioner):
             :returns: A ProvisionedResource.
         """
         rtnval = ProvisionedResource(kind=kind, name=name, venue_id=venue_id,
-                                     attributes={}, tags=[])
+                                     attributes={}, tags={})
         return rtnval
 
     def _ingress_payload(self, *, sg: Any) -> List[Dict[str, Any]]:

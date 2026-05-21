@@ -28,11 +28,11 @@ class CloudObjectBucket(SchemaObject):
     region = Field(str, required=True)
     versioning = Field(bool, required=False, default=False)
     public = Field(bool, required=False, default=False)
-    tags = Field(list, required=False, default=None)
+    tags = Field(dict, required=False, default=None)
 
     def __init__(self, *, name: str, region: str,
                  versioning: bool = False, public: bool = False,
-                 tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct a CloudObjectBucket.
 
@@ -40,14 +40,14 @@ class CloudObjectBucket(SchemaObject):
             :param region: Region identifier.
             :param versioning: Whether object versioning is enabled.
             :param public: Whether the bucket is publicly accessible.
-            :param tags: Optional list of single-entry tag dicts.
+            :param tags: Optional flat dict of tag key/value pairs.
 
             :raises: SchemaValidationError
         """
         validate_name(value=name)
         validate_name(value=region)
 
-        effective_tags = tags if tags is not None else []
+        effective_tags = tags if tags is not None else {}
 
         super().__init__(name=name, region=region, versioning=versioning,
                          public=public, tags=effective_tags)

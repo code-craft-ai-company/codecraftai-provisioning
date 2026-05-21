@@ -202,7 +202,7 @@ class FakeCloudProvisioner(CloudProvisioner):
                 resource = ProvisionedResource(
                     kind=entry["kind"], name=entry["name"],
                     venue_id=venue_id, attributes=desired_attrs,
-                    tags=[owner_tag],
+                    tags=dict(owner_tag),
                 )
                 self._state[key] = resource
                 self._mutation_log.append(("create", key[0], key[1]))
@@ -211,7 +211,7 @@ class FakeCloudProvisioner(CloudProvisioner):
                 resource = ProvisionedResource(
                     kind=existing.kind, name=existing.name,
                     venue_id=existing.venue_id, attributes=desired_attrs,
-                    tags=list(existing.tags),
+                    tags=dict(existing.tags),
                 )
                 self._state[key] = resource
                 self._mutation_log.append(("update", key[0], key[1]))
@@ -258,11 +258,7 @@ class FakeCloudProvisioner(CloudProvisioner):
 
             :returns: True when owned by automojo.
         """
-        for tag in resource.tags:
-            if tag.get(self.OWNER_TAG_KEY) == self.OWNER_TAG_VALUE:
-                rtnval = True
-                return rtnval
-        rtnval = False
+        rtnval = resource.tags.get(self.OWNER_TAG_KEY) == self.OWNER_TAG_VALUE
         return rtnval
 
     def seed_external_resource(self, *, resource: ProvisionedResource) -> None:

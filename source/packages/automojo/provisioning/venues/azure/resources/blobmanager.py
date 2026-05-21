@@ -117,7 +117,7 @@ class BlobManager:
         if existing is None:
             tags = azure_tags_for(run_id=run_id, resource_name=desired.name,
                                   resource_kind=self.KIND,
-                                  extra=list(desired.tags),
+                                  extra=dict(desired.tags),
                                   defaults=default_tags)
             params: Dict[str, Any] = {
                 "location": location,

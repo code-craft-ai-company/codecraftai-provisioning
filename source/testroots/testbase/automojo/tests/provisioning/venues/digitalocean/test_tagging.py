@@ -22,12 +22,10 @@ def test_tag_round_trip_simple() -> None:
     """
         A simple key/value tag round-trips to identity.
     """
-    neutral = [{"team": "ci"}, {"env": "test"}]
+    neutral = {"team": "ci", "env": "test"}
     encoded = to_do(neutral_tags=neutral)
     decoded = from_do(do_tags=encoded)
-    assert sorted(d for entry in decoded for d in entry.items()) == sorted(
-        d for entry in neutral for d in entry.items()
-    )
+    assert decoded == neutral
     return
 
 
@@ -35,15 +33,11 @@ def test_tag_round_trip_with_equals_in_value() -> None:
     """
         A value containing ``=`` round-trips to identity (escaping works).
     """
-    neutral = [{"expr": "a=b=c"}, {"plain": "value"}]
+    neutral = {"expr": "a=b=c", "plain": "value"}
     encoded = to_do(neutral_tags=neutral)
     decoded = from_do(do_tags=encoded)
-    flat = {}
-    for entry in decoded:
-        for key, value in entry.items():
-            flat[key] = value
-    assert flat["expr"] == "a=b=c"
-    assert flat["plain"] == "value"
+    assert decoded["expr"] == "a=b=c"
+    assert decoded["plain"] == "value"
     return
 
 
@@ -51,10 +45,10 @@ def test_tag_round_trip_with_backslash() -> None:
     """
         A value containing a backslash round-trips to identity.
     """
-    neutral = [{"path": "C:\\users\\test=x"}]
+    neutral = {"path": "C:\\users\\test=x"}
     encoded = to_do(neutral_tags=neutral)
     decoded = from_do(do_tags=encoded)
-    assert decoded == [{"path": "C:\\users\\test=x"}]
+    assert decoded == {"path": "C:\\users\\test=x"}
     return
 
 
@@ -76,14 +70,7 @@ def test_tag_round_trip_identity(pairs) -> None:
     """
         For any key/value dict, ``from_do(to_do(...))`` is the identity.
     """
-    neutral = [{key: value} for key, value in pairs.items()]
-    encoded = to_do(neutral_tags=neutral)
+    encoded = to_do(neutral_tags=pairs)
     decoded = from_do(do_tags=encoded)
-
-    decoded_flat = {}
-    for entry in decoded:
-        for key, value in entry.items():
-            decoded_flat[key] = value
-
-    assert decoded_flat == pairs
+    assert decoded == pairs
     return

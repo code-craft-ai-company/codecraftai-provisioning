@@ -166,7 +166,7 @@ class LvInventory:
                 "name": resource.name,
                 "venue_id": resource.venue_id,
                 "attributes": dict(resource.attributes),
-                "tags": [dict(tag) for tag in resource.tags],
+                "tags": dict(resource.tags),
             })
 
         with open(path, "w", encoding="utf-8") as fh:

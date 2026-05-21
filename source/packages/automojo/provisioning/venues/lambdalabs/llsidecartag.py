@@ -92,40 +92,40 @@ class LlSidecarTag:
             json.dump(document, fh, indent=2, sort_keys=True)
         return
 
-    def write(self, *, neutral_tags: List[Dict[str, str]],
+    def write(self, *, neutral_tags: Dict[str, str],
               instance_id: str) -> None:
         """
-            Record the neutral tag list for an instance id.
+            Record the neutral tag dict for an instance id.
 
-            :param neutral_tags: The neutral tag list (single-entry dicts).
+            :param neutral_tags: The neutral flat tag dict.
             :param instance_id: The Lambda Labs instance id key.
 
             :returns: ``None``.
         """
         document = self._load()
         if neutral_tags is not None:
-            document[instance_id] = [dict(tag) for tag in neutral_tags]
+            document[instance_id] = dict(neutral_tags)
         else:
-            document[instance_id] = []
+            document[instance_id] = {}
         self._store(document=document)
         return
 
-    def read(self, *, instance_id: str) -> List[Dict[str, str]]:
+    def read(self, *, instance_id: str) -> Dict[str, str]:
         """
-            Recover the neutral tag list for an instance id.
+            Recover the neutral tag dict for an instance id.
 
             :param instance_id: The Lambda Labs instance id key.
 
-            :returns: The neutral tag list, or an empty list when the id is
-                not recorded.
+            :returns: The neutral flat tag dict, or an empty dict when the id
+                is not recorded.
         """
         document = self._load()
         entry = document.get(instance_id, None)
         if entry is None:
-            rtnval: List[Dict[str, str]] = []
+            rtnval: Dict[str, str] = {}
             return rtnval
 
-        rtnval = [dict(tag) for tag in entry]
+        rtnval = dict(entry)
         return rtnval
 
     def all_instance_ids(self) -> List[str]:

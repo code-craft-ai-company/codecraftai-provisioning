@@ -93,7 +93,7 @@ def provisioner_factory(venue, credential):
     def _make(*, client, spec, vpn_control_plane=None):
         rtnval = VultrCloudProvisioner(
             venue=venue, credential=credential, spec=spec, client=client,
-            default_tags=[{"automojo:component": "test"}],
+            default_tags={"automojo:component": "test"},
             vpn_control_plane=vpn_control_plane,
         )
         return rtnval

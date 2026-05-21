@@ -74,11 +74,10 @@ def test_apply_idempotent(tag_pairs):
     """
         apply ∘ apply yields the same VM inventory with no fresh creates.
     """
-    tags = [{key: value} for key, value in tag_pairs.items()]
     client = MockNutanixClient()
     provisioner = NutanixCloudProvisioner(venue=_venue(), client=client,
                                           config=make_config(),
-                                          spec=basic_spec(tags=tags))
+                                          spec=basic_spec(tags=tag_pairs))
     provisioner.apply(aspects=_aspects())
     vm_calls_after_first = client.create_vm_calls
 
@@ -94,11 +93,10 @@ def test_destroy_is_inverse_of_apply(tag_pairs):
     """
         destroy ∘ apply leaves the venue empty of run-owned resources.
     """
-    tags = [{key: value} for key, value in tag_pairs.items()]
     client = MockNutanixClient()
     provisioner = NutanixCloudProvisioner(venue=_venue(), client=client,
                                           config=make_config(),
-                                          spec=basic_spec(tags=tags))
+                                          spec=basic_spec(tags=tag_pairs))
     provisioner.apply(aspects=_aspects())
     provisioner.destroy(aspects=_aspects())
 
@@ -115,22 +113,17 @@ def test_category_value_round_trip_identity(tag_pairs):
         Translating neutral tags to Prism Categories and reading them
         back is the identity (modulo the injected automojo-run-id entry).
     """
-    tags = [{key: value} for key, value in tag_pairs.items()]
     client = MockNutanixClient()
     provisioner = NutanixCloudProvisioner(venue=_venue(), client=client,
                                           config=make_config(),
-                                          spec=basic_spec(tags=tags))
+                                          spec=basic_spec(tags=tag_pairs))
     provisioner.apply(aspects=_aspects())
 
     translator = NtxCategoryTranslator(client=client)
     vm = client.vms_state["node-propsrun"]
     recovered = translator.read(vm=vm)
 
-    recovered_map = {}
-    for entry in recovered:
-        for key, value in entry.items():
-            recovered_map[key] = value
-    assert recovered_map == tag_pairs
+    assert recovered == tag_pairs
 
 
 def test_task_poll_honours_timeout_aspect():

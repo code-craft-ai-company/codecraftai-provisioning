@@ -131,7 +131,7 @@ class LvApplyStages:
                 kind="network", name=network.name, venue_id=defined.uuid,
                 attributes={"venue_name": venue_name,
                             "forward_mode": defined.forward_mode},
-                tags=network.tags if network.tags is not None else [],
+                tags=network.tags if network.tags is not None else {},
             )
             if existed:
                 result.skipped.append(network.name)
@@ -177,7 +177,7 @@ class LvApplyStages:
                             "pool": pool_name,
                             "path": created.path,
                             "capacity_bytes": created.capacity_bytes},
-                tags=volume.tags if volume.tags is not None else [],
+                tags=volume.tags if volume.tags is not None else {},
             )
             if existed:
                 result.skipped.append(volume.name)
@@ -243,7 +243,7 @@ class LvApplyStages:
                             "vcpus": defined.vcpus,
                             "memory_kib": defined.memory_kib,
                             "boot_disk": boot_path},
-                tags=instance.tags if instance.tags is not None else [],
+                tags=instance.tags if instance.tags is not None else {},
             )
             result.created.append(resource)
 

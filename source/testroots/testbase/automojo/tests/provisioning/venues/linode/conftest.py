@@ -46,7 +46,7 @@ def region_config() -> LinodeRegionConfig:
     """
     rtnval = LinodeRegionConfig(
         region="us-east", object_storage_cluster="us-east-1",
-        default_tags=[{"automojo:component": "test"}],
+        default_tags={"automojo:component": "test"},
     )
     return rtnval
 

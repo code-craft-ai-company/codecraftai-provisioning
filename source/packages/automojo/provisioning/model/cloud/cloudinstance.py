@@ -61,7 +61,7 @@ class CloudInstance(SchemaObject):
     keypair = Field(str, required=False, default=None)
     user_data_script = Field(str, required=False, default=None)
     public_ip = Field(bool, required=False, default=False)
-    tags = Field(list, required=False, default=None)
+    tags = Field(dict, required=False, default=None)
     vpn_join = Field(VPNJoinSpec, required=False, default=None)
     accelerators = Field(list, required=False, default=None)
     interconnect = Field(CloudInterconnect, required=False, default=None)
@@ -76,7 +76,7 @@ class CloudInstance(SchemaObject):
                  keypair: Optional[str] = None,
                  user_data_script: Optional[str] = None,
                  public_ip: bool = False,
-                 tags: Optional[List[Dict[str, str]]] = None,
+                 tags: Optional[Dict[str, str]] = None,
                  vpn_join: Optional[VPNJoinSpec] = None,
                  accelerators: Optional[List[CloudAcceleratorSpec]] = None,
                  interconnect: Optional[CloudInterconnect] = None,
@@ -100,7 +100,7 @@ class CloudInstance(SchemaObject):
             :param keypair: Optional CloudKeyPair name.
             :param user_data_script: Optional raw user-data script.
             :param public_ip: Whether to attach a public IP.
-            :param tags: Optional list of single-entry tag dicts.
+            :param tags: Optional flat dict of tag key/value pairs.
             :param vpn_join: Optional VPNJoinSpec for control-plane VPN.
             :param accelerators: Optional list of CloudAcceleratorSpec.
             :param interconnect: Optional CloudInterconnect.
@@ -123,7 +123,7 @@ class CloudInstance(SchemaObject):
             )
 
         effective_security_groups = security_groups if security_groups is not None else []
-        effective_tags = tags if tags is not None else []
+        effective_tags = tags if tags is not None else {}
         effective_accelerators = accelerators if accelerators is not None else None
         effective_shared_fs_mounts = shared_fs_mounts if shared_fs_mounts is not None else None
 

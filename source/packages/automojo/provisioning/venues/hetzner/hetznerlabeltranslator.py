@@ -131,7 +131,7 @@ def _validate_label_value(*, key: str, value: str) -> None:
 
 class HetznerLabelTranslator:
     """
-        Translator between neutral single-entry tag dicts and the Hetzner
+        Translator between a neutral flat tag dict and the Hetzner
         labels dict (a flat ``{key: value}`` mapping).
 
         Conformant inputs round-trip as identity:
@@ -140,12 +140,12 @@ class HetznerLabelTranslator:
 
     @classmethod
     def to_hetzner(cls, *,
-                   neutral_tags: Optional[List[Dict[str, str]]]
+                   neutral_tags: Optional[Dict[str, str]]
                    ) -> Dict[str, str]:
         """
-            Convert neutral single-entry tag dicts to a Hetzner labels dict.
+            Convert a neutral flat tag dict to a Hetzner labels dict.
 
-            :param neutral_tags: List of single-entry ``{key: value}`` dicts.
+            :param neutral_tags: Flat ``{key: value}`` dict of tag pairs.
 
             :returns: A flat ``{key: value}`` dict.
             :raises: HetznerValidationError
@@ -155,57 +155,32 @@ class HetznerLabelTranslator:
             rtnval = out
             return rtnval
 
-        for entry in neutral_tags:
-            if not isinstance(entry, dict):
-                err_msg_lines = ["Neutral tag entry is not a dict."]
-                err_msg_lines.append("ENTRY: {!r}".format(entry))
-                err_msg = os.linesep.join(err_msg_lines)
-                raise HetznerValidationError(err_msg)
-
-            if len(entry) != 1:
-                err_msg_lines = [
-                    "Neutral tag entry must be a single-key dict."
-                ]
-                err_msg_lines.append("ENTRY: {!r}".format(entry))
-                err_msg = os.linesep.join(err_msg_lines)
-                raise HetznerValidationError(err_msg)
-
-            for key, value in entry.items():
-                _validate_label_key(key=key)
-                _validate_label_value(key=key, value=value)
-
-                if key in out:
-                    err_msg_lines = [
-                        "Duplicate label key in neutral tag set."
-                    ]
-                    err_msg_lines.append("KEY: {}".format(key))
-                    err_msg = os.linesep.join(err_msg_lines)
-                    raise HetznerValidationError(err_msg)
-
-                out[key] = value
+        for key, value in neutral_tags.items():
+            _validate_label_key(key=key)
+            _validate_label_value(key=key, value=value)
+            out[key] = value
 
         rtnval = out
         return rtnval
 
     @classmethod
     def from_hetzner(cls, *, labels: Optional[Dict[str, str]]
-                     ) -> List[Dict[str, str]]:
+                     ) -> Dict[str, str]:
         """
-            Convert a Hetzner labels dict back to neutral single-entry dicts.
+            Convert a Hetzner labels dict back to a neutral flat tag dict.
 
             :param labels: Flat ``{key: value}`` dict from a Hetzner object.
 
-            :returns: A key-sorted list of single-entry neutral dicts.
+            :returns: A neutral flat ``{key: value}`` dict.
         """
-        out: List[Dict[str, str]] = []
+        out: Dict[str, str] = {}
         if labels is None:
             rtnval = out
             return rtnval
 
         sorted_keys = sorted(labels.keys())
         for key in sorted_keys:
-            value = labels[key]
-            out.append({key: value})
+            out[key] = labels[key]
 
         rtnval = out
         return rtnval
@@ -213,8 +188,8 @@ class HetznerLabelTranslator:
     @classmethod
     def base_labels(cls, *, run_id: str, resource_name: str,
                     resource_kind: str,
-                    extra: Optional[List[Dict[str, str]]] = None,
-                    defaults: Optional[List[Dict[str, str]]] = None
+                    extra: Optional[Dict[str, str]] = None,
+                    defaults: Optional[Dict[str, str]] = None
                     ) -> Dict[str, str]:
         """
             Build the full Hetzner labels dict for a created resource.
@@ -228,19 +203,19 @@ class HetznerLabelTranslator:
             :returns: A flat ``{key: value}`` labels dict.
             :raises: HetznerValidationError
         """
-        combined: List[Dict[str, str]] = []
-        combined.append({OWNER_LABEL_KEY: OWNER_LABEL_VALUE})
-        combined.append({RUN_ID_LABEL_KEY: run_id})
-        combined.append({RESOURCE_NAME_LABEL_KEY: resource_name})
-        combined.append({RESOURCE_KIND_LABEL_KEY: resource_kind})
+        combined: Dict[str, str] = {}
+        combined[OWNER_LABEL_KEY] = OWNER_LABEL_VALUE
+        combined[RUN_ID_LABEL_KEY] = run_id
+        combined[RESOURCE_NAME_LABEL_KEY] = resource_name
+        combined[RESOURCE_KIND_LABEL_KEY] = resource_kind
 
         if defaults is not None:
-            for entry in defaults:
-                combined.append(dict(entry))
+            for key, value in defaults.items():
+                combined[key] = value
 
         if extra is not None:
-            for entry in extra:
-                combined.append(dict(entry))
+            for key, value in extra.items():
+                combined[key] = value
 
         rtnval = cls.to_hetzner(neutral_tags=combined)
         return rtnval

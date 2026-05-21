@@ -88,7 +88,7 @@ class MockCloudProvisioner(CloudProvisioner):
                     kind=entry["kind"], name=entry["name"],
                     venue_id="{}-{}".format(self.venue.name, entry["name"]),
                     attributes=dict(entry.get("attributes", {})),
-                    tags=[{self.OWNER_TAG_KEY: self.OWNER_TAG_VALUE}],
+                    tags={self.OWNER_TAG_KEY: self.OWNER_TAG_VALUE},
                 )
                 self._inventory.append(res)
                 created.append(res)

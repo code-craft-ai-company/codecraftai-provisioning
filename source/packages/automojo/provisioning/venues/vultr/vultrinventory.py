@@ -119,10 +119,8 @@ class VultrInventory:
         """
         neutral_tags = neutral_tags_of(entry=entry)
         name = entry.get("label", "")
-        for tag in neutral_tags:
-            for key, value in tag.items():
-                if key == RESOURCE_NAME_TAG_KEY:
-                    name = value
+        if RESOURCE_NAME_TAG_KEY in neutral_tags:
+            name = neutral_tags[RESOURCE_NAME_TAG_KEY]
 
         venue_id = str(entry.get("id", ""))
         rtnval = ProvisionedResource(

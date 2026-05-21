@@ -57,7 +57,7 @@ def region_config() -> GcpRegionConfig:
     rtnval = GcpRegionConfig(
         project="automojo-test", region="us-central1",
         zone="us-central1-a",
-        default_tags=[{"automojo:component": "test"}],
+        default_tags={"automojo:component": "test"},
     )
     return rtnval
 

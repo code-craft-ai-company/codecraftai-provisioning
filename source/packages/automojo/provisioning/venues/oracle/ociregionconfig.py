@@ -28,7 +28,7 @@ class OciRegionConfig:
 
     def __init__(self, *, region: str, compartment_id: str,
                  availability_domain: str,
-                 default_tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 default_tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct an OciRegionConfig.
 
@@ -36,7 +36,7 @@ class OciRegionConfig:
             :param compartment_id: Apex compartment OCID for the run.
             :param availability_domain: Default availability domain
                                         (e.g. ``Uocm:US-ASHBURN-AD-1``).
-            :param default_tags: Optional list of single-entry tag dicts to
+            :param default_tags: Optional flat dict of tag key/value pairs to
                                  apply to every created resource.
 
             :raises: ValueError
@@ -54,12 +54,12 @@ class OciRegionConfig:
                 "OciRegionConfig.availability_domain must not be empty."
             )
 
-        effective_tags = default_tags if default_tags is not None else []
+        effective_tags = default_tags if default_tags is not None else {}
 
         self._region: str = region
         self._compartment_id: str = compartment_id
         self._availability_domain: str = availability_domain
-        self._default_tags: List[Dict[str, str]] = effective_tags
+        self._default_tags: Dict[str, str] = effective_tags
         return
 
     @property
@@ -93,11 +93,11 @@ class OciRegionConfig:
         return rtnval
 
     @property
-    def default_tags(self) -> List[Dict[str, str]]:
+    def default_tags(self) -> Dict[str, str]:
         """
             Return the list of default tag dicts.
 
             :returns: A defensive copy of the default tag list.
         """
-        rtnval = list(self._default_tags)
+        rtnval = dict(self._default_tags)
         return rtnval

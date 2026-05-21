@@ -36,12 +36,12 @@ class VultrTagTranslator:
     """
 
     @classmethod
-    def to_vultr(cls, *, neutral_tags: Optional[List[Dict[str, str]]]
+    def to_vultr(cls, *, neutral_tags: Optional[Dict[str, str]]
                  ) -> List[str]:
         """
-            Convert neutral single-entry tag dicts to Vultr string tags.
+            Convert a neutral flat tag dict to Vultr string tags.
 
-            :param neutral_tags: List of single-entry ``{key: value}`` dicts.
+            :param neutral_tags: Flat ``{key: value}`` dict of tag pairs.
 
             :returns: A key-sorted list of ``"key=value"`` strings.
             :raises: VultrValidationError
@@ -51,40 +51,21 @@ class VultrTagTranslator:
             return rtnval
 
         seen_keys: Dict[str, str] = {}
-        for entry in neutral_tags:
-            if not isinstance(entry, dict):
-                err_msg_lines = ["Neutral tag entry is not a dict."]
-                err_msg_lines.append("ENTRY: {!r}".format(entry))
+        for key, value in neutral_tags.items():
+            if not isinstance(key, str) or not isinstance(value, str):
+                err_msg_lines = ["Tag key and value must be strings."]
+                err_msg_lines.append("KEY: {!r}".format(key))
+                err_msg_lines.append("VALUE: {!r}".format(value))
                 err_msg = os.linesep.join(err_msg_lines)
                 raise VultrValidationError(err_msg)
-            if len(entry) != 1:
+            if "=" in key:
                 err_msg_lines = [
-                    "Neutral tag entry must be a single-key dict."
+                    "Tag key may not contain an '=' separator."
                 ]
-                err_msg_lines.append("ENTRY: {!r}".format(entry))
+                err_msg_lines.append("KEY: {!r}".format(key))
                 err_msg = os.linesep.join(err_msg_lines)
                 raise VultrValidationError(err_msg)
-
-            for key, value in entry.items():
-                if not isinstance(key, str) or not isinstance(value, str):
-                    err_msg_lines = ["Tag key and value must be strings."]
-                    err_msg_lines.append("KEY: {!r}".format(key))
-                    err_msg_lines.append("VALUE: {!r}".format(value))
-                    err_msg = os.linesep.join(err_msg_lines)
-                    raise VultrValidationError(err_msg)
-                if "=" in key:
-                    err_msg_lines = [
-                        "Tag key may not contain an '=' separator."
-                    ]
-                    err_msg_lines.append("KEY: {!r}".format(key))
-                    err_msg = os.linesep.join(err_msg_lines)
-                    raise VultrValidationError(err_msg)
-                if key in seen_keys:
-                    err_msg_lines = ["Duplicate tag key in neutral tag set."]
-                    err_msg_lines.append("KEY: {}".format(key))
-                    err_msg = os.linesep.join(err_msg_lines)
-                    raise VultrValidationError(err_msg)
-                seen_keys[key] = value
+            seen_keys[key] = value
 
         sorted_keys = sorted(seen_keys.keys())
         out: List[str] = []
@@ -96,19 +77,19 @@ class VultrTagTranslator:
 
     @classmethod
     def from_vultr(cls, *, strings: Optional[List[str]]
-                   ) -> List[Dict[str, str]]:
+                   ) -> Dict[str, str]:
         """
-            Convert a Vultr string tag list back to neutral single-entry dicts.
+            Convert a Vultr string tag list back to a neutral flat tag dict.
 
             :param strings: List of ``"key=value"`` strings.
 
-            :returns: A key-sorted list of single-entry neutral dicts.
+            :returns: A neutral flat ``{key: value}`` dict.
         """
+        pairs: Dict[str, str] = {}
         if strings is None:
-            rtnval: List[Dict[str, str]] = []
+            rtnval = pairs
             return rtnval
 
-        pairs: Dict[str, str] = {}
         for entry in strings:
             if not isinstance(entry, str):
                 continue
@@ -120,10 +101,9 @@ class VultrTagTranslator:
             value = entry[split_index + 1:]
             pairs[key] = value
 
-        sorted_keys = sorted(pairs.keys())
-        out: List[Dict[str, str]] = []
-        for key in sorted_keys:
-            out.append({key: pairs[key]})
+        out: Dict[str, str] = {}
+        for key in sorted(pairs.keys()):
+            out[key] = pairs[key]
 
         rtnval = out
         return rtnval
@@ -146,8 +126,8 @@ class VultrTagTranslator:
     @classmethod
     def base_resource_tags(cls, *, run_id: str, resource_name: str,
                            resource_kind: str,
-                           extra: Optional[List[Dict[str, str]]] = None,
-                           defaults: Optional[List[Dict[str, str]]] = None
+                           extra: Optional[Dict[str, str]] = None,
+                           defaults: Optional[Dict[str, str]] = None
                            ) -> List[str]:
         """
             Build the full Vultr string tag list for a created resource.
@@ -160,19 +140,19 @@ class VultrTagTranslator:
 
             :returns: A key-sorted list of ``"key=value"`` strings.
         """
-        combined: List[Dict[str, str]] = []
-        combined.append({OWNER_TAG_KEY: OWNER_TAG_VALUE})
-        combined.append({RUN_ID_TAG_KEY: run_id})
-        combined.append({RESOURCE_NAME_TAG_KEY: resource_name})
-        combined.append({RESOURCE_KIND_TAG_KEY: resource_kind})
+        combined: Dict[str, str] = {}
+        combined[OWNER_TAG_KEY] = OWNER_TAG_VALUE
+        combined[RUN_ID_TAG_KEY] = run_id
+        combined[RESOURCE_NAME_TAG_KEY] = resource_name
+        combined[RESOURCE_KIND_TAG_KEY] = resource_kind
 
         if defaults is not None:
-            for entry in defaults:
-                combined.append(dict(entry))
+            for key, value in defaults.items():
+                combined[key] = value
 
         if extra is not None:
-            for entry in extra:
-                combined.append(dict(entry))
+            for key, value in extra.items():
+                combined[key] = value
 
         rtnval = cls.to_vultr(neutral_tags=combined)
         return rtnval

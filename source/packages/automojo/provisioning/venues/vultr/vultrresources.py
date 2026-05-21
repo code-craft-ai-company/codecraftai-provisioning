@@ -147,13 +147,13 @@ def list_owned_raw(*, client: VultrClient, path: str, collection_key: str,
     return rtnval
 
 
-def neutral_tags_of(*, entry: Dict[str, Any]) -> List[Dict[str, str]]:
+def neutral_tags_of(*, entry: Dict[str, Any]) -> Dict[str, str]:
     """
-        Reconstruct the neutral tag list from a Vultr API entry.
+        Reconstruct the neutral tag dict from a Vultr API entry.
 
         :param entry: A Vultr API resource dict.
 
-        :returns: A list of single-entry neutral tag dicts.
+        :returns: A flat ``{key: value}`` dict of neutral tag pairs.
     """
     rtnval = VultrTagTranslator.from_vultr(strings=_tag_strings_of(entry=entry))
     return rtnval

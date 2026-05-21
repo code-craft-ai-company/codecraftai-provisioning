@@ -89,7 +89,7 @@ class FakeProvisionerBasicTests(unittest.TestCase):
         fake.apply(aspects=aspects)
         external = ProvisionedResource(
             kind="instance", name="external-host",
-            venue_id="i-ext", tags=[],
+            venue_id="i-ext", tags={},
         )
         fake.seed_external_resource(resource=external)
         names = {r.name for r in fake.inventory(aspects=aspects)}
@@ -116,7 +116,7 @@ class FakeProvisionerBasicTests(unittest.TestCase):
         aspects_destroy = ProvisioningAspects(confirm=True)
         fake.apply(aspects=aspects_apply)
         external = ProvisionedResource(kind="bucket", name="external-bk",
-                                       venue_id="bk-ext", tags=[])
+                                       venue_id="bk-ext", tags={})
         fake.seed_external_resource(resource=external)
         fake.destroy(aspects=aspects_destroy)
         leftover_keys = list(fake.state.keys())

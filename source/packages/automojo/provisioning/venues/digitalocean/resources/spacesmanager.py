@@ -106,7 +106,7 @@ class SpacesManager:
 
         neutral_tags = base_resource_tags(
             run_id=run_id, resource_name=desired.name,
-            resource_kind=self.KIND, extra=list(desired.tags),
+            resource_kind=self.KIND, extra=dict(desired.tags),
             defaults=default_tags,
         )
         attributes: Dict[str, Any] = {}
@@ -166,7 +166,7 @@ class SpacesManager:
             attributes["region"] = region
             entry = ProvisionedResource(
                 kind=self.KIND, name=name, venue_id=bucket,
-                attributes=attributes, tags=[],
+                attributes=attributes, tags={},
             )
             out.append(entry)
         rtnval = out

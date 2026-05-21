@@ -114,7 +114,7 @@ class MetalApplyStages:
 
     def __init__(self, *, client: MetalClient, resolver: MetalResolver,
                  metro: str,
-                 default_tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 default_tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct a MetalApplyStages.
 
@@ -126,8 +126,8 @@ class MetalApplyStages:
         self._client: MetalClient = client
         self._resolver: MetalResolver = resolver
         self._metro: str = metro
-        self._default_tags: List[Dict[str, str]] = (
-            list(default_tags) if default_tags is not None else []
+        self._default_tags: Dict[str, str] = (
+            dict(default_tags) if default_tags is not None else {}
         )
         self._renderer: MetalUserDataRenderer = MetalUserDataRenderer()
         return
@@ -173,7 +173,7 @@ class MetalApplyStages:
 
         neutral_tags = base_resource_tags(
             run_id=run_id, resource_name=desired.name,
-            resource_kind="network", extra=list(desired.tags),
+            resource_kind="network", extra=dict(desired.tags),
             defaults=self._default_tags,
         )
         tag_strings = MetalTagTranslator.to_metal(neutral_tags=neutral_tags)
@@ -249,7 +249,7 @@ class MetalApplyStages:
 
         neutral_tags = base_resource_tags(
             run_id=run_id, resource_name=desired.name,
-            resource_kind="subnet", extra=list(desired.tags),
+            resource_kind="subnet", extra=dict(desired.tags),
             defaults=self._default_tags,
         )
         tag_strings = MetalTagTranslator.to_metal(neutral_tags=neutral_tags)
@@ -431,12 +431,11 @@ class MetalApplyStages:
 
         neutral_tags = base_resource_tags(
             run_id=run_id, resource_name=desired.name,
-            resource_kind="instance", extra=list(desired.tags),
+            resource_kind="instance", extra=dict(desired.tags),
             defaults=self._default_tags,
         )
         if desired.vpn_join is not None:
-            neutral_tags.append({VPN_PROVIDER_TAG_KEY:
-                                 desired.vpn_join.provider})
+            neutral_tags[VPN_PROVIDER_TAG_KEY] = desired.vpn_join.provider
         tag_strings = MetalTagTranslator.to_metal(neutral_tags=neutral_tags)
 
         created = self._client.create_device(

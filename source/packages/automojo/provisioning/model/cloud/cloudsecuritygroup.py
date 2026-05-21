@@ -34,12 +34,12 @@ class CloudSecurityGroup(SchemaObject):
     network = Field(str, required=True)
     ingress_rules = Field(list, required=False, default=None)
     egress_rules = Field(list, required=False, default=None)
-    tags = Field(list, required=False, default=None)
+    tags = Field(dict, required=False, default=None)
 
     def __init__(self, *, name: str, network: str,
                  ingress_rules: Optional[List[CloudIngressRule]] = None,
                  egress_rules: Optional[List[CloudEgressRule]] = None,
-                 tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct a CloudSecurityGroup.
 
@@ -47,7 +47,7 @@ class CloudSecurityGroup(SchemaObject):
             :param network: Name of the parent CloudNetwork.
             :param ingress_rules: Optional list of ingress rules.
             :param egress_rules: Optional list of egress rules.
-            :param tags: Optional list of single-entry tag dicts.
+            :param tags: Optional flat dict of tag key/value pairs.
 
             :raises: SchemaValidationError
         """
@@ -56,7 +56,7 @@ class CloudSecurityGroup(SchemaObject):
 
         effective_ingress = ingress_rules if ingress_rules is not None else []
         effective_egress = egress_rules if egress_rules is not None else []
-        effective_tags = tags if tags is not None else []
+        effective_tags = tags if tags is not None else {}
 
         super().__init__(name=name, network=network,
                          ingress_rules=effective_ingress,

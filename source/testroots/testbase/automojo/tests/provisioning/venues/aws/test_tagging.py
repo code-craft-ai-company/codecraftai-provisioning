@@ -24,9 +24,9 @@ from automojo.provisioning.venues.aws.awstagging import (
 
 def test_to_aws_basic() -> None:
     """
-        Convert a small tag list and inspect the shape.
+        Convert a small tag dict and inspect the shape.
     """
-    out = to_aws(neutral_tags=[{"a": "1"}, {"b": "2"}])
+    out = to_aws(neutral_tags={"a": "1", "b": "2"})
     assert out == [{"Key": "a", "Value": "1"}, {"Key": "b", "Value": "2"}]
     return
 
@@ -37,7 +37,7 @@ def test_from_aws_basic() -> None:
     """
     out = from_aws(aws_tags=[{"Key": "a", "Value": "1"},
                              {"Key": "b", "Value": "2"}])
-    assert out == [{"a": "1"}, {"b": "2"}]
+    assert out == {"a": "1", "b": "2"}
     return
 
 
@@ -45,13 +45,10 @@ def test_base_resource_tags_contains_owner_run_name_kind() -> None:
     """
         ``base_resource_tags`` includes the required keys.
     """
-    tags = base_resource_tags(
+    flat = base_resource_tags(
         run_id="r1", resource_name="vpc-a", resource_kind="network",
-        extra=[{"team": "ml"}], defaults=[{"component": "test"}],
+        extra={"team": "ml"}, defaults={"component": "test"},
     )
-    flat = {}
-    for entry in tags:
-        flat.update(entry)
     assert flat["automojo:owned-by"] == "automojo-provisioning"
     assert flat["automojo:owner"] == "r1"
     assert flat["automojo:resource-name"] == "vpc-a"
@@ -67,7 +64,7 @@ def test_to_aws_rejects_oversize_value() -> None:
     """
     big_value = "x" * (AWS_TAG_VALUE_MAX + 1)
     with pytest.raises(AwsValidationError):
-        to_aws(neutral_tags=[{"k": big_value}])
+        to_aws(neutral_tags={"k": big_value})
     return
 
 
@@ -83,11 +80,9 @@ def test_to_aws_rejects_oversize_value() -> None:
 ))
 def test_round_trip_identity(tag_map) -> None:
     """
-        from_aws(to_aws(x)) == sorted(x).
+        from_aws(to_aws(x)) == x.
     """
-    neutral = [{k: v} for k, v in tag_map.items()]
-    aws_form = to_aws(neutral_tags=neutral)
+    aws_form = to_aws(neutral_tags=tag_map)
     rebuilt = from_aws(aws_tags=aws_form)
-    expected = sorted(neutral, key=lambda d: list(d.keys())[0])
-    assert rebuilt == expected
+    assert rebuilt == tag_map
     return

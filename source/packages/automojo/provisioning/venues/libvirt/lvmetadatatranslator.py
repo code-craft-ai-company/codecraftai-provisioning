@@ -24,18 +24,17 @@ AUTOMOJO_NAMESPACE = "https://automationmojo.com/provisioning/v1"
 
 class LvMetadataTranslator:
     """
-        Translate between the neutral tag form (a list of single-entry
-        dicts) and a libvirt ``<metadata>`` inner-XML fragment.
+        Translate between the neutral tag form (a flat ``{key: value}``
+        dict) and a libvirt ``<metadata>`` inner-XML fragment.
 
-        For conformant inputs — every tag a single-entry dict with
-        non-empty string key / value — the round trip
-        ``extract(embed(tags, run_id))`` recovers the neutral tag list
+        For conformant inputs — non-empty string keys / values — the round
+        trip ``extract(embed(tags, run_id))`` recovers the neutral tag dict
         as the identity.  Keys / values containing namespaces, colons,
         and whitespace round-trip because the values are carried in
         element text, which the XML serialiser escapes / unescapes.
     """
 
-    def embed(self, *, neutral_tags: Optional[List[Dict[str, str]]],
+    def embed(self, *, neutral_tags: Optional[Dict[str, str]],
               run_id: str) -> str:
         """
             Render the inner XML of a ``<metadata>`` block.
@@ -44,8 +43,8 @@ class LvMetadataTranslator:
             ``<automojo:metadata>`` element and its children — suitable
             for the interop ``LibvirtDomainSpec.metadata_xml`` field.
 
-            :param neutral_tags: A list of single-entry tag dicts, or
-                ``None``.
+            :param neutral_tags: A flat ``{key: value}`` dict of tag pairs,
+                or ``None``.
             :param run_id: The provisioning run id.
 
             :returns: The metadata inner-XML fragment string.
@@ -61,17 +60,16 @@ class LvMetadataTranslator:
             root, "{%s}tags" % AUTOMOJO_NAMESPACE
         )
 
-        effective_tags: List[Dict[str, str]] = []
+        effective_tags: Dict[str, str] = {}
         if neutral_tags is not None:
             effective_tags = neutral_tags
 
-        for entry in effective_tags:
-            for key, value in entry.items():
-                tag_element = ElementTree.SubElement(
-                    tags_element, "{%s}tag" % AUTOMOJO_NAMESPACE
-                )
-                tag_element.set("key", key)
-                tag_element.text = value
+        for key, value in effective_tags.items():
+            tag_element = ElementTree.SubElement(
+                tags_element, "{%s}tag" % AUTOMOJO_NAMESPACE
+            )
+            tag_element.set("key", key)
+            tag_element.text = value
 
         ElementTree.register_namespace("automojo", AUTOMOJO_NAMESPACE)
         rtnval = ElementTree.tostring(root, encoding="unicode")
@@ -94,16 +92,16 @@ class LvMetadataTranslator:
         rtnval = run_element.text
         return rtnval
 
-    def extract(self, *, domain_xml: str) -> List[Dict[str, str]]:
+    def extract(self, *, domain_xml: str) -> Dict[str, str]:
         """
-            Recover the neutral tag list embedded in a domain's XML.
+            Recover the neutral tag dict embedded in a domain's XML.
 
             :param domain_xml: The full domain XML string.
 
-            :returns: The neutral tag list, or an empty list when the
+            :returns: The neutral flat tag dict, or an empty dict when the
                 domain carries no automojo tags.
         """
-        out: List[Dict[str, str]] = []
+        out: Dict[str, str] = {}
 
         try:
             root = ElementTree.fromstring(domain_xml)
@@ -127,7 +125,7 @@ class LvMetadataTranslator:
             value = tag_element.text
             if value is None:
                 value = ""
-            out.append({key: value})
+            out[key] = value
 
         rtnval = out
         return rtnval

@@ -460,13 +460,12 @@ def test_label_round_trip_identity(tags) -> None:
         CrusoeLabelTranslator
     )
     translator = CrusoeLabelTranslator()
-    neutral = [{key: value} for key, value in tags]
+    neutral = {key: value for key, value in tags}
 
     labels = translator.to_crusoe(neutral_tags=neutral)
     recovered = translator.from_crusoe(labels=labels)
 
-    expected = sorted(neutral, key=lambda d: list(d.keys())[0])
-    assert recovered == expected
+    assert recovered == neutral
     return
 
 

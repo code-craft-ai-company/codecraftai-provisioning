@@ -59,7 +59,7 @@ class VultrApplyStages:
     # ------------------------------------------------------------------
 
     def apply_network_and_firewall(self, *, spec: Any, run_id: str,
-                                   default_tags: List[Dict[str, str]]
+                                   default_tags: Dict[str, str]
                                    ) -> Dict[str, Any]:
         """
             Apply VPC 2.0, Firewall Groups + rules, and SSH keys.
@@ -84,7 +84,7 @@ class VultrApplyStages:
             if existing is None:
                 tags = VultrTagTranslator.base_resource_tags(
                     run_id=run_id, resource_name=net.name,
-                    resource_kind="network", extra=list(net.tags),
+                    resource_kind="network", extra=dict(net.tags),
                     defaults=default_tags,
                 )
                 v4_subnet, v4_mask = self._split_cidr(cidr=net.cidr)
@@ -113,7 +113,7 @@ class VultrApplyStages:
             if existing is None:
                 tags = VultrTagTranslator.base_resource_tags(
                     run_id=run_id, resource_name=sg.name,
-                    resource_kind="sg", extra=list(sg.tags),
+                    resource_kind="sg", extra=dict(sg.tags),
                     defaults=default_tags,
                 )
                 # Vultr firewall groups are described by a single string and
@@ -187,7 +187,7 @@ class VultrApplyStages:
     # ------------------------------------------------------------------
 
     def apply_instances_and_blocks(self, *, spec: Any, run_id: str,
-                                   default_tags: List[Dict[str, str]],
+                                   default_tags: Dict[str, str],
                                    networks: Dict[str, ProvisionedResource],
                                    firewalls: Dict[str, ProvisionedResource],
                                    keypairs: Dict[str, ProvisionedResource],
@@ -218,7 +218,7 @@ class VultrApplyStages:
             if existing is None:
                 tags = VultrTagTranslator.base_resource_tags(
                     run_id=run_id, resource_name=inst.name,
-                    resource_kind="instance", extra=list(inst.tags),
+                    resource_kind="instance", extra=dict(inst.tags),
                     defaults=default_tags,
                 )
                 os_id = self._resolver.image_to_os_id(
@@ -306,7 +306,7 @@ class VultrApplyStages:
             if existing is None:
                 tags = VultrTagTranslator.base_resource_tags(
                     run_id=run_id, resource_name=vol.name,
-                    resource_kind="volume", extra=list(vol.tags),
+                    resource_kind="volume", extra=dict(vol.tags),
                     defaults=default_tags,
                 )
                 region = self._block_region(volume=vol, spec=spec)
@@ -365,7 +365,7 @@ class VultrApplyStages:
                 cluster_id = self._object_cluster_id(bucket=bucket)
                 tags = VultrTagTranslator.base_resource_tags(
                     run_id=run_id, resource_name=bucket.name,
-                    resource_kind="bucket", extra=list(bucket.tags),
+                    resource_kind="bucket", extra=dict(bucket.tags),
                 )
                 tagged_label = "{}|{}".format(bucket.name, ",".join(tags))
                 response = self._client.post(

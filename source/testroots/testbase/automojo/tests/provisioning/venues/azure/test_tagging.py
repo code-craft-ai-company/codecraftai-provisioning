@@ -26,28 +26,28 @@ from automojo.provisioning.venues.azure.azuretagging import (
 
 def test_to_azure_basic() -> None:
     """
-        Flatten a small neutral tag list into a flat dict.
+        Convert a small neutral tag dict into the Azure tags dict.
     """
-    out = to_azure(neutral_tags=[{"a": "1"}, {"b": "2"}])
+    out = to_azure(neutral_tags={"a": "1", "b": "2"})
     assert out == {"a": "1", "b": "2"}
     return
 
 
 def test_from_azure_basic() -> None:
     """
-        Reverse direction: flat dict back to sorted single-entry dicts.
+        Reverse direction: Azure tags dict back to a flat neutral tag dict.
     """
     out = from_azure(azure_tags={"b": "2", "a": "1"})
-    assert out == [{"a": "1"}, {"b": "2"}]
+    assert out == {"a": "1", "b": "2"}
     return
 
 
-def test_to_azure_rejects_collision() -> None:
+def test_to_azure_rejects_non_string_value() -> None:
     """
-        Two neutral entries with the same key are a collision.
+        A non-string tag value is rejected.
     """
     with pytest.raises(AzureValidationError):
-        to_azure(neutral_tags=[{"k": "1"}, {"k": "2"}])
+        to_azure(neutral_tags={"k": 123})
     return
 
 
@@ -57,7 +57,7 @@ def test_to_azure_rejects_oversize_value() -> None:
     """
     big_value = "x" * (AZURE_TAG_VALUE_MAX + 1)
     with pytest.raises(AzureValidationError):
-        to_azure(neutral_tags=[{"k": big_value}])
+        to_azure(neutral_tags={"k": big_value})
     return
 
 
@@ -65,13 +65,10 @@ def test_base_resource_tags_contains_owner_run_name_kind() -> None:
     """
         ``base_resource_tags`` includes the required keys.
     """
-    tags = base_resource_tags(
+    flat = base_resource_tags(
         run_id="r1", resource_name="vnet-a", resource_kind="network",
-        extra=[{"team": "ml"}], defaults=[{"component": "test"}],
+        extra={"team": "ml"}, defaults={"component": "test"},
     )
-    flat = {}
-    for entry in tags:
-        flat.update(entry)
     assert flat["automojo:owned-by"] == "automojo-provisioning"
     assert flat["automojo:owner"] == "r1"
     assert flat["automojo:resource-name"] == "vnet-a"
@@ -93,11 +90,9 @@ def test_base_resource_tags_contains_owner_run_name_kind() -> None:
 ))
 def test_tag_round_trip_identity(tag_map) -> None:
     """
-        from_azure(to_azure(x)) == sorted(x) for any collision-free set.
+        from_azure(to_azure(x)) == x for any tag dict.
     """
-    neutral = [{k: v} for k, v in tag_map.items()]
-    azure_form = to_azure(neutral_tags=neutral)
+    azure_form = to_azure(neutral_tags=tag_map)
     rebuilt = from_azure(azure_tags=azure_form)
-    expected = sorted(neutral, key=lambda d: list(d.keys())[0])
-    assert rebuilt == expected
+    assert rebuilt == tag_map
     return

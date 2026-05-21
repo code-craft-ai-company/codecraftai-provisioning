@@ -86,7 +86,7 @@ class CloudNetworkTests(unittest.TestCase):
 
     def test_roundtrip(self) -> None:
         net = CloudNetwork(name="vpc-a", cidr="10.0.0.0/16", region="us-east-1",
-                           tags=[{"env": "prod"}])
+                           tags={"env": "prod"})
         as_dict = net.to_dict()
         rebuilt = CloudNetwork.from_dict(as_dict)
         self.assertEqual(net, rebuilt)
@@ -493,7 +493,7 @@ def _build_network(seed: int):
     rtnval = CloudNetwork(name="net-{}".format(seed),
                           cidr="10.{}.0.0/16".format(seed % 256),
                           region="region-{}".format(seed),
-                          tags=[{"env": "test"}])
+                          tags={"env": "test"})
     return rtnval
 
 
@@ -605,6 +605,52 @@ class AllModelClassesPropertyTests(unittest.TestCase):
                     model_cls.__name__, seed
                 )
             )
+        return
+
+
+class FlatDictTagsTests(unittest.TestCase):
+
+    def test_tags_default_to_empty_dict(self) -> None:
+        net = CloudNetwork(name="vpc-a", cidr="10.0.0.0/16", region="r")
+        self.assertEqual(net.tags, {})
+        return
+
+    def test_tags_accept_flat_dict(self) -> None:
+        net = CloudNetwork(name="vpc-a", cidr="10.0.0.0/16", region="r",
+                           tags={"env": "lab", "team": "infra"})
+        self.assertEqual(net.tags, {"env": "lab", "team": "infra"})
+        return
+
+    def test_tags_roundtrip_as_flat_dict(self) -> None:
+        net = CloudNetwork(name="vpc-a", cidr="10.0.0.0/16", region="r",
+                           tags={"env": "lab"})
+        rebuilt = CloudNetwork.from_dict(net.to_dict())
+        self.assertEqual(rebuilt.tags, {"env": "lab"})
+        return
+
+
+class RuleProtocolEnumTests(unittest.TestCase):
+
+    def test_ingress_rule_protocol_coerces_string(self) -> None:
+        rule = CloudIngressRule(protocol="TCP", from_port=22, to_port=22,
+                                source_cidrs=["0.0.0.0/0"])
+        self.assertEqual(rule.protocol, "tcp")
+        return
+
+    def test_egress_rule_protocol_coerces_enum(self) -> None:
+        from automojo.provisioning.model.cloud.networkprotocol import (
+            NetworkProtocol
+        )
+        rule = CloudEgressRule(protocol=NetworkProtocol.ALL,
+                               from_port=0, to_port=65535,
+                               dest_cidrs=["0.0.0.0/0"])
+        self.assertEqual(rule.protocol, "all")
+        return
+
+    def test_rule_rejects_unknown_protocol(self) -> None:
+        with self.assertRaises(SchemaSemanticError):
+            CloudIngressRule(protocol="sctp", from_port=22, to_port=22,
+                             source_cidrs=["0.0.0.0/0"])
         return
 
 
