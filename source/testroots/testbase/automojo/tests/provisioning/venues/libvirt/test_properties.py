@@ -130,45 +130,32 @@ def test_destroy_is_inverse_of_apply(instance_count):
 
 
 @settings(max_examples=80)
-@given(tags=st.lists(
-    st.dictionaries(
-        keys=st.text(
-            alphabet=st.characters(
-                whitelist_categories=("Ll", "Lu", "Nd"),
-                whitelist_characters=" :/-_.",
-            ),
-            min_size=1, max_size=12),
-        values=st.text(
-            alphabet=st.characters(
-                whitelist_categories=("Ll", "Lu", "Nd"),
-                whitelist_characters=" :/-_.",
-            ),
-            min_size=1, max_size=12),
-        min_size=1, max_size=1),
+@given(tags=st.dictionaries(
+    keys=st.text(
+        alphabet=st.characters(
+            whitelist_categories=("Ll", "Lu", "Nd"),
+            whitelist_characters=" :/-_.",
+        ),
+        min_size=1, max_size=12),
+    values=st.text(
+        alphabet=st.characters(
+            whitelist_categories=("Ll", "Lu", "Nd"),
+            whitelist_characters=" :/-_.",
+        ),
+        min_size=1, max_size=12),
     min_size=0, max_size=5))
 def test_metadata_tag_round_trip_identity(tags):
     """
-        Embedding a neutral tag list into XML metadata and extracting it
+        Embedding a neutral tag dict into XML metadata and extracting it
         back is the identity — even for namespaces, colons, and
         whitespace in keys and values.
     """
-    # Deduplicate keys so the round-trip stays the identity (a metadata
-    # block with duplicate keys is a malformed neutral tag list).
-    seen = set()
-    unique_tags = []
-    for entry in tags:
-        key = list(entry.keys())[0]
-        if key in seen:
-            continue
-        seen.add(key)
-        unique_tags.append(entry)
-
     translator = LvMetadataTranslator()
-    inner = translator.embed(neutral_tags=unique_tags, run_id="run-xyz")
+    inner = translator.embed(neutral_tags=tags, run_id="run-xyz")
     domain_xml = ("<domain><metadata>{}</metadata></domain>").format(inner)
 
     recovered = translator.extract(domain_xml=domain_xml)
-    assert recovered == [dict(tag) for tag in unique_tags]
+    assert recovered == tags
 
     recovered_run = translator.extract_run_id(domain_xml=domain_xml)
     assert recovered_run == "run-xyz"

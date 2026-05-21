@@ -304,7 +304,7 @@ class InstanceManager:
         image_uri = resolve_image_uri(image=desired.image)
         labels = base_resource_labels(
             run_id=run_id, resource_name=desired.name,
-            resource_kind=self.KIND, extra=list(desired.tags),
+            resource_kind=self.KIND, extra=dict(desired.tags),
             defaults=default_tags,
         )
 

@@ -128,24 +128,22 @@ def test_destroy_is_inverse_of_apply(instance_count):
 
 
 @settings(max_examples=60)
-@given(tags=st.lists(
-    st.dictionaries(
-        keys=st.text(alphabet=st.characters(min_codepoint=97,
-                                             max_codepoint=122),
-                     min_size=1, max_size=8),
-        values=st.text(alphabet=st.characters(min_codepoint=97,
-                                              max_codepoint=122),
-                       min_size=1, max_size=8),
-        min_size=1, max_size=1),
+@given(tags=st.dictionaries(
+    keys=st.text(alphabet=st.characters(min_codepoint=97,
+                                        max_codepoint=122),
+                 min_size=1, max_size=8),
+    values=st.text(alphabet=st.characters(min_codepoint=97,
+                                          max_codepoint=122),
+                   min_size=1, max_size=8),
     min_size=0, max_size=5))
 def test_sidecar_tag_round_trip_identity(tags):
     """
-        Writing a neutral tag list and reading it back is the identity.
+        Writing a neutral tag dict and reading it back is the identity.
     """
     sidecar = LlSidecarTag(runid="roundtrip", output_root=tempfile.mkdtemp())
     sidecar.write(neutral_tags=tags, instance_id="i-xyz")
     recovered = sidecar.read(instance_id="i-xyz")
-    assert recovered == [dict(tag) for tag in tags]
+    assert recovered == tags
     return
 
 

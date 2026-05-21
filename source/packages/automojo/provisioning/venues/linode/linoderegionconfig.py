@@ -25,14 +25,14 @@ class LinodeRegionConfig:
 
     def __init__(self, *, region: str,
                  object_storage_cluster: str,
-                 default_tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 default_tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct a LinodeRegionConfig.
 
             :param region: Linode region slug (e.g. ``us-east``).
             :param object_storage_cluster: Object-storage cluster identifier
                                            (e.g. ``us-east-1``).
-            :param default_tags: Optional list of single-entry tag dicts to
+            :param default_tags: Optional flat dict of tag key/value pairs to
                                  apply to every created resource.
         """
         if region is None or len(region) == 0:
@@ -43,11 +43,11 @@ class LinodeRegionConfig:
                 "LinodeRegionConfig.object_storage_cluster must not be empty."
             )
 
-        effective_tags = default_tags if default_tags is not None else []
+        effective_tags = default_tags if default_tags is not None else {}
 
         self._region: str = region
         self._object_storage_cluster: str = object_storage_cluster
-        self._default_tags: List[Dict[str, str]] = effective_tags
+        self._default_tags: Dict[str, str] = effective_tags
         return
 
     @property
@@ -71,11 +71,11 @@ class LinodeRegionConfig:
         return rtnval
 
     @property
-    def default_tags(self) -> List[Dict[str, str]]:
+    def default_tags(self) -> Dict[str, str]:
         """
             Return the list of default tag dicts.
 
             :returns: A defensive copy of the default tag list.
         """
-        rtnval = list(self._default_tags)
+        rtnval = dict(self._default_tags)
         return rtnval

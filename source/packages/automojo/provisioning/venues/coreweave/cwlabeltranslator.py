@@ -28,14 +28,13 @@ _MAX_LABEL_LENGTH = 63
 
 class CwLabelTranslator:
     """
-        Translate between the neutral tag form (a list of single-entry dicts)
+        Translate between the neutral tag form (a flat ``{key: value}`` dict)
         and the Kubernetes label form (a flat string-to-string dict).
 
-        For conformant inputs — every tag a single-entry dict whose key and
-        value already satisfy the Kubernetes label rules, with no duplicate
-        keys — the round trip ``from_k8s(to_k8s(tags))`` is the identity.
-        Non-conformant key/value characters are replaced and a warning is
-        emitted per change.
+        For conformant inputs — keys and values that already satisfy the
+        Kubernetes label rules — the round trip ``from_k8s(to_k8s(tags))``
+        is the identity.  Non-conformant key/value characters are replaced
+        and a warning is emitted per change.
     """
 
     def __init__(self, *, logger_name: str = "automojo.provisioning.coreweave") -> None:
@@ -102,11 +101,11 @@ class CwLabelTranslator:
         rtnval = replaced
         return rtnval
 
-    def to_k8s(self, *, neutral_tags: List[Dict[str, str]]) -> Dict[str, str]:
+    def to_k8s(self, *, neutral_tags: Dict[str, str]) -> Dict[str, str]:
         """
-            Translate a neutral tag list into a Kubernetes label dict.
+            Translate a neutral tag dict into a Kubernetes label dict.
 
-            :param neutral_tags: A list of single-entry tag dicts.
+            :param neutral_tags: A flat ``{key: value}`` dict of tag pairs.
 
             :returns: A flat Kubernetes label dictionary.
         """
@@ -114,38 +113,37 @@ class CwLabelTranslator:
         if neutral_tags is None:
             return rtnval
 
-        for entry in neutral_tags:
-            for key, value in entry.items():
-                if self.is_conformant(value=key):
-                    safe_key = key
-                else:
-                    safe_key = self.sanitise(value=key)
+        for key, value in neutral_tags.items():
+            if self.is_conformant(value=key):
+                safe_key = key
+            else:
+                safe_key = self.sanitise(value=key)
 
-                if self.is_conformant(value=value):
-                    safe_value = value
-                else:
-                    safe_value = self.sanitise(value=value)
+            if self.is_conformant(value=value):
+                safe_value = value
+            else:
+                safe_value = self.sanitise(value=value)
 
-                rtnval[safe_key] = safe_value
+            rtnval[safe_key] = safe_value
 
         return rtnval
 
-    def from_k8s(self, *, labels: Dict[str, str]) -> List[Dict[str, str]]:
+    def from_k8s(self, *, labels: Dict[str, str]) -> Dict[str, str]:
         """
-            Translate a Kubernetes label dict into the neutral tag list form.
+            Translate a Kubernetes label dict into the neutral tag dict form.
 
             Keys are emitted in sorted order so the result is deterministic.
 
             :param labels: A flat Kubernetes label dictionary.
 
-            :returns: A list of single-entry tag dicts.
+            :returns: A flat ``{key: value}`` dict of tag pairs.
         """
-        rtnval: List[Dict[str, str]] = []
+        rtnval: Dict[str, str] = {}
         if labels is None:
             return rtnval
 
         for key in sorted(labels.keys()):
-            rtnval.append({key: labels[key]})
+            rtnval[key] = labels[key]
 
         return rtnval
 

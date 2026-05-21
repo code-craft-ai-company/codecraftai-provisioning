@@ -128,7 +128,7 @@ def test_property_tag_round_trip_identity(tags) -> None:
         list as the identity (modulo key ordering, which from_xen sorts).
     """
     translator = XenTagTranslator()
-    neutral = [{key: value} for key, value in tags]
+    neutral = {key: value for key, value in tags}
 
     translated = translator.to_xen(neutral_tags=neutral,
                                    run_id="tag-round-trip")
@@ -137,10 +137,7 @@ def test_property_tag_round_trip_identity(tags) -> None:
                       tags=translated["tags"])
     recovered = translator.from_xen(vm_record=vm_record)
 
-    expected = sorted(neutral, key=lambda d: next(iter(d.keys())))
-    recovered_sorted = sorted(recovered,
-                              key=lambda d: next(iter(d.keys())))
-    assert recovered_sorted == expected
+    assert recovered == neutral
     return
 
 
@@ -153,11 +150,10 @@ def test_property_tags_list_encodes_key_value_pairs(tags) -> None:
         ``tags`` list, and the run-id/owner markers stay out of that list.
     """
     translator = XenTagTranslator()
-    neutral = [{key: value} for key, value in tags]
+    neutral = {key: value for key, value in tags}
     translated = translator.to_xen(neutral_tags=neutral, run_id="run-9")
 
     assert len(translated["tags"]) == len(neutral)
-    for entry in neutral:
-        for key, value in entry.items():
-            assert "{}={}".format(key, value) in translated["tags"]
+    for key, value in neutral.items():
+        assert "{}={}".format(key, value) in translated["tags"]
     return

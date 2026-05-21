@@ -111,7 +111,7 @@ class LinodeApplyStages:
                 continue
             tags = self._translator.owner_tags(
                 run_id=run_id, resource_name=net.name,
-                resource_kind="network", extra=list(net.tags),
+                resource_kind="network", extra=dict(net.tags),
                 defaults=defaults,
             )
             created = self._client.vpc_create(
@@ -150,7 +150,7 @@ class LinodeApplyStages:
             result.created.append(ProvisionedResource(
                 kind="subnet", name=subnet.name,
                 venue_id=str(getattr(created, "id", "")),
-                attributes=attributes, tags=[],
+                attributes=attributes, tags={},
             ))
 
         firewall_state: Dict[str, Any] = {}
@@ -162,7 +162,7 @@ class LinodeApplyStages:
                 continue
             tags = self._translator.owner_tags(
                 run_id=run_id, resource_name=sg.name,
-                resource_kind="sg", extra=list(sg.tags),
+                resource_kind="sg", extra=dict(sg.tags),
                 defaults=defaults,
             )
             rules = self._firewall_rules(sg=sg)
@@ -194,7 +194,7 @@ class LinodeApplyStages:
                 kind="keypair", name=kp.name,
                 venue_id=str(getattr(created, "id", "")),
                 attributes={"public_key": kp.public_key_material},
-                tags=[],
+                tags={},
             ))
 
         rtnval: Dict[str, Any] = {
@@ -276,7 +276,7 @@ class LinodeApplyStages:
 
             tags = self._translator.owner_tags(
                 run_id=run_id, resource_name=inst.name,
-                resource_kind="instance", extra=list(inst.tags),
+                resource_kind="instance", extra=dict(inst.tags),
                 defaults=defaults,
             )
 
@@ -332,7 +332,7 @@ class LinodeApplyStages:
                 continue
             tags = self._translator.owner_tags(
                 run_id=run_id, resource_name=vol.name,
-                resource_kind="volume", extra=list(vol.tags),
+                resource_kind="volume", extra=dict(vol.tags),
                 defaults=defaults,
             )
             attach_handle = None
@@ -379,7 +379,7 @@ class LinodeApplyStages:
             result.created.append(ProvisionedResource(
                 kind="bucket", name=bucket.name,
                 venue_id=str(getattr(created, "id", bucket.name)),
-                attributes={"cluster": cluster}, tags=[],
+                attributes={"cluster": cluster}, tags={},
             ))
 
         for record in spec.dns_records:
@@ -407,7 +407,7 @@ class LinodeApplyStages:
                 venue_id=str(getattr(created, "id", record.name)),
                 attributes={"zone": record.zone,
                             "record_type": record.record_type},
-                tags=[],
+                tags={},
             ))
         return
 

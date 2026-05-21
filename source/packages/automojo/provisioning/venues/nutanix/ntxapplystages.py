@@ -165,7 +165,7 @@ class NtxApplyStages:
                 kind="network", name=network.name, venue_id=entity_uuid,
                 attributes={"venue_name": venue_name,
                             "cidr": network.cidr},
-                tags=network.tags if network.tags is not None else [],
+                tags=network.tags if network.tags is not None else {},
             )
             if existed:
                 result.skipped.append(network.name)
@@ -213,7 +213,7 @@ class NtxApplyStages:
                 attributes={"venue_name": venue_name,
                             "cidr": subnet.cidr,
                             "cluster_uuid": cluster_uuid},
-                tags=subnet.tags if subnet.tags is not None else [],
+                tags=subnet.tags if subnet.tags is not None else {},
             )
             if existed:
                 result.skipped.append(subnet.name)
@@ -256,7 +256,7 @@ class NtxApplyStages:
                 kind="security_group", name=sg.name,
                 venue_id=entity_uuid,
                 attributes={"venue_name": venue_name},
-                tags=sg.tags if sg.tags is not None else [],
+                tags=sg.tags if sg.tags is not None else {},
             )
             if existed:
                 result.skipped.append(sg.name)
@@ -303,7 +303,7 @@ class NtxApplyStages:
                 attributes={"venue_name": venue_name,
                             "size_gb": volume.size_gb,
                             "storage_class": volume.storage_class.value},
-                tags=volume.tags if volume.tags is not None else [],
+                tags=volume.tags if volume.tags is not None else {},
             )
             if existed:
                 result.skipped.append(volume.name)
@@ -390,7 +390,7 @@ class NtxApplyStages:
                             "memory_mib": hardware["memory_mib"],
                             "image_uuid": image_uuid,
                             "cluster_uuid": cluster_uuid},
-                tags=instance.tags if instance.tags is not None else [],
+                tags=instance.tags if instance.tags is not None else {},
             )
             result.created.append(resource)
 

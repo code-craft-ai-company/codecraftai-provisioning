@@ -86,17 +86,17 @@ class CwManifestRenderer:
         return
 
     def _run_labels(self, *, run_id: str,
-                    tags: Optional[List[Dict[str, str]]]) -> Dict[str, str]:
+                    tags: Optional[Dict[str, str]]) -> Dict[str, str]:
         """
             Build the label map for a resource — neutral tags plus the
             run-id label.
 
             :param run_id: The automojo run identifier.
-            :param tags: Optional neutral tag list.
+            :param tags: Optional neutral tag dict.
 
             :returns: A Kubernetes label dict.
         """
-        labels = self._labels.to_k8s(neutral_tags=tags if tags is not None else [])
+        labels = self._labels.to_k8s(neutral_tags=tags if tags is not None else {})
         labels[RUN_ID_LABEL] = run_id
         return labels
 

@@ -106,6 +106,6 @@ class FsxManager:
         rtnval = ProvisionedResource(
             kind=self.KIND, name=desired.name,
             venue_id=desired.existing_id,
-            attributes=attributes, tags=[],
+            attributes=attributes, tags={},
         )
         return rtnval

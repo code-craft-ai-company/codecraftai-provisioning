@@ -100,7 +100,7 @@ class HvApplyStages:
             else:
                 created.append(ProvisionedResource(
                     kind="network", name=net.name,
-                    venue_id=record.switch_id, attributes={}, tags=[]))
+                    venue_id=record.switch_id, attributes={}, tags={}))
 
         rtnval = switch_state
         return rtnval
@@ -145,7 +145,7 @@ class HvApplyStages:
                             vpn_authkeys=vpn_authkeys, aspects=aspects)
             created.append(ProvisionedResource(
                 kind="instance", name=inst.name, venue_id=inst.name,
-                attributes={}, tags=[]))
+                attributes={}, tags={}))
             self._record_vpn(instance=inst, vpn_records=vpn_records)
 
         for vol in spec.volumes:
@@ -163,7 +163,7 @@ class HvApplyStages:
             self._client.vhdx.new_vhdx(spec=vhdx_spec, aspects=aspects)
             created.append(ProvisionedResource(
                 kind="volume", name=vol.name, venue_id=vhdx_path,
-                attributes={}, tags=[]))
+                attributes={}, tags={}))
 
             if vol.attached_to is not None and len(vol.attached_to) > 0:
                 self._client.adapters.add_vm_hard_disk(

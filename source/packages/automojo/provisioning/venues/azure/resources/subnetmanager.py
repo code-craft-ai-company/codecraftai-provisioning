@@ -114,7 +114,7 @@ class SubnetManager:
         rtnval = ProvisionedResource(
             kind=self.KIND, name=desired.name,
             venue_id=getattr(existing, "id", desired.name),
-            attributes=attributes, tags=[],
+            attributes=attributes, tags={},
         )
         return rtnval
 

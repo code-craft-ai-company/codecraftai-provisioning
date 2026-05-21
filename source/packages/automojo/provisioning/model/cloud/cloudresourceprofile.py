@@ -103,14 +103,14 @@ class CloudResourceProfile(SchemaObject):
     description = Field(str, required=False, default="")
     credential = Field(str, required=False, default=None)
     payload = Field(dict, required=False, default=None)
-    tags = Field(list, required=False, default=None)
+    tags = Field(dict, required=False, default=None)
 
     def __init__(self, *, name: str,
                  kind: Union[CloudResourceKind, str],
                  description: str = "",
                  credential: Optional[str] = None,
                  payload: Optional[Dict[str, Any]] = None,
-                 tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct a CloudResourceProfile.
 
@@ -120,7 +120,7 @@ class CloudResourceProfile(SchemaObject):
             :param credential: Optional credential vault reference name.
             :param payload: Optional payload validated against the matching
                             model class.
-            :param tags: Optional list of single-entry tag dicts.
+            :param tags: Optional flat dict of tag key/value pairs.
 
             :raises: SchemaValidationError
         """
@@ -130,7 +130,7 @@ class CloudResourceProfile(SchemaObject):
         resolved_kind = resolve_kind(value=kind)
 
         effective_payload = payload if payload is not None else {}
-        effective_tags = tags if tags is not None else []
+        effective_tags = tags if tags is not None else {}
 
         if len(effective_payload) > 0:
             target_cls = model_class_for_kind(kind=resolved_kind)

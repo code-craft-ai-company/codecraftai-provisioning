@@ -60,7 +60,7 @@ def config() -> VSphereVenueConfig:
         template_folder="/DC1/vm/templates",
         nsx_available=False,
         subnet_vlan_ids={"pg-a": 1020},
-        default_tags=[{"automojo:component": "test"}],
+        default_tags={"automojo:component": "test"},
     )
     return rtnval
 

@@ -40,25 +40,25 @@ class DoRegionConfig:
 
     def __init__(self, *, region: str,
                  spaces_region: Optional[str] = None,
-                 default_tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 default_tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct a DoRegionConfig.
 
             :param region: DigitalOcean region slug (e.g. ``nyc3``).
             :param spaces_region: Optional Spaces region slug; defaults to
                                   ``region`` when omitted.
-            :param default_tags: Optional list of single-entry tag dicts to
+            :param default_tags: Optional flat dict of tag key/value pairs to
                                   apply to every created resource.
         """
         if region is None or len(region) == 0:
             raise ValueError("DoRegionConfig.region must not be empty.")
 
         effective_spaces = spaces_region if spaces_region is not None else region
-        effective_tags = default_tags if default_tags is not None else []
+        effective_tags = default_tags if default_tags is not None else {}
 
         self._region: str = region
         self._spaces_region: str = effective_spaces
-        self._default_tags: List[Dict[str, str]] = effective_tags
+        self._default_tags: Dict[str, str] = effective_tags
         return
 
     @property
@@ -82,11 +82,11 @@ class DoRegionConfig:
         return rtnval
 
     @property
-    def default_tags(self) -> List[Dict[str, str]]:
+    def default_tags(self) -> Dict[str, str]:
         """
             Return the list of default tag dicts.
 
             :returns: A defensive copy of the default tag list.
         """
-        rtnval = list(self._default_tags)
+        rtnval = dict(self._default_tags)
         return rtnval

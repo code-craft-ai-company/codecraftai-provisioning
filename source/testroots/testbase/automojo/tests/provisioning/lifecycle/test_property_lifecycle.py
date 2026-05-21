@@ -136,11 +136,7 @@ class OwnerTagInvariantProperty(unittest.TestCase):
         owner_key = FakeCloudProvisioner.OWNER_TAG_KEY
         owner_value = FakeCloudProvisioner.OWNER_TAG_VALUE
         for resource in fake.inventory(aspects=aspects):
-            has_tag = False
-            for tag in resource.tags:
-                if tag.get(owner_key) == owner_value:
-                    has_tag = True
-                    break
+            has_tag = resource.tags.get(owner_key) == owner_value
             self.assertTrue(has_tag,
                             "resource missing owner tag: {!r}".format(resource))
         return

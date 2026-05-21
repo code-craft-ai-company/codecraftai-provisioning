@@ -34,14 +34,14 @@ class WorkloadCluster(SchemaObject):
     accelerator_pools = Field(list, required=False, default=None)
     autoscaling = Field(AutoscalingSpec, required=False, default=None)
     networking = Field(dict, required=False, default=None)
-    tags = Field(list, required=False, default=None)
+    tags = Field(dict, required=False, default=None)
 
     def __init__(self, *, name: str,
                  node_pools: Optional[List[NodePoolSpec]] = None,
                  accelerator_pools: Optional[List[NodePoolSpec]] = None,
                  autoscaling: Optional[AutoscalingSpec] = None,
                  networking: Optional[Dict[str, Any]] = None,
-                 tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct a WorkloadCluster.
 
@@ -50,7 +50,7 @@ class WorkloadCluster(SchemaObject):
             :param accelerator_pools: Optional list of accelerator node pools.
             :param autoscaling: Optional autoscaling spec.
             :param networking: Optional venue-neutral networking dict.
-            :param tags: Optional list of single-entry tag dicts.
+            :param tags: Optional flat dict of tag key/value pairs.
 
             :raises: SchemaValidationError
         """
@@ -59,7 +59,7 @@ class WorkloadCluster(SchemaObject):
         effective_node_pools = node_pools if node_pools is not None else []
         effective_accel_pools = accelerator_pools if accelerator_pools is not None else []
         effective_networking = networking if networking is not None else {}
-        effective_tags = tags if tags is not None else []
+        effective_tags = tags if tags is not None else {}
 
         super().__init__(name=name, node_pools=effective_node_pools,
                          accelerator_pools=effective_accel_pools,

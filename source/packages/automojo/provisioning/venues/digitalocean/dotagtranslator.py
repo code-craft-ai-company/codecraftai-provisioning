@@ -76,15 +76,15 @@ def _unescape(*, value: str) -> str:
     return rtnval
 
 
-def to_do(*, neutral_tags: Optional[List[Dict[str, str]]]) -> List[str]:
+def to_do(*, neutral_tags: Optional[Dict[str, str]]) -> List[str]:
     """
-        Convert neutral single-entry tag dicts to the DigitalOcean tag
+        Convert a neutral flat tag dict to the DigitalOcean tag
         string-list wire shape.
 
         Each ``{key: value}`` pair becomes a single ``key=value`` string with
         ``\\`` and ``=`` escaped so round-tripping is the identity.
 
-        :param neutral_tags: List of single-entry ``{key: value}`` dicts.
+        :param neutral_tags: Flat ``{key: value}`` dict of tag pairs.
 
         :returns: A sorted list of ``key=value`` tag strings.
         :raises: DoValidationError
@@ -93,65 +93,45 @@ def to_do(*, neutral_tags: Optional[List[Dict[str, str]]]) -> List[str]:
         rtnval: List[str] = []
         return rtnval
 
-    seen_keys: Dict[str, str] = {}
     encoded: List[str] = []
-    for entry in neutral_tags:
-        if not isinstance(entry, dict):
-            err_msg_lines = ["Neutral tag entry is not a dict."]
-            err_msg_lines.append("ENTRY: {!r}".format(entry))
-            err_msg = os.linesep.join(err_msg_lines)
-            raise DoValidationError(err_msg)
-        if len(entry) != 1:
-            err_msg_lines = ["Neutral tag entry must be a single-key dict."]
-            err_msg_lines.append("ENTRY: {!r}".format(entry))
+    for key, value in neutral_tags.items():
+        if not isinstance(key, str) or not isinstance(value, str):
+            err_msg_lines = ["Tag key and value must be strings."]
+            err_msg_lines.append("KEY: {!r}".format(key))
+            err_msg_lines.append("VALUE: {!r}".format(value))
             err_msg = os.linesep.join(err_msg_lines)
             raise DoValidationError(err_msg)
 
-        for key, value in entry.items():
-            if not isinstance(key, str) or not isinstance(value, str):
-                err_msg_lines = ["Tag key and value must be strings."]
-                err_msg_lines.append("KEY: {!r}".format(key))
-                err_msg_lines.append("VALUE: {!r}".format(value))
-                err_msg = os.linesep.join(err_msg_lines)
-                raise DoValidationError(err_msg)
+        tag_string = "{}={}".format(_escape(value=key),
+                                    _escape(value=value))
+        if len(tag_string) > DO_TAG_MAX:
+            err_msg_lines = ["Encoded tag exceeds DigitalOcean 255 limit."]
+            err_msg_lines.append("KEY: {}".format(key))
+            err_msg_lines.append("LENGTH: {}".format(len(tag_string)))
+            err_msg = os.linesep.join(err_msg_lines)
+            raise DoValidationError(err_msg)
 
-            if key in seen_keys:
-                err_msg_lines = ["Duplicate tag key in neutral tag set."]
-                err_msg_lines.append("KEY: {}".format(key))
-                err_msg = os.linesep.join(err_msg_lines)
-                raise DoValidationError(err_msg)
-
-            tag_string = "{}={}".format(_escape(value=key),
-                                        _escape(value=value))
-            if len(tag_string) > DO_TAG_MAX:
-                err_msg_lines = ["Encoded tag exceeds DigitalOcean 255 limit."]
-                err_msg_lines.append("KEY: {}".format(key))
-                err_msg_lines.append("LENGTH: {}".format(len(tag_string)))
-                err_msg = os.linesep.join(err_msg_lines)
-                raise DoValidationError(err_msg)
-
-            seen_keys[key] = value
-            encoded.append(tag_string)
+        encoded.append(tag_string)
 
     encoded.sort()
     rtnval = encoded
     return rtnval
 
 
-def from_do(*, do_tags: Optional[List[str]]) -> List[Dict[str, str]]:
+def from_do(*, do_tags: Optional[List[str]]) -> Dict[str, str]:
     """
-        Convert a DigitalOcean tag string-list back to neutral single-entry
-        dicts.
+        Convert a DigitalOcean tag string-list back to a neutral flat tag
+        dict.
 
         :param do_tags: List of ``key=value`` tag strings.
 
-        :returns: A key-sorted list of single-entry neutral dicts.
+        :returns: A neutral flat ``{key: value}`` dict.
     """
+    out: Dict[str, str] = {}
     if do_tags is None:
-        rtnval: List[Dict[str, str]] = []
+        rtnval = out
         return rtnval
 
-    pairs: List[Dict[str, str]] = []
     for tag_string in do_tags:
         # Split on the first unescaped '='.
         split_index = -1
@@ -175,10 +155,9 @@ def from_do(*, do_tags: Optional[List[str]]) -> List[Dict[str, str]]:
         raw_value = tag_string[split_index + 1:]
         key = _unescape(value=raw_key)
         value = _unescape(value=raw_value)
-        pairs.append({key: value})
+        out[key] = value
 
-    pairs.sort(key=lambda d: next(iter(d.keys())))
-    rtnval = pairs
+    rtnval = out
     return rtnval
 
 
@@ -190,21 +169,17 @@ def to_flat(*, do_tags: Optional[List[str]]) -> Dict[str, str]:
 
         :returns: A flat dict (empty when input is None).
     """
-    out: Dict[str, str] = {}
-    for entry in from_do(do_tags=do_tags):
-        for key, value in entry.items():
-            out[key] = value
-    rtnval = out
+    rtnval = from_do(do_tags=do_tags)
     return rtnval
 
 
 def base_resource_tags(*, run_id: str, resource_name: str,
                        resource_kind: str,
-                       extra: Optional[List[Dict[str, str]]] = None,
-                       defaults: Optional[List[Dict[str, str]]] = None
-                       ) -> List[Dict[str, str]]:
+                       extra: Optional[Dict[str, str]] = None,
+                       defaults: Optional[Dict[str, str]] = None
+                       ) -> Dict[str, str]:
     """
-        Build the full neutral tag list for a created DigitalOcean resource.
+        Build the full neutral tag dict for a created DigitalOcean resource.
 
         :param run_id: The provisioning run identifier.
         :param resource_name: Neutral resource name.
@@ -212,21 +187,21 @@ def base_resource_tags(*, run_id: str, resource_name: str,
         :param extra: Optional user-declared tags.
         :param defaults: Optional venue default tags.
 
-        :returns: Combined neutral tag list.
+        :returns: Combined neutral flat tag dict.
     """
-    combined: List[Dict[str, str]] = []
-    combined.append({OWNER_TAG_KEY: OWNER_TAG_VALUE})
-    combined.append({RUN_ID_TAG_KEY: run_id})
-    combined.append({RESOURCE_NAME_TAG_KEY: resource_name})
-    combined.append({RESOURCE_KIND_TAG_KEY: resource_kind})
+    combined: Dict[str, str] = {}
+    combined[OWNER_TAG_KEY] = OWNER_TAG_VALUE
+    combined[RUN_ID_TAG_KEY] = run_id
+    combined[RESOURCE_NAME_TAG_KEY] = resource_name
+    combined[RESOURCE_KIND_TAG_KEY] = resource_kind
 
     if defaults is not None:
-        for entry in defaults:
-            combined.append(dict(entry))
+        for key, value in defaults.items():
+            combined[key] = value
 
     if extra is not None:
-        for entry in extra:
-            combined.append(dict(entry))
+        for key, value in extra.items():
+            combined[key] = value
 
     rtnval = combined
     return rtnval

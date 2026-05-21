@@ -23,13 +23,13 @@ class AwsRegionConfig:
     """
 
     def __init__(self, *, region: str, availability_zone: str,
-                 default_tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 default_tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct an AwsRegionConfig.
 
             :param region: AWS region (e.g. ``us-east-1``).
             :param availability_zone: AZ within the region (e.g. ``us-east-1a``).
-            :param default_tags: Optional list of single-entry tag dicts to
+            :param default_tags: Optional flat dict of tag key/value pairs to
                                  apply to every created resource.
         """
         if region is None or len(region) == 0:
@@ -40,11 +40,11 @@ class AwsRegionConfig:
                 "AwsRegionConfig.availability_zone must not be empty."
             )
 
-        effective_tags = default_tags if default_tags is not None else []
+        effective_tags = default_tags if default_tags is not None else {}
 
         self._region: str = region
         self._availability_zone: str = availability_zone
-        self._default_tags: List[Dict[str, str]] = effective_tags
+        self._default_tags: Dict[str, str] = effective_tags
         return
 
     @property
@@ -68,11 +68,11 @@ class AwsRegionConfig:
         return rtnval
 
     @property
-    def default_tags(self) -> List[Dict[str, str]]:
+    def default_tags(self) -> Dict[str, str]:
         """
             Return the list of default tag dicts.
 
             :returns: A defensive copy of the default tag list.
         """
-        rtnval = list(self._default_tags)
+        rtnval = dict(self._default_tags)
         return rtnval

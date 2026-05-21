@@ -136,7 +136,7 @@ class SubnetManager:
         if existing is None:
             labels = base_resource_labels(
                 run_id=run_id, resource_name=desired.name,
-                resource_kind=self.KIND, extra=list(desired.tags),
+                resource_kind=self.KIND, extra=dict(desired.tags),
                 defaults=default_tags,
             )
             body: Dict[str, Any] = {

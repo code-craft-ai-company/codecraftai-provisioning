@@ -17,8 +17,8 @@ from typing import Dict, List
 
 class PveTagTranslator:
     """
-        Translates between the neutral tag representation — a list of
-        single-entry ``{key: value}`` dicts — and the Proxmox tag
+        Translates between the neutral tag representation — a flat
+        ``{key: value}`` dict — and the Proxmox tag
         representation — a flat list of ``key=value`` strings (Proxmox
         joins tags with a semicolon into a single config string).
 
@@ -28,12 +28,11 @@ class PveTagTranslator:
     """
 
     @staticmethod
-    def to_pve(*, neutral_tags: List[Dict[str, str]]) -> List[str]:
+    def to_pve(*, neutral_tags: Dict[str, str]) -> List[str]:
         """
-            Encode a neutral tag list into a Proxmox tag-string list.
+            Encode a neutral tag dict into a Proxmox tag-string list.
 
-            :param neutral_tags: A list of single-entry ``{key: value}``
-                dicts.
+            :param neutral_tags: A flat ``{key: value}`` dict of tag pairs.
 
             :returns: A list of ``key=value`` strings, one per neutral tag.
         """
@@ -41,24 +40,21 @@ class PveTagTranslator:
         if neutral_tags is None:
             return rtnval
 
-        for entry in neutral_tags:
-            if entry is None:
-                continue
-            for key, value in entry.items():
-                rtnval.append("{}={}".format(key, value))
+        for key, value in neutral_tags.items():
+            rtnval.append("{}={}".format(key, value))
 
         return rtnval
 
     @staticmethod
-    def from_pve(*, pve_tags: List[str]) -> List[Dict[str, str]]:
+    def from_pve(*, pve_tags: List[str]) -> Dict[str, str]:
         """
-            Decode a Proxmox tag-string list back into a neutral tag list.
+            Decode a Proxmox tag-string list back into a neutral tag dict.
 
             :param pve_tags: A list of ``key=value`` strings.
 
-            :returns: A list of single-entry ``{key: value}`` dicts.
+            :returns: A flat ``{key: value}`` dict of tag pairs.
         """
-        rtnval: List[Dict[str, str]] = []
+        rtnval: Dict[str, str] = {}
         if pve_tags is None:
             return rtnval
 
@@ -68,6 +64,6 @@ class PveTagTranslator:
             if "=" not in token:
                 continue
             key, _, value = token.partition("=")
-            rtnval.append({key: value})
+            rtnval[key] = value
 
         return rtnval

@@ -195,14 +195,14 @@ def test_inventory_lists_run_resources(venue, credential, aspects,
     """
     client = MockLambdalabsClient()
     provisioner = _provisioner(venue=venue, credential=credential,
-                               spec=basic_spec(tags=[{"team": "ml"}]),
+                               spec=basic_spec(tags={"team": "ml"}),
                                client=client, output_root=str(tmp_path))
     provisioner.apply(aspects=aspects)
 
     resources = provisioner.inventory(aspects=aspects)
     assert len(resources) == 1
     assert resources[0].kind == "instance"
-    assert resources[0].tags == [{"team": "ml"}]
+    assert resources[0].tags == {"team": "ml"}
 
     snapshot = os.path.join(str(tmp_path), "provisioning", "testrun01",
                             "lambdalabs-inventory.json")
@@ -219,7 +219,7 @@ def test_apply_writes_sidecar_tags(venue, credential, aspects, tmp_path):
     """
     client = MockLambdalabsClient()
     provisioner = _provisioner(venue=venue, credential=credential,
-                               spec=basic_spec(tags=[{"env": "test"}]),
+                               spec=basic_spec(tags={"env": "test"}),
                                client=client, output_root=str(tmp_path))
     result = provisioner.apply(aspects=aspects)
 
@@ -227,5 +227,5 @@ def test_apply_writes_sidecar_tags(venue, credential, aspects, tmp_path):
                          if r.kind == "instance"][0]
     sidecar = LlSidecarTag(runid="testrun01", output_root=str(tmp_path))
     recovered = sidecar.read(instance_id=instance_resource.venue_id)
-    assert recovered == [{"env": "test"}]
+    assert recovered == {"env": "test"}
     return

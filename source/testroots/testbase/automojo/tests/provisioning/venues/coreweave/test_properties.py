@@ -92,14 +92,10 @@ def test_label_round_trip_identity_for_conformant_inputs(tags: Dict[str, str]):
     """
     translator = CwLabelTranslator()
 
-    neutral = []
-    for key in sorted(tags.keys()):
-        neutral.append({key: tags[key]})
-
     round_tripped = translator.from_k8s(
-        labels=translator.to_k8s(neutral_tags=neutral))
+        labels=translator.to_k8s(neutral_tags=tags))
 
-    assert round_tripped == neutral
+    assert round_tripped == tags
     return
 
 

@@ -779,7 +779,7 @@ class DigitalOceanCloudProvisioner(CloudProvisioner):
             entry["name"] = resource.name
             entry["venue_id"] = resource.venue_id
             entry["attributes"] = dict(resource.attributes)
-            entry["tags"] = list(resource.tags)
+            entry["tags"] = dict(resource.tags)
             payload.append(entry)
 
         out_path = os.path.join(out_dir, "do-inventory.json")

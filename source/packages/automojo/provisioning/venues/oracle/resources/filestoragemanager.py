@@ -134,6 +134,6 @@ class FileStorageManager:
 
         rtnval = ProvisionedResource(
             kind=self.KIND, name=desired.name, venue_id=venue_id,
-            attributes=attributes, tags=[],
+            attributes=attributes, tags={},
         )
         return rtnval

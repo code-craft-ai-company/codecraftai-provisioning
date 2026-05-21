@@ -54,7 +54,7 @@ def region_config() -> OciRegionConfig:
         region="us-ashburn-1",
         compartment_id="ocid1.compartment.oc1..aaaacompartmenttest",
         availability_domain="Uocm:US-ASHBURN-AD-1",
-        default_tags=[{"automojo_component": "test"}],
+        default_tags={"automojo_component": "test"},
     )
     return rtnval
 

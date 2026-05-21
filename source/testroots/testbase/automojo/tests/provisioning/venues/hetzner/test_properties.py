@@ -113,10 +113,9 @@ def test_label_round_trip_identity_for_conformant_inputs(pairs) -> None:
     """
         from_hetzner(to_hetzner(x)) == sorted(x) for conformant inputs.
     """
-    neutral = [{key: value} for key, value in pairs]
+    neutral = {key: value for key, value in pairs}
     labels = HetznerLabelTranslator.to_hetzner(neutral_tags=neutral)
     recovered = HetznerLabelTranslator.from_hetzner(labels=labels)
 
-    expected = sorted(neutral, key=lambda d: list(d.keys())[0])
-    assert recovered == expected
+    assert recovered == neutral
     return

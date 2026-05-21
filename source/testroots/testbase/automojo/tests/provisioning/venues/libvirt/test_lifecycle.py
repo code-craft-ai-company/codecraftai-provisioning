@@ -186,14 +186,14 @@ def test_inventory_lists_run_resources(venue, aspects, tmp_path):
     """
     client = _seeded_client()
     provisioner = _provisioner(venue=venue,
-                               spec=basic_spec(tags=[{"team": "ml"}]),
+                               spec=basic_spec(tags={"team": "ml"}),
                                client=client, output_root=str(tmp_path))
     provisioner.apply(aspects=aspects)
 
     resources = provisioner.inventory(aspects=aspects)
     assert len(resources) == 1
     assert resources[0].kind == "instance"
-    assert resources[0].tags == [{"team": "ml"}]
+    assert resources[0].tags == {"team": "ml"}
 
     snapshot = os.path.join(str(tmp_path), "provisioning", "testrun01",
                             "libvirt-inventory.json")

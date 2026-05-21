@@ -36,13 +36,13 @@ class CloudDevice(SchemaObject):
     role = Field(str, required=True)
     addresses = Field(DeviceAddressSet, required=False, default=None)
     vpn_join = Field(VPNJoinSpec, required=False, default=None)
-    tags = Field(list, required=False, default=None)
+    tags = Field(dict, required=False, default=None)
 
     def __init__(self, *, identifier: str, category: str, group: str,
                  profile: str, role: str,
                  addresses: Optional[DeviceAddressSet] = None,
                  vpn_join: Optional[VPNJoinSpec] = None,
-                 tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct a CloudDevice.
 
@@ -53,9 +53,9 @@ class CloudDevice(SchemaObject):
             :param role: Functional role.
             :param addresses: Optional DeviceAddressSet.
             :param vpn_join: Optional VPNJoinSpec.
-            :param tags: Optional list of single-entry tag dicts.
+            :param tags: Optional flat dict of tag key/value pairs.
         """
-        effective_tags = tags if tags is not None else []
+        effective_tags = tags if tags is not None else {}
         super().__init__(identifier=identifier, category=category, group=group,
                          profile=profile, role=role, addresses=addresses,
                          vpn_join=vpn_join, tags=effective_tags)

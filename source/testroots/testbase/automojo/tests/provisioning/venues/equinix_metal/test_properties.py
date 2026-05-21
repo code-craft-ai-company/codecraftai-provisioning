@@ -75,12 +75,10 @@ def test_tag_round_trip_identity(pairs) -> None:
     """
         ``from_metal(to_metal(x))`` is the identity (key-sorted).
     """
-    neutral = [{key: value} for key, value in pairs.items()]
-    encoded = MetalTagTranslator.to_metal(neutral_tags=neutral)
+    encoded = MetalTagTranslator.to_metal(neutral_tags=pairs)
     decoded = MetalTagTranslator.from_metal(strings=encoded)
 
-    expected = [{key: pairs[key]} for key in sorted(pairs.keys())]
-    assert decoded == expected
+    assert decoded == pairs
     return
 
 

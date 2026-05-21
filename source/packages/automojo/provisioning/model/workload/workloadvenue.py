@@ -31,13 +31,13 @@ class WorkloadVenue(SchemaObject):
     kind = Field(str, required=True)
     credential_ref = Field(str, required=True)
     endpoint = Field(str, required=False, default=None)
-    tags = Field(list, required=False, default=None)
+    tags = Field(dict, required=False, default=None)
 
     def __init__(self, *, name: str,
                  kind: Union[WorkloadVenueKind, str],
                  credential_ref: str,
                  endpoint: Optional[str] = None,
-                 tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct a WorkloadVenue.
 
@@ -45,7 +45,7 @@ class WorkloadVenue(SchemaObject):
             :param kind: WorkloadVenueKind value.
             :param credential_ref: Credential vault reference name.
             :param endpoint: Optional API endpoint URL.
-            :param tags: Optional list of single-entry tag dicts.
+            :param tags: Optional flat dict of tag key/value pairs.
 
             :raises: SchemaValidationError
         """
@@ -67,7 +67,7 @@ class WorkloadVenue(SchemaObject):
                 "kind must be a WorkloadVenueKind or string."
             )
 
-        effective_tags = tags if tags is not None else []
+        effective_tags = tags if tags is not None else {}
 
         super().__init__(name=name, kind=kind_value,
                          credential_ref=credential_ref,

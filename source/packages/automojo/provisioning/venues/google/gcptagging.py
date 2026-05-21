@@ -88,16 +88,16 @@ def is_label_conformant(*, key: str, value: str) -> bool:
     return rtnval
 
 
-def to_labels(*, neutral_tags: Optional[List[Dict[str, str]]],
+def to_labels(*, neutral_tags: Optional[Dict[str, str]],
               warnings: Optional[List[Dict[str, Any]]] = None
               ) -> Dict[str, str]:
     """
-        Convert neutral single-entry tag dicts to a GCP labels mapping.
+        Convert a neutral flat tag dict to a GCP labels mapping.
 
         Keys and values are lowercased and illegal characters are replaced;
         every change appends a warning record to ``warnings`` when supplied.
 
-        :param neutral_tags: List of single-entry ``{key: value}`` dicts.
+        :param neutral_tags: Flat ``{key: value}`` dict of tag pairs.
         :param warnings: Optional list to append change warnings to.
 
         :returns: A flat ``{key: value}`` GCP labels dict.
@@ -108,71 +108,59 @@ def to_labels(*, neutral_tags: Optional[List[Dict[str, str]]],
         return rtnval
 
     labels: Dict[str, str] = {}
-    for entry in neutral_tags:
-        if not isinstance(entry, dict):
-            err_msg_lines = ["Neutral tag entry is not a dict."]
-            err_msg_lines.append("ENTRY: {!r}".format(entry))
-            err_msg = os.linesep.join(err_msg_lines)
-            raise GcpValidationError(err_msg)
-        if len(entry) != 1:
-            err_msg_lines = ["Neutral tag entry must be a single-key dict."]
-            err_msg_lines.append("ENTRY: {!r}".format(entry))
+    for key, value in neutral_tags.items():
+        if not isinstance(key, str) or not isinstance(value, str):
+            err_msg_lines = ["Tag key and value must be strings."]
+            err_msg_lines.append("KEY: {!r}".format(key))
+            err_msg_lines.append("VALUE: {!r}".format(value))
             err_msg = os.linesep.join(err_msg_lines)
             raise GcpValidationError(err_msg)
 
-        for key, value in entry.items():
-            if not isinstance(key, str) or not isinstance(value, str):
-                err_msg_lines = ["Tag key and value must be strings."]
-                err_msg_lines.append("KEY: {!r}".format(key))
-                err_msg_lines.append("VALUE: {!r}".format(value))
-                err_msg = os.linesep.join(err_msg_lines)
-                raise GcpValidationError(err_msg)
+        if len(key) == 0:
+            err_msg_lines = ["Tag key must not be empty."]
+            err_msg = os.linesep.join(err_msg_lines)
+            raise GcpValidationError(err_msg)
 
-            if len(key) == 0:
-                err_msg_lines = ["Tag key must not be empty."]
-                err_msg = os.linesep.join(err_msg_lines)
-                raise GcpValidationError(err_msg)
+        safe_key = sanitise_label_component(value=key)
+        safe_value = sanitise_label_component(value=value)
 
-            safe_key = sanitise_label_component(value=key)
-            safe_value = sanitise_label_component(value=value)
+        if safe_key != key and warnings is not None:
+            warnings.append({
+                "resource": "<labels>",
+                "warning": ("Tag key {!r} sanitised to {!r} for "
+                            "GCP labels.").format(key, safe_key),
+            })
+        if safe_value != value and warnings is not None:
+            warnings.append({
+                "resource": "<labels>",
+                "warning": ("Tag value {!r} sanitised to {!r} for "
+                            "GCP labels.").format(value, safe_value),
+            })
 
-            if safe_key != key and warnings is not None:
-                warnings.append({
-                    "resource": "<labels>",
-                    "warning": ("Tag key {!r} sanitised to {!r} for "
-                                "GCP labels.").format(key, safe_key),
-                })
-            if safe_value != value and warnings is not None:
-                warnings.append({
-                    "resource": "<labels>",
-                    "warning": ("Tag value {!r} sanitised to {!r} for "
-                                "GCP labels.").format(value, safe_value),
-                })
-
-            labels[safe_key] = safe_value
+        labels[safe_key] = safe_value
 
     rtnval = labels
     return rtnval
 
 
 def from_labels(*, labels: Optional[Dict[str, str]]
-                ) -> List[Dict[str, str]]:
+                ) -> Dict[str, str]:
     """
-        Convert a GCP labels mapping back to neutral single-entry dicts.
+        Convert a GCP labels mapping back to a neutral flat tag dict.
 
         Already-conformant inputs round-trip as identity (key-sorted).
 
         :param labels: Flat ``{key: value}`` GCP labels dict.
 
-        :returns: A key-sorted list of single-entry neutral dicts.
+        :returns: A neutral flat ``{key: value}`` dict.
     """
+    out: Dict[str, str] = {}
     if labels is None:
-        rtnval: List[Dict[str, str]] = []
+        rtnval = out
         return rtnval
 
-    out: List[Dict[str, str]] = []
     for key in sorted(labels.keys()):
-        out.append({key: labels[key]})
+        out[key] = labels[key]
 
     rtnval = out
     return rtnval
@@ -180,8 +168,8 @@ def from_labels(*, labels: Optional[Dict[str, str]]
 
 def base_resource_labels(*, run_id: str, resource_name: str,
                          resource_kind: str,
-                         extra: Optional[List[Dict[str, str]]] = None,
-                         defaults: Optional[List[Dict[str, str]]] = None
+                         extra: Optional[Dict[str, str]] = None,
+                         defaults: Optional[Dict[str, str]] = None
                          ) -> Dict[str, str]:
     """
         Build the full GCP labels mapping for a created resource.

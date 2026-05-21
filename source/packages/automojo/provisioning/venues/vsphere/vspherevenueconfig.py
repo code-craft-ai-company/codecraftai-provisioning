@@ -31,7 +31,7 @@ class VSphereVenueConfig:
                  template_folder: Optional[str] = None,
                  nsx_available: bool = False,
                  subnet_vlan_ids: Optional[Dict[str, int]] = None,
-                 default_tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 default_tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct a VSphereVenueConfig.
 
@@ -49,7 +49,7 @@ class VSphereVenueConfig:
             :param subnet_vlan_ids: Optional mapping ``subnet_name -> vlan_id``
                                     used when realising distributed port
                                     groups.
-            :param default_tags: Optional list of single-entry tag dicts
+            :param default_tags: Optional flat dict of tag key/value pairs
                                   applied to every created resource.
 
             :raises: ValueError
@@ -65,7 +65,7 @@ class VSphereVenueConfig:
 
         effective_library_ids = content_library_ids if content_library_ids is not None else []
         effective_vlan_ids = subnet_vlan_ids if subnet_vlan_ids is not None else {}
-        effective_default_tags = default_tags if default_tags is not None else []
+        effective_default_tags = default_tags if default_tags is not None else {}
 
         self._host: str = host
         self._datacenter: str = datacenter
@@ -76,7 +76,7 @@ class VSphereVenueConfig:
         self._template_folder: Optional[str] = template_folder
         self._nsx_available: bool = nsx_available
         self._subnet_vlan_ids: Dict[str, int] = effective_vlan_ids
-        self._default_tags: List[Dict[str, str]] = effective_default_tags
+        self._default_tags: Dict[str, str] = effective_default_tags
         return
 
     @property
@@ -170,11 +170,11 @@ class VSphereVenueConfig:
         return rtnval
 
     @property
-    def default_tags(self) -> List[Dict[str, str]]:
+    def default_tags(self) -> Dict[str, str]:
         """
             Return the list of default tag dicts.
 
             :returns: A defensive copy of the default tag list.
         """
-        rtnval = list(self._default_tags)
+        rtnval = dict(self._default_tags)
         return rtnval

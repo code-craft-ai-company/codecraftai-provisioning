@@ -51,11 +51,11 @@ class NetworkManager:
         return
 
     @staticmethod
-    def _encode_description(*, neutral_tags: List[Dict[str, str]]) -> str:
+    def _encode_description(*, neutral_tags: Dict[str, str]) -> str:
         """
-            Encode a neutral tag list into a VPC description string.
+            Encode a neutral tag dict into a VPC description string.
 
-            :param neutral_tags: Neutral tag list.
+            :param neutral_tags: Neutral flat tag dict.
 
             :returns: A newline-joined ``key=value`` description string.
         """
@@ -139,7 +139,7 @@ class NetworkManager:
         existing = self.find(run_id=run_id, name=desired.name)
         neutral_tags = base_resource_tags(
             run_id=run_id, resource_name=desired.name,
-            resource_kind=self.KIND, extra=list(desired.tags),
+            resource_kind=self.KIND, extra=dict(desired.tags),
             defaults=default_tags,
         )
 

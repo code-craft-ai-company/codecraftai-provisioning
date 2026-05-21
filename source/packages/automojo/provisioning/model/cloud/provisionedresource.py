@@ -33,12 +33,12 @@ class ProvisionedResource(SchemaObject):
     name = Field(str, required=True)
     venue_id = Field(str, required=True)
     attributes = Field(dict, required=False, default=None)
-    tags = Field(list, required=False, default=None)
+    tags = Field(dict, required=False, default=None)
     preemption_policy = Field(str, required=False, default=None)
 
     def __init__(self, *, kind: str, name: str, venue_id: str,
                  attributes: Optional[Dict[str, Any]] = None,
-                 tags: Optional[List[Dict[str, str]]] = None,
+                 tags: Optional[Dict[str, str]] = None,
                  preemption_policy: Optional[str] = None) -> None:
         """
             Construct a ProvisionedResource.
@@ -47,7 +47,7 @@ class ProvisionedResource(SchemaObject):
             :param name: Logical resource name (matches the spec).
             :param venue_id: Venue-side identifier returned by the API.
             :param attributes: Provider-specific facts.
-            :param tags: Ownership/tag-set list.
+            :param tags: Ownership/tag-set flat dict.
             :param preemption_policy: PreemptionPolicy value carried from the
                                       owning CloudInstance (None for resources
                                       that are not instances).
@@ -62,7 +62,7 @@ class ProvisionedResource(SchemaObject):
             raise SchemaValidationError("venue_id must not be empty.")
 
         effective_attrs = attributes if attributes is not None else {}
-        effective_tags = tags if tags is not None else []
+        effective_tags = tags if tags is not None else {}
 
         super().__init__(kind=kind, name=name, venue_id=venue_id,
                          attributes=effective_attrs, tags=effective_tags,

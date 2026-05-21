@@ -214,7 +214,7 @@ class PveApplyStages:
                             "venue_name": venue_name,
                             "cores": hardware.cores,
                             "memory_mb": hardware.memory_mb},
-                tags=inst.tags if inst.tags is not None else [],
+                tags=inst.tags if inst.tags is not None else {},
             )
             result.created.append(resource)
             self._record_vpn(inst=inst, vmid=new_vmid, result=result)
@@ -322,7 +322,7 @@ class PveApplyStages:
             :returns: The ordered Proxmox tag-string list.
         """
         tags: List[str] = [OWNER_TAG, run_id_tag(run_id=run_id)]
-        neutral = inst.tags if inst.tags is not None else []
+        neutral = inst.tags if inst.tags is not None else {}
         for encoded in PveTagTranslator.to_pve(neutral_tags=neutral):
             tags.append(encoded)
         return tags

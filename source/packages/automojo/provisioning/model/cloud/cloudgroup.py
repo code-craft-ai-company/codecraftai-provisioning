@@ -12,18 +12,18 @@ class CloudGroup:
     A class representing a group of cloud resources.
     """
 
-    def __init__(self, *, name: str, description: str, tags: Optional[List[Dict[str, str]]] = None):
+    def __init__(self, *, name: str, description: str, tags: Optional[Dict[str, str]] = None):
         """
         Initialize a CloudGroup instance.
 
         :param name: The name of the cloud group.
         :param description: An optional description of the cloud group.
-        :param tags: An optional list of tags to attach to the cloud group.
+        :param tags: An optional flat dict of tags to attach to the cloud group.
 
         """
         self._name = name
         self._description = description
-        self._tags = tags if tags is not None else []
+        self._tags = tags if tags is not None else {}
         return
 
     @property
@@ -45,7 +45,7 @@ class CloudGroup:
         return self._name
     
     @property
-    def tags(self) -> List[Dict[str, str]]:
+    def tags(self) -> Dict[str, str]:
         """
         Get the tags of the cloud group.
 

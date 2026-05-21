@@ -91,20 +91,18 @@ def test_destroy_is_inverse_of_apply(job_count, volume_count):
 # ----------------------------------------------------------------------
 
 @settings(max_examples=40, deadline=None)
-@given(tags=st.lists(
-    st.dictionaries(keys=st.text(min_size=1, max_size=8),
-                    values=st.text(min_size=0, max_size=12),
-                    min_size=1, max_size=1),
-    min_size=0, max_size=6))
+@given(tags=st.dictionaries(keys=st.text(min_size=1, max_size=8),
+                            values=st.text(min_size=0, max_size=12),
+                            min_size=0, max_size=6))
 def test_sidecar_tag_round_trip_identity(tags):
     """
-        Writing a neutral tag list and reading it back recovers the identity.
+        Writing a neutral tag dict and reading it back recovers the identity.
     """
     with tempfile.TemporaryDirectory() as tmp_dir:
         sidecar = RpSidecarTag(runid="run-xyz", output_root=tmp_dir)
         sidecar.write(neutral_tags=tags, pod_id="pod-1")
         recovered = sidecar.read(pod_id="pod-1")
-    assert recovered == [dict(tag) for tag in tags]
+    assert recovered == tags
 
 
 # ----------------------------------------------------------------------

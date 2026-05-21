@@ -41,12 +41,12 @@ class MetalTagTranslator:
     """
 
     @staticmethod
-    def to_metal(*, neutral_tags: Optional[List[Dict[str, str]]]
+    def to_metal(*, neutral_tags: Optional[Dict[str, str]]
                  ) -> List[str]:
         """
-            Convert neutral single-entry tag dicts to the Metal string list.
+            Convert a neutral flat tag dict to the Metal string list.
 
-            :param neutral_tags: List of single-entry ``{key: value}`` dicts.
+            :param neutral_tags: Flat ``{key: value}`` dict of tag pairs.
 
             :returns: A key-sorted list of ``"key=value"`` strings.
             :raises: MetalValidationError
@@ -56,46 +56,23 @@ class MetalTagTranslator:
             return rtnval
 
         seen_keys: Dict[str, str] = {}
-        for entry in neutral_tags:
-            if not isinstance(entry, dict):
-                err_msg_lines = ["Neutral tag entry is not a dict."]
-                err_msg_lines.append("ENTRY: {!r}".format(entry))
+        for key, value in neutral_tags.items():
+            if not isinstance(key, str) or not isinstance(value, str):
+                err_msg_lines = ["Tag key and value must be strings."]
+                err_msg_lines.append("KEY: {!r}".format(key))
+                err_msg_lines.append("VALUE: {!r}".format(value))
                 err_msg = os.linesep.join(err_msg_lines)
                 raise MetalValidationError(err_msg)
 
-            if len(entry) != 1:
+            if "=" in key:
                 err_msg_lines = [
-                    "Neutral tag entry must be a single-key dict."
+                    "Tag key must not contain '=' on Equinix Metal."
                 ]
-                err_msg_lines.append("ENTRY: {!r}".format(entry))
+                err_msg_lines.append("KEY: {!r}".format(key))
                 err_msg = os.linesep.join(err_msg_lines)
                 raise MetalValidationError(err_msg)
 
-            for key, value in entry.items():
-                if not isinstance(key, str) or not isinstance(value, str):
-                    err_msg_lines = ["Tag key and value must be strings."]
-                    err_msg_lines.append("KEY: {!r}".format(key))
-                    err_msg_lines.append("VALUE: {!r}".format(value))
-                    err_msg = os.linesep.join(err_msg_lines)
-                    raise MetalValidationError(err_msg)
-
-                if "=" in key:
-                    err_msg_lines = [
-                        "Tag key must not contain '=' on Equinix Metal."
-                    ]
-                    err_msg_lines.append("KEY: {!r}".format(key))
-                    err_msg = os.linesep.join(err_msg_lines)
-                    raise MetalValidationError(err_msg)
-
-                if key in seen_keys:
-                    err_msg_lines = [
-                        "Duplicate tag key in neutral tag set."
-                    ]
-                    err_msg_lines.append("KEY: {}".format(key))
-                    err_msg = os.linesep.join(err_msg_lines)
-                    raise MetalValidationError(err_msg)
-
-                seen_keys[key] = value
+            seen_keys[key] = value
 
         out: List[str] = []
         for key in sorted(seen_keys.keys()):
@@ -106,20 +83,20 @@ class MetalTagTranslator:
 
     @staticmethod
     def from_metal(*, strings: Optional[List[str]]
-                   ) -> List[Dict[str, str]]:
+                   ) -> Dict[str, str]:
         """
-            Convert a Metal ``"key=value"`` string list back to neutral
-            single-entry dicts.
+            Convert a Metal ``"key=value"`` string list back to a neutral
+            flat tag dict.
 
             :param strings: List of ``"key=value"`` strings.
 
-            :returns: A key-sorted list of single-entry neutral dicts.
+            :returns: A neutral flat ``{key: value}`` dict.
         """
+        pairs: Dict[str, str] = {}
         if strings is None:
-            rtnval: List[Dict[str, str]] = []
+            rtnval = pairs
             return rtnval
 
-        pairs: Dict[str, str] = {}
         for entry in strings:
             if entry is None or len(entry) == 0:
                 continue
@@ -128,9 +105,9 @@ class MetalTagTranslator:
             key, value = entry.split("=", 1)
             pairs[key] = value
 
-        out: List[Dict[str, str]] = []
+        out: Dict[str, str] = {}
         for key in sorted(pairs.keys()):
-            out.append({key: pairs[key]})
+            out[key] = pairs[key]
 
         rtnval = out
         return rtnval
@@ -159,11 +136,11 @@ class MetalTagTranslator:
 
 def base_resource_tags(*, run_id: str, resource_name: str,
                        resource_kind: str,
-                       extra: Optional[List[Dict[str, str]]] = None,
-                       defaults: Optional[List[Dict[str, str]]] = None
-                       ) -> List[Dict[str, str]]:
+                       extra: Optional[Dict[str, str]] = None,
+                       defaults: Optional[Dict[str, str]] = None
+                       ) -> Dict[str, str]:
     """
-        Build the full neutral tag list for a created Equinix Metal resource.
+        Build the full neutral tag dict for a created Equinix Metal resource.
 
         :param run_id: The provisioning run identifier.
         :param resource_name: Neutral resource name.
@@ -171,21 +148,21 @@ def base_resource_tags(*, run_id: str, resource_name: str,
         :param extra: Optional user-declared tags.
         :param defaults: Optional venue default tags.
 
-        :returns: Combined neutral tag list.
+        :returns: Combined neutral flat tag dict.
     """
-    combined: List[Dict[str, str]] = []
-    combined.append({OWNER_TAG_KEY: OWNER_TAG_VALUE})
-    combined.append({RUN_ID_TAG_KEY: run_id})
-    combined.append({RESOURCE_NAME_TAG_KEY: resource_name})
-    combined.append({RESOURCE_KIND_TAG_KEY: resource_kind})
+    combined: Dict[str, str] = {}
+    combined[OWNER_TAG_KEY] = OWNER_TAG_VALUE
+    combined[RUN_ID_TAG_KEY] = run_id
+    combined[RESOURCE_NAME_TAG_KEY] = resource_name
+    combined[RESOURCE_KIND_TAG_KEY] = resource_kind
 
     if defaults is not None:
-        for entry in defaults:
-            combined.append(dict(entry))
+        for key, value in defaults.items():
+            combined[key] = value
 
     if extra is not None:
-        for entry in extra:
-            combined.append(dict(entry))
+        for key, value in extra.items():
+            combined[key] = value
 
     rtnval = combined
     return rtnval

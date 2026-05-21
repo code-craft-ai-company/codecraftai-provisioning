@@ -79,7 +79,7 @@ class LandscapeEmitterTests(unittest.TestCase):
                                 venue_id="i-1",
                                 attributes={"public_ip": "1.2.3.4",
                                             "private_ip": "10.0.0.5"},
-                                tags=[{"role": "web"}])
+                                tags={"role": "web"})
         ]}
         emitter = LandscapeEmitter(spec=spec, inventory=inventory)
         doc = emitter.emit(aspects=ProvisioningAspects())

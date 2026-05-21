@@ -26,13 +26,13 @@ class HetznerLocationConfig:
     """
 
     def __init__(self, *, location: str,
-                 default_labels: Optional[List[Dict[str, str]]] = None
+                 default_labels: Optional[Dict[str, str]] = None
                  ) -> None:
         """
             Construct a HetznerLocationConfig.
 
             :param location: Hetzner location slug (e.g. ``nbg1``).
-            :param default_labels: Optional list of single-entry label dicts
+            :param default_labels: Optional flat dict of label key/value pairs
                                    applied to every created resource.
 
             :raises: ValueError
@@ -46,10 +46,10 @@ class HetznerLocationConfig:
                 "location slug.".format(location)
             )
 
-        effective_labels = default_labels if default_labels is not None else []
+        effective_labels = default_labels if default_labels is not None else {}
 
         self._location: str = location
-        self._default_labels: List[Dict[str, str]] = effective_labels
+        self._default_labels: Dict[str, str] = effective_labels
         return
 
     @property
@@ -63,11 +63,11 @@ class HetznerLocationConfig:
         return rtnval
 
     @property
-    def default_labels(self) -> List[Dict[str, str]]:
+    def default_labels(self) -> Dict[str, str]:
         """
-            Return the list of default label dicts.
+            Return the flat dict of default labels.
 
-            :returns: A defensive copy of the default label list.
+            :returns: A defensive copy of the default label dict.
         """
-        rtnval = list(self._default_labels)
+        rtnval = dict(self._default_labels)
         return rtnval

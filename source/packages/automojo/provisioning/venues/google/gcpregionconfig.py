@@ -33,14 +33,14 @@ class GcpRegionConfig:
     """
 
     def __init__(self, *, project: str, region: str, zone: str,
-                 default_tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 default_tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct a GcpRegionConfig.
 
             :param project: GCP project id (apex container).
             :param region: GCP region (e.g. ``us-central1``).
             :param zone: Default zone within the region (e.g. ``us-central1-a``).
-            :param default_tags: Optional list of single-entry tag dicts to
+            :param default_tags: Optional flat dict of tag key/value pairs to
                                  apply (as labels) to every created resource.
 
             :raises: ValueError
@@ -54,12 +54,12 @@ class GcpRegionConfig:
         if zone is None or len(zone) == 0:
             raise ValueError("GcpRegionConfig.zone must not be empty.")
 
-        effective_tags = default_tags if default_tags is not None else []
+        effective_tags = default_tags if default_tags is not None else {}
 
         self._project: str = project
         self._region: str = region
         self._zone: str = zone
-        self._default_tags: List[Dict[str, str]] = effective_tags
+        self._default_tags: Dict[str, str] = effective_tags
         return
 
     @property
@@ -93,13 +93,13 @@ class GcpRegionConfig:
         return rtnval
 
     @property
-    def default_tags(self) -> List[Dict[str, str]]:
+    def default_tags(self) -> Dict[str, str]:
         """
             Return the list of default tag dicts.
 
             :returns: A defensive copy of the default tag list.
         """
-        rtnval = list(self._default_tags)
+        rtnval = dict(self._default_tags)
         return rtnval
 
     def zone_supports_compact_placement(self, *, zone: str) -> bool:

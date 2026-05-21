@@ -115,42 +115,29 @@ def test_destroy_is_inverse_of_apply(instance_count):
 
 
 @settings(max_examples=80)
-@given(tags=st.lists(
-    st.dictionaries(
-        keys=st.text(
-            alphabet=st.characters(
-                whitelist_categories=("Ll", "Lu", "Nd"),
-                whitelist_characters=" :/-_.",
-            ),
-            min_size=1, max_size=12),
-        values=st.text(
-            alphabet=st.characters(
-                whitelist_categories=("Ll", "Lu", "Nd"),
-                whitelist_characters=" :/-_.",
-            ),
-            min_size=1, max_size=12),
-        min_size=1, max_size=1),
+@given(tags=st.dictionaries(
+    keys=st.text(
+        alphabet=st.characters(
+            whitelist_categories=("Ll", "Lu", "Nd"),
+            whitelist_characters=" :/-_.",
+        ),
+        min_size=1, max_size=12),
+    values=st.text(
+        alphabet=st.characters(
+            whitelist_categories=("Ll", "Lu", "Nd"),
+            whitelist_characters=" :/-_.",
+        ),
+        min_size=1, max_size=12),
     min_size=0, max_size=5))
 def test_tag_round_trip_identity(tags):
     """
-        Encoding a neutral tag list into Proxmox tag strings and decoding
+        Encoding a neutral tag dict into Proxmox tag strings and decoding
         it back is the identity — even for keys and values containing
         namespaces, colons, slashes, and whitespace.
     """
-    # Deduplicate keys; a neutral tag list with duplicate keys is
-    # malformed and cannot survive a round-trip.
-    seen = set()
-    unique_tags = []
-    for entry in tags:
-        key = list(entry.keys())[0]
-        if key in seen:
-            continue
-        seen.add(key)
-        unique_tags.append(entry)
-
-    encoded = PveTagTranslator.to_pve(neutral_tags=unique_tags)
+    encoded = PveTagTranslator.to_pve(neutral_tags=tags)
     recovered = PveTagTranslator.from_pve(pve_tags=encoded)
-    assert recovered == [dict(tag) for tag in unique_tags]
+    assert recovered == tags
     return
 
 

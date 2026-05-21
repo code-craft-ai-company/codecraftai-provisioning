@@ -39,13 +39,12 @@ class NtxCategoryTranslator:
         self._client = client
         return
 
-    def ensure(self, *, neutral_tags: List[Dict[str, str]], run_id: str,
+    def ensure(self, *, neutral_tags: Dict[str, str], run_id: str,
                aspects: Any) -> Dict[str, str]:
         """
             Ensure every neutral tag and the run-id Category exist.
 
-            :param neutral_tags: The neutral tag list (single-entry
-                ``{key: value}`` dicts).
+            :param neutral_tags: The neutral flat tag dict.
             :param run_id: The provisioning run id.
             :param aspects: Behaviour control for the interop client.
 
@@ -54,13 +53,12 @@ class NtxCategoryTranslator:
         """
         mapping: Dict[str, str] = {}
 
-        effective_tags = neutral_tags if neutral_tags is not None else []
-        for entry in effective_tags:
-            for key, value in entry.items():
-                self._client.categories.ensure_category(name=key,
-                                                        value=value,
-                                                        aspects=aspects)
-                mapping[key] = value
+        effective_tags = neutral_tags if neutral_tags is not None else {}
+        for key, value in effective_tags.items():
+            self._client.categories.ensure_category(name=key,
+                                                    value=value,
+                                                    aspects=aspects)
+            mapping[key] = value
 
         self._client.categories.ensure_category(name=RUN_ID_CATEGORY,
                                                 value=run_id,
@@ -70,19 +68,19 @@ class NtxCategoryTranslator:
         rtnval = mapping
         return rtnval
 
-    def read(self, *, vm: Any) -> List[Dict[str, str]]:
+    def read(self, *, vm: Any) -> Dict[str, str]:
         """
-            Recover the neutral tag list from a Prism VM entity.
+            Recover the neutral tag dict from a Prism VM entity.
 
             The ``automojo-run-id`` Category is dropped from the recovered
-            list so the round-trip is the identity on the caller-supplied
+            dict so the round-trip is the identity on the caller-supplied
             neutral tags.
 
             :param vm: A :class:`NutanixVm` record.
 
-            :returns: The recovered neutral tag list (single-entry dicts).
+            :returns: The recovered neutral flat tag dict.
         """
-        rtnval: List[Dict[str, str]] = []
+        rtnval: Dict[str, str] = {}
 
         raw = getattr(vm, "raw", None)
         if raw is None:
@@ -100,10 +98,10 @@ class NtxCategoryTranslator:
                 continue
             values = categories_mapping[key]
             if isinstance(values, list):
-                for value in values:
-                    rtnval.append({key: value})
+                if len(values) > 0:
+                    rtnval[key] = values[0]
             else:
-                rtnval.append({key: values})
+                rtnval[key] = values
 
         return rtnval
 

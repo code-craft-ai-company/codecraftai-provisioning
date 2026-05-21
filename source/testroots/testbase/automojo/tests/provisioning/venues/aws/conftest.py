@@ -66,7 +66,7 @@ def region_config() -> AwsRegionConfig:
     """
     rtnval = AwsRegionConfig(
         region="us-east-1", availability_zone="us-east-1a",
-        default_tags=[{"automojo:component": "test"}],
+        default_tags={"automojo:component": "test"},
     )
     return rtnval
 

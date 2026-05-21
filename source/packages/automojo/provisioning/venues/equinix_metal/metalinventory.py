@@ -153,7 +153,7 @@ class MetalInventory:
                 "name": resource.name,
                 "venue_id": resource.venue_id,
                 "attributes": dict(resource.attributes),
-                "tags": list(resource.tags),
+                "tags": dict(resource.tags),
             })
 
         with open(target_path, "w", encoding="utf-8") as fh:

@@ -43,14 +43,14 @@ class CloudSharedFilesystem(SchemaObject):
     throughput_gbps = Field(int, required=False, default=None)
     mount_targets = Field(list, required=False, default=None)
     existing_id = Field(str, required=False, default=None)
-    tags = Field(list, required=False, default=None)
+    tags = Field(dict, required=False, default=None)
 
     def __init__(self, *, name: str, kind: str,
                  size_tb: Optional[int] = None,
                  throughput_gbps: Optional[int] = None,
                  mount_targets: Optional[List[SharedFsMountSpec]] = None,
                  existing_id: Optional[str] = None,
-                 tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct a CloudSharedFilesystem.
 
@@ -60,7 +60,7 @@ class CloudSharedFilesystem(SchemaObject):
             :param throughput_gbps: Optional throughput hint.
             :param mount_targets: Optional list of SharedFsMountSpec entries.
             :param existing_id: When set, attach-only mode against an existing FS.
-            :param tags: Optional list of single-entry tag dicts.
+            :param tags: Optional flat dict of tag key/value pairs.
 
             :raises: SchemaValidationError
         """
@@ -86,7 +86,7 @@ class CloudSharedFilesystem(SchemaObject):
                                   field_name="throughput_gbps")
 
         effective_mount_targets = mount_targets if mount_targets is not None else []
-        effective_tags = tags if tags is not None else []
+        effective_tags = tags if tags is not None else {}
 
         super().__init__(name=name, kind=kind, size_tb=size_tb,
                          throughput_gbps=throughput_gbps,

@@ -40,12 +40,12 @@ class LinodeTagTranslator:
         so that ``from_linode(to_linode(x))`` is the identity.
     """
 
-    def to_linode(self, *, neutral_tags: Optional[List[Dict[str, str]]]
+    def to_linode(self, *, neutral_tags: Optional[Dict[str, str]]
                   ) -> List[str]:
         """
-            Convert neutral single-entry tag dicts to Linode string tags.
+            Convert a neutral flat tag dict to Linode string tags.
 
-            :param neutral_tags: List of single-entry ``{key: value}`` dicts.
+            :param neutral_tags: Flat ``{key: value}`` dict of tag pairs.
 
             :returns: A key-sorted list of ``"key=value"`` strings.
             :raises: LinodeValidationError
@@ -55,92 +55,69 @@ class LinodeTagTranslator:
             return rtnval
 
         pairs: List[str] = []
-        seen_keys: Dict[str, str] = {}
-        for entry in neutral_tags:
-            if not isinstance(entry, dict):
-                err_msg_lines = ["Neutral tag entry is not a dict."]
-                err_msg_lines.append("ENTRY: {!r}".format(entry))
+        for key, value in neutral_tags.items():
+            if not isinstance(key, str) or not isinstance(value, str):
+                err_msg_lines = ["Tag key and value must be strings."]
+                err_msg_lines.append("KEY: {!r}".format(key))
+                err_msg_lines.append("VALUE: {!r}".format(value))
                 err_msg = os.linesep.join(err_msg_lines)
                 raise LinodeValidationError(err_msg)
 
-            if len(entry) != 1:
+            if "=" in key:
                 err_msg_lines = [
-                    "Neutral tag entry must be a single-key dict."
+                    "Tag key must not contain an '=' character."
                 ]
-                err_msg_lines.append("ENTRY: {!r}".format(entry))
+                err_msg_lines.append("KEY: {!r}".format(key))
                 err_msg = os.linesep.join(err_msg_lines)
                 raise LinodeValidationError(err_msg)
 
-            for key, value in entry.items():
-                if not isinstance(key, str) or not isinstance(value, str):
-                    err_msg_lines = ["Tag key and value must be strings."]
-                    err_msg_lines.append("KEY: {!r}".format(key))
-                    err_msg_lines.append("VALUE: {!r}".format(value))
-                    err_msg = os.linesep.join(err_msg_lines)
-                    raise LinodeValidationError(err_msg)
+            encoded = "{}={}".format(key, value)
+            if len(encoded) > LINODE_TAG_MAX:
+                err_msg_lines = [
+                    "Encoded Linode tag exceeds the 50-char limit."
+                ]
+                err_msg_lines.append("TAG: {!r}".format(encoded))
+                err_msg = os.linesep.join(err_msg_lines)
+                raise LinodeValidationError(err_msg)
 
-                if "=" in key:
-                    err_msg_lines = [
-                        "Tag key must not contain an '=' character."
-                    ]
-                    err_msg_lines.append("KEY: {!r}".format(key))
-                    err_msg = os.linesep.join(err_msg_lines)
-                    raise LinodeValidationError(err_msg)
-
-                if key in seen_keys:
-                    err_msg_lines = ["Duplicate tag key in neutral tag set."]
-                    err_msg_lines.append("KEY: {}".format(key))
-                    err_msg = os.linesep.join(err_msg_lines)
-                    raise LinodeValidationError(err_msg)
-
-                encoded = "{}={}".format(key, value)
-                if len(encoded) > LINODE_TAG_MAX:
-                    err_msg_lines = [
-                        "Encoded Linode tag exceeds the 50-char limit."
-                    ]
-                    err_msg_lines.append("TAG: {!r}".format(encoded))
-                    err_msg = os.linesep.join(err_msg_lines)
-                    raise LinodeValidationError(err_msg)
-
-                seen_keys[key] = value
-                pairs.append(encoded)
+            pairs.append(encoded)
 
         pairs.sort()
         rtnval = pairs
         return rtnval
 
     def from_linode(self, *, strings: Optional[List[str]]
-                    ) -> List[Dict[str, str]]:
+                    ) -> Dict[str, str]:
         """
-            Convert a Linode string tag list back to neutral tag dicts.
+            Convert a Linode string tag list back to a neutral flat tag dict.
 
             Strings that do not contain an ``=`` are ignored so foreign tags
             placed on a resource by hand do not break the round-trip.
 
             :param strings: List of ``"key=value"`` strings.
 
-            :returns: A key-sorted list of single-entry neutral dicts.
+            :returns: A neutral flat ``{key: value}`` dict.
         """
+        out: Dict[str, str] = {}
         if strings is None:
-            rtnval: List[Dict[str, str]] = []
+            rtnval = out
             return rtnval
 
-        out: List[Dict[str, str]] = []
         for entry in sorted(strings):
             if "=" not in entry:
                 continue
             split_at = entry.index("=")
             key = entry[:split_at]
             value = entry[split_at + 1:]
-            out.append({key: value})
+            out[key] = value
 
         rtnval = out
         return rtnval
 
     def owner_tags(self, *, run_id: str, resource_name: str,
                    resource_kind: str,
-                   extra: Optional[List[Dict[str, str]]] = None,
-                   defaults: Optional[List[Dict[str, str]]] = None
+                   extra: Optional[Dict[str, str]] = None,
+                   defaults: Optional[Dict[str, str]] = None
                    ) -> List[str]:
         """
             Build the full Linode string tag list for a created resource.
@@ -153,19 +130,19 @@ class LinodeTagTranslator:
 
             :returns: A list of ``"key=value"`` string tags.
         """
-        combined: List[Dict[str, str]] = []
-        combined.append({OWNER_TAG_KEY: OWNER_TAG_VALUE})
-        combined.append({RUN_ID_TAG_KEY: run_id})
-        combined.append({RESOURCE_NAME_TAG_KEY: resource_name})
-        combined.append({RESOURCE_KIND_TAG_KEY: resource_kind})
+        combined: Dict[str, str] = {}
+        combined[OWNER_TAG_KEY] = OWNER_TAG_VALUE
+        combined[RUN_ID_TAG_KEY] = run_id
+        combined[RESOURCE_NAME_TAG_KEY] = resource_name
+        combined[RESOURCE_KIND_TAG_KEY] = resource_kind
 
         if defaults is not None:
-            for entry in defaults:
-                combined.append(dict(entry))
+            for key, value in defaults.items():
+                combined[key] = value
 
         if extra is not None:
-            for entry in extra:
-                combined.append(dict(entry))
+            for key, value in extra.items():
+                combined[key] = value
 
         rtnval = self.to_linode(neutral_tags=combined)
         return rtnval
@@ -201,10 +178,5 @@ class LinodeTagTranslator:
             :returns: The resource name, or None when absent.
         """
         neutral = self.from_linode(strings=strings)
-        for entry in neutral:
-            for key, value in entry.items():
-                if key == RESOURCE_NAME_TAG_KEY:
-                    rtnval: Optional[str] = value
-                    return rtnval
-        rtnval = None
+        rtnval: Optional[str] = neutral.get(RESOURCE_NAME_TAG_KEY, None)
         return rtnval

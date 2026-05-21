@@ -65,13 +65,13 @@ class CloudStorageVolume(SchemaObject):
     storage_class = Field(str, required=True)
     attached_to = Field(str, required=False, default=None)
     mount = Field(str, required=False, default=None)
-    tags = Field(list, required=False, default=None)
+    tags = Field(dict, required=False, default=None)
 
     def __init__(self, *, name: str, size_gb: int,
                  storage_class: Union[StorageClass, str] = StorageClass.STANDARD,
                  attached_to: Optional[str] = None,
                  mount: Optional[str] = None,
-                 tags: Optional[List[Dict[str, str]]] = None) -> None:
+                 tags: Optional[Dict[str, str]] = None) -> None:
         """
             Construct a CloudStorageVolume.
 
@@ -81,7 +81,7 @@ class CloudStorageVolume(SchemaObject):
                                   member or its lowercase string value.
             :param attached_to: Optional name of attaching CloudInstance.
             :param mount: Optional mount path within the attached instance.
-            :param tags: Optional list of single-entry tag dicts.
+            :param tags: Optional flat dict of tag key/value pairs.
 
             :raises: SchemaValidationError, SchemaSemanticError
         """
@@ -90,7 +90,7 @@ class CloudStorageVolume(SchemaObject):
 
         effective_class = _coerce_storage_class(value=storage_class)
 
-        effective_tags = tags if tags is not None else []
+        effective_tags = tags if tags is not None else {}
 
         super().__init__(name=name, size_gb=size_gb,
                          storage_class=effective_class,

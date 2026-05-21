@@ -174,16 +174,15 @@ class MetalPlanBuilder:
         observed_tags = MetalTagTranslator.flat_dict(
             strings=existing.get("tags", [])
         )
-        for entry in desired.tags:
-            for key, value in entry.items():
-                if observed_tags.get(key, None) != value:
-                    rtnval = {
-                        "before": {"tags": existing.get("tags", [])},
-                        "after": {"tags": desired.tags},
-                        "note": ("Metal devices cannot resize; "
-                                 "UPDATE-by-recreate."),
-                    }
-                    return rtnval
+        for key, value in desired.tags.items():
+            if observed_tags.get(key, None) != value:
+                rtnval = {
+                    "before": {"tags": existing.get("tags", [])},
+                    "after": {"tags": desired.tags},
+                    "note": ("Metal devices cannot resize; "
+                             "UPDATE-by-recreate."),
+                }
+                return rtnval
 
         rtnval = None
         return rtnval

@@ -133,7 +133,7 @@ class SshKeyManager:
         rtnval = ProvisionedResource(
             kind=self.KIND, name=desired.name,
             venue_id=str(existing.get("id", "")),
-            attributes=attributes, tags=[],
+            attributes=attributes, tags={},
         )
         return rtnval
 
