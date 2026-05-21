@@ -15,6 +15,9 @@ import os
 
 from typing import Any, Dict, List, Optional
 
+from automojo.provisioning.model.cloud.cloudinstancesizecatalog import (
+    CloudInstanceSizeCatalog
+)
 from automojo.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
@@ -161,6 +164,11 @@ class VultrResolver:
             :returns: A Vultr plan id string.
             :raises: VultrValidationError
         """
+        size_catalog = CloudInstanceSizeCatalog.default()
+        native = size_catalog.resolve(token=size_hint, venue="vultr")
+        effective = native if native is not None else size_hint
+        size_hint = effective
+
         accel_list = accelerators if accelerators is not None else []
         if len(accel_list) > 0:
             first = accel_list[0]

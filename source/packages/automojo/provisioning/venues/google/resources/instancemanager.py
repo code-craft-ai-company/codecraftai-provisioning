@@ -24,6 +24,9 @@ from automojo.provisioning.cloudinit.vpncloudinitrenderer import (
 from automojo.provisioning.model.cloud.cloudacceleratorcatalog import (
     CloudAcceleratorCatalog
 )
+from automojo.provisioning.model.cloud.cloudinstancesizecatalog import (
+    CloudInstanceSizeCatalog
+)
 from automojo.provisioning.model.cloud.cloudimage import CloudImage
 from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
 from automojo.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
@@ -162,7 +165,11 @@ class InstanceManager:
         )
         gpu_accels = [a for a in accelerators if a.kind == "GPU"]
         if len(gpu_accels) == 0:
-            rtnval = instance.size
+            size_catalog = CloudInstanceSizeCatalog.default()
+            native = size_catalog.resolve(token=instance.size,
+                                          venue=self.VENUE_NAME)
+            effective = native if native is not None else instance.size
+            rtnval = effective
             return rtnval
 
         first = gpu_accels[0]

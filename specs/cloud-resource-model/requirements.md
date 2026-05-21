@@ -111,6 +111,10 @@ everything a venue needs, including optional VPN join and accelerator slots.
 1. THE SYSTEM SHALL expose `CloudInstance(name, profile_ref, image, size, subnet,
    security_groups, keypair, user_data_script, public_ip: bool, tags, vpn_join,
    accelerators, interconnect, placement_group, shared_fs_mounts, preemption_policy)`.
+   `size` accepts a neutral instance-size token from the `CloudInstanceSizeCatalog`
+   (e.g. `general.large`) OR a venue-native size string; venue resolvers translate
+   neutral tokens via the catalog and pass native strings through unchanged. See
+   `specs/instance-size-catalog/`.
 2. WHEN `vpn_join` is set and its `provider == "twingate"` and the instance is NOT
    declared a connector host THEN THE SYSTEM SHALL raise `SchemaSemanticError`.
 3. WHEN `accelerators` is set but the resolved venue does not support the requested

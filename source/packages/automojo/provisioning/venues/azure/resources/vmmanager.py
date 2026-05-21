@@ -24,6 +24,9 @@ from automojo.provisioning.cloudinit.vpncloudinitrenderer import (
 from automojo.provisioning.model.cloud.cloudacceleratorcatalog import (
     CloudAcceleratorCatalog
 )
+from automojo.provisioning.model.cloud.cloudinstancesizecatalog import (
+    CloudInstanceSizeCatalog
+)
 from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
 from automojo.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
 from automojo.provisioning.model.cloud.provisionedresource import (
@@ -134,7 +137,11 @@ class VmManager:
         """
         accelerators = instance.accelerators if instance.accelerators is not None else []
         if len(accelerators) == 0:
-            rtnval = instance.size
+            size_catalog = CloudInstanceSizeCatalog.default()
+            native = size_catalog.resolve(token=instance.size,
+                                          venue=self.VENUE_NAME)
+            effective = native if native is not None else instance.size
+            rtnval = effective
             return rtnval
 
         first = accelerators[0]

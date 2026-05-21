@@ -19,6 +19,9 @@ from typing import Optional
 from automojo.provisioning.model.cloud.cloudacceleratorcatalog import (
     CloudAcceleratorCatalog, default_accelerator_catalog
 )
+from automojo.provisioning.model.cloud.cloudinstancesizecatalog import (
+    CloudInstanceSizeCatalog
+)
 from automojo.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
@@ -183,6 +186,10 @@ class LlResolver:
         if size is None or len(size) == 0:
             rtnval = None
             return rtnval
+
+        size_catalog = CloudInstanceSizeCatalog.default()
+        native = size_catalog.resolve(token=size, venue="lambdalabs")
+        size = native if native is not None else size
 
         is_cluster = False
         if instance.interconnect is not None:

@@ -1,0 +1,224 @@
+# instancesizes.yaml — neutral instance-size token -> per-venue SKU catalog.
+#
+# This catalog covers CPU/RAM instance shapes only.  GPU/accelerator
+# sizing lives in accelerators.yaml and must not be duplicated here.
+#
+# Token scheme: <family>.<size>
+#   families: general | compute (CPU-optimised) | memory (RAM-optimised)
+#   sizes:    small | medium | large | xlarge | 2xlarge
+#
+# Each entry binds one neutral token to:
+#   - vcpu: neutral vCPU count for the shape
+#   - memory_gb: neutral RAM in GB for the shape
+#   - venue_skus: mapping of provisioning-venue-name to native SKU string.
+#
+# Not every token needs every venue; a token simply omits venues where
+# no good native match exists.
+#
+# Loader invariants enforced at load time:
+#   - Each token is unique.
+#   - Within any single venue, no two tokens map to the same SKU.
+
+version: 1
+entries:
+
+  # ---- general purpose -------------------------------------------------
+  - token: general.small
+    vcpu: 2
+    memory_gb: 4
+    venue_skus:
+      aws: t3.medium
+      azure: Standard_B2s
+      gcp: e2-small
+      oracle: VM.Standard.E4.Flex.1
+      digitalocean: s-2vcpu-4gb
+      hetzner: cx22
+      linode: g6-standard-2
+      equinix_metal: t3.small.x86
+      vultr: vc2-2c-4gb
+      crusoe: c1a.2x
+      nebius: cpu-c2-m4
+      lambdalabs: cpu_2x_general
+
+  - token: general.medium
+    vcpu: 2
+    memory_gb: 8
+    venue_skus:
+      aws: t3.large
+      azure: Standard_B2ms
+      gcp: e2-medium
+      oracle: VM.Standard.E4.Flex.2
+      digitalocean: s-2vcpu-8gb
+      hetzner: cx32
+      linode: g6-standard-4
+      equinix_metal: c3.small.x86
+      vultr: vc2-2c-8gb
+      crusoe: c1a.4x
+      nebius: cpu-c2-m8
+      lambdalabs: cpu_4x_general
+
+  - token: general.large
+    vcpu: 4
+    memory_gb: 16
+    venue_skus:
+      aws: m5.xlarge
+      azure: Standard_D4s_v5
+      gcp: e2-standard-4
+      oracle: VM.Standard.E4.Flex.4
+      digitalocean: s-4vcpu-8gb
+      hetzner: cx42
+      linode: g6-standard-6
+      equinix_metal: m3.small.x86
+      vultr: vc2-4c-16gb
+      crusoe: c1a.8x
+      nebius: cpu-c4-m16
+      lambdalabs: cpu_8x_general
+
+  - token: general.xlarge
+    vcpu: 8
+    memory_gb: 32
+    venue_skus:
+      aws: m5.2xlarge
+      azure: Standard_D8s_v5
+      gcp: e2-standard-8
+      oracle: VM.Standard.E4.Flex.8
+      digitalocean: s-8vcpu-32gb
+      hetzner: cx52
+      linode: g6-standard-8
+      equinix_metal: m3.large.x86
+      vultr: vc2-8c-32gb
+      crusoe: c1a.16x
+      nebius: cpu-c8-m32
+
+  - token: general.2xlarge
+    vcpu: 16
+    memory_gb: 64
+    venue_skus:
+      aws: m5.4xlarge
+      azure: Standard_D16s_v5
+      gcp: e2-standard-16
+      oracle: VM.Standard.E4.Flex.16
+      digitalocean: s-16vcpu-64gb
+      linode: g6-standard-16
+      equinix_metal: n3.xlarge.x86
+      vultr: vc2-16c-64gb
+      crusoe: c1a.32x
+      nebius: cpu-c16-m64
+
+  # ---- compute optimised (CPU-heavy) -----------------------------------
+  - token: compute.medium
+    vcpu: 2
+    memory_gb: 4
+    venue_skus:
+      aws: c5.large
+      azure: Standard_F2s_v2
+      gcp: c2-standard-2
+      oracle: VM.Optimized3.Flex.2
+      digitalocean: c-2
+      hetzner: ccx13
+      linode: g6-dedicated-2
+      vultr: vhf-2c-4gb
+      crusoe: c1d.2x
+      nebius: cpu-d2-m4
+
+  - token: compute.large
+    vcpu: 4
+    memory_gb: 8
+    venue_skus:
+      aws: c5.xlarge
+      azure: Standard_F4s_v2
+      gcp: c2-standard-4
+      oracle: VM.Optimized3.Flex.4
+      digitalocean: c-4
+      hetzner: ccx23
+      linode: g6-dedicated-4
+      vultr: vhf-4c-8gb
+      crusoe: c1d.4x
+      nebius: cpu-d4-m8
+
+  - token: compute.xlarge
+    vcpu: 8
+    memory_gb: 16
+    venue_skus:
+      aws: c5.2xlarge
+      azure: Standard_F8s_v2
+      gcp: c2-standard-8
+      oracle: VM.Optimized3.Flex.8
+      digitalocean: c-8
+      hetzner: ccx33
+      linode: g6-dedicated-8
+      vultr: vhf-8c-16gb
+      crusoe: c1d.8x
+      nebius: cpu-d8-m16
+
+  - token: compute.2xlarge
+    vcpu: 16
+    memory_gb: 32
+    venue_skus:
+      aws: c5.4xlarge
+      azure: Standard_F16s_v2
+      gcp: c2-standard-16
+      oracle: VM.Optimized3.Flex.16
+      digitalocean: c-16
+      hetzner: ccx43
+      linode: g6-dedicated-16
+      vultr: vhf-16c-32gb
+      crusoe: c1d.16x
+      nebius: cpu-d16-m32
+
+  # ---- memory optimised (RAM-heavy) ------------------------------------
+  - token: memory.medium
+    vcpu: 2
+    memory_gb: 16
+    venue_skus:
+      aws: r5.large
+      azure: Standard_E2s_v5
+      gcp: n2-highmem-2
+      oracle: VM.Standard.E4.Flex.M2
+      digitalocean: m-2vcpu-16gb
+      linode: g6-highmem-1
+      vultr: vhp-2c-16gb-amd
+      crusoe: c1m.2x
+      nebius: cpu-m2-m16
+
+  - token: memory.large
+    vcpu: 4
+    memory_gb: 32
+    venue_skus:
+      aws: r5.xlarge
+      azure: Standard_E4s_v5
+      gcp: n2-highmem-4
+      oracle: VM.Standard.E4.Flex.M4
+      digitalocean: m-4vcpu-32gb
+      linode: g6-highmem-2
+      vultr: vhp-4c-32gb-amd
+      crusoe: c1m.4x
+      nebius: cpu-m4-m32
+
+  - token: memory.xlarge
+    vcpu: 8
+    memory_gb: 64
+    venue_skus:
+      aws: r5.2xlarge
+      azure: Standard_E8s_v5
+      gcp: n2-highmem-8
+      oracle: VM.Standard.E4.Flex.M8
+      digitalocean: m-8vcpu-64gb
+      linode: g6-highmem-4
+      vultr: vhp-8c-64gb-amd
+      crusoe: c1m.8x
+      nebius: cpu-m8-m64
+
+  - token: memory.2xlarge
+    vcpu: 16
+    memory_gb: 128
+    venue_skus:
+      aws: r5.4xlarge
+      azure: Standard_E16s_v5
+      gcp: n2-highmem-16
+      oracle: VM.Standard.E4.Flex.M16
+      digitalocean: m-16vcpu-128gb
+      linode: g6-highmem-8
+      vultr: vhp-16c-128gb-amd
+      crusoe: c1m.16x
+      nebius: cpu-m16-m128
