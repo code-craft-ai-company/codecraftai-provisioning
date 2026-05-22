@@ -181,6 +181,17 @@ class MockMetalClient:
         rtnval = dict(device)
         return rtnval
 
+    def update_device_tags(self, *, device_id: str,
+                           tags: List[str]) -> Dict[str, Any]:
+        self.calls.append("update_device_tags")
+        for device in self._devices:
+            if device.get("id") == device_id:
+                device["tags"] = list(tags)
+                rtnval = dict(device)
+                return rtnval
+        rtnval = {"id": device_id, "tags": list(tags), "state": "active"}
+        return rtnval
+
     def delete_device(self, *, device_id: str) -> None:
         self.calls.append("delete_device")
         self._devices = [d for d in self._devices

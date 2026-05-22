@@ -11,10 +11,15 @@ __copyright__ = "Copyright 2026, Automation Mojo LLC"
 __credits__ = []
 
 
+import os
+
 from typing import Any, Dict, List, Optional
 
 from automojo.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
+)
+from automojo.provisioning.venues.hetzner.hetznererrors import (
+    HetznerValidationError
 )
 from automojo.provisioning.venues.hetzner.hetznerlabeltranslator import (
     HetznerLabelTranslator
@@ -155,6 +160,7 @@ class HetznerApplyStages:
                                   run_id: str, aspects: Any,
                                   authkey_for: Dict[str, str],
                                   created: List[ProvisionedResource],
+                                  updated: List[ProvisionedResource],
                                   skipped: List[str],
                                   vpn_records: List[Dict[str, Any]]
                                   ) -> Dict[str, ProvisionedResource]:
@@ -166,6 +172,7 @@ class HetznerApplyStages:
             :param aspects: ProvisioningAspects.
             :param authkey_for: Map of instance-name -> minted VPN authkey.
             :param created: List to append newly created resources to.
+            :param updated: List to append in-place updated resources to.
             :param skipped: List to append skipped resource names to.
             :param vpn_records: List to append vpn-device records to.
 
@@ -270,7 +277,12 @@ class HetznerApplyStages:
                 HetznerLabelTranslator.belongs_to_run(
                     labels=_labels_of(existing), run_id=run_id))
             if owned is True:
-                skipped.append(vol.name)
+                reconciled = self._reconcile_volume(
+                    vol=vol, existing=existing)
+                if reconciled is not None:
+                    updated.append(reconciled)
+                else:
+                    skipped.append(vol.name)
                 continue
 
             labels = HetznerLabelTranslator.base_labels(
@@ -339,6 +351,60 @@ class HetznerApplyStages:
                                 "record_type": record.record_type,
                                 "value": value}))
         return
+
+    def _reconcile_volume(self, *, vol: Any,
+                          existing: Any) -> Optional[ProvisionedResource]:
+        """
+            Reconcile a live owned Volume against the spec, realising a
+            size *grow* in place via the hcloud ``volume.resize`` call.
+
+            Hetzner volumes support an online in-place grow; the resize is
+            non-disruptive and is therefore not gated behind
+            ``aspects.confirm``.  Hetzner volumes cannot shrink — a smaller
+            desired size is an impossible request and is refused with a
+            typed :class:`HetznerValidationError` rather than silently
+            recreated.
+
+            :param vol: The desired CloudStorageVolume.
+            :param existing: The live hcloud volume object.
+
+            :returns: A ProvisionedResource when the volume was grown in
+                place; ``None`` when the volume was already in size-shape.
+
+            :raises: HetznerValidationError when a shrink is requested.
+        """
+        live_size = getattr(existing, "size", None)
+        if live_size is None or live_size == vol.size_gb:
+            rtnval: Optional[ProvisionedResource] = None
+            return rtnval
+
+        if vol.size_gb < live_size:
+            err_msg_lines = [
+                "Hetzner volume cannot be shrunk; hcloud volumes only "
+                "support an in-place grow."
+            ]
+            err_msg_lines.append("VOLUME: {}".format(vol.name))
+            err_msg_lines.append("    live size_gb:    {}".format(
+                live_size))
+            err_msg_lines.append("    desired size_gb: {}".format(
+                vol.size_gb))
+            err_msg = os.linesep.join(err_msg_lines)
+            raise HetznerValidationError(err_msg)
+
+        self._client.volumes.resize(volume=existing, size=vol.size_gb)
+        setattr(existing, "size", vol.size_gb)
+
+        attrs: Dict[str, Any] = {"volume_id": _id_of(existing),
+                                 "size_gb": vol.size_gb}
+        attached_server_id = getattr(existing, "attached_server_id", None)
+        if attached_server_id is not None:
+            attrs["attached_server_id"] = attached_server_id
+        rtnval = ProvisionedResource(
+            kind="volume", name=vol.name, venue_id=_id_of(existing),
+            attributes=attrs,
+            tags=HetznerLabelTranslator.from_hetzner(
+                labels=_labels_of(existing)))
+        return rtnval
 
     @classmethod
     def _resource_from_network(cls, *, net: Any,

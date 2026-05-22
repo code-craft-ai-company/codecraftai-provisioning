@@ -155,6 +155,20 @@ class _MockCollection:
             del self._objects[name]
         return
 
+    def resize(self, *, volume: Any, size: int) -> None:
+        """
+            Grow a volume in place to a new (larger) size.
+
+            Mirrors the hcloud ``VolumesClient.resize`` surface; Hetzner
+            volumes only support a grow.
+
+            :param volume: The volume object.
+            :param size: The new size in GiB.
+        """
+        self._owner.resize_calls += 1
+        setattr(volume, "size", size)
+        return
+
     def attach(self, *, volume: Any, server_id: Any) -> None:
         """
             Record a volume attachment.
@@ -194,6 +208,7 @@ class MockHetznerClient:
         self.delete_calls: int = 0
         self.attach_calls: int = 0
         self.detach_calls: int = 0
+        self.resize_calls: int = 0
 
         self.networks: _MockCollection = _MockCollection(
             kind="network", owner=self)

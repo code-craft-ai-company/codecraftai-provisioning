@@ -26,6 +26,9 @@ from automojo.provisioning.model.exceptions import SchemaSemanticError
 from automojo.provisioning.venues.hetzner.hetznercloudprovisioner import (
     HetznerCloudProvisioner
 )
+from automojo.provisioning.venues.hetzner.hetznererrors import (
+    HetznerValidationError
+)
 from automojo.provisioning.venues.hetzner.hetznerinventory import (
     HetznerInventory
 )
@@ -191,6 +194,119 @@ def test_inventory_persist_writes_json(venue, credential, location_config,
     assert os.path.isfile(path)
     assert path.endswith(os.path.join("testrun01",
                                       "hetzner-inventory.json"))
+    return
+
+
+def test_plan_emits_inplace_update_for_volume_grow(venue, credential,
+                                                   location_config,
+                                                   client,
+                                                   aspects) -> None:
+    """
+        A volume whose desired size is larger than the live size plans an
+        in-place UPDATE.
+    """
+    spec = basic_spec()
+    provisioner = _provisioner(venue=venue, credential=credential,
+                               location_config=location_config,
+                               client=client, spec=spec)
+    provisioner.apply(aspects=aspects)
+
+    grown = basic_spec()
+    grown.volumes[0].size_gb = 50
+    provisioner = _provisioner(venue=venue, credential=credential,
+                               location_config=location_config,
+                               client=client, spec=grown)
+    plan = provisioner.plan(aspects=aspects)
+    volume_actions = [a for a in plan.actions
+                      if a.resource_kind == "volume"]
+    assert len(volume_actions) == 1
+    assert volume_actions[0].intent == PlannedActionIntent.UPDATE.value
+    assert volume_actions[0].diff["after"]["size_gb"] == 50
+    return
+
+
+def test_apply_realizes_volume_grow_in_place(venue, credential,
+                                             location_config, client,
+                                             aspects) -> None:
+    """
+        Apply grows a drifted volume in place via volume.resize and records
+        it in ProvisioningResult.updated.
+    """
+    spec = basic_spec()
+    provisioner = _provisioner(venue=venue, credential=credential,
+                               location_config=location_config,
+                               client=client, spec=spec)
+    provisioner.apply(aspects=aspects)
+    creates_after_first = client.create_calls
+
+    grown = basic_spec()
+    grown.volumes[0].size_gb = 50
+    provisioner = _provisioner(venue=venue, credential=credential,
+                               location_config=location_config,
+                               client=client, spec=grown)
+    result = provisioner.apply(aspects=aspects)
+
+    assert client.resize_calls == 1
+    assert client.create_calls == creates_after_first
+    updated_names = {r.name for r in result.updated}
+    assert "vol-a" in updated_names
+    assert "vol-a" not in set(result.skipped)
+    volume = client.volumes.get_by_name(name="vol-a")
+    assert getattr(volume, "size", None) == 50
+    return
+
+
+def test_reapply_after_volume_grow_is_skip(venue, credential,
+                                           location_config, client,
+                                           aspects) -> None:
+    """
+        A second apply of the grown spec emits SKIP — the in-place grow is
+        idempotent.
+    """
+    spec = basic_spec()
+    provisioner = _provisioner(venue=venue, credential=credential,
+                               location_config=location_config,
+                               client=client, spec=spec)
+    provisioner.apply(aspects=aspects)
+
+    grown = basic_spec()
+    grown.volumes[0].size_gb = 50
+    provisioner = _provisioner(venue=venue, credential=credential,
+                               location_config=location_config,
+                               client=client, spec=grown)
+    provisioner.apply(aspects=aspects)
+    resize_after_grow = client.resize_calls
+
+    second = provisioner.apply(aspects=aspects)
+    assert client.resize_calls == resize_after_grow
+    assert "vol-a" in set(second.skipped)
+    assert len(second.updated) == 0
+    return
+
+
+def test_volume_shrink_is_refused(venue, credential, location_config,
+                                  client, aspects) -> None:
+    """
+        A volume whose desired size is smaller than the live size is
+        refused — Hetzner volumes cannot shrink — rather than silently
+        recreated.
+    """
+    spec = basic_spec()
+    provisioner = _provisioner(venue=venue, credential=credential,
+                               location_config=location_config,
+                               client=client, spec=spec)
+    provisioner.apply(aspects=aspects)
+
+    shrunk = basic_spec()
+    shrunk.volumes[0].size_gb = 10
+    provisioner = _provisioner(venue=venue, credential=credential,
+                               location_config=location_config,
+                               client=client, spec=shrunk)
+    with pytest.raises(HetznerValidationError):
+        provisioner.plan(aspects=aspects)
+    with pytest.raises(HetznerValidationError):
+        provisioner.apply(aspects=aspects)
+    assert client.resize_calls == 0
     return
 
 

@@ -348,6 +348,7 @@ class EquinixMetalCloudProvisioner(CloudProvisioner):
         self._last_run_id = run_id
 
         created: List[ProvisionedResource] = []
+        updated: List[ProvisionedResource] = []
         skipped: List[str] = []
         vpn_records: List[Dict[str, Any]] = []
 
@@ -417,7 +418,16 @@ class EquinixMetalCloudProvisioner(CloudProvisioner):
             )
 
             if existed:
-                skipped.append(instance.name)
+                # The device already exists; realise an in-place tag drift
+                # (non-disruptive — Metal device tags are mutable) when the
+                # spec tags have drifted from the live device.
+                reconciled = self._stages.reconcile_device(
+                    desired=instance, run_id=run_id, aspects=aspects,
+                )
+                if reconciled is not None:
+                    updated.append(reconciled)
+                else:
+                    skipped.append(instance.name)
             else:
                 created.append(resource)
                 if instance.vpn_join is not None:
@@ -434,7 +444,7 @@ class EquinixMetalCloudProvisioner(CloudProvisioner):
 
         self._last_vpn_records = vpn_records
 
-        rtnval = ProvisioningResult(created=created, updated=[],
+        rtnval = ProvisioningResult(created=created, updated=updated,
                                     skipped=skipped, errors=[])
         return rtnval
 
