@@ -13,7 +13,11 @@ __copyright__ = "Copyright 2026, Automation Mojo LLC"
 __credits__ = []
 
 
+import os
+
 from typing import Any, Dict, List, Optional
+
+from automojo.provisioning.model.exceptions import SchemaSemanticError
 
 from automojo.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
@@ -229,7 +233,12 @@ class LinodeApplyStages:
             existing = self._reader.find_instance(name=inst.name)
             if existing is not None:
                 instance_state[inst.name] = existing
-                result.skipped.append(inst.name)
+                resized = self._reconcile_instance(
+                    inst=inst, existing=existing, result=result,
+                    aspects=aspects,
+                )
+                if resized is not True:
+                    result.skipped.append(inst.name)
                 continue
 
             accelerator_models = self._accelerator_models(instance=inst)
@@ -351,6 +360,65 @@ class LinodeApplyStages:
             ))
 
         rtnval = instance_state
+        return rtnval
+
+    def _reconcile_instance(self, *, inst: Any, existing: Any,
+                            result: LinodeApplyResult,
+                            aspects: Any) -> bool:
+        """
+            Reconcile a live Linode instance against the spec, realising
+            a type (size) drift in place via a Linode resize.
+
+            A Linode resize migrates the instance and reboots the guest;
+            the disruptive change is gated behind ``aspects.confirm``
+            consistently with destroy gating.
+
+            :param inst: The neutral CloudInstance.
+            :param existing: The live Linode instance handle.
+            :param result: The LinodeApplyResult accumulator.
+            :param aspects: Aspects controlling apply behaviour.
+
+            :returns: ``True`` when the instance was resized; ``False``
+                when it was already in shape.
+
+            :raises: SchemaSemanticError when a resize is required but
+                ``aspects.confirm`` is not ``True``.
+        """
+        accelerator_models = self._accelerator_models(instance=inst)
+        desired_type = self._resolver.size_to_type(
+            size_hint=inst.size, accelerators=accelerator_models,
+        )
+        current_type = getattr(existing, "type", None)
+        current_type_id = getattr(current_type, "id", current_type)
+        if current_type_id is None or current_type_id == desired_type:
+            rtnval = False
+            return rtnval
+
+        confirm = getattr(aspects, "confirm", False)
+        if confirm is not True:
+            err_msg_lines = [
+                "Linode apply requires aspects.confirm=True for an "
+                "in-place instance resize — a Linode resize migrates "
+                "the instance and reboots the guest."
+            ]
+            err_msg_lines.append("INSTANCE: {}".format(inst.name))
+            err_msg_lines.append("    before: {}".format(current_type_id))
+            err_msg_lines.append("    after:  {}".format(desired_type))
+            err_msg = os.linesep.join(err_msg_lines)
+            raise SchemaSemanticError(err_msg)
+
+        instance_id = getattr(existing, "id", None)
+        self._client.instance_resize(instance_id=instance_id,
+                                     new_type=desired_type)
+
+        result.updated.append(ProvisionedResource(
+            kind="instance", name=inst.name,
+            venue_id=str(instance_id),
+            attributes={"instance_id": instance_id,
+                        "type": desired_type},
+            tags=dict(inst.tags),
+        ))
+        rtnval = True
         return rtnval
 
     def apply_object_storage_and_dns(self, *, spec: LinodeSpec, run_id: str,

@@ -133,6 +133,22 @@ def basic_spec(*, with_vpn: bool = False,
     return rtnval
 
 
+def resized_spec(*, size: str = "large") -> LibvirtSpec:
+    """
+        Build a LibvirtSpec whose single domain carries a different size
+        token — used to provoke vCPU / memory drift against an
+        already-applied basic_spec.
+
+        :param size: The neutral size token for the domain.
+
+        :returns: A LibvirtSpec instance.
+    """
+    rtnval = LibvirtSpec(networks=[make_network()],
+                         keypairs=[make_keypair()],
+                         instances=[make_instance(size=size)])
+    return rtnval
+
+
 def volume_spec() -> LibvirtSpec:
     """
         Build a LibvirtSpec carrying a data volume.

@@ -22,10 +22,13 @@ from automojo.provisioning.model.exceptions import SchemaSemanticError
 from automojo.provisioning.venues.libvirt.libvirtcloudprovisioner import (
     LibvirtCloudProvisioner
 )
+from automojo.provisioning.venues.libvirt.lverrors import (
+    ConfirmationRequiredError
+)
 
 from ._mockclient import MockLibvirtClient, RecordingVpnControlPlane
 from ._specfactory import (
-    BASE_IMAGE_VOLUME, basic_spec, make_config, volume_spec
+    BASE_IMAGE_VOLUME, basic_spec, make_config, resized_spec, volume_spec
 )
 
 
@@ -144,6 +147,82 @@ def test_apply_idempotent_no_mutation_on_reapply(venue, aspects, tmp_path):
     second = provisioner.apply(aspects=aspects)
     assert client.define_domain_calls == first_domain_calls
     assert "node" in second.skipped
+    return
+
+
+def test_apply_realises_domain_drift_by_recreate(venue, confirm_aspects,
+                                                 tmp_path):
+    """
+        Apply over a venue carrying a size-drifted domain realises the
+        UPDATE by undefining the stale domain and redefining it with the
+        desired hardware shape; the result carries it in ``updated``.
+    """
+    client = _seeded_client()
+    baseline = _provisioner(venue=venue, spec=basic_spec(), client=client,
+                            output_root=str(tmp_path))
+    baseline.apply(aspects=confirm_aspects)
+    first_domain_calls = client.define_domain_calls
+
+    drifted = _provisioner(venue=venue, spec=resized_spec(size="large"),
+                           client=client, output_root=str(tmp_path))
+    result = drifted.apply(aspects=confirm_aspects)
+
+    assert client.define_domain_calls == first_domain_calls + 1
+    updated_names = [r.name for r in result.updated]
+    assert updated_names == ["node"]
+    assert result.updated[0].attributes["vcpus"] == 4
+
+    live = client.domains.list_domains(aspects=confirm_aspects)
+    assert len(live) == 1
+    assert live[0].vcpus == 4
+    return
+
+
+def test_replan_after_recreate_emits_skip(venue, confirm_aspects, tmp_path):
+    """
+        A second apply after an UPDATE-by-recreate emits SKIP — the
+        idempotent contract is preserved.
+    """
+    client = _seeded_client()
+    baseline = _provisioner(venue=venue, spec=basic_spec(), client=client,
+                            output_root=str(tmp_path))
+    baseline.apply(aspects=confirm_aspects)
+
+    drifted = _provisioner(venue=venue, spec=resized_spec(size="large"),
+                           client=client, output_root=str(tmp_path))
+    drifted.apply(aspects=confirm_aspects)
+
+    plan = drifted.plan(aspects=confirm_aspects)
+    instance_actions = [a for a in plan.actions
+                        if a.resource_kind == "instance"]
+    assert len(instance_actions) == 1
+    assert instance_actions[0].intent == "skip"
+
+    second = drifted.apply(aspects=confirm_aspects)
+    assert "node" in second.skipped
+    assert len(second.updated) == 0
+    return
+
+
+def test_unconfirmed_drifted_apply_requires_confirm(venue, aspects,
+                                                    tmp_path):
+    """
+        An UPDATE-by-recreate without aspects.confirm raises
+        ConfirmationRequiredError — consistent with DELETE / destroy
+        gating.
+    """
+    client = _seeded_client()
+    baseline = _provisioner(venue=venue, spec=basic_spec(), client=client,
+                            output_root=str(tmp_path))
+    baseline.apply(aspects=aspects)
+
+    drifted = _provisioner(venue=venue, spec=resized_spec(size="large"),
+                           client=client, output_root=str(tmp_path))
+    with pytest.raises(ConfirmationRequiredError):
+        drifted.apply(aspects=aspects)
+
+    live = client.domains.list_domains(aspects=aspects)
+    assert live[0].vcpus == 2
     return
 
 

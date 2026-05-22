@@ -315,7 +315,25 @@ class HypervCloudProvisioner(CloudProvisioner):
                     err_msg = os.linesep.join(err_msg_lines)
                     raise ConfirmationRequiredError(err_msg)
 
+            update_instance = (
+                action.intent == PlannedActionIntent.UPDATE.value
+                and action.resource_kind == "instance")
+            if update_instance is True and confirm is not True:
+                err_msg_lines = [
+                    "HypervCloudProvisioner.apply has a planned in-place "
+                    "VM resize (UPDATE)."
+                ]
+                err_msg_lines.append(
+                    "    {}: {}".format(action.resource_kind,
+                                        action.resource_name))
+                err_msg_lines.append(
+                    "Set-VMProcessor / Set-VMMemory require the VM to be "
+                    "stopped; re-run with aspects.confirm=True to proceed.")
+                err_msg = os.linesep.join(err_msg_lines)
+                raise ConfirmationRequiredError(err_msg)
+
         created: List[ProvisionedResource] = []
+        updated: List[ProvisionedResource] = []
         skipped: List[str] = []
         vpn_records: List[Dict[str, Any]] = []
         vpn_authkeys = self._mint_authkeys(spec=spec, aspects=aspects)
@@ -325,12 +343,13 @@ class HypervCloudProvisioner(CloudProvisioner):
             aspects=runner)
         self._apply_stages.apply_vms(
             spec=spec, run_id=run_id, switch_state=switch_state,
-            created=created, skipped=skipped, vpn_records=vpn_records,
-            vpn_authkeys=vpn_authkeys, aspects=runner)
+            created=created, updated=updated, skipped=skipped,
+            vpn_records=vpn_records, vpn_authkeys=vpn_authkeys,
+            aspects=runner)
 
         self._last_vpn_records = vpn_records
 
-        rtnval = ProvisioningResult(created=created, updated=[],
+        rtnval = ProvisioningResult(created=created, updated=updated,
                                     skipped=skipped, errors=[])
         return rtnval
 

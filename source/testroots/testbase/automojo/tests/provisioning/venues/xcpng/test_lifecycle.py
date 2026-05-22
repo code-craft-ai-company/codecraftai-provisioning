@@ -17,15 +17,20 @@ import base64
 from automojo.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
+import pytest
+
 from automojo.provisioning.venues.xcpng.xcpngcloudprovisioner import (
     XcpngCloudProvisioner
 )
 from automojo.provisioning.venues.xcpng.xencloudinitrenderer import (
     XENSTORE_USERDATA_KEY
 )
+from automojo.provisioning.venues.xcpng.xenerrors import (
+    ConfirmationRequiredError
+)
 
 from ._mockclient import MockXenClient, RecordingVpnControlPlane
-from ._specfactory import basic_spec
+from ._specfactory import basic_spec, resized_spec
 
 
 def _provisioner(*, venue, spec, client=None, vpn=None):
@@ -88,6 +93,76 @@ def test_apply_re_plan_is_all_skip(venue, aspects):
     plan = provisioner.plan(aspects=aspects)
     intents = set(a.intent for a in plan.actions)
     assert intents == {PlannedActionIntent.SKIP.value}
+    return
+
+
+def test_apply_realises_vm_drift_by_recreate(venue, confirm_aspects):
+    """
+        Apply over a venue carrying a size-drifted VM realises the
+        UPDATE by-recreate — the stale VM is shut down + destroyed and a
+        fresh VM is cloned at the desired hardware shape; the result
+        carries it in ``updated``.
+    """
+    client = MockXenClient()
+    baseline = _provisioner(venue=venue, spec=basic_spec(), client=client)
+    baseline.apply(aspects=confirm_aspects)
+    first_clone_calls = client.clone_calls
+
+    drifted = _provisioner(venue=venue, spec=resized_spec(size="large"),
+                           client=client)
+    result = drifted.apply(aspects=confirm_aspects)
+
+    assert client.clone_calls == first_clone_calls + 1
+    updated_names = [r.name for r in result.updated]
+    assert updated_names == ["worker"]
+    assert result.updated[0].attributes["vcpus"] == 4
+
+    assert len(client.vms) == 1
+    live_vm = list(client.vms.values())[0]
+    assert live_vm.vcpus_max == 4
+    return
+
+
+def test_replan_after_recreate_emits_skip(venue, confirm_aspects):
+    """
+        A second apply after an UPDATE-by-recreate emits SKIP — the
+        idempotent contract is preserved.
+    """
+    client = MockXenClient()
+    baseline = _provisioner(venue=venue, spec=basic_spec(), client=client)
+    baseline.apply(aspects=confirm_aspects)
+
+    drifted = _provisioner(venue=venue, spec=resized_spec(size="large"),
+                           client=client)
+    drifted.apply(aspects=confirm_aspects)
+
+    plan = drifted.plan(aspects=confirm_aspects)
+    instance_actions = [a for a in plan.actions
+                        if a.resource_kind == "instance"]
+    assert len(instance_actions) == 1
+    assert instance_actions[0].intent == "skip"
+
+    second = drifted.apply(aspects=confirm_aspects)
+    assert "worker" in second.skipped
+    assert len(second.updated) == 0
+    return
+
+
+def test_unconfirmed_drifted_apply_requires_confirm(venue, aspects):
+    """
+        An UPDATE-by-recreate without aspects.confirm raises
+        ConfirmationRequiredError — consistent with DELETE gating.
+    """
+    client = MockXenClient()
+    baseline = _provisioner(venue=venue, spec=basic_spec(), client=client)
+    baseline.apply(aspects=aspects)
+
+    drifted = _provisioner(venue=venue, spec=resized_spec(size="large"),
+                           client=client)
+    with pytest.raises(ConfirmationRequiredError):
+        drifted.apply(aspects=aspects)
+
+    assert len(client.vms) == 1
     return
 
 

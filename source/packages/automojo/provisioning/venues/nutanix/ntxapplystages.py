@@ -53,6 +53,7 @@ class NtxApplyResult:
             Construct an empty NtxApplyResult.
         """
         self.created: List[ProvisionedResource] = []
+        self.updated: List[ProvisionedResource] = []
         self.skipped: List[str] = []
         self.vpn_records: List[Dict[str, Any]] = []
         return
@@ -341,8 +342,12 @@ class NtxApplyStages:
         for instance in spec.instances:
             venue_name = resource_name_for(spec_name=instance.name,
                                            run_id=run_id)
-            if venue_name in live_by_name:
-                result.skipped.append(instance.name)
+            existing_vm = live_by_name.get(venue_name, None)
+            if existing_vm is not None:
+                self._reconcile_vm(instance=instance,
+                                   existing_vm=existing_vm,
+                                   cluster_uuid=cluster_uuid,
+                                   result=result, aspects=aspects)
                 continue
 
             image_uuid = self._resolver.image_to_uuid(
@@ -402,6 +407,61 @@ class NtxApplyStages:
                     "vpn_provider": instance.vpn_join.provider,
                     "vpn_device_id": venue_name,
                 })
+        return
+
+    def _reconcile_vm(self, *, instance: CloudInstance, existing_vm: Any,
+                      cluster_uuid: str, result: NtxApplyResult,
+                      aspects: Any) -> None:
+        """
+            Reconcile a live VM against the spec, realising vCPU / memory
+            drift in place via an intent-spec PUT.
+
+            A VM whose hardware matches the spec is a SKIP.  A VM whose
+            vCPU / memory has drifted is resized in place — Prism replaces
+            the VM intent spec, an operation AHV applies at the next power
+            cycle (the engine gates the disruptive resize behind
+            ``aspects.confirm`` before this stage runs).
+
+            :param instance: The neutral :class:`CloudInstance`.
+            :param existing_vm: The live :class:`NutanixVm` record.
+            :param cluster_uuid: The placement cluster uuid.
+            :param result: The :class:`NtxApplyResult` accumulator.
+            :param aspects: Behaviour control for the interop client.
+
+            :returns: ``None``.
+        """
+        hardware = self._resolver.size_to_hardware(size_hint=instance.size)
+        desired_vcpus = hardware["num_vcpus"]
+        desired_memory_mib = hardware["memory_mib"]
+
+        drifted = (existing_vm.num_vcpus != desired_vcpus
+                   or existing_vm.memory_mib != desired_memory_mib)
+        if drifted is not True:
+            result.skipped.append(instance.name)
+            return
+
+        update_spec = VmSpec(
+            name=existing_vm.name, cluster_uuid=cluster_uuid,
+            num_vcpus=desired_vcpus,
+            num_cores_per_vcpu=hardware["num_cores_per_vcpu"],
+            memory_mib=desired_memory_mib,
+        )
+        handle = self._client.vms.update(vm_uuid=existing_vm.uuid,
+                                         spec=update_spec, aspects=aspects)
+        vm_uuid = handle.result_entity_uuid(aspects=aspects)
+        if vm_uuid is None:
+            vm_uuid = existing_vm.uuid
+
+        resource = ProvisionedResource(
+            kind="instance", name=instance.name, venue_id=vm_uuid,
+            attributes={"venue_name": existing_vm.name,
+                        "uuid": vm_uuid,
+                        "num_vcpus": desired_vcpus,
+                        "memory_mib": desired_memory_mib,
+                        "cluster_uuid": cluster_uuid},
+            tags=instance.tags if instance.tags is not None else {},
+        )
+        result.updated.append(resource)
         return
 
     def _subnet_uuids_for(self, *, spec: NutanixSpec,

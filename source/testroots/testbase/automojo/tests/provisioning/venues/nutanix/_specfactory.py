@@ -150,6 +150,23 @@ def basic_spec(*, with_vpn: bool = False,
     return rtnval
 
 
+def resized_spec(*, size: str = "large") -> NutanixSpec:
+    """
+        Build a NutanixSpec whose single VM carries a different size
+        token — used to provoke vCPU / memory drift against an
+        already-applied baseline_spec.
+
+        :param size: The neutral size token for the VM.
+
+        :returns: A NutanixSpec instance.
+    """
+    rtnval = NutanixSpec(networks=[make_network()],
+                         subnets=[make_subnet()],
+                         keypairs=[make_keypair()],
+                         instances=[make_instance(size=size)])
+    return rtnval
+
+
 def volume_spec() -> NutanixSpec:
     """
         Build a NutanixSpec carrying a data volume.

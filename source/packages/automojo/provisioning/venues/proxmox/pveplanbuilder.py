@@ -173,6 +173,11 @@ class PvePlanBuilder:
                                       "after": desired_bytes}
 
             if drifted is True:
+                diff["note"] = ("Proxmox VM vCPU/memory drift; the interop "
+                                "client exposes no in-place hardware "
+                                "reconfigure, so UPDATE is realised "
+                                "by-recreate (stop + destroy + re-clone) "
+                                "and gated behind aspects.confirm.")
                 actions.append(PlannedAction(
                     intent=PlannedActionIntent.UPDATE,
                     resource_kind="instance",

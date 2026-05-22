@@ -54,6 +54,7 @@ class LvApplyResult:
             Construct an empty LvApplyResult.
         """
         self.created: List[ProvisionedResource] = []
+        self.updated: List[ProvisionedResource] = []
         self.skipped: List[str] = []
         self.vpn_records: List[Dict[str, Any]] = []
         return
@@ -210,52 +211,118 @@ class LvApplyStages:
         for instance in spec.instances:
             venue_name = resource_name_for(spec_name=instance.name,
                                            run_id=run_id)
-            if venue_name in live_by_name:
-                result.skipped.append(instance.name)
+            existing = live_by_name.get(venue_name, None)
+            if existing is not None:
+                drifted = self._domain_has_drifted(instance=instance,
+                                                   existing=existing)
+                if drifted is not True:
+                    result.skipped.append(instance.name)
+                    continue
+                # libvirt exposes no in-place vCPU / memory reconfigure
+                # API; a drifted domain is realised UPDATE-by-recreate —
+                # undefine + destroy the stale domain, then redefine it
+                # with the desired hardware shape.
+                self._client.domains.destroy_domain(name=venue_name,
+                                                    aspects=aspects)
+                self._client.domains.undefine_domain(name=venue_name,
+                                                     aspects=aspects)
+                resource = self._create_domain(
+                    spec=spec, instance=instance, run_id=run_id,
+                    venue_name=venue_name,
+                    vpn_control_plane=vpn_control_plane, result=result,
+                    aspects=aspects,
+                )
+                result.updated.append(resource)
                 continue
 
-            network_name = self._network_name_for(spec=spec,
-                                                   instance=instance,
-                                                   run_id=run_id)
-            boot_path = self._clone_boot_volume(instance=instance,
-                                                run_id=run_id,
-                                                aspects=aspects)
-            seed_path = self._build_seed_iso(
+            resource = self._create_domain(
                 spec=spec, instance=instance, run_id=run_id,
                 venue_name=venue_name,
-                vpn_control_plane=vpn_control_plane, aspects=aspects,
-            )
-
-            domain_spec = self._domain_builder.build(
-                instance=instance, domain_name=venue_name, run_id=run_id,
-                network_name=network_name, boot_disk_path=boot_path,
-                data_disk_paths=[], seed_iso_path=seed_path,
-            )
-            defined = self._client.domains.define_domain(spec=domain_spec,
-                                                         aspects=aspects)
-            self._client.domains.create_domain(name=venue_name,
-                                               aspects=aspects)
-
-            resource = ProvisionedResource(
-                kind="instance", name=instance.name, venue_id=defined.uuid,
-                attributes={"venue_name": venue_name,
-                            "uuid": defined.uuid,
-                            "vcpus": defined.vcpus,
-                            "memory_kib": defined.memory_kib,
-                            "boot_disk": boot_path},
-                tags=instance.tags if instance.tags is not None else {},
+                vpn_control_plane=vpn_control_plane, result=result,
+                aspects=aspects,
             )
             result.created.append(resource)
-
-            if instance.vpn_join is not None:
-                result.vpn_records.append({
-                    "instance_name": instance.name,
-                    "instance_id": defined.uuid,
-                    "venue_name": venue_name,
-                    "vpn_provider": instance.vpn_join.provider,
-                    "vpn_device_id": venue_name,
-                })
         return
+
+    def _domain_has_drifted(self, *, instance: CloudInstance,
+                            existing: Any) -> bool:
+        """
+            Return whether a live domain's vCPU / memory drifts from the
+            spec's resolved hardware shape.
+
+            :param instance: The neutral :class:`CloudInstance`.
+            :param existing: The live :class:`LibvirtDomainInfo`.
+
+            :returns: ``True`` when the domain has drifted.
+        """
+        sizing = self._domain_builder.resolve_size(size=instance.size)
+        desired_vcpus = sizing["vcpus"]
+        desired_memory_kib = sizing["memory_mib"] * 1024
+        rtnval = (existing.vcpus != desired_vcpus
+                  or existing.memory_kib != desired_memory_kib)
+        return rtnval
+
+    def _create_domain(self, *, spec: LibvirtSpec, instance: CloudInstance,
+                       run_id: str, venue_name: str,
+                       vpn_control_plane: Optional[Any],
+                       result: LvApplyResult,
+                       aspects: Any) -> ProvisionedResource:
+        """
+            Clone the boot volume, build the seed ISO, and define + start
+            one domain.
+
+            :param spec: The :class:`LibvirtSpec`.
+            :param instance: The neutral :class:`CloudInstance`.
+            :param run_id: The provisioning run id.
+            :param venue_name: The venue-side domain name.
+            :param vpn_control_plane: Optional ``IVPNControlPlane`` impl.
+            :param result: The :class:`LvApplyResult` accumulator.
+            :param aspects: Behaviour control for the interop client.
+
+            :returns: The :class:`ProvisionedResource` for the domain.
+        """
+        network_name = self._network_name_for(spec=spec,
+                                               instance=instance,
+                                               run_id=run_id)
+        boot_path = self._clone_boot_volume(instance=instance,
+                                            run_id=run_id,
+                                            aspects=aspects)
+        seed_path = self._build_seed_iso(
+            spec=spec, instance=instance, run_id=run_id,
+            venue_name=venue_name,
+            vpn_control_plane=vpn_control_plane, aspects=aspects,
+        )
+
+        domain_spec = self._domain_builder.build(
+            instance=instance, domain_name=venue_name, run_id=run_id,
+            network_name=network_name, boot_disk_path=boot_path,
+            data_disk_paths=[], seed_iso_path=seed_path,
+        )
+        defined = self._client.domains.define_domain(spec=domain_spec,
+                                                     aspects=aspects)
+        self._client.domains.create_domain(name=venue_name,
+                                           aspects=aspects)
+
+        resource = ProvisionedResource(
+            kind="instance", name=instance.name, venue_id=defined.uuid,
+            attributes={"venue_name": venue_name,
+                        "uuid": defined.uuid,
+                        "vcpus": defined.vcpus,
+                        "memory_kib": defined.memory_kib,
+                        "boot_disk": boot_path},
+            tags=instance.tags if instance.tags is not None else {},
+        )
+
+        if instance.vpn_join is not None:
+            result.vpn_records.append({
+                "instance_name": instance.name,
+                "instance_id": defined.uuid,
+                "venue_name": venue_name,
+                "vpn_provider": instance.vpn_join.provider,
+                "vpn_device_id": venue_name,
+            })
+        rtnval = resource
+        return rtnval
 
     def _network_name_for(self, *, spec: LibvirtSpec,
                           instance: CloudInstance, run_id: str) -> str:

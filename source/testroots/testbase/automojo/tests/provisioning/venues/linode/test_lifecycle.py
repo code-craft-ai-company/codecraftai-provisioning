@@ -178,6 +178,90 @@ def test_apply_with_vpn_join_injects_user_data(venue, credential,
     return
 
 
+def test_apply_realises_instance_resize_in_place(venue, credential,
+                                                 region_config,
+                                                 confirm_aspects,
+                                                 mock_client) -> None:
+    """
+        apply over a venue with a size-drifted instance realises the
+        resize in place — the mock client records an instance_resize
+        call and the result carries the resized instance in ``updated``.
+    """
+    baseline_spec = basic_spec(instance_size="small")
+    baseline = _provisioner(venue=venue, credential=credential,
+                            region_config=region_config, spec=baseline_spec,
+                            mock_client=mock_client)
+    baseline.apply(aspects=confirm_aspects)
+    assert mock_client.resize_calls == 0
+
+    drifted_spec = basic_spec(instance_size="large")
+    drifted = _provisioner(venue=venue, credential=credential,
+                           region_config=region_config, spec=drifted_spec,
+                           mock_client=mock_client)
+    result = drifted.apply(aspects=confirm_aspects)
+
+    assert mock_client.resize_calls == 1
+    updated_names = [r.name for r in result.updated]
+    assert updated_names == ["inst-a"]
+    assert result.updated[0].attributes["type"] == "g6-standard-6"
+    return
+
+
+def test_replan_after_resize_emits_skip(venue, credential, region_config,
+                                        confirm_aspects,
+                                        mock_client) -> None:
+    """
+        A second apply after an in-place resize emits no UPDATE — the
+        idempotent contract is preserved.
+    """
+    baseline = _provisioner(venue=venue, credential=credential,
+                            region_config=region_config,
+                            spec=basic_spec(instance_size="small"),
+                            mock_client=mock_client)
+    baseline.apply(aspects=confirm_aspects)
+
+    drifted = _provisioner(venue=venue, credential=credential,
+                           region_config=region_config,
+                           spec=basic_spec(instance_size="large"),
+                           mock_client=mock_client)
+    drifted.apply(aspects=confirm_aspects)
+
+    plan = drifted.plan(aspects=confirm_aspects)
+    instance_actions = [a for a in plan.actions
+                        if a.resource_kind == "instance"]
+    assert len(instance_actions) == 1
+    assert instance_actions[0].intent == PlannedActionIntent.SKIP.value
+
+    second = drifted.apply(aspects=confirm_aspects)
+    assert "inst-a" in second.skipped
+    assert len(second.updated) == 0
+    return
+
+
+def test_unconfirmed_resize_raises_semantic_error(venue, credential,
+                                                  region_config, aspects,
+                                                  mock_client) -> None:
+    """
+        An in-place instance resize without aspects.confirm raises
+        SchemaSemanticError — consistent with destroy gating.
+    """
+    baseline = _provisioner(venue=venue, credential=credential,
+                            region_config=region_config,
+                            spec=basic_spec(instance_size="small"),
+                            mock_client=mock_client)
+    baseline.apply(aspects=aspects)
+
+    drifted = _provisioner(venue=venue, credential=credential,
+                           region_config=region_config,
+                           spec=basic_spec(instance_size="large"),
+                           mock_client=mock_client)
+    with pytest.raises(SchemaSemanticError):
+        drifted.apply(aspects=aspects)
+
+    assert mock_client.resize_calls == 0
+    return
+
+
 def test_destroy_requires_confirm(venue, credential, region_config,
                                   aspects, mock_client) -> None:
     """

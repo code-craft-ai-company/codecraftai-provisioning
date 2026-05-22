@@ -18,8 +18,16 @@ from automojo.provisioning.venues.nutanix.nutanixcloudprovisioner import (
     NutanixCloudProvisioner
 )
 
+import pytest
+
+from automojo.provisioning.venues.nutanix.ntxerrors import (
+    ConfirmationRequiredError
+)
+
 from ._mockclient import MockNutanixClient, RecordingVpnControlPlane
-from ._specfactory import basic_spec, make_config, volume_spec
+from ._specfactory import (
+    basic_spec, make_config, resized_spec, volume_spec
+)
 
 
 def _provisioner(*, venue, spec, client=None, vpn_control_plane=None):
@@ -133,6 +141,74 @@ def test_apply_re_apply_is_idempotent(venue, aspects):
     assert client.create_vm_calls == first_vm_calls
     assert sorted(second.skipped) == ["appsubnet", "node", "vpcnet"]
     assert len(second.created) == 0
+
+
+def test_apply_realises_vm_vcpu_memory_drift_in_place(venue,
+                                                      confirm_aspects):
+    """
+        Apply over a venue with a size-drifted VM realises the resize in
+        place — the mock client records a vms.update call and the result
+        carries the resized instance in ``updated``.
+    """
+    client = MockNutanixClient()
+    baseline = _provisioner(venue=venue, spec=basic_spec(), client=client)
+    baseline.apply(aspects=confirm_aspects)
+    assert client.update_vm_calls == 0
+
+    drifted = _provisioner(venue=venue, spec=resized_spec(size="large"),
+                           client=client)
+    result = drifted.apply(aspects=confirm_aspects)
+
+    assert client.update_vm_calls == 1
+    updated_names = [resource.name for resource in result.updated]
+    assert updated_names == ["node"]
+    resized = result.updated[0]
+    assert resized.attributes["num_vcpus"] == 4
+
+    live_vm = client.vms_state["node-testrun0"]
+    assert live_vm.num_vcpus == 4
+
+
+def test_replan_after_resize_emits_skip(venue, confirm_aspects):
+    """
+        A second apply after an in-place resize emits SKIP for the VM —
+        idempotence is preserved.
+    """
+    client = MockNutanixClient()
+    baseline = _provisioner(venue=venue, spec=basic_spec(), client=client)
+    baseline.apply(aspects=confirm_aspects)
+
+    drifted = _provisioner(venue=venue, spec=resized_spec(size="large"),
+                           client=client)
+    drifted.apply(aspects=confirm_aspects)
+
+    plan = drifted.plan(aspects=confirm_aspects)
+    instance_actions = [a for a in plan.actions
+                        if a.resource_kind == "instance"]
+    assert len(instance_actions) == 1
+    assert instance_actions[0].intent == "skip"
+
+    second = drifted.apply(aspects=confirm_aspects)
+    assert client.update_vm_calls == 1
+    assert second.skipped.count("node") == 1
+    assert len(second.updated) == 0
+
+
+def test_unconfirmed_resize_raises_confirmation_required(venue, aspects):
+    """
+        An in-place VM resize without aspects.confirm raises
+        ConfirmationRequiredError — consistent with DELETE gating.
+    """
+    client = MockNutanixClient()
+    baseline = _provisioner(venue=venue, spec=basic_spec(), client=client)
+    baseline.apply(aspects=aspects)
+
+    drifted = _provisioner(venue=venue, spec=resized_spec(size="large"),
+                           client=client)
+    with pytest.raises(ConfirmationRequiredError):
+        drifted.apply(aspects=aspects)
+
+    assert client.update_vm_calls == 0
 
 
 def test_destroy_removes_vm_subnet_and_vpc(venue, confirm_aspects):
