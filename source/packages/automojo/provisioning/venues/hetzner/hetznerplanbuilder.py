@@ -11,6 +11,8 @@ __copyright__ = "Copyright 2026, Automation Mojo LLC"
 __credits__ = []
 
 
+import os
+
 from typing import Any, Dict, List, Optional
 
 from automojo.provisioning.model.cloud.plannedaction import PlannedAction
@@ -18,6 +20,9 @@ from automojo.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
 from automojo.provisioning.model.cloud.provisioningplan import ProvisioningPlan
+from automojo.provisioning.venues.hetzner.hetznererrors import (
+    HetznerValidationError
+)
 from automojo.provisioning.venues.hetzner.hetznerlabeltranslator import (
     HetznerLabelTranslator
 )
@@ -228,17 +233,38 @@ class HetznerPlanBuilder:
                 actions.append(PlannedAction(
                     intent=PlannedActionIntent.CREATE,
                     resource_kind="volume", resource_name=vol.name))
-            elif getattr(existing, "size", None) == vol.size_gb:
+                continue
+
+            live_size = getattr(existing, "size", None)
+            if live_size == vol.size_gb:
                 actions.append(PlannedAction(
                     intent=PlannedActionIntent.SKIP,
                     resource_kind="volume", resource_name=vol.name))
-            else:
-                actions.append(PlannedAction(
-                    intent=PlannedActionIntent.UPDATE,
-                    resource_kind="volume", resource_name=vol.name,
-                    diff={"before": {"size_gb": getattr(existing,
-                                                        "size", 0)},
-                          "after": {"size_gb": vol.size_gb}}))
+                continue
+
+            if live_size is not None and vol.size_gb < live_size:
+                # Hetzner volumes can only grow — a shrink is impossible
+                # and must not be presented as a clean in-place UPDATE.
+                err_msg_lines = [
+                    "Hetzner volume cannot be shrunk; hcloud volumes only "
+                    "support an in-place grow."
+                ]
+                err_msg_lines.append("VOLUME: {}".format(vol.name))
+                err_msg_lines.append("    live size_gb:    {}".format(
+                    live_size))
+                err_msg_lines.append("    desired size_gb: {}".format(
+                    vol.size_gb))
+                err_msg = os.linesep.join(err_msg_lines)
+                raise HetznerValidationError(err_msg)
+
+            # A grow — Hetzner realises this in place via volume.resize.
+            actions.append(PlannedAction(
+                intent=PlannedActionIntent.UPDATE,
+                resource_kind="volume", resource_name=vol.name,
+                diff={"before": {"size_gb": live_size},
+                      "after": {"size_gb": vol.size_gb},
+                      "note": "Volume grow is realised in place via "
+                              "volume.resize."}))
         return
 
     def _plan_dns(self, *, spec: HetznerSpec,

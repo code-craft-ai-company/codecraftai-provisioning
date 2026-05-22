@@ -246,6 +246,104 @@ def test_destroy_calls_vpn_delete_device(venue, credential, project_config,
     return
 
 
+def test_plan_emits_inplace_update_for_tag_drift(venue, credential,
+                                                 project_config,
+                                                 mock_client,
+                                                 aspects) -> None:
+    """
+        A tag-only drift on an existing device plans an in-place UPDATE
+        carrying an ``update_kind="tags"`` diff.
+    """
+    spec = basic_spec()
+    provisioner = _provisioner(
+        venue=venue, credential=credential, project_config=project_config,
+        spec=spec, mock_client=mock_client,
+    )
+    provisioner.apply(aspects=aspects)
+
+    drifted = basic_spec()
+    drifted.instances[0].tags["automojo:purpose"] = "production"
+    provisioner = _provisioner(
+        venue=venue, credential=credential, project_config=project_config,
+        spec=drifted, mock_client=mock_client,
+    )
+    plan = provisioner.plan(aspects=aspects)
+    device_actions = [a for a in plan.actions
+                      if a.resource_kind == "instance"]
+    assert len(device_actions) == 1
+    assert device_actions[0].intent == PlannedActionIntent.UPDATE.value
+    assert device_actions[0].diff.get("update_kind") == "tags"
+    return
+
+
+def test_apply_realizes_tag_drift_in_place(venue, credential,
+                                           project_config, mock_client,
+                                           aspects) -> None:
+    """
+        Apply realises a tag-only drift in place via update_device_tags and
+        records the device in ProvisioningResult.updated.
+    """
+    spec = basic_spec()
+    provisioner = _provisioner(
+        venue=venue, credential=credential, project_config=project_config,
+        spec=spec, mock_client=mock_client,
+    )
+    provisioner.apply(aspects=aspects)
+    mock_client.calls.clear()
+
+    drifted = basic_spec()
+    drifted.instances[0].tags["automojo:purpose"] = "production"
+    provisioner = _provisioner(
+        venue=venue, credential=credential, project_config=project_config,
+        spec=drifted, mock_client=mock_client,
+    )
+    result = provisioner.apply(aspects=aspects)
+
+    assert "update_device_tags" in mock_client.calls
+    assert "create_device" not in mock_client.calls
+    assert "delete_device" not in mock_client.calls
+    updated_names = {r.name for r in result.updated}
+    assert "dev-a" in updated_names
+    assert "dev-a" not in set(result.skipped)
+
+    device = mock_client.list_devices()[0]
+    observed = dict(
+        entry.split("=", 1) for entry in device.get("tags", [])
+        if "=" in entry
+    )
+    assert observed.get("automojo:purpose") == "production"
+    return
+
+
+def test_reapply_after_tag_drift_is_skip(venue, credential, project_config,
+                                         mock_client, aspects) -> None:
+    """
+        A second apply of the tag-reconciled spec emits SKIP — the in-place
+        tag update is idempotent.
+    """
+    spec = basic_spec()
+    provisioner = _provisioner(
+        venue=venue, credential=credential, project_config=project_config,
+        spec=spec, mock_client=mock_client,
+    )
+    provisioner.apply(aspects=aspects)
+
+    drifted = basic_spec()
+    drifted.instances[0].tags["automojo:purpose"] = "production"
+    provisioner = _provisioner(
+        venue=venue, credential=credential, project_config=project_config,
+        spec=drifted, mock_client=mock_client,
+    )
+    provisioner.apply(aspects=aspects)
+    mock_client.calls.clear()
+
+    second = provisioner.apply(aspects=aspects)
+    assert "dev-a" in set(second.skipped)
+    assert len(second.updated) == 0
+    assert len(mock_client.calls) == 0
+    return
+
+
 def test_default_aspects_substituted_when_omitted(venue, credential,
                                                   project_config,
                                                   mock_client) -> None:

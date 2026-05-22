@@ -275,6 +275,24 @@ class MetalClient:
         )
         return rtnval
 
+    def update_device_tags(self, *, device_id: str,
+                           tags: List[str]) -> Dict[str, Any]:
+        """
+            Update the tag string list on an existing device in place.
+
+            Equinix Metal device tags are mutable; the Metal API realises a
+            tag change with ``PUT /devices/{id}`` carrying a new ``tags``
+            list, with no reprovisioning of the bare-metal server.
+
+            :param device_id: The device id.
+            :param tags: The replacement tag string list.
+
+            :returns: The updated device dict.
+        """
+        manager = self._manager()
+        rtnval = manager.update_device(device_id=device_id, tags=tags)
+        return rtnval
+
     def delete_device(self, *, device_id: str) -> None:
         """
             Delete a device.

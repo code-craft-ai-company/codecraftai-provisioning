@@ -285,6 +285,7 @@ class HetznerCloudProvisioner(CloudProvisioner):
             dns_client=self._dns_client)
 
         created: List[ProvisionedResource] = []
+        updated: List[ProvisionedResource] = []
         skipped: List[str] = []
         vpn_records: List[Dict[str, Any]] = []
 
@@ -295,14 +296,14 @@ class HetznerCloudProvisioner(CloudProvisioner):
             created=created, skipped=skipped)
         stages.apply_servers_and_volumes(
             spec=self._spec, run_id=run_id, aspects=aspects,
-            authkey_for=authkey_for, created=created, skipped=skipped,
-            vpn_records=vpn_records)
+            authkey_for=authkey_for, created=created, updated=updated,
+            skipped=skipped, vpn_records=vpn_records)
         stages.apply_dns(spec=self._spec, run_id=run_id, aspects=aspects,
                          created=created)
 
         self._last_vpn_records = vpn_records
 
-        rtnval = ProvisioningResult(created=created, updated=[],
+        rtnval = ProvisioningResult(created=created, updated=updated,
                                     skipped=skipped, errors=[])
         return rtnval
 

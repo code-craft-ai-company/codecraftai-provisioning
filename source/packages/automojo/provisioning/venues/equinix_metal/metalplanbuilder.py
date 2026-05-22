@@ -50,9 +50,15 @@ class MetalPlanBuilder:
         Computes a read-only CREATE/SKIP/UPDATE plan for an Equinix Metal
         spec.
 
-        Bare-metal devices cannot be resized in place; when a device's
-        hostname or tags drift the plan emits ``UPDATE`` (which the engine
-        realises as UPDATE-by-recreate, never an in-place mutation).
+        Bare-metal devices cannot be resized in place; a hostname drift
+        emits ``UPDATE`` realised as UPDATE-by-recreate.  Device tags are
+        mutable in place via the Metal API, so a tag-only drift emits an
+        honest in-place ``UPDATE`` that ``apply`` realises with
+        ``update_device_tags`` — no reprovisioning.
+
+        The drift diff carries an ``update_kind`` discriminator
+        (``"recreate"`` for hostname drift, ``"tags"`` for tag-only drift)
+        so the apply path can tell the two cases apart.
     """
 
     def __init__(self, *, stages: MetalApplyStages) -> None:
@@ -157,6 +163,12 @@ class MetalPlanBuilder:
         """
             Compute a hostname / tag drift diff for a device.
 
+            A hostname drift cannot be realised in place — bare-metal
+            devices cannot be renamed without reprovisioning — so it yields
+            an ``update_kind="recreate"`` diff.  A tag-only drift is
+            realised in place by the Metal API and yields an
+            ``update_kind="tags"`` diff.
+
             :param existing: Existing device dict.
             :param desired: Desired CloudInstance.
 
@@ -167,7 +179,8 @@ class MetalPlanBuilder:
             rtnval = {
                 "before": {"hostname": observed_hostname},
                 "after": {"hostname": desired.name},
-                "note": "Metal devices cannot resize; UPDATE-by-recreate.",
+                "update_kind": "recreate",
+                "note": "Metal devices cannot rename; UPDATE-by-recreate.",
             }
             return rtnval
 
@@ -179,8 +192,9 @@ class MetalPlanBuilder:
                 rtnval = {
                     "before": {"tags": existing.get("tags", [])},
                     "after": {"tags": desired.tags},
-                    "note": ("Metal devices cannot resize; "
-                             "UPDATE-by-recreate."),
+                    "update_kind": "tags",
+                    "note": ("Metal device tags are mutable; realised "
+                             "in place via update_device_tags."),
                 }
                 return rtnval
 

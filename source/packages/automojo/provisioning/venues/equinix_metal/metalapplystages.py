@@ -456,6 +456,73 @@ class MetalApplyStages:
         rtnval = resource
         return rtnval
 
+    def reconcile_device(self, *, desired: CloudInstance, run_id: str,
+                         aspects: Any) -> Optional[ProvisionedResource]:
+        """
+            Reconcile a live owned Device against the spec, realising a
+            tag-only drift in place via the Metal API.
+
+            Equinix Metal device tags are mutable; a tag drift is realised
+            with ``update_device_tags`` (``PUT /devices/{id}``) with no
+            reprovisioning of the bare-metal server.  A tag update is
+            non-disruptive, so it is not gated behind ``aspects.confirm``.
+
+            A hostname drift is *not* reconciled here — renaming a Metal
+            device requires reprovisioning (UPDATE-by-recreate) and is left
+            for the caller to handle.
+
+            :param desired: Desired CloudInstance.
+            :param run_id: Run identifier.
+            :param aspects: Aspects.
+
+            :returns: A ProvisionedResource when the device tags were
+                updated in place; ``None`` when the device was already in
+                tag-shape (or only a non-tag drift exists).
+        """
+        existing = self.find_device(run_id=run_id, name=desired.name)
+        if existing is None:
+            rtnval: Optional[ProvisionedResource] = None
+            return rtnval
+
+        observed_hostname = existing.get("hostname", "")
+        if observed_hostname != desired.name:
+            rtnval = None
+            return rtnval
+
+        observed_tags = MetalTagTranslator.flat_dict(
+            strings=existing.get("tags", [])
+        )
+        drifted = False
+        for key, value in desired.tags.items():
+            if observed_tags.get(key, None) != value:
+                drifted = True
+                break
+
+        if drifted is not True:
+            rtnval = None
+            return rtnval
+
+        neutral_tags = base_resource_tags(
+            run_id=run_id, resource_name=desired.name,
+            resource_kind="instance", extra=dict(desired.tags),
+            defaults=self._default_tags,
+        )
+        if desired.vpn_join is not None:
+            neutral_tags[VPN_PROVIDER_TAG_KEY] = desired.vpn_join.provider
+        existing_vpn_device_id = observed_tags.get(VPN_DEVICE_ID_TAG_KEY,
+                                                   None)
+        if existing_vpn_device_id is not None and len(
+                existing_vpn_device_id) > 0:
+            neutral_tags[VPN_DEVICE_ID_TAG_KEY] = existing_vpn_device_id
+        tag_strings = MetalTagTranslator.to_metal(neutral_tags=neutral_tags)
+
+        device_id = str(existing.get("id", ""))
+        updated = self._client.update_device_tags(
+            device_id=device_id, tags=tag_strings,
+        )
+        rtnval = self._device_resource(device=updated, name=desired.name)
+        return rtnval
+
     def _wait_for_active(self, *, device: Dict[str, Any],
                          instance_name: str,
                          aspects: Any) -> Dict[str, Any]:
