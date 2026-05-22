@@ -42,6 +42,17 @@ class WorkloadVenueTests(unittest.TestCase):
             WorkloadVenue(name="x", kind="messos", credential_ref="kc")
         return
 
+    def test_accepts_container_kind(self) -> None:
+        venue_from_enum = WorkloadVenue(name="runpod-venue",
+                                        kind=WorkloadVenueKind.CONTAINER,
+                                        credential_ref="kc")
+        self.assertEqual(venue_from_enum.kind, "container")
+
+        venue_from_str = WorkloadVenue(name="runpod-venue", kind="container",
+                                       credential_ref="kc")
+        self.assertEqual(venue_from_str.kind, "container")
+        return
+
 
 class WorkloadClusterTests(unittest.TestCase):
 

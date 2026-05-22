@@ -18,10 +18,14 @@ class WorkloadVenueKind(str, Enum):
     """
         Locked set of workload venue kinds.
 
-        Only KUBERNETES is implementable in v1.  The other values are reserved
-        public-surface entries so future implementations are purely additive.
+        KUBERNETES and CONTAINER are implementable; CONTAINER describes a
+        container-shaped GPU venue (e.g. RunPod) whose unit of work is a
+        container/pod rather than a cluster-scheduler job.  SLURM, RAY and
+        NOMAD are reserved public-surface entries so future implementations
+        are purely additive.
     """
     KUBERNETES = "kubernetes"
+    CONTAINER = "container"
     SLURM = "slurm"
     RAY = "ray"
     NOMAD = "nomad"
