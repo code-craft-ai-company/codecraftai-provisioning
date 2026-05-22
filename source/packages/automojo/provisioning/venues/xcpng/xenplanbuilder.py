@@ -165,7 +165,9 @@ class XenPlanBuilder:
         rtnval = {
             "before": before,
             "after": after,
-            "note": ("XenServer applies vCPU/memory via live set_* calls "
-                     "when the VM supports dynamic reconfigure."),
+            "note": ("XCP-ng VM vCPU/memory drift; the interop client "
+                     "exposes no in-place hardware reconfigure, so UPDATE "
+                     "is realised by-recreate (hard-shutdown + destroy + "
+                     "re-clone) and gated behind aspects.confirm."),
         }
         return rtnval

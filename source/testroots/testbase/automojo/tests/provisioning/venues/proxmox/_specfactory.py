@@ -155,6 +155,22 @@ def basic_spec(*, with_vpn: bool = False,
     return rtnval
 
 
+def resized_spec(*, size: str = "large") -> ProxmoxSpec:
+    """
+        Build a ProxmoxSpec whose single VM carries a different size
+        token — used to provoke cores / memory drift against an
+        already-applied basic_spec.
+
+        :param size: The neutral size token for the VM.
+
+        :returns: A ProxmoxSpec instance.
+    """
+    rtnval = ProxmoxSpec(networks=[make_network()],
+                         keypairs=[make_keypair()],
+                         instances=[make_instance(size=size)])
+    return rtnval
+
+
 def volume_spec() -> ProxmoxSpec:
     """
         Build a ProxmoxSpec carrying a data volume bound to the instance.

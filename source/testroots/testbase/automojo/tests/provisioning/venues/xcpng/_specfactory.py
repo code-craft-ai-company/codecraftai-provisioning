@@ -129,6 +129,21 @@ def basic_spec(*, with_vpn: bool = False, with_volume: bool = False,
     return rtnval
 
 
+def resized_spec(*, size: str = "large") -> XcpngSpec:
+    """
+        Build an XcpngSpec whose single VM carries a different size slug
+        — used to provoke vCPU / memory drift against an already-applied
+        basic_spec.
+
+        :param size: The neutral size slug for the VM.
+
+        :returns: An XcpngSpec instance.
+    """
+    rtnval = XcpngSpec(networks=[make_network()],
+                       instances=[make_instance(size=size)])
+    return rtnval
+
+
 def bucket_lb_spec() -> XcpngSpec:
     """
         Build an XcpngSpec containing an object bucket and a load balancer

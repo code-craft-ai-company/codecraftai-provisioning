@@ -140,85 +140,196 @@ class PveApplyStages:
         for inst in spec.instances:
             venue_name = vm_name_for(spec_name=inst.name, run_id=run_id)
             existing = live_by_name.get(venue_name, None)
-            if existing is not None:
-                result.skipped.append(inst.name)
-                self._record_vpn(inst=inst, vmid=existing.vmid,
-                                 result=result)
-                continue
 
             node = self._resolver.resolve_node(instance=inst)
             if node is None:
                 continue
 
-            image_resolution = self._resolver.image_to_template_or_url(
-                image=inst.image
-            )
-            hardware = self._resolver.size_to_hardware(size_hint=inst.size)
+            if existing is not None:
+                drifted = self._vm_has_drifted(inst=inst, existing=existing)
+                if drifted is not True:
+                    result.skipped.append(inst.name)
+                    self._record_vpn(inst=inst, vmid=existing.vmid,
+                                     result=result)
+                    continue
+                # Proxmox exposes no public in-place vCPU / memory
+                # reconfigure on the interop client; a drifted VM is
+                # realised UPDATE-by-recreate — stop + destroy the stale
+                # VM, then re-clone it at the desired hardware shape.
+                self._recreate_vm(spec=spec, inst=inst, run_id=run_id,
+                                  venue_name=venue_name, node=node,
+                                  existing=existing, used_vmids=used_vmids,
+                                  result=result,
+                                  vpn_control_plane=vpn_control_plane,
+                                  aspects=aspects)
+                continue
 
-            new_vmid = self._next_vmid(used_vmids=used_vmids)
-            used_vmids.add(new_vmid)
-
-            tags = self._compose_tags(inst=inst, run_id=run_id)
-            clone_spec = ProxmoxVmCloneSpec(
-                newid=new_vmid, name=venue_name, full=True,
-                target_node=node,
-                storage=self._resolver.pick_storage(
-                    required_gb=hardware.disk_gb, node=node
-                ),
-                description="automojo {}".format(run_id),
-                extra={"cores": hardware.cores, "memory": hardware.memory_mb},
-            )
-            clone_handle = self._client.qemu.clone_vm(
-                node_name=node, source_vmid=image_resolution.template_vmid,
-                spec=clone_spec, aspects=aspects,
-            )
-            clone_handle.wait(aspects=aspects)
-
-            self._client.qemu.set_tags(node_name=node, vmid=new_vmid,
-                                       tags=tags, aspects=aspects)
-
-            self._apply_disks(spec=spec, inst=inst, node=node,
-                              vmid=new_vmid, aspects=aspects)
-
-            authkey = self._mint_authkey(inst=inst,
-                                         vpn_control_plane=vpn_control_plane)
-            snippet = self._cloud_init_renderer.render_and_upload(
-                node_name=node, instance=inst, keypairs=spec.keypairs,
-                rendered_hostname=venue_name, authkey=authkey,
+            resource = self._provision_vm(
+                spec=spec, inst=inst, run_id=run_id, venue_name=venue_name,
+                node=node, used_vmids=used_vmids,
+                vpn_control_plane=vpn_control_plane, result=result,
                 aspects=aspects,
             )
-            if snippet is not None:
-                self._client.qemu.set_cloud_init_user_data(
-                    node_name=node, vmid=new_vmid,
-                    user_data=snippet.cicustom_value, aspects=aspects,
-                )
-
-            if inst.subnet is not None and len(inst.subnet) > 0:
-                self._client.qemu.set_ip_config(
-                    node_name=node, vmid=new_vmid, slot="ipconfig0",
-                    value="ip=dhcp", aspects=aspects,
-                )
-
-            self._attach_firewall(spec=spec, inst=inst, node=node,
-                                  vmid=new_vmid, aspects=aspects)
-
-            start_handle = self._client.qemu.start_vm(
-                node_name=node, vmid=new_vmid, aspects=aspects
-            )
-            start_handle.wait(aspects=aspects)
-
-            resource = ProvisionedResource(
-                kind="instance", name=inst.name,
-                venue_id=str(new_vmid),
-                attributes={"vmid": new_vmid, "node": node,
-                            "venue_name": venue_name,
-                            "cores": hardware.cores,
-                            "memory_mb": hardware.memory_mb},
-                tags=inst.tags if inst.tags is not None else {},
-            )
             result.created.append(resource)
-            self._record_vpn(inst=inst, vmid=new_vmid, result=result)
         return
+
+    def _vm_has_drifted(self, *, inst: CloudInstance,
+                        existing: Any) -> bool:
+        """
+            Return whether a live VM's cores / memory drifts from the
+            spec's resolved hardware shape.
+
+            :param inst: The neutral :class:`CloudInstance`.
+            :param existing: The live :class:`ProxmoxVmStatus`.
+
+            :returns: ``True`` when the VM has drifted.
+        """
+        hardware = self._resolver.size_to_hardware(size_hint=inst.size)
+        drifted = False
+        if existing.cpus is not None:
+            if int(existing.cpus) != hardware.cores:
+                drifted = True
+        if existing.maxmem is not None:
+            desired_bytes = hardware.memory_mb * 1024 * 1024
+            if int(existing.maxmem) != desired_bytes:
+                drifted = True
+        rtnval = drifted
+        return rtnval
+
+    def _recreate_vm(self, *, spec: ProxmoxSpec, inst: CloudInstance,
+                     run_id: str, venue_name: str, node: str,
+                     existing: Any, used_vmids: set,
+                     result: PveApplyResult,
+                     vpn_control_plane: Optional[Any],
+                     aspects: Any) -> None:
+        """
+            Realise a drifted VM UPDATE-by-recreate — stop + destroy the
+            stale VM, then re-clone it at the desired hardware shape.
+
+            :param spec: The :class:`ProxmoxSpec`.
+            :param inst: The neutral :class:`CloudInstance`.
+            :param run_id: The provisioning run id.
+            :param venue_name: The venue-side VM name.
+            :param node: The node hosting the VM.
+            :param existing: The live :class:`ProxmoxVmStatus`.
+            :param used_vmids: The mutable in-use VMID set.
+            :param result: The :class:`PveApplyResult` accumulator.
+            :param vpn_control_plane: Optional ``IVPNControlPlane`` impl.
+            :param aspects: Behaviour control for the interop client.
+
+            :returns: ``None``.
+        """
+        stop_handle = self._client.qemu.stop_vm(node_name=node,
+                                                vmid=existing.vmid,
+                                                aspects=aspects)
+        if stop_handle is not None:
+            stop_handle.wait(aspects=aspects, raise_on_failure=False)
+        destroy_handle = self._client.qemu.destroy_vm(node_name=node,
+                                                      vmid=existing.vmid,
+                                                      aspects=aspects)
+        if destroy_handle is not None:
+            destroy_handle.wait(aspects=aspects, raise_on_failure=False)
+        used_vmids.discard(existing.vmid)
+
+        resource = self._provision_vm(
+            spec=spec, inst=inst, run_id=run_id, venue_name=venue_name,
+            node=node, used_vmids=used_vmids,
+            vpn_control_plane=vpn_control_plane, result=result,
+            aspects=aspects,
+        )
+        result.updated.append(resource)
+        return
+
+    def _provision_vm(self, *, spec: ProxmoxSpec, inst: CloudInstance,
+                      run_id: str, venue_name: str, node: str,
+                      used_vmids: set,
+                      vpn_control_plane: Optional[Any],
+                      result: PveApplyResult,
+                      aspects: Any) -> ProvisionedResource:
+        """
+            Clone, configure, tag, and power-on a single VM.
+
+            :param spec: The :class:`ProxmoxSpec`.
+            :param inst: The neutral :class:`CloudInstance`.
+            :param run_id: The provisioning run id.
+            :param venue_name: The venue-side VM name.
+            :param node: The node hosting the VM.
+            :param used_vmids: The mutable in-use VMID set.
+            :param vpn_control_plane: Optional ``IVPNControlPlane`` impl.
+            :param result: The :class:`PveApplyResult` accumulator.
+            :param aspects: Behaviour control for the interop client.
+
+            :returns: The :class:`ProvisionedResource` for the VM.
+        """
+        image_resolution = self._resolver.image_to_template_or_url(
+            image=inst.image
+        )
+        hardware = self._resolver.size_to_hardware(size_hint=inst.size)
+
+        new_vmid = self._next_vmid(used_vmids=used_vmids)
+        used_vmids.add(new_vmid)
+
+        tags = self._compose_tags(inst=inst, run_id=run_id)
+        clone_spec = ProxmoxVmCloneSpec(
+            newid=new_vmid, name=venue_name, full=True,
+            target_node=node,
+            storage=self._resolver.pick_storage(
+                required_gb=hardware.disk_gb, node=node
+            ),
+            description="automojo {}".format(run_id),
+            extra={"cores": hardware.cores, "memory": hardware.memory_mb},
+        )
+        clone_handle = self._client.qemu.clone_vm(
+            node_name=node, source_vmid=image_resolution.template_vmid,
+            spec=clone_spec, aspects=aspects,
+        )
+        clone_handle.wait(aspects=aspects)
+
+        self._client.qemu.set_tags(node_name=node, vmid=new_vmid,
+                                   tags=tags, aspects=aspects)
+
+        self._apply_disks(spec=spec, inst=inst, node=node,
+                          vmid=new_vmid, aspects=aspects)
+
+        authkey = self._mint_authkey(inst=inst,
+                                     vpn_control_plane=vpn_control_plane)
+        snippet = self._cloud_init_renderer.render_and_upload(
+            node_name=node, instance=inst, keypairs=spec.keypairs,
+            rendered_hostname=venue_name, authkey=authkey,
+            aspects=aspects,
+        )
+        if snippet is not None:
+            self._client.qemu.set_cloud_init_user_data(
+                node_name=node, vmid=new_vmid,
+                user_data=snippet.cicustom_value, aspects=aspects,
+            )
+
+        if inst.subnet is not None and len(inst.subnet) > 0:
+            self._client.qemu.set_ip_config(
+                node_name=node, vmid=new_vmid, slot="ipconfig0",
+                value="ip=dhcp", aspects=aspects,
+            )
+
+        self._attach_firewall(spec=spec, inst=inst, node=node,
+                              vmid=new_vmid, aspects=aspects)
+
+        start_handle = self._client.qemu.start_vm(
+            node_name=node, vmid=new_vmid, aspects=aspects
+        )
+        start_handle.wait(aspects=aspects)
+
+        resource = ProvisionedResource(
+            kind="instance", name=inst.name,
+            venue_id=str(new_vmid),
+            attributes={"vmid": new_vmid, "node": node,
+                        "venue_name": venue_name,
+                        "cores": hardware.cores,
+                        "memory_mb": hardware.memory_mb},
+            tags=inst.tags if inst.tags is not None else {},
+        )
+        self._record_vpn(inst=inst, vmid=new_vmid, result=result)
+        rtnval = resource
+        return rtnval
 
     def _apply_disks(self, *, spec: ProxmoxSpec, inst: CloudInstance,
                      node: str, vmid: int, aspects: Any) -> None:

@@ -173,15 +173,34 @@ class XenApplyStages:
         for inst in spec.instances:
             venue_name = vm_name_for(spec_name=inst.name, run_id=run_id)
             existing = live_by_name.get(venue_name, None)
+            recreated = False
             if existing is not None:
-                result.skipped.append(inst.name)
-                continue
+                drift = self._vm_drift(existing=existing,
+                                       shape=self._resolver.size_to_hardware(
+                                           size_hint=inst.size))
+                if drift is None:
+                    result.skipped.append(inst.name)
+                    continue
+                # XAPI exposes no in-place vCPU / memory reconfigure on
+                # the interop client; a drifted VM is realised
+                # UPDATE-by-recreate — clean-shutdown + destroy the stale
+                # VM, then re-clone it at the desired hardware shape.
+                shutdown_handle = self._client.Vms.clean_shutdown(
+                    vm_uuid=existing.uuid, aspects=aspects)
+                if shutdown_handle is not None:
+                    shutdown_handle.wait(aspects=aspects)
+                self._client.Vms.destroy(vm_uuid=existing.uuid,
+                                         aspects=aspects)
+                recreated = True
 
             resource = self._apply_one_vm(
                 inst=inst, venue_name=venue_name, run_id=run_id,
                 volumes=volumes_by_attach.get(inst.name, []),
                 vpn_control_plane=vpn_control_plane, aspects=aspects)
-            result.created.append(resource)
+            if recreated is True:
+                result.updated.append(resource)
+            else:
+                result.created.append(resource)
 
             if inst.vpn_join is not None:
                 result.vpn_records.append({
@@ -209,6 +228,28 @@ class XenApplyStages:
                 continue
             out.setdefault(attach_target, []).append(volume)
         rtnval = out
+        return rtnval
+
+    @staticmethod
+    def _vm_drift(*, existing: Any, shape: Any) -> Optional[Dict[str, Any]]:
+        """
+            Compute the vCPU / memory drift between a live VM and a
+            resolved hardware shape.
+
+            :param existing: The live XenVm record.
+            :param shape: The resolved :class:`XenHardwareShape`.
+
+            :returns: A diff dict when the VM drifts, else ``None``.
+        """
+        drifted = (existing.vcpus_max != shape.vcpus
+                   or existing.memory_static_max != shape.memory_bytes)
+        if drifted is not True:
+            rtnval: Optional[Dict[str, Any]] = None
+            return rtnval
+        rtnval = {"before": {"vcpus": existing.vcpus_max,
+                             "memory_bytes": existing.memory_static_max},
+                  "after": {"vcpus": shape.vcpus,
+                            "memory_bytes": shape.memory_bytes}}
         return rtnval
 
     def _apply_one_vm(self, *, inst: CloudInstance, venue_name: str,

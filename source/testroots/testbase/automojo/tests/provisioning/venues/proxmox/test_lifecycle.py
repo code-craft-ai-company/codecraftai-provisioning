@@ -25,10 +25,13 @@ from automojo.provisioning.model.cloud.plannedactionintent import (
 from automojo.provisioning.venues.proxmox.proxmoxcloudprovisioner import (
     ProxmoxCloudProvisioner
 )
+from automojo.provisioning.venues.proxmox.pveerrors import (
+    ConfirmationRequiredError
+)
 
 from ._mockclient import MockProxmoxClient, RecordingVpnControlPlane
 from ._specfactory import basic_spec, make_credential, make_resolver, \
-    volume_spec
+    resized_spec, volume_spec
 
 
 def _provisioner(*, venue, spec, client=None, vpn_control_plane=None,
@@ -146,6 +149,83 @@ def test_apply_idempotent_no_mutation_on_reapply(venue, aspects, tmp_path):
     second = provisioner.apply(aspects=aspects)
     assert client.clone_vm_calls == first_clone_calls
     assert "node" in second.skipped
+    return
+
+
+def test_apply_realises_vm_drift_by_recreate(venue, confirm_aspects,
+                                             tmp_path):
+    """
+        Apply over a venue carrying a size-drifted VM realises the
+        UPDATE by-recreate — the stale VM is stopped + destroyed and a
+        fresh VM is cloned at the desired hardware shape; the result
+        carries it in ``updated``.
+    """
+    client = MockProxmoxClient()
+    baseline = _provisioner(venue=venue, spec=basic_spec(), client=client,
+                            output_root=str(tmp_path))
+    baseline.apply(aspects=confirm_aspects)
+    first_clone_calls = client.clone_vm_calls
+
+    drifted = _provisioner(venue=venue, spec=resized_spec(size="large"),
+                           client=client, output_root=str(tmp_path))
+    result = drifted.apply(aspects=confirm_aspects)
+
+    assert client.clone_vm_calls == first_clone_calls + 1
+    assert client.destroy_vm_calls == 1
+    updated_names = [r.name for r in result.updated]
+    assert updated_names == ["node"]
+    assert result.updated[0].attributes["cores"] == 8
+
+    vms = client.all_vms()
+    assert len(vms) == 1
+    assert int(vms[0].cpus) == 8
+    return
+
+
+def test_replan_after_recreate_emits_skip(venue, confirm_aspects, tmp_path):
+    """
+        A second apply after an UPDATE-by-recreate emits SKIP — the
+        idempotent contract is preserved.
+    """
+    client = MockProxmoxClient()
+    baseline = _provisioner(venue=venue, spec=basic_spec(), client=client,
+                            output_root=str(tmp_path))
+    baseline.apply(aspects=confirm_aspects)
+
+    drifted = _provisioner(venue=venue, spec=resized_spec(size="large"),
+                           client=client, output_root=str(tmp_path))
+    drifted.apply(aspects=confirm_aspects)
+
+    plan = drifted.plan(aspects=confirm_aspects)
+    instance_actions = [a for a in plan.actions
+                        if a.resource_kind == "instance"]
+    assert len(instance_actions) == 1
+    assert instance_actions[0].intent == "skip"
+
+    second = drifted.apply(aspects=confirm_aspects)
+    assert "node" in second.skipped
+    assert len(second.updated) == 0
+    return
+
+
+def test_unconfirmed_drifted_apply_requires_confirm(venue, aspects,
+                                                    tmp_path):
+    """
+        An UPDATE-by-recreate without aspects.confirm raises
+        ConfirmationRequiredError — consistent with the venue's DELETE /
+        destroy gating.
+    """
+    client = MockProxmoxClient()
+    baseline = _provisioner(venue=venue, spec=basic_spec(), client=client,
+                            output_root=str(tmp_path))
+    baseline.apply(aspects=aspects)
+
+    drifted = _provisioner(venue=venue, spec=resized_spec(size="large"),
+                           client=client, output_root=str(tmp_path))
+    with pytest.raises(ConfirmationRequiredError):
+        drifted.apply(aspects=aspects)
+
+    assert client.destroy_vm_calls == 0
     return
 
 

@@ -19,6 +19,9 @@ from automojo.provisioning.model.exceptions import SchemaSemanticError
 from automojo.provisioning.venues.hyperv.hypervcloudprovisioner import (
     HypervCloudProvisioner
 )
+from automojo.provisioning.venues.hyperv.hverrors import (
+    ConfirmationRequiredError
+)
 
 from automojo.tests.provisioning.venues.hyperv import _specfactory
 
@@ -113,6 +116,80 @@ def test_apply_creates_switch_vm_and_starts(venue, client, host_config,
     assert client.calls["start_vm"] == 1
     assert client.calls["set_vm_processor"] == 1
     assert client.calls["set_vm_memory"] == 1
+    return
+
+
+def test_apply_realises_hardware_drift_in_place(venue, client, host_config,
+                                                confirm_aspects):
+    """
+        apply over a host carrying a processor/memory-drifted VM realises
+        the resize in place via Set-VMProcessor / Set-VMMemory; the
+        result carries the VM in ``updated``.
+    """
+    spec = _specfactory.make_basic_spec()
+    client.seed_vm(name="vm-app", processor_count=99,
+                   memory_startup_bytes=2147483648)
+    provisioner = _provisioner(venue=venue, client=client,
+                               host_config=host_config, spec=spec)
+
+    result = provisioner.apply(aspects=confirm_aspects)
+
+    assert client.calls["set_vm_processor"] == 1
+    assert client.calls["set_vm_memory"] == 1
+    assert client.calls["new_vm"] == 0
+    updated_names = [r.name for r in result.updated]
+    assert updated_names == ["vm-app"]
+    assert result.updated[0].attributes["processor_count"] == 4
+
+    live = client.vms_state["vm-app"]
+    assert live.processor_count == 4
+    assert live.memory_startup_bytes == 8589934592
+    return
+
+
+def test_replan_after_resize_emits_skip(venue, client, host_config,
+                                        confirm_aspects):
+    """
+        A second apply after an in-place resize emits SKIP for the VM —
+        idempotence is preserved.
+    """
+    spec = _specfactory.make_basic_spec()
+    client.seed_vm(name="vm-app", processor_count=99,
+                   memory_startup_bytes=2147483648)
+    provisioner = _provisioner(venue=venue, client=client,
+                               host_config=host_config, spec=spec)
+
+    provisioner.apply(aspects=confirm_aspects)
+
+    plan = provisioner.plan(aspects=confirm_aspects)
+    instance_actions = [a for a in plan.actions
+                        if a.resource_kind == "instance"]
+    assert len(instance_actions) == 1
+    assert instance_actions[0].intent == "skip"
+
+    second = provisioner.apply(aspects=confirm_aspects)
+    assert "vm-app" in second.skipped
+    assert len(second.updated) == 0
+    return
+
+
+def test_unconfirmed_resize_requires_confirm(venue, client, host_config,
+                                             aspects):
+    """
+        An in-place VM resize without aspects.confirm raises
+        ConfirmationRequiredError — Set-VMProcessor / Set-VMMemory need
+        the VM stopped, so the resize is disruptive.
+    """
+    spec = _specfactory.make_basic_spec()
+    client.seed_vm(name="vm-app", processor_count=99,
+                   memory_startup_bytes=2147483648)
+    provisioner = _provisioner(venue=venue, client=client,
+                               host_config=host_config, spec=spec)
+
+    with pytest.raises(ConfirmationRequiredError):
+        provisioner.apply(aspects=aspects)
+
+    assert client.calls["set_vm_processor"] == 0
     return
 
 

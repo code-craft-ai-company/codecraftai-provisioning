@@ -272,6 +272,7 @@ class MockLinodeClient:
         self._buckets: List[Any] = []
         self._domains: List[Any] = []
         self._ssh_keys: List[Any] = []
+        self.resize_calls: int = 0
 
         self.profile: _ProfileNamespace = _ProfileNamespace(
             ssh_key_store=self._ssh_keys
@@ -376,6 +377,29 @@ class MockLinodeClient:
         )
         self._instances.append(resource)
         rtnval = resource
+        return rtnval
+
+    def instance_resize(self, *, instance_id: int,
+                        new_type: str) -> Optional[Any]:
+        """
+            Resize a Linode instance in place to a new type slug.
+
+            Linode realises a resize via an instance migration that
+            reboots the guest; the live type slug is replaced.
+
+            :param instance_id: The numeric instance id.
+            :param new_type: The target Linode type slug.
+
+            :returns: The resized MockResource, or ``None`` when the
+                instance id is unknown.
+        """
+        self.resize_calls = self.resize_calls + 1
+        for resource in self._instances:
+            if resource.id == instance_id:
+                resource.type = new_type
+                rtnval: Optional[Any] = resource
+                return rtnval
+        rtnval = None
         return rtnval
 
     def volumes(self) -> List[Any]:

@@ -538,6 +538,28 @@ class _MockVmsGroup:
         rtnval = _MockTaskHandle(task_uuid=uuid, entity_uuid=uuid)
         return rtnval
 
+    def update(self, *, vm_uuid: str, spec: Any,
+               aspects: Any) -> _MockTaskHandle:
+        """
+            Replace a VM's intent spec in place (vCPU / memory resize).
+
+            :param vm_uuid: The VM uuid.
+            :param spec: The :class:`VmSpec` replacement.
+            :param aspects: Behaviour control (unused).
+
+            :returns: A :class:`_MockTaskHandle`.
+        """
+        _ = aspects
+        for record in self._owner.vms_state.values():
+            if record.uuid == vm_uuid:
+                self._owner.update_vm_calls = (
+                    self._owner.update_vm_calls + 1
+                )
+                record.num_vcpus = spec.num_vcpus
+                record.memory_mib = spec.memory_mib
+        rtnval = _MockTaskHandle(task_uuid=vm_uuid, entity_uuid=vm_uuid)
+        return rtnval
+
     def power_on(self, *, vm_uuid: str, aspects: Any) -> _MockTaskHandle:
         """
             Power a VM on (idempotent).
@@ -684,6 +706,7 @@ class MockNutanixClient:
         self.create_policy_calls = 0
         self.create_volume_group_calls = 0
         self.create_vm_calls = 0
+        self.update_vm_calls = 0
 
         self.clusters = _MockClustersGroup(owner=self)
         self.images = _MockImagesGroup(owner=self)

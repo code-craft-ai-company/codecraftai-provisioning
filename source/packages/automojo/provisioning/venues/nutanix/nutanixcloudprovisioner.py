@@ -326,6 +326,20 @@ class NutanixCloudProvisioner(CloudProvisioner):
                 err_msg = os.linesep.join(err_msg_lines)
                 raise ConfirmationRequiredError(err_msg)
 
+            update_instance = (action.intent == "update"
+                               and action.resource_kind == "instance")
+            if update_instance is True and confirm is not True:
+                err_msg_lines = [
+                    "Nutanix apply requires aspects.confirm=True for an "
+                    "in-place VM resize (UPDATE) — AHV applies the new "
+                    "vCPU / memory intent spec at the next power cycle."
+                ]
+                err_msg_lines.append("RESOURCE: {}".format(
+                    action.resource_name
+                ))
+                err_msg = os.linesep.join(err_msg_lines)
+                raise ConfirmationRequiredError(err_msg)
+
         result = NtxApplyResult()
 
         self._apply_stages.apply_network_and_flow_policies(
@@ -341,7 +355,8 @@ class NutanixCloudProvisioner(CloudProvisioner):
 
         self._last_vpn_records = result.vpn_records
 
-        rtnval = ProvisioningResult(created=result.created, updated=[],
+        rtnval = ProvisioningResult(created=result.created,
+                                    updated=result.updated,
                                     skipped=result.skipped, errors=[])
         return rtnval
 

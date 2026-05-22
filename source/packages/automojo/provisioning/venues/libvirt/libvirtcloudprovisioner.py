@@ -349,7 +349,8 @@ class LibvirtCloudProvisioner(CloudProvisioner):
 
         self._last_vpn_records = result.vpn_records
 
-        rtnval = ProvisioningResult(created=result.created, updated=[],
+        rtnval = ProvisioningResult(created=result.created,
+                                    updated=result.updated,
                                     skipped=result.skipped, errors=[])
         return rtnval
 

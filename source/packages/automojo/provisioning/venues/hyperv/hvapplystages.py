@@ -12,7 +12,7 @@ __copyright__ = "Copyright 2026, Automation Mojo LLC"
 __credits__ = []
 
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from automojo.interop.hyperv.specs.hypervadapterspec import HypervAdapterSpec
 from automojo.interop.hyperv.specs.hypervswitchspec import HypervSwitchSpec
@@ -108,6 +108,7 @@ class HvApplyStages:
     def apply_vms(self, *, spec: Any, run_id: str,
                   switch_state: Dict[str, Any],
                   created: List[ProvisionedResource],
+                  updated: List[ProvisionedResource],
                   skipped: List[str],
                   vpn_records: List[Dict[str, Any]],
                   vpn_authkeys: Dict[str, str], aspects: Any) -> None:
@@ -118,6 +119,7 @@ class HvApplyStages:
             :param run_id: The provisioning run identifier.
             :param switch_state: Map of network name -> switch record.
             :param created: The accumulating created-resource list.
+            :param updated: The accumulating updated-resource list.
             :param skipped: The accumulating skipped-name list.
             :param vpn_records: The accumulating VPN device-record list.
             :param vpn_authkeys: Map of instance name -> minted auth key.
@@ -134,8 +136,14 @@ class HvApplyStages:
             keypair_index[keypair.name] = keypair
 
         for inst in spec.instances:
-            if inst.name in existing_vms:
-                skipped.append(inst.name)
+            existing = existing_vms.get(inst.name, None)
+            if existing is not None:
+                resized = self._reconcile_vm(inst=inst, existing=existing,
+                                             aspects=aspects)
+                if resized is not None:
+                    updated.append(resized)
+                else:
+                    skipped.append(inst.name)
                 self._record_vpn(instance=inst, vpn_records=vpn_records)
                 continue
 
@@ -237,6 +245,58 @@ class HvApplyStages:
 
         self._client.vms.start_vm(name=inst.name, aspects=aspects)
         return
+
+    def _reconcile_vm(self, *, inst: Any,
+                      existing: Any,
+                      aspects: Any) -> Optional[ProvisionedResource]:
+        """
+            Reconcile a live VM against the spec, realising processor /
+            memory drift in place via ``Set-VMProcessor`` /
+            ``Set-VMMemory``.
+
+            Hyper-V applies a processor count or startup-memory change
+            only while the VM is stopped, so the VM is stopped, resized,
+            and restarted.  The disruptive resize is gated behind
+            ``aspects.confirm`` by the provisioner before this stage runs.
+
+            :param inst: The neutral CloudInstance.
+            :param existing: The live :class:`HypervVm` record.
+            :param aspects: The AspectsRunner.
+
+            :returns: A :class:`ProvisionedResource` when the VM was
+                resized, or ``None`` when it was already in shape.
+        """
+        hardware = self._resolver.size_to_hardware(size_hint=inst.size)
+        cpu_drift = (existing.processor_count
+                     != hardware.processor_count)
+        mem_drift = (existing.memory_startup_bytes
+                     != hardware.memory_startup_bytes)
+        if cpu_drift is not True and mem_drift is not True:
+            rtnval: Optional[ProvisionedResource] = None
+            return rtnval
+
+        self._client.vms.stop_vm(name=inst.name, force=True,
+                                 aspects=aspects)
+
+        if cpu_drift is True:
+            self._client.hardware.set_vm_processor(
+                name=inst.name, count=hardware.processor_count,
+                aspects=aspects)
+        if mem_drift is True:
+            self._client.hardware.set_vm_memory(
+                name=inst.name,
+                startup_bytes=hardware.memory_startup_bytes,
+                aspects=aspects)
+
+        self._client.vms.start_vm(name=inst.name, aspects=aspects)
+
+        rtnval = ProvisionedResource(
+            kind="instance", name=inst.name, venue_id=inst.name,
+            attributes={"processor_count": hardware.processor_count,
+                        "memory_startup_bytes":
+                            hardware.memory_startup_bytes},
+            tags={})
+        return rtnval
 
     def _deliver_cloud_init(self, *, inst: Any, is_windows: bool,
                             keypair_index: Dict[str, Any],
