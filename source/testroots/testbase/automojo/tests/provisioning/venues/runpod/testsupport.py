@@ -349,7 +349,7 @@ def make_venue() -> WorkloadVenue:
 
         :returns: A populated :class:`WorkloadVenue`.
     """
-    rtnval = WorkloadVenue(name="runpod-venue", kind="kubernetes",
+    rtnval = WorkloadVenue(name="runpod-venue", kind="container",
                            credential_ref="runpod-key")
     return rtnval
 
