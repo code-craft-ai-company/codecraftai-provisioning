@@ -3,8 +3,8 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/vsphere/` tree per `design.md`.
-- [x] 2. Add `automojo-interop-vsphere` dep; gate optional
-  `automojo-interop-nsx` behind an extras feature flag.
+- [x] 2. Add `codecraftai-interop-vsphere` dep; gate optional
+  `codecraftai-interop-nsx` behind an extras feature flag.
 - [x] 3. Declare `VsValidationError`, `VsConflictError`,
   `VsCapacityError`, `ConfirmationRequiredError` in `vserrors.py`.
 

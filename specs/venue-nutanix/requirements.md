@@ -2,13 +2,13 @@
 
 ## Introduction
 
-The `venue-nutanix` feature provides `automojo-provisioning` with the ability to
+The `venue-nutanix` feature provides `codecraftai-provisioning` with the ability to
 stand up VMs on Nutanix AHV clusters via Prism Central.  It implements the
 `CloudProvisioner` lifecycle defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) and maps the
 neutral resource model in [cloud-resource-model](../cloud-resource-model/design.md)
 onto Nutanix primitives via the Prism Central v3/v4 REST APIs surfaced by
-`automojo-interop-nutanix` (built on `automojo-restclient-base`).
+`codecraftai-interop-nutanix` (built on `codecraftai-restclient-base`).
 
 The venue covers VPC (Flow Networking), Subnet, Security Policy (Flow), VM,
 Volume, and Image.  Nutanix does not natively offer public object storage in
@@ -41,7 +41,7 @@ Every method on `NutanixCloudProvisioner` accepts `aspects: Aspects`.
 #### Acceptance Criteria
 
 1. WHEN `plan(spec, aspects)` is called THE SYSTEM SHALL list resources by the
-   `automojo-run-id` category on VMs and Subnets and emit `PlanAction`s.
+   `codecraftai-run-id` category on VMs and Subnets and emit `PlanAction`s.
 2. WHEN VM hardware drifts THE SYSTEM SHALL emit `UPDATE` honouring AHV's
    hot-plug rules where possible.
 

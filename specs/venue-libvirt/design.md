@@ -5,19 +5,19 @@
 `LibvirtCloudProvisioner` realises the neutral resource model on a libvirt host
 (or several, addressed by per-URI connections) using the `libvirt-python`
 native bindings — there is no REST involved.  The bindings are wrapped by
-`automojo-interop-libvirt`, which owns connection lifecycle, XML
+`codecraftai-interop-libvirt`, which owns connection lifecycle, XML
 construction/parsing, and the cloud-init seed-ISO builder.
 
 libvirt has no notion of tags; the provisioner uses an XML metadata block under
-a custom namespace (`https://automationmojo.com/provisioning/v1`) to record
-the `automojo-run-id` and neutral tags.  Querying by tag is implemented as
+a custom namespace (`https://code-craft.ai/provisioning/v1`) to record
+the `codecraftai-run-id` and neutral tags.  Querying by tag is implemented as
 "list all Domains, parse metadata, filter".
 
 See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- `automojo-interop-libvirt/Agents.md`
+- `codecraftai-interop-libvirt/Agents.md`
 
 ---
 
@@ -42,7 +42,7 @@ See Also:
                               │
                               ▼
 ┌──────────────────────────────────────────────────────────────┐
-│        LibvirtClient (automojo-interop-libvirt)              │
+│        LibvirtClient (codecraftai-interop-libvirt)              │
 │   connections / networks / storage_pools / volumes / domains │
 │   libvirt-python native bindings                             │
 └──────────────────────────────────────────────────────────────┘
@@ -78,14 +78,14 @@ Native binding call paths used by `apply`:
 | `CloudDnsRecord` | external | warn today. |
 | `CloudSharedFilesystem(*, existing_id)` | virtio-9p / NFS attach | attach-only. |
 | `VPNJoinSpec` | seed ISO `user-data` `runcmd`. |
-| Tags | XML `<metadata><automojo:tags>` | round-trip identity. |
+| Tags | XML `<metadata><ccai:tags>` | round-trip identity. |
 
 ---
 
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/libvirt/
+source/packages/ccai/provisioning/venues/libvirt/
 ├── __init__.py
 ├── libvirtcloudprovisioner.py
 ├── lvdomainxmlbuilder.py

@@ -7,34 +7,34 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from typing import List, Optional
 
-from automojo.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
-from automojo.provisioning.model.cloud.cloudimage import CloudImage
-from automojo.provisioning.model.cloud.cloudingressrule import (
+from ccai.provisioning.model.cloud.cloudimage import CloudImage
+from ccai.provisioning.model.cloud.cloudingressrule import (
     CloudIngressRule
 )
-from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.cloudkeypair import CloudKeyPair
-from automojo.provisioning.model.cloud.cloudnetwork import CloudNetwork
-from automojo.provisioning.model.cloud.cloudsecuritygroup import (
+from ccai.provisioning.model.cloud.cloudkeypair import CloudKeyPair
+from ccai.provisioning.model.cloud.cloudnetwork import CloudNetwork
+from ccai.provisioning.model.cloud.cloudsecuritygroup import (
     CloudSecurityGroup
 )
-from automojo.provisioning.model.cloud.cloudstoragevolume import (
+from ccai.provisioning.model.cloud.cloudstoragevolume import (
     CloudStorageVolume
 )
-from automojo.provisioning.model.cloud.cloudsubnet import CloudSubnet
-from automojo.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
-from automojo.provisioning.venues.nebius.nebiusspec import NebiusSpec
+from ccai.provisioning.model.cloud.cloudsubnet import CloudSubnet
+from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.provisioning.venues.nebius.nebiusspec import NebiusSpec
 
 
 _PUBLIC_KEY = (
@@ -128,7 +128,7 @@ def gpu_cluster_spec() -> NebiusSpec:
             placement_group="train-cluster",
         ))
 
-    from automojo.provisioning.model.cloud.cloudsharedfilesystem import (
+    from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
         CloudSharedFilesystem
     )
     sfs = CloudSharedFilesystem(name="shared-a", kind="VENUE_NATIVE",

@@ -9,7 +9,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -22,13 +22,13 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from automojo.provisioning.venues.coreweave.cwlabeltranslator import (
+from ccai.provisioning.venues.coreweave.cwlabeltranslator import (
     CwLabelTranslator
 )
-from automojo.provisioning.venues.coreweave.cwsunkrenderer import CwSunkRenderer
-from automojo.provisioning.venues.coreweave.cwvpnsidecar import CwVpnSidecar
+from ccai.provisioning.venues.coreweave.cwsunkrenderer import CwSunkRenderer
+from ccai.provisioning.venues.coreweave.cwvpnsidecar import CwVpnSidecar
 
-from automojo.tests.provisioning.venues.coreweave.testsupport import (
+from ccai.tests.provisioning.venues.coreweave.testsupport import (
     MockKubernetesClient, make_gpu_job, make_provisioner, make_spec
 )
 

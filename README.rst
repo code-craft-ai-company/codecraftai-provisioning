@@ -1,8 +1,8 @@
 ============================
-Automation Mojo Provisioning
+Code Craft AI Provisioning
 ============================
 
-The ``automojo-provisioning`` package provides the cloud-provisioning layer for the automojo suite. It defines a vendor-neutral model for declaring cloud resources and a set of venue-specific provisioner implementations that can realise those resources on the three major public clouds.
+The ``codecraftai-provisioning`` package provides the cloud-provisioning layer for the ccai suite. It defines a vendor-neutral model for declaring cloud resources and a set of venue-specific provisioner implementations that can realise those resources on the three major public clouds.
 
 Highlights
 ==========
@@ -10,8 +10,8 @@ Highlights
 - Vendor-neutral ``CloudResourceProfile``, ``CloudDevice``, ``CloudGroup``, ``CloudVenue``, and abstract ``CloudProvisioner`` under ``provisioning/model/cloud/``.
 - Concrete provisioners under ``provisioning/venues/``: ``AwsCloudProvisioner``, ``AzureCloudProvisioner``, and ``GoogleCloudProvisioner``.
 - Top-level ``ProvisioningEngine`` that drives a provisioning run end-to-end.
-- Integrates with ``automojo-landscaping`` so cloud-provisioned hosts can be folded into a landscape once they exist.
-- Cloud authentication via ``automojo-credentials``.
+- Integrates with ``codecraftai-landscaping`` so cloud-provisioned hosts can be folded into a landscape once they exist.
+- Cloud authentication via ``codecraftai-credentials``.
 
 Repository Structure
 ====================
@@ -51,7 +51,7 @@ Run TestBase tests (when test roots are populated):
 
 .. code-block:: bash
 
-   testbase testing run --root source/testroots/testbase --includes=automojo --output=./.output
+   testbase testing run --root source/testroots/testbase --includes=ccai --output=./.output
 
 Standards and Conventions
 =========================

@@ -9,7 +9,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -17,32 +17,32 @@ import unittest
 
 from typing import Any, Dict, List, Optional
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
-from automojo.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-from automojo.provisioning.model.workload.workloadvenue import WorkloadVenue
-from automojo.provisioning.model.workload.workloadvenuekind import (
+from ccai.provisioning.model.workload.workloadvenue import WorkloadVenue
+from ccai.provisioning.model.workload.workloadvenuekind import (
     WorkloadVenueKind
 )
-from automojo.provisioning.model.workload.nodepoolspec import NodePoolSpec
-from automojo.provisioning.model.workload.workloadcluster import WorkloadCluster
-from automojo.provisioning.model.workload.workloadjob import WorkloadJob
-from automojo.provisioning.model.workload.workloadservice import WorkloadService
-from automojo.provisioning.model.workload.workloadspec import WorkloadSpec
-from automojo.provisioning.model.workload.kubernetesworkloadprovisioner import (
+from ccai.provisioning.model.workload.nodepoolspec import NodePoolSpec
+from ccai.provisioning.model.workload.workloadcluster import WorkloadCluster
+from ccai.provisioning.model.workload.workloadjob import WorkloadJob
+from ccai.provisioning.model.workload.workloadservice import WorkloadService
+from ccai.provisioning.model.workload.workloadspec import WorkloadSpec
+from ccai.provisioning.model.workload.kubernetesworkloadprovisioner import (
     KubernetesWorkloadProvisioner
 )
-from automojo.provisioning.model.workload.slurmworkloadprovisioner import (
+from ccai.provisioning.model.workload.slurmworkloadprovisioner import (
     SlurmWorkloadProvisioner
 )
-from automojo.provisioning.model.workload.rayworkloadprovisioner import (
+from ccai.provisioning.model.workload.rayworkloadprovisioner import (
     RayWorkloadProvisioner
 )
-from automojo.provisioning.model.workload.nomadworkloadprovisioner import (
+from ccai.provisioning.model.workload.nomadworkloadprovisioner import (
     NomadWorkloadProvisioner
 )
 

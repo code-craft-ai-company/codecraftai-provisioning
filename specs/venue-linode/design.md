@@ -3,7 +3,7 @@
 ## Overview
 
 `LinodeCloudProvisioner` realises the neutral resource model on Linode via the
-`linode_api4` SDK surfaced by `automojo-interop-linode`.  Linode is a mid-tier
+`linode_api4` SDK surfaced by `codecraftai-interop-linode`.  Linode is a mid-tier
 cloud with VPC + Cloud Firewall + Block Storage + Object Storage + DNS, plus a
 small GPU SKU set.  There is no HPC interconnect and no native shared-FS service
 of the WEKA/Lustre class.
@@ -12,7 +12,7 @@ See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- `automojo-interop-linode/Agents.md`
+- `codecraftai-interop-linode/Agents.md`
 
 ---
 
@@ -37,7 +37,7 @@ See Also:
                           │
                           ▼
 ┌──────────────────────────────────────────────────────────────┐
-│        LinodeClient (automojo-interop-linode)                │
+│        LinodeClient (codecraftai-interop-linode)                │
 │   vpcs / firewalls / instances / volumes / object-storage    │
 │   linode_api4 SDK against api.linode.com                     │
 └──────────────────────────────────────────────────────────────┘
@@ -79,7 +79,7 @@ REST call paths used by `apply`:
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/linode/
+source/packages/ccai/provisioning/venues/linode/
 ├── __init__.py
 ├── linodecloudprovisioner.py
 ├── linoderesolver.py

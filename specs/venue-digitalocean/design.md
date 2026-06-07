@@ -8,14 +8,14 @@ no native HPC interconnect, no first-class shared FS of the WEKA/Lustre class, a
 a thin GPU SKU catalog.  The provisioner is therefore honest in `validate` about
 which neutral asks have no DO realisation and errors cleanly for them.
 
-All API calls go through `automojo-interop-digitalocean`'s `DigitalOceanClient`,
+All API calls go through `codecraftai-interop-digitalocean`'s `DigitalOceanClient`,
 which wraps the `pydo` SDK against `api.digitalocean.com/v2/`.
 
 See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- `automojo-interop-digitalocean/Agents.md`
+- `codecraftai-interop-digitalocean/Agents.md`
 
 ---
 
@@ -40,7 +40,7 @@ See Also:
                           │
                           ▼
 ┌──────────────────────────────────────────────────────────────┐
-│        DigitalOceanClient (automojo-interop-digitalocean)    │
+│        DigitalOceanClient (codecraftai-interop-digitalocean)    │
 │   vpcs / firewalls / droplets / volumes / spaces / dns       │
 │   pydo SDK against api.digitalocean.com/v2                   │
 └──────────────────────────────────────────────────────────────┘
@@ -87,7 +87,7 @@ REST call paths used by `apply`:
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/digitalocean/
+source/packages/ccai/provisioning/venues/digitalocean/
 ├── __init__.py
 ├── digitaloceancloudprovisioner.py
 ├── doresolver.py

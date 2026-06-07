@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -15,24 +15,24 @@ import base64
 
 import pytest
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.exceptions import SchemaSemanticError
 
 from moto import mock_aws
 
-from automojo.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-from automojo.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
-from automojo.provisioning.venues.aws.awscloudprovisioner import (
+from ccai.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
+from ccai.provisioning.venues.aws.awscloudprovisioner import (
     AwsCloudProvisioner
 )
-from automojo.provisioning.venues.aws.awsspec import AwsSpec
+from ccai.provisioning.venues.aws.awsspec import AwsSpec
 
 from ._specfactory import basic_spec
 
@@ -252,7 +252,7 @@ def test_efa_attaches_placement_group(venue, credential, region_config,
         r.kind == "instance" for r in result.created
     )
     assert instance_created is True
-    assert pg_seen == "" or "automojo-pg-" in pg_seen
+    assert pg_seen == "" or "codecraftai-pg-" in pg_seen
     return
 
 
@@ -337,7 +337,7 @@ def test_plan_emits_delete_for_owned_orphan(venue, credential,
         venue=venue, credential=credential, region_config=region_config,
         spec=full_spec,
     )
-    # Realise the full spec so the instance carries automojo:owner tags.
+    # Realise the full spec so the instance carries ccai:owner tags.
     provisioner.apply(aspects=aspects)
 
     # Re-plan against a spec from which the instance has been dropped; the

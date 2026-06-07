@@ -7,27 +7,27 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.credentials.basecredential import BaseCredential
-from automojo.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.credentials.basecredential import BaseCredential
+from ccai.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
-from automojo.provisioning.venues.aws.awscloudprovisioner import (
+from ccai.provisioning.venues.aws.awscloudprovisioner import (
     AwsCloudProvisioner
 )
-from automojo.provisioning.venues.aws.awserrors import AwsValidationError
-from automojo.provisioning.venues.aws.awsspec import AwsSpec
+from ccai.provisioning.venues.aws.awserrors import AwsValidationError
+from ccai.provisioning.venues.aws.awsspec import AwsSpec
 
 from ._specfactory import basic_spec
 

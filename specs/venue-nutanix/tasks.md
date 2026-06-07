@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/nutanix/` tree per `design.md`.
-- [x] 2. Add `automojo-interop-nutanix` dep.
+- [x] 2. Add `codecraftai-interop-nutanix` dep.
 - [x] 3. Declare `NtxValidationError`, `NtxConflictError`,
   `ConfirmationRequiredError` in `ntxerrors.py`.
 

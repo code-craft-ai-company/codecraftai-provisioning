@@ -9,14 +9,14 @@ minutes, not seconds; not every Metal plan is available in every metro; and
 in-place "resize" is not a concept.  The provisioner is honest about this in
 the plan output and the destroy gating.
 
-API calls go through `automojo-interop-equinix-metal`'s `MetalClient`, which
+API calls go through `codecraftai-interop-equinix-metal`'s `MetalClient`, which
 wraps the `packet-python` SDK against `api.equinix.com/metal/v1/`.
 
 See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- `automojo-interop-equinix-metal/Agents.md`
+- `codecraftai-interop-equinix-metal/Agents.md`
 
 ---
 
@@ -41,7 +41,7 @@ See Also:
                           │
                           ▼
 ┌──────────────────────────────────────────────────────────────┐
-│        MetalClient (automojo-interop-equinix-metal)          │
+│        MetalClient (codecraftai-interop-equinix-metal)          │
 │   projects / vlans / ip-reservations / ssh-keys / devices    │
 │   packet-python SDK against api.equinix.com/metal/v1         │
 └──────────────────────────────────────────────────────────────┘
@@ -83,7 +83,7 @@ REST call paths used by `apply`:
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/equinix/
+source/packages/ccai/provisioning/venues/equinix/
 ├── __init__.py
 ├── equinixmetalcloudprovisioner.py
 ├── metalresolver.py

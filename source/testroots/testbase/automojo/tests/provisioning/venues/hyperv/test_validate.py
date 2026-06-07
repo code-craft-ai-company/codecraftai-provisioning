@@ -7,19 +7,19 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.venues.hyperv.hverrors import HvValidationError
-from automojo.provisioning.venues.hyperv.hypervcloudprovisioner import (
+from ccai.provisioning.venues.hyperv.hverrors import HvValidationError
+from ccai.provisioning.venues.hyperv.hypervcloudprovisioner import (
     HypervCloudProvisioner
 )
-from automojo.provisioning.venues.hyperv.hypervspec import HypervSpec
+from ccai.provisioning.venues.hyperv.hypervspec import HypervSpec
 
-from automojo.tests.provisioning.venues.hyperv import _specfactory
+from ccai.tests.provisioning.venues.hyperv import _specfactory
 
 
 def _provisioner(*, venue, client, host_config, spec):

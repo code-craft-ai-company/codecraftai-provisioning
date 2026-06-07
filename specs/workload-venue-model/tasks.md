@@ -47,4 +47,4 @@
 ## Documentation
 
 - [ ] 30. Document the §7.6 ECS/ACI/Cloud Run exclusion in module docstring (deferred: documentation not yet authored)
-- [ ] 31. Cross-link to `automojo-interop-kubernetes` (deferred: cross-repo documentation link not yet authored)
+- [ ] 31. Cross-link to `codecraftai-interop-kubernetes` (deferred: cross-repo documentation link not yet authored)

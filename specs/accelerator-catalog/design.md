@@ -36,7 +36,7 @@ make the data file safe to edit without breaking anything downstream.
 
    default_accelerator_catalog() ──► process-wide singleton
    from_path(path)               ──► test override
-   AUTOMOJO_ACCELERATOR_CATALOG  ──► env-var override
+   CCAI_ACCELERATOR_CATALOG  ──► env-var override
 ```
 
 ---
@@ -111,7 +111,7 @@ entries:
   #     TPU_V5P, TPU_V5E entries follow the same shape
 ```
 
-The loader validates against `automojo-configuration`'s `SchemaObject` machinery.
+The loader validates against `codecraftai-configuration`'s `SchemaObject` machinery.
 Each entry's `venue_skus` mapping is keyed by the **provisioning venue name** (the
 same string a `CloudVenue` uses), and the values are arbitrary venue-side strings.
 
@@ -120,7 +120,7 @@ same string a `CloudVenue` uses), and the values are arbitrary venue-side string
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/model/cloud/
+source/packages/ccai/provisioning/model/cloud/
 ├── accelerators.yaml                       # packaged data file
 ├── cloudacceleratorcatalog.py              # loader + lookup class
 └── cloudacceleratorcatalogentry.py         # SchemaObject entry

@@ -8,23 +8,23 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from typing import Any, Dict, List, Optional
 
-from automojo.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
-from automojo.provisioning.model.workload.workloadjob import WorkloadJob
-from automojo.provisioning.model.workload.workloadservice import WorkloadService
-from automojo.provisioning.model.workload.workloadvenue import WorkloadVenue
+from ccai.provisioning.model.workload.workloadjob import WorkloadJob
+from ccai.provisioning.model.workload.workloadservice import WorkloadService
+from ccai.provisioning.model.workload.workloadvenue import WorkloadVenue
 
-from automojo.provisioning.venues.coreweave.coreweaveworkloadspec import (
+from ccai.provisioning.venues.coreweave.coreweaveworkloadspec import (
     CoreweaveWorkloadSpec
 )
-from automojo.provisioning.venues.coreweave.coreweaveworkloadprovisioner import (
+from ccai.provisioning.venues.coreweave.coreweaveworkloadprovisioner import (
     CoreweaveWorkloadProvisioner
 )
 

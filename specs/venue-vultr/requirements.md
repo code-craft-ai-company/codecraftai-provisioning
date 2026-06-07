@@ -2,14 +2,14 @@
 
 ## Introduction
 
-The `venue-vultr` feature provides `automojo-provisioning` with the ability to
+The `venue-vultr` feature provides `codecraftai-provisioning` with the ability to
 stand up infrastructure on Vultr.  It implements the `CloudProvisioner` lifecycle
 defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) and maps the
 neutral resource model in [cloud-resource-model](../cloud-resource-model/design.md)
-onto Vultr primitives via the Vultr REST API surfaced by `automojo-interop-vultr`
+onto Vultr primitives via the Vultr REST API surfaced by `codecraftai-interop-vultr`
 (no first-party Python SDK; the interop layer builds on
-`automojo-restclient-base`).
+`codecraftai-restclient-base`).
 
 The venue covers VPC (`vpc2`), Instance, Cloud Firewall, Block Storage, Object
 Storage, and DNS records.  GPU SKUs are limited (A16/A40/L40S single-node);
@@ -41,7 +41,7 @@ Every method on `VultrCloudProvisioner` accepts `aspects: Aspects`.
 #### Acceptance Criteria
 
 1. WHEN `plan(spec, aspects)` is called THE SYSTEM SHALL list resources by
-   the `automojo-run-id` tag and emit `PlanAction`s.
+   the `codecraftai-run-id` tag and emit `PlanAction`s.
 2. WHEN plan or backups setting drifts THE SYSTEM SHALL emit `UPDATE`; plan
    changes are UPDATE-by-recreate.
 

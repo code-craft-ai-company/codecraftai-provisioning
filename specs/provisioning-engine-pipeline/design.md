@@ -145,7 +145,7 @@ restricted kind set, preserving topological order within the subset.
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/
+source/packages/ccai/provisioning/
 ├── provisioningengine.py             # replaces today's stub
 ├── pipelinespec.py
 ├── pipelinestage.py
@@ -173,7 +173,7 @@ Every pipeline run carries a `runid` (UUID4).  The engine creates
 - `plan.yaml` — `PipelinePlan`
 - `result.yaml` — `Dict[venue_name, ProvisioningResult]`
 - `inventory.yaml` — full inventory per venue
-- `landscape.yaml` — emitted block consumable by `automojo-landscaping`
+- `landscape.yaml` — emitted block consumable by `codecraftai-landscaping`
 - `stages.log` — per-stage entry/exit/duration
 
 Details on resumability and state persistence live in the

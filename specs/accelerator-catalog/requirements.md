@@ -33,7 +33,7 @@ file.
 #### Acceptance Criteria
 
 1. THE SYSTEM SHALL include
-   `source/packages/automojo/provisioning/model/cloud/accelerators.yaml` as a
+   `source/packages/ccai/provisioning/model/cloud/accelerators.yaml` as a
    distributed data file in the package.
 2. THE SYSTEM SHALL define each entry with the fields:
    `neutral_name`, `kind`, `memory_gb`, `interconnect`, `venue_skus` (mapping of
@@ -79,7 +79,7 @@ and overrides are explicit, not accidental.
 2. THE SYSTEM SHALL expose `CloudAcceleratorCatalog.from_path(*, path: str)` for
    tests and out-of-tree overrides.
 3. WHEN the catalog file is overridden via the environment variable
-   `AUTOMOJO_ACCELERATOR_CATALOG` THE SYSTEM SHALL load from the indicated path on
+   `CCAI_ACCELERATOR_CATALOG` THE SYSTEM SHALL load from the indicated path on
    first access.
 
 ---

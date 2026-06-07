@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -17,12 +17,12 @@ from pathlib import Path
 
 import pytest
 
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
 
-from automojo.provisioning.venues.crusoe.crusoecloudprovisioner import (
+from ccai.provisioning.venues.crusoe.crusoecloudprovisioner import (
     CrusoeCloudProvisioner
 )
-from automojo.provisioning.venues.crusoe.crusoeprojectconfig import (
+from ccai.provisioning.venues.crusoe.crusoeprojectconfig import (
     CrusoeProjectConfig
 )
 

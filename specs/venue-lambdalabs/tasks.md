@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/lambdalabs/` tree per `design.md`.
-- [x] 2. Add `automojo-interop-lambdalabs` dep.
+- [x] 2. Add `codecraftai-interop-lambdalabs` dep.
 - [x] 3. Declare `LlValidationError`, `LlCapacityError`,
   `ConfirmationRequiredError` in `llerrors.py`.
 

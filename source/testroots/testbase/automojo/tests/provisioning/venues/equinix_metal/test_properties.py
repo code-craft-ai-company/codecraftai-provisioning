@@ -8,26 +8,26 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from hypothesis import given, settings, strategies as st
 
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.credentials.equinixmetalapitokencredential import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.credentials.equinixmetalapitokencredential import (
     EquinixMetalApiTokenCredential
 )
-from automojo.provisioning.venues.equinix_metal.equinixmetalcloudprovisioner import (
+from ccai.provisioning.venues.equinix_metal.equinixmetalcloudprovisioner import (
     EquinixMetalCloudProvisioner
 )
-from automojo.provisioning.venues.equinix_metal.metalprojectconfig import (
+from ccai.provisioning.venues.equinix_metal.metalprojectconfig import (
     MetalProjectConfig
 )
-from automojo.provisioning.venues.equinix_metal.metaltagtranslator import (
+from ccai.provisioning.venues.equinix_metal.metaltagtranslator import (
     MetalTagTranslator
 )
 

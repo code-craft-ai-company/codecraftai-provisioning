@@ -4,7 +4,7 @@
 
 The cloud resource model is the neutral Python type vocabulary that every venue
 provisioner consumes and every spec author produces.  No model class talks to a cloud
-SDK directly.  Each class is a `SchemaObject` (from `automojo-configuration`) with
+SDK directly.  Each class is a `SchemaObject` (from `codecraftai-configuration`) with
 typed `SchemaField` declarations, giving callers a single class that supports both
 direct Python construction and `from_dict`/`to_dict` for YAML loaders and inventory
 emit.
@@ -49,7 +49,7 @@ landscape emit) while keeping cross-resource invariants centralised in one place
 ## Data Model
 
 Every class lives under
-`source/packages/automojo/provisioning/model/cloud/` — one file per class, file name
+`source/packages/ccai/provisioning/model/cloud/` — one file per class, file name
 all-lowercase, class name PascalCase, per the project's class-per-file standard.
 
 ```python
@@ -175,7 +175,7 @@ class CloudResourceProfile(SchemaObject):
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/model/cloud/
+source/packages/ccai/provisioning/model/cloud/
 ├── cloudnetwork.py
 ├── cloudsubnet.py
 ├── cloudsecuritygroup.py
@@ -211,7 +211,7 @@ lifecycle `validate` stage using `ipaddress.IPv4Network.overlaps()` /
   the model; runs semantic validation.
 - [preemption-policy](../preemption-policy/design.md) — `preemption_policy` field on
   `CloudInstance`.
-- [cloud-provisioning-config-schema](../../../automojo-configuration/specs/cloud-provisioning-config-schema/design.md) —
+- [cloud-provisioning-config-schema](../../../codecraftai-configuration/specs/cloud-provisioning-config-schema/design.md) —
   YAML loader that consumes `from_dict`.
 
 ---

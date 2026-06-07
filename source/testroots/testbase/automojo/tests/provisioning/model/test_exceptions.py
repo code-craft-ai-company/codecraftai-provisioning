@@ -7,14 +7,14 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import unittest
 
-from automojo.errors.exceptions import SemanticError
-from automojo.provisioning.model.exceptions import (
+from ccai.errors.exceptions import SemanticError
+from ccai.provisioning.model.exceptions import (
     SchemaSemanticError, SchemaValidationError
 )
 
@@ -28,7 +28,7 @@ class SchemaSemanticErrorHierarchyTests(unittest.TestCase):
 
     def test_schema_semantic_error_is_a_semantic_error(self) -> None:
         """
-            SchemaSemanticError derives from automojo SemanticError.
+            SchemaSemanticError derives from ccai SemanticError.
         """
         self.assertTrue(issubclass(SchemaSemanticError, SemanticError))
         return

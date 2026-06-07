@@ -2,13 +2,13 @@
 
 ## Introduction
 
-The `venue-lambdalabs` feature provides `automojo-provisioning` with the ability
+The `venue-lambdalabs` feature provides `codecraftai-provisioning` with the ability
 to stand up GPU instances on Lambda Labs.  It implements the `CloudProvisioner`
 lifecycle defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) and maps the
 neutral resource model in [cloud-resource-model](../cloud-resource-model/design.md)
 onto Lambda Labs primitives via the Lambda Labs Cloud REST API surfaced by
-`automojo-interop-lambdalabs` (built on `automojo-restclient-base`).
+`codecraftai-interop-lambdalabs` (built on `codecraftai-restclient-base`).
 
 Lambda's API is intentionally small: instances, SSH keys, file-systems (shared
 NFS), and 1-Click Clusters.  There is no VPC, no firewall, and no object

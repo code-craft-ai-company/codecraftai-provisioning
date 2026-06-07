@@ -2,14 +2,14 @@
 
 ## Introduction
 
-The `venue-crusoe` feature provides `automojo-provisioning` with the ability to
+The `venue-crusoe` feature provides `codecraftai-provisioning` with the ability to
 stand up GPU infrastructure on Crusoe Cloud.  It implements the
 `CloudProvisioner` lifecycle defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) and maps the
 neutral resource model in [cloud-resource-model](../cloud-resource-model/design.md)
 onto Crusoe primitives via the Crusoe Cloud REST API
-(`api.crusoecloud.com/v1alpha5/`) surfaced by `automojo-interop-crusoe` (built
-on `automojo-restclient-base`).
+(`api.crusoecloud.com/v1alpha5/`) surfaced by `codecraftai-interop-crusoe` (built
+on `codecraftai-restclient-base`).
 
 Crusoe's API shape is the closest to AWS in this group: VPCs, Subnets,
 Firewall Rules, Instances, Disks, IB-enabled placement.  GPU SKUs cover H100,
@@ -44,7 +44,7 @@ Every method on `CrusoeCloudProvisioner` accepts `aspects: Aspects`.
 #### Acceptance Criteria
 
 1. WHEN `plan(spec, aspects)` is called THE SYSTEM SHALL list resources by
-   `automojo-run-id` label and emit `PlanAction`s.
+   `codecraftai-run-id` label and emit `PlanAction`s.
 2. WHEN instance_type drifts THE SYSTEM SHALL flag UPDATE-by-recreate.
 
 ---

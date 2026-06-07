@@ -9,21 +9,21 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from typing import Any, Dict, List, Optional
 
-from automojo.interop.xen.model.xennetwork import XenNetwork
-from automojo.interop.xen.model.xenstoragerepository import (
+from ccai.interop.xen.model.xennetwork import XenNetwork
+from ccai.interop.xen.model.xenstoragerepository import (
     XenStorageRepository
 )
-from automojo.interop.xen.model.xenvbd import XenVbd
-from automojo.interop.xen.model.xenvdi import XenVdi
-from automojo.interop.xen.model.xenvif import XenVif
-from automojo.interop.xen.model.xenvm import XenVm
-from automojo.interop.xen.model.xenvmtemplate import XenVmTemplate
+from ccai.interop.xen.model.xenvbd import XenVbd
+from ccai.interop.xen.model.xenvdi import XenVdi
+from ccai.interop.xen.model.xenvif import XenVif
+from ccai.interop.xen.model.xenvm import XenVm
+from ccai.interop.xen.model.xenvmtemplate import XenVmTemplate
 
 
 class _DoneHandle:
@@ -411,7 +411,7 @@ class _MockVmsGroup:
 
 class MockXenClient:
     """
-        In-memory stand-in for the ``automojo-interop-xen`` :class:`XenClient`.
+        In-memory stand-in for the ``codecraftai-interop-xen`` :class:`XenClient`.
 
         Holds deterministic dictionaries for templates, networks, SRs, VMs,
         VDIs, VBDs and VIFs and exposes the same lazily-constructed api-group

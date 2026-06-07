@@ -7,18 +7,18 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import unittest
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
-from automojo.provisioning.model.cloud.networkprotocol import NetworkProtocol
-from automojo.provisioning.model.cloud.cloudingressrule import (
+from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.cloud.networkprotocol import NetworkProtocol
+from ccai.provisioning.model.cloud.cloudingressrule import (
     CloudIngressRule, coerce_network_protocol
 )
-from automojo.provisioning.model.cloud.cloudegressrule import CloudEgressRule
+from ccai.provisioning.model.cloud.cloudegressrule import CloudEgressRule
 
 
 class NetworkProtocolTests(unittest.TestCase):

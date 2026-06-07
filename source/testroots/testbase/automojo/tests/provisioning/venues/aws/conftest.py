@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -15,12 +15,12 @@ import os
 
 import pytest
 
-from automojo.credentials.awsaccesskeycredential import AwsAccessKeyCredential
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.credentials.awsaccesskeycredential import AwsAccessKeyCredential
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.aws.awsregionconfig import AwsRegionConfig
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.aws.awsregionconfig import AwsRegionConfig
 
 
 @pytest.fixture(autouse=True)
@@ -66,7 +66,7 @@ def region_config() -> AwsRegionConfig:
     """
     rtnval = AwsRegionConfig(
         region="us-east-1", availability_zone="us-east-1a",
-        default_tags={"automojo:component": "test"},
+        default_tags={"ccai:component": "test"},
     )
     return rtnval
 

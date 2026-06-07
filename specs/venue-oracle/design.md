@@ -3,18 +3,18 @@
 ## Overview
 
 `OracleCloudProvisioner` realises the neutral resource model on OCI via the `oci`
-SDK surfaced by `automojo-interop-oracle`.  OCI's structural specialties are
+SDK surfaced by `codecraftai-interop-oracle`.  OCI's structural specialties are
 **compartments** (the apex container, hierarchical), **availability domains**
 (per-region zones), and **cluster networks** (the RoCEv2 RDMA fabric for HPC).
 This provisioner treats the compartment OCID as the apex container and uses the
-`automojo-run-id` freeform tag as the per-run discriminator.
+`codecraftai-run-id` freeform tag as the per-run discriminator.
 
 See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- [oracle-credentials](../../../automojo-credentials/specs/oracle-credentials/design.md)
-- `automojo-interop-oracle/Agents.md`
+- [oracle-credentials](../../../codecraftai-credentials/specs/oracle-credentials/design.md)
+- `codecraftai-interop-oracle/Agents.md`
 
 ---
 
@@ -39,7 +39,7 @@ See Also:
                           │
                           ▼
 ┌──────────────────────────────────────────────────────────────┐
-│        OciClient (automojo-interop-oracle)                   │
+│        OciClient (codecraftai-interop-oracle)                   │
 │   core(VCN/Subnet/Compute/Volume) / object-storage / dns /   │
 │   file-storage / cluster-network  oci SDK                    │
 └──────────────────────────────────────────────────────────────┘
@@ -86,7 +86,7 @@ SDK call paths used by `apply`:
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/oracle/
+source/packages/ccai/provisioning/venues/oracle/
 ├── __init__.py
 ├── oraclecloudprovisioner.py
 ├── ociresolver.py

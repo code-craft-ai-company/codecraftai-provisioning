@@ -8,14 +8,14 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-from automojo.provisioning.venues.nebius.nebiuscloudprovisioner import (
+from ccai.provisioning.venues.nebius.nebiuscloudprovisioner import (
     NebiusCloudProvisioner
 )
 

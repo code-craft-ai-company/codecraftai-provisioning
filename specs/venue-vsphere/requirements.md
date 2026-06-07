@@ -2,20 +2,20 @@
 
 ## Introduction
 
-The `venue-vsphere` feature provides `automojo-provisioning` with the ability to
+The `venue-vsphere` feature provides `codecraftai-provisioning` with the ability to
 stand up VMs on a VMware vSphere/vCenter environment.  It implements the
 `CloudProvisioner` lifecycle defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) and maps the
 neutral resource model in [cloud-resource-model](../cloud-resource-model/design.md)
 onto vSphere primitives via the **rebuilt** `VSphereClient` in
-`automojo-interop-vsphere` (see PLAN §6.1–§6.2 and IMPLEMENTATION-PLAN §1.15).
+`codecraftai-interop-vsphere` (see PLAN §6.1–§6.2 and IMPLEMENTATION-PLAN §1.15).
 
 The venue covers Distributed Virtual Switch/Port Group, Content Library template
 clone or `VmCreateSpec` build, datastore selection, virtual disk attachment, and
 guest customisation (cloud-init for Linux, sysprep for Windows).  Several
 neutral asks have no faithful vSphere realisation and **must fail loudly** rather
 than silently: `CloudObjectBucket` has no equivalent; `CloudLoadBalancer`
-requires NSX (and `automojo-interop-nsx` is a separate package per PLAN §6.6),
+requires NSX (and `codecraftai-interop-nsx` is a separate package per PLAN §6.6),
 so it is a `validate`-error when NSX is absent; `CloudInterconnect(kind != NONE)`
 is a `validate`-error (HPC fabrics are out of vSphere's scope here); shared FS
 of WEKA/Lustre class is `validate`-error or attach-existing only via NFS
@@ -37,7 +37,7 @@ async vCenter task is awaited through `TaskHandle.wait(aspects=...)`.
 2. WHEN the spec contains `CloudObjectBucket` THE SYSTEM SHALL report an error
    stating vSphere has no native object-storage primitive.
 3. WHEN the spec contains `CloudLoadBalancer` and NSX is not configured THE
-   SYSTEM SHALL report an error pointing to `automojo-interop-nsx`.
+   SYSTEM SHALL report an error pointing to `codecraftai-interop-nsx`.
 4. WHEN the spec contains `CloudInterconnect(kind != NONE)` or
    `CloudSharedFilesystem(kind in {LUSTRE,WEKA,VAST,GPFS})` without
    `existing_id` (NFS datastore mount) THE SYSTEM SHALL report an error.
@@ -51,7 +51,7 @@ async vCenter task is awaited through `TaskHandle.wait(aspects=...)`.
 #### Acceptance Criteria
 
 1. WHEN `plan(spec, aspects)` is called THE SYSTEM SHALL list resources by the
-   `automojo-run-id` vSphere category tag and emit `PlanAction`s.
+   `codecraftai-run-id` vSphere category tag and emit `PlanAction`s.
 2. WHEN a VM's hardware (CPU/RAM/disk) drifts THE SYSTEM SHALL emit `UPDATE`
    where vSphere supports in-place reconfigure, otherwise UPDATE-by-recreate.
 3. WHEN port-group VLAN drifts THE SYSTEM SHALL emit `UPDATE`.

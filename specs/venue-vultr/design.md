@@ -4,7 +4,7 @@
 
 `VultrCloudProvisioner` realises the neutral resource model on Vultr.  Vultr's
 API is REST-only (no first-party SDK), so the interop layer builds on
-`automojo-restclient-base`.  The provisioner is mid-feature: VPC + Firewall +
+`codecraftai-restclient-base`.  The provisioner is mid-feature: VPC + Firewall +
 Block Storage + Object Storage + DNS + a thin GPU SKU set; no HPC interconnect;
 no managed shared FS of the WEKA/Lustre class.
 
@@ -12,7 +12,7 @@ See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- `automojo-interop-vultr/Agents.md`
+- `codecraftai-interop-vultr/Agents.md`
 
 ---
 
@@ -37,7 +37,7 @@ See Also:
                           │
                           ▼
 ┌──────────────────────────────────────────────────────────────┐
-│        VultrClient (automojo-interop-vultr)                  │
+│        VultrClient (codecraftai-interop-vultr)                  │
 │   vpc2 / firewalls / ssh-keys / instances / blocks / object  │
 │   RestClientBase against api.vultr.com/v2                    │
 └──────────────────────────────────────────────────────────────┘
@@ -80,7 +80,7 @@ REST call paths used by `apply`:
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/vultr/
+source/packages/ccai/provisioning/venues/vultr/
 ├── __init__.py
 ├── vultrcloudprovisioner.py
 ├── vultrresolver.py

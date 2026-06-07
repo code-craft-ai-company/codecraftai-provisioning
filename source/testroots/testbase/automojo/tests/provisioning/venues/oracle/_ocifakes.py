@@ -12,7 +12,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -337,7 +337,7 @@ class FakeObjectStorageClient:
 
     def get_namespace(self) -> _Response:
         """Return the tenancy namespace."""
-        rtnval = _Response(data="automojonamespace")
+        rtnval = _Response(data="ccainamespace")
         return rtnval
 
     def get_bucket(self, *, namespace_name: str, bucket_name: str

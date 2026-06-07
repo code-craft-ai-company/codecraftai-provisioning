@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/azure/` tree per `design.md`.
-- [ ] 2. Add `automojo-interop-azure` + `azure-identity` + `azure-mgmt-*` deps to (deferred: cross-repo dependency wiring owned by package packaging step)
+- [ ] 2. Add `codecraftai-interop-azure` + `azure-identity` + `azure-mgmt-*` deps to (deferred: cross-repo dependency wiring owned by package packaging step)
   `pyproject.toml`.
 - [x] 3. Declare `AzureValidationError`, `AzureConflictError`,
   `ConfirmationRequiredError` in `azureerrors.py`.
@@ -72,4 +72,4 @@
 ## Documentation
 
 - [ ] 28. Author `provisioning/venues/azure/README.md` cross-linking the resource (deferred: README.md not yet authored)
-  model, lifecycle, vpn-join, and `automojo-interop-azure`.
+  model, lifecycle, vpn-join, and `codecraftai-interop-azure`.

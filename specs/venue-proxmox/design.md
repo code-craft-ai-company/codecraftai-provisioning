@@ -3,17 +3,17 @@
 ## Overview
 
 `ProxmoxCloudProvisioner` realises the neutral resource model on Proxmox VE
-through `automojo-interop-proxmox`, which wraps the Proxmox REST API (port
+through `codecraftai-interop-proxmox`, which wraps the Proxmox REST API (port
 8006, ticket-auth + CSRF token) on `RestClientBase`.  Proxmox's apex container
 is the **cluster**; resources live on **nodes** within the cluster.  The
 provisioner treats one cluster as one venue instance and uses the
-`automojo-run-id` Proxmox tag as the per-run discriminator.
+`codecraftai-run-id` Proxmox tag as the per-run discriminator.
 
 See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- `automojo-interop-proxmox/Agents.md`
+- `codecraftai-interop-proxmox/Agents.md`
 
 ---
 
@@ -38,7 +38,7 @@ See Also:
                               │
                               ▼
 ┌──────────────────────────────────────────────────────────────┐
-│        ProxmoxClient (automojo-interop-proxmox)              │
+│        ProxmoxClient (codecraftai-interop-proxmox)              │
 │   cluster/nodes/qemu/lxc/storage/firewall/sdn  REST          │
 │   RestClientBase against https://<pve>:8006/api2/json        │
 └──────────────────────────────────────────────────────────────┘
@@ -84,7 +84,7 @@ REST call paths used by `apply`:
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/proxmox/
+source/packages/ccai/provisioning/venues/proxmox/
 ├── __init__.py
 ├── proxmoxcloudprovisioner.py
 ├── pveresolver.py
@@ -101,7 +101,7 @@ source/packages/automojo/provisioning/venues/proxmox/
 
 ## Idempotency
 
-Reads filter VM/LXC listings by the `tags` field containing `automojo-run-id=<id>`.
+Reads filter VM/LXC listings by the `tags` field containing `codecraftai-run-id=<id>`.
 Cloud-init snippets are content-addressed by hash; re-uploading an identical
 snippet is skipped.  VM resize (CPU/RAM) uses `qemu/{vmid}/config` in-place when
 the VM is stopped or hot-plug is enabled; disk resize uses `resize`.

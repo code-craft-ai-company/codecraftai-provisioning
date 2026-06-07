@@ -5,7 +5,7 @@
 `CrusoeCloudProvisioner` realises the neutral resource model on Crusoe Cloud.
 Crusoe's product shape is AWS-adjacent: VPC, Subnet, Firewall Rules,
 Instance, Disk, IB Partition for HPC interconnect, and a managed file storage
-option.  All calls go through `automojo-interop-crusoe`'s `CrusoeClient`,
+option.  All calls go through `codecraftai-interop-crusoe`'s `CrusoeClient`,
 which wraps the REST API on `RestClientBase` against
 `https://api.crusoecloud.com/v1alpha5/`.
 
@@ -13,7 +13,7 @@ See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- `automojo-interop-crusoe/Agents.md`
+- `codecraftai-interop-crusoe/Agents.md`
 
 ---
 
@@ -38,7 +38,7 @@ See Also:
                               │
                               ▼
 ┌──────────────────────────────────────────────────────────────┐
-│        CrusoeClient (automojo-interop-crusoe)                │
+│        CrusoeClient (codecraftai-interop-crusoe)                │
 │   vpcs / subnets / firewall-rules / ssh-keys / instances /   │
 │   disks / ib-partitions / file-systems  REST                 │
 └──────────────────────────────────────────────────────────────┘
@@ -82,7 +82,7 @@ REST call paths used by `apply`:
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/crusoe/
+source/packages/ccai/provisioning/venues/crusoe/
 ├── __init__.py
 ├── crusoecloudprovisioner.py
 ├── crusoeresolver.py
@@ -100,7 +100,7 @@ source/packages/automojo/provisioning/venues/crusoe/
 
 ## Idempotency
 
-Reads filter by label `automojo-run-id=<id>`.  IB partitions are checked by
+Reads filter by label `codecraftai-run-id=<id>`.  IB partitions are checked by
 name before create.  instance_type changes are UPDATE-by-recreate gated on
 `aspects.confirm`.
 

@@ -8,31 +8,31 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.cloudloadbalancer import (
+from ccai.provisioning.model.cloud.cloudloadbalancer import (
     CloudLoadBalancer
 )
-from automojo.provisioning.model.cloud.cloudobjectbucket import (
+from ccai.provisioning.model.cloud.cloudobjectbucket import (
     CloudObjectBucket
 )
-from automojo.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
-from automojo.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
-from automojo.provisioning.venues.nebius.nebiuscloudprovisioner import (
+from ccai.provisioning.venues.nebius.nebiuscloudprovisioner import (
     NebiusCloudProvisioner
 )
-from automojo.provisioning.venues.nebius.nebiuserrors import (
+from ccai.provisioning.venues.nebius.nebiuserrors import (
     NebiusValidationError
 )
 

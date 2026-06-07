@@ -137,7 +137,7 @@ Lock timeout is controlled by `aspects.lock_timeout_seconds` (default 30s).
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/state/
+source/packages/ccai/provisioning/state/
 ├── provisioningstatestore.py
 ├── runstate.py
 ├── runstatus.py

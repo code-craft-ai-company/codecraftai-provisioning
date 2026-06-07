@@ -3,7 +3,7 @@
 ## Overview
 
 `HetznerCloudProvisioner` realises the neutral resource model on Hetzner Cloud
-through the `hcloud` SDK surfaced by `automojo-interop-hetzner`.  Hetzner is a
+through the `hcloud` SDK surfaced by `codecraftai-interop-hetzner`.  Hetzner is a
 deliberately small, cost-efficient cloud: there is no object storage in the
 Cloud product (Hetzner Storage Box is a separate, FTP/SMB/SSH-style product
 outside this provisioner's scope), no HPC interconnect, and a thin GPU SKU set.
@@ -13,7 +13,7 @@ See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- `automojo-interop-hetzner/Agents.md`
+- `codecraftai-interop-hetzner/Agents.md`
 
 ---
 
@@ -38,7 +38,7 @@ See Also:
                           │
                           ▼
 ┌──────────────────────────────────────────────────────────────┐
-│        HetznerClient (automojo-interop-hetzner)              │
+│        HetznerClient (codecraftai-interop-hetzner)              │
 │   networks / firewalls / ssh_keys / servers / volumes / dns  │
 │   hcloud SDK against api.hetzner.cloud                       │
 └──────────────────────────────────────────────────────────────┘
@@ -80,7 +80,7 @@ REST call paths used by `apply`:
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/hetzner/
+source/packages/ccai/provisioning/venues/hetzner/
 ├── __init__.py
 ├── hetznercloudprovisioner.py
 ├── hetznerresolver.py

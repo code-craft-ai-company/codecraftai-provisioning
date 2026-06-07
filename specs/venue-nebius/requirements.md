@@ -2,13 +2,13 @@
 
 ## Introduction
 
-The `venue-nebius` feature provides `automojo-provisioning` with the ability to
+The `venue-nebius` feature provides `codecraftai-provisioning` with the ability to
 stand up GPU infrastructure on Nebius.  It implements the `CloudProvisioner`
 lifecycle defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) and maps the
 neutral resource model in [cloud-resource-model](../cloud-resource-model/design.md)
 onto Nebius primitives via the Nebius REST API surfaced by
-`automojo-interop-nebius` (built on `automojo-restclient-base`).
+`codecraftai-interop-nebius` (built on `codecraftai-restclient-base`).
 
 Nebius's product shape is similar to Crusoe — VPCs, subnets, security groups,
 instances, disks, **GPU clusters** (their IB-enabled placement primitive),
@@ -42,7 +42,7 @@ Every method on `NebiusCloudProvisioner` accepts `aspects: Aspects`.
 #### Acceptance Criteria
 
 1. WHEN `plan(spec, aspects)` is called THE SYSTEM SHALL list resources by
-   `automojo-run-id` label and emit `PlanAction`s.
+   `codecraftai-run-id` label and emit `PlanAction`s.
 2. WHEN instance platform/preset drifts THE SYSTEM SHALL flag
    UPDATE-by-recreate.
 

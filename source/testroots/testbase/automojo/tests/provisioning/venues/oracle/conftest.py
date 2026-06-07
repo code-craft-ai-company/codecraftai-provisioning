@@ -7,20 +7,20 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.credentials.oraclecloudapikeycredential import (
+from ccai.credentials.oraclecloudapikeycredential import (
     OracleCloudApiKeyCredential
 )
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.oracle.ociregionconfig import OciRegionConfig
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.oracle.ociregionconfig import OciRegionConfig
 
 
 _FAKE_PRIVATE_KEY = (
@@ -54,7 +54,7 @@ def region_config() -> OciRegionConfig:
         region="us-ashburn-1",
         compartment_id="ocid1.compartment.oc1..aaaacompartmenttest",
         availability_domain="Uocm:US-ASHBURN-AD-1",
-        default_tags={"automojo_component": "test"},
+        default_tags={"ccai_component": "test"},
     )
     return rtnval
 

@@ -7,26 +7,26 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from typing import Optional
 
-from automojo.provisioning.model.cloud.cloudimage import CloudImage
-from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
-from automojo.provisioning.model.cloud.cloudkeypair import CloudKeyPair
-from automojo.provisioning.model.cloud.cloudnetwork import CloudNetwork
-from automojo.provisioning.model.cloud.cloudstoragevolume import (
+from ccai.provisioning.model.cloud.cloudimage import CloudImage
+from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
+from ccai.provisioning.model.cloud.cloudkeypair import CloudKeyPair
+from ccai.provisioning.model.cloud.cloudnetwork import CloudNetwork
+from ccai.provisioning.model.cloud.cloudstoragevolume import (
     CloudStorageVolume
 )
-from automojo.provisioning.model.cloud.cloudsubnet import CloudSubnet
-from automojo.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
-from automojo.provisioning.venues.vsphere.vspherespec import VSphereSpec
+from ccai.provisioning.model.cloud.cloudsubnet import CloudSubnet
+from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.provisioning.venues.vsphere.vspherespec import VSphereSpec
 
 
 _PUBLIC_KEY = (
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAITESTKEYMATERIALabcdef automojo"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAITESTKEYMATERIALabcdef ccai"
 )
 
 

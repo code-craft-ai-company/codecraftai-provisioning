@@ -3,19 +3,19 @@
 ## Overview
 
 `XcpngCloudProvisioner` realises the neutral resource model on XCP-ng (and
-Citrix Hypervisor) Pools through `automojo-interop-xen`, which wraps the XAPI
+Citrix Hypervisor) Pools through `codecraftai-interop-xen`, which wraps the XAPI
 XML-RPC interface (`/RPC2`).  The Pool is the apex container; the
 pool-master receives all writes and replicates state across hosts.
 
 XCP-ng does not natively model tags as first-class queryable indices; the
-provisioner uses `VM.other_config["automojo-run-id"]` plus the legacy `tags`
+provisioner uses `VM.other_config["codecraftai-run-id"]` plus the legacy `tags`
 field to encode neutral tags.
 
 See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- `automojo-interop-xen/Agents.md`
+- `codecraftai-interop-xen/Agents.md`
 
 ---
 
@@ -40,7 +40,7 @@ See Also:
                               │
                               ▼
 ┌──────────────────────────────────────────────────────────────┐
-│        XenClient (automojo-interop-xen)                      │
+│        XenClient (codecraftai-interop-xen)                      │
 │   session / VM / VDI / SR / Network / VIF / pool             │
 │   XAPI XML-RPC against https://<master>/RPC2                 │
 └──────────────────────────────────────────────────────────────┘
@@ -76,14 +76,14 @@ XAPI call paths used by `apply`:
 | `CloudDnsRecord` | external | warn today. |
 | `CloudSharedFilesystem(*, existing_id)` | SR mount (NFS) | attach-only. |
 | `VPNJoinSpec` | xenstore `vm-data/cloud-init/user-data` base64. |
-| Tags | `VM.other_config["automojo-run-id"]` + `tags` list. |
+| Tags | `VM.other_config["codecraftai-run-id"]` + `tags` list. |
 
 ---
 
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/xcpng/
+source/packages/ccai/provisioning/venues/xcpng/
 ├── __init__.py
 ├── xcpngcloudprovisioner.py
 ├── xenresolver.py
@@ -102,7 +102,7 @@ source/packages/automojo/provisioning/venues/xcpng/
 
 VM lookups use `VM.get_by_name_label` returning the deterministic
 `<spec-name>-<run-id-short>` name; existing VMs with matching
-`other_config["automojo-run-id"]` are SKIP candidates.  Memory and vCPU
+`other_config["codecraftai-run-id"]` are SKIP candidates.  Memory and vCPU
 changes use the live `set_*` calls when the VM supports dynamic reconfigure;
 otherwise UPDATE-by-recreate gated on `aspects.confirm`.
 

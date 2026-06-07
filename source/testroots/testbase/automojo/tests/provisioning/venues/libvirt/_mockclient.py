@@ -8,17 +8,17 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from typing import Any, Dict, List
 
-from automojo.interop.libvirt.model.libvirtdomaininfo import LibvirtDomainInfo
-from automojo.interop.libvirt.model.libvirtnetwork import LibvirtNetwork
-from automojo.interop.libvirt.model.libvirtvolume import LibvirtVolume
+from ccai.interop.libvirt.model.libvirtdomaininfo import LibvirtDomainInfo
+from ccai.interop.libvirt.model.libvirtnetwork import LibvirtNetwork
+from ccai.interop.libvirt.model.libvirtvolume import LibvirtVolume
 
-from automojo.provisioning.venues.libvirt.lvdomainxmlbuilder import (
+from ccai.provisioning.venues.libvirt.lvdomainxmlbuilder import (
     LvDomainXmlBuilder
 )
 

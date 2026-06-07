@@ -85,7 +85,7 @@ render a template across a group.
 ### Requirement 4: Credential Resolution
 
 **User Story:** As a framework author, I want the credential to resolve through the
-existing `automojo-credentials` registry, never as a raw string.
+existing `codecraftai-credentials` registry, never as a raw string.
 
 #### Acceptance Criteria
 

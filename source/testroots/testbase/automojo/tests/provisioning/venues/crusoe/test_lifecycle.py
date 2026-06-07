@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -17,36 +17,36 @@ from pathlib import Path
 
 import pytest
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.exceptions import SchemaSemanticError
 
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from automojo.errors.exceptions import SemanticError
+from ccai.errors.exceptions import SemanticError
 
-from automojo.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.cloudloadbalancer import (
+from ccai.provisioning.model.cloud.cloudloadbalancer import (
     CloudLoadBalancer
 )
-from automojo.provisioning.model.cloud.cloudobjectbucket import (
+from ccai.provisioning.model.cloud.cloudobjectbucket import (
     CloudObjectBucket
 )
-from automojo.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
 
-from automojo.provisioning.venues.crusoe.crusoecloudprovisioner import (
+from ccai.provisioning.venues.crusoe.crusoecloudprovisioner import (
     CrusoeCloudProvisioner
 )
-from automojo.provisioning.venues.crusoe.crusoeerrors import (
+from ccai.provisioning.venues.crusoe.crusoeerrors import (
     CrusoeValidationError
 )
 
@@ -315,7 +315,7 @@ def test_apply_attaches_ib_partition(crusoe_venue, mock_client,
     assert launch_spec.placement_group_id is not None
     partitions = mock_client.placement_groups.list(project_id="proj-1")
     assert len(partitions) == 1
-    assert partitions[0].labels.get("automojo-run-id") == "run-1"
+    assert partitions[0].labels.get("codecraftai-run-id") == "run-1"
     return
 
 
@@ -433,8 +433,8 @@ def _make_venue_and_config():
 
         :returns: A tuple of (CloudVenue, CrusoeProjectConfig).
     """
-    from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-    from automojo.provisioning.venues.crusoe.crusoeprojectconfig import (
+    from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+    from ccai.provisioning.venues.crusoe.crusoeprojectconfig import (
         CrusoeProjectConfig
     )
     venue = CloudVenue(name="crusoe-test", provider="crusoe",
@@ -450,7 +450,7 @@ def test_apply_idempotent_property(volume_count) -> None:
     """
         For any number of volumes, a second apply creates nothing.
     """
-    from automojo.provisioning.model.cloud.cloudstoragevolume import (
+    from ccai.provisioning.model.cloud.cloudstoragevolume import (
         CloudStorageVolume
     )
     crusoe_venue, project_config = _make_venue_and_config()
@@ -481,7 +481,7 @@ def test_label_round_trip_identity(tags) -> None:
     """
         from_crusoe(to_crusoe(tags)) is the identity for conformant inputs.
     """
-    from automojo.provisioning.venues.crusoe.crusoelabeltranslator import (
+    from ccai.provisioning.venues.crusoe.crusoelabeltranslator import (
         CrusoeLabelTranslator
     )
     translator = CrusoeLabelTranslator()
@@ -501,8 +501,8 @@ def test_ib_partition_grouping(node_count) -> None:
         Multiple IB-interconnect instances sharing a group are attached to a
         single IB partition.
     """
-    from automojo.provisioning.model.cloud.cloudimage import CloudImage
-    from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
+    from ccai.provisioning.model.cloud.cloudimage import CloudImage
+    from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
 
     crusoe_venue, project_config = _make_venue_and_config()
     client = MockCrusoeClient()

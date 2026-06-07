@@ -6,7 +6,7 @@
 RunPod is container-shaped — the API surface is Pods, Templates, GPU Types,
 and Network Volumes — so this provisioner does not consume the
 `CloudNetwork`/`CloudSubnet`/`CloudSecurityGroup` parts of the neutral
-model.  Calls go through `automojo-interop-runpod`'s `RunpodClient` against
+model.  Calls go through `codecraftai-interop-runpod`'s `RunpodClient` against
 the GraphQL endpoint at `https://api.runpod.io/graphql`.
 
 VPN bring-up is constrained: RunPod containers run with limited
@@ -23,7 +23,7 @@ See Also:
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [workload-venue-model](../workload-venue-model/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- `automojo-interop-runpod/Agents.md`
+- `codecraftai-interop-runpod/Agents.md`
 
 ---
 
@@ -48,7 +48,7 @@ See Also:
                               │
                               ▼
 ┌──────────────────────────────────────────────────────────────┐
-│        RunpodClient (automojo-interop-runpod)                │
+│        RunpodClient (codecraftai-interop-runpod)                │
 │   pods / volumes / templates / gpu-types                     │
 │   GraphQL against api.runpod.io/graphql                      │
 └──────────────────────────────────────────────────────────────┘
@@ -84,7 +84,7 @@ GraphQL operations used by `apply`:
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/runpod/
+source/packages/ccai/provisioning/venues/runpod/
 ├── __init__.py
 ├── runpodworkloadprovisioner.py
 ├── rpresolver.py

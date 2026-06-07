@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -16,20 +16,20 @@ import unittest
 
 from typing import Any, List
 
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.model.cloud.cloudimage import CloudImage
-from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
-from automojo.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
-from automojo.provisioning.model.cloud.provisionedresource import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.model.cloud.cloudimage import CloudImage
+from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
+from ccai.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
+from ccai.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )
-from automojo.provisioning.model.cloud._fake.fakecloudprovisioner import (
+from ccai.provisioning.model.cloud._fake.fakecloudprovisioner import (
     FakeCloudProvisioner
 )
-from automojo.provisioning.preemption.preemptionerrors import (
+from ccai.provisioning.preemption.preemptionerrors import (
     ProvisioningPreemptionError
 )
-from automojo.provisioning.preemption.preemptionhandler import (
+from ccai.provisioning.preemption.preemptionhandler import (
     handle_preemption
 )
 
@@ -127,7 +127,7 @@ class HandlePreemptionReacquireTests(unittest.TestCase):
         instance = _make_instance(policy=PreemptionPolicy.REACQUIRE)
         provisioner = ReacquireFakeProvisioner(venue=_make_venue())
         with self.assertLogs(
-                "automojo.provisioning.preemption.preemptionhandler",
+                "ccai.provisioning.preemption.preemptionhandler",
                 level=logging.WARNING) as captured:
             replacement = handle_preemption(
                 spec=instance, policy=PreemptionPolicy.REACQUIRE,
@@ -177,7 +177,7 @@ class HandlePreemptionBestEffortTests(unittest.TestCase):
         instance = _make_instance(policy=PreemptionPolicy.BEST_EFFORT)
         provisioner = ReacquireFakeProvisioner(venue=_make_venue())
         with self.assertLogs(
-                "automojo.provisioning.preemption.preemptionhandler",
+                "ccai.provisioning.preemption.preemptionhandler",
                 level=logging.INFO) as captured:
             handle_preemption(spec=instance,
                               policy=PreemptionPolicy.BEST_EFFORT,

@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -19,27 +19,27 @@ from pathlib import Path
 
 import yaml
 
-from automojo.provisioning.model.cloud.provisionedresource import (
+from ccai.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )
-from automojo.provisioning.model.cloud.provisioningresult import (
+from ccai.provisioning.model.cloud.provisioningresult import (
     ProvisioningResult
 )
-from automojo.provisioning.state.atomicwrite import write_tmp_then_rename
-from automojo.provisioning.state.crossplatformlock import (
+from ccai.provisioning.state.atomicwrite import write_tmp_then_rename
+from ccai.provisioning.state.crossplatformlock import (
     cross_platform_lock
 )
-from automojo.provisioning.state.provisioninglocktimeouterror import (
+from ccai.provisioning.state.provisioninglocktimeouterror import (
     ProvisioningLockTimeoutError
 )
-from automojo.provisioning.state.provisioningstatestore import (
+from ccai.provisioning.state.provisioningstatestore import (
     ProvisioningStateStore
 )
-from automojo.provisioning.state.redactforpersistence import (
+from ccai.provisioning.state.redactforpersistence import (
     redact_for_persistence, REDACTED_PLACEHOLDER,
 )
-from automojo.provisioning.state.runstate import RunState
-from automojo.provisioning.state.runstatus import RunStatus
+from ccai.provisioning.state.runstate import RunState
+from ccai.provisioning.state.runstatus import RunStatus
 
 
 class AtomicWriteTests(unittest.TestCase):

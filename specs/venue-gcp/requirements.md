@@ -2,13 +2,13 @@
 
 ## Introduction
 
-The `venue-gcp` feature provides `automojo-provisioning` with the ability to stand
+The `venue-gcp` feature provides `codecraftai-provisioning` with the ability to stand
 up infrastructure on Google Cloud Platform.  It implements the `CloudProvisioner`
 lifecycle defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) and maps the
 neutral resource model in [cloud-resource-model](../cloud-resource-model/design.md)
 onto GCP primitives via the `google-cloud-*` SDKs surfaced by
-`automojo-interop-gcp`.
+`codecraftai-interop-gcp`.
 
 The venue covers VPC (`compute.networks`), Subnet, Firewall rule, Compute Engine
 Instance, Persistent Disk, GCS bucket, and Cloud DNS record.  It additionally
@@ -51,7 +51,7 @@ apply.
 #### Acceptance Criteria
 
 1. WHEN `plan(spec, aspects)` is called THE SYSTEM SHALL list every resource by
-   `automojo-run-id` label and emit `PlanAction`s.
+   `codecraftai-run-id` label and emit `PlanAction`s.
 2. WHEN labels or firewall rule sets drift THE SYSTEM SHALL emit `UPDATE`.
 3. WHEN a resource is absent THE SYSTEM SHALL emit `CREATE`.
 

@@ -7,23 +7,23 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.credentials.digitaloceanapitokencredential import (
+from ccai.credentials.digitaloceanapitokencredential import (
     DigitalOceanApiTokenCredential
 )
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.digitalocean.doclient import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.digitalocean.doclient import (
     DigitalOceanClient
 )
-from automojo.provisioning.venues.digitalocean.doregionconfig import (
+from ccai.provisioning.venues.digitalocean.doregionconfig import (
     DoRegionConfig
 )
 
@@ -49,7 +49,7 @@ def region_config() -> DoRegionConfig:
     """
     rtnval = DoRegionConfig(
         region="nyc3", spaces_region="nyc3",
-        default_tags={"automojo:component": "test"},
+        default_tags={"ccai:component": "test"},
     )
     return rtnval
 

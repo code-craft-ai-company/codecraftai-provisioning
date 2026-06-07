@@ -3,7 +3,7 @@
 ## Overview
 
 `VSphereCloudProvisioner` realises the neutral resource model on VMware vSphere
-through the rebuilt `VSphereClient` in `automojo-interop-vsphere` (PLAN §6.2;
+through the rebuilt `VSphereClient` in `codecraftai-interop-vsphere` (PLAN §6.2;
 IMPLEMENTATION-PLAN §1.15).  It assumes the post-extraction client shape: REST
 on `RestClientBase`, `RestApiGroup`-backed api groups, `VSphereTaskHandle`
 returned by every async op, `Aspects`-controlled `wait`.
@@ -13,7 +13,7 @@ documented in §6.3 of the plan and surfaced in `validate`:
 
 - no native object storage → `CloudObjectBucket` is a `validate`-error
 - no native LB without NSX → `CloudLoadBalancer` `validate`-errors when NSX is
-  absent (and composes `automojo-interop-nsx` when present)
+  absent (and composes `codecraftai-interop-nsx` when present)
 - no HPC interconnect → `CloudInterconnect(kind != NONE)` `validate`-errors
 - shared FS via NFS datastore attach only — provisioning new managed Lustre is
   out of scope
@@ -22,8 +22,8 @@ See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- `automojo-interop-vsphere/Agents.md` and
-  `automojo-interop-vsphere/specs/vsphere-client/design.md`
+- `codecraftai-interop-vsphere/Agents.md` and
+  `codecraftai-interop-vsphere/specs/vsphere-client/design.md`
 
 ---
 
@@ -48,7 +48,7 @@ See Also:
                               │
                               ▼
 ┌──────────────────────────────────────────────────────────────┐
-│        VSphereClient (automojo-interop-vsphere)              │
+│        VSphereClient (codecraftai-interop-vsphere)              │
 │   Network / Content / Vm / Cluster / DataStore / Tagging /   │
 │   Folder / Host  apigroups on RestClientBase                 │
 │   Returns VSphereTaskHandle for async ops                    │
@@ -98,7 +98,7 @@ documented in PLAN §6.6.
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/vsphere/
+source/packages/ccai/provisioning/venues/vsphere/
 ├── __init__.py
 ├── vspherecloudprovisioner.py
 ├── vsresolver.py                  # library-item / template / datastore resolution
@@ -115,7 +115,7 @@ source/packages/automojo/provisioning/venues/vsphere/
 
 ## Idempotency
 
-Reads filter by attached category-tag pair (`automojo-run-id=<id>`).  VM hardware
+Reads filter by attached category-tag pair (`codecraftai-run-id=<id>`).  VM hardware
 deltas honour vSphere's reconfigure rules: CPU/RAM hot-add when the guest
 supports it, otherwise UPDATE-by-recreate gated on `aspects.confirm`.  Tag
 attach is idempotent at the API level.

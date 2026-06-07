@@ -7,26 +7,26 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.exceptions import SchemaSemanticError
 
 from hypothesis import HealthCheck, given, settings, strategies as st
 
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-from automojo.provisioning.venues.digitalocean.digitaloceancloudprovisioner import (
+from ccai.provisioning.venues.digitalocean.digitaloceancloudprovisioner import (
     DigitalOceanCloudProvisioner
 )
-from automojo.provisioning.venues.digitalocean.doclient import (
+from ccai.provisioning.venues.digitalocean.doclient import (
     DigitalOceanClient
 )
 

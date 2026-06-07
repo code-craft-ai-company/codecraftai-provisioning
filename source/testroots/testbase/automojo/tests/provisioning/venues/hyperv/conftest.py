@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -15,13 +15,13 @@ from typing import Any, Dict, List
 
 import pytest
 
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.hyperv.hvhostconfig import HvHostConfig
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.hyperv.hvhostconfig import HvHostConfig
 
-from automojo.tests.provisioning.venues.hyperv._mockclient import (
+from ccai.tests.provisioning.venues.hyperv._mockclient import (
     MockHypervClient
 )
 

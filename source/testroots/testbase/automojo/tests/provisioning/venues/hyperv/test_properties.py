@@ -8,7 +8,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -17,20 +17,20 @@ from typing import Dict, List
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.hyperv.hvhostconfig import HvHostConfig
-from automojo.provisioning.venues.hyperv.hvnotestranslator import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.hyperv.hvhostconfig import HvHostConfig
+from ccai.provisioning.venues.hyperv.hvnotestranslator import (
     HvNotesTranslator
 )
-from automojo.provisioning.venues.hyperv.hypervcloudprovisioner import (
+from ccai.provisioning.venues.hyperv.hypervcloudprovisioner import (
     HypervCloudProvisioner
 )
 
-from automojo.tests.provisioning.venues.hyperv import _specfactory
-from automojo.tests.provisioning.venues.hyperv._mockclient import (
+from ccai.tests.provisioning.venues.hyperv import _specfactory
+from ccai.tests.provisioning.venues.hyperv._mockclient import (
     MockHypervClient
 )
 

@@ -5,7 +5,7 @@
 After a successful `apply`, the provisioning engine emits a
 `landscape.yaml`-compatible block listing every provisioned host with a full
 `DeviceAddressSet` (public, private, overlay).  The block is consumable directly by
-`automojo-landscaping`, so a user can run `arcli provision apply` then immediately use
+`codecraftai-landscaping`, so a user can run `arcli provision apply` then immediately use
 the emitted landscape file to drive tests against the new infrastructure.
 
 This spec defines the emit format, the source-of-truth mapping from
@@ -33,17 +33,17 @@ downstream landscaping packages rely on.
 
 ### Requirement 2: Landscape Schema Compatibility
 
-**User Story:** As an `automojo-landscaping` user, I want the emitted file to load
+**User Story:** As an `codecraftai-landscaping` user, I want the emitted file to load
 directly into the landscape loader without translation.
 
 #### Acceptance Criteria
 
 1. THE SYSTEM SHALL produce a YAML document with the top-level keys `apod`,
    `environment`, `pod`, `devices` matching the existing
-   `automojo-landscaping/specs/landscape-yaml-schema` schema.
+   `codecraftai-landscaping/specs/landscape-yaml-schema` schema.
 2. THE SYSTEM SHALL include a `vpn:` top-level block when any provisioned instance
    has a `vpn_join` spec, listing the providers and credential vault references.
-3. WHEN the emitted file is parsed by `automojo-landscaping` THE SYSTEM SHALL pass
+3. WHEN the emitted file is parsed by `codecraftai-landscaping` THE SYSTEM SHALL pass
    landscaping's own schema validation with no warnings.
 
 ---

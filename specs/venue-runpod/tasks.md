@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/runpod/` tree per `design.md`.
-- [ ] 2. Add `automojo-interop-runpod` dep. (deferred: cross-repo dependency wiring owned by package packaging step)
+- [ ] 2. Add `codecraftai-interop-runpod` dep. (deferred: cross-repo dependency wiring owned by package packaging step)
 - [x] 3. Declare `RpValidationError`, `RpCapacityError`,
   `ConfirmationRequiredError` in `rperrors.py`.
 

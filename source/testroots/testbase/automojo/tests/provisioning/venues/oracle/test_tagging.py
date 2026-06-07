@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -16,8 +16,8 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from automojo.provisioning.venues.oracle.ocierrors import OciValidationError
-from automojo.provisioning.venues.oracle.ocitagging import (
+from ccai.provisioning.venues.oracle.ocierrors import OciValidationError
+from ccai.provisioning.venues.oracle.ocitagging import (
     OCI_TAG_VALUE_MAX, base_resource_tags, from_freeform, to_freeform
 )
 
@@ -48,10 +48,10 @@ def test_base_resource_tags_contains_owner_run_name_kind() -> None:
         run_id="r1", resource_name="vcn-a", resource_kind="network",
         extra={"team": "ml"}, defaults={"component": "test"},
     )
-    assert flat["automojo_owned-by"] == "automojo-provisioning"
-    assert flat["automojo_run-id"] == "r1"
-    assert flat["automojo_resource-name"] == "vcn-a"
-    assert flat["automojo_resource-kind"] == "network"
+    assert flat["ccai_owned-by"] == "codecraftai-provisioning"
+    assert flat["ccai_run-id"] == "r1"
+    assert flat["ccai_resource-name"] == "vcn-a"
+    assert flat["ccai_resource-kind"] == "network"
     assert flat["team"] == "ml"
     assert flat["component"] == "test"
     return

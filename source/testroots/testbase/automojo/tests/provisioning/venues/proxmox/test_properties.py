@@ -9,7 +9,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -18,18 +18,18 @@ import tempfile
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.proxmox.proxmoxcloudprovisioner import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.proxmox.proxmoxcloudprovisioner import (
     ProxmoxCloudProvisioner
 )
-from automojo.provisioning.venues.proxmox.proxmoxspec import ProxmoxSpec
-from automojo.provisioning.venues.proxmox.pvecloudinitrenderer import (
+from ccai.provisioning.venues.proxmox.proxmoxspec import ProxmoxSpec
+from ccai.provisioning.venues.proxmox.pvecloudinitrenderer import (
     PveCloudInitRenderer
 )
-from automojo.provisioning.venues.proxmox.pvetagtranslator import (
+from ccai.provisioning.venues.proxmox.pvetagtranslator import (
     PveTagTranslator
 )
 
@@ -180,7 +180,7 @@ def test_validate_rejects_unsupported_kinds(venue, aspects):
     import pytest
 
     from ._specfactory import bucket_lb_dns_spec
-    from automojo.provisioning.venues.proxmox.pveerrors import (
+    from ccai.provisioning.venues.proxmox.pveerrors import (
         PveValidationError
     )
 

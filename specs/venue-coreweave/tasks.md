@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/coreweave/` tree per `design.md`.
-- [x] 2. Add `automojo-interop-coreweave` + `automojo-interop-kubernetes`
+- [x] 2. Add `codecraftai-interop-coreweave` + `codecraftai-interop-kubernetes`
   deps.
 - [x] 3. Declare `CwValidationError`, `CwKubeconfigError`,
   `ConfirmationRequiredError` in `cwerrors.py`.

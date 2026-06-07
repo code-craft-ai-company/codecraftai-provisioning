@@ -5,18 +5,18 @@
 `HypervCloudProvisioner` realises the neutral resource model on Microsoft
 Hyper-V hosts.  Hyper-V offers no REST API in the OS — control is via the
 `Hyper-V` PowerShell module, executed remotely over WinRM through an
-`ICommandRunner`.  The `automojo-interop-hyperv` package owns the PowerShell
+`ICommandRunner`.  The `codecraftai-interop-hyperv` package owns the PowerShell
 command construction and result parsing (every cmdlet is invoked with
 `ConvertTo-Json -Compress` for deterministic stdout).
 
 Hyper-V has no first-class tagging system; the provisioner uses `VM.Notes` to
-store a JSON envelope `{"automojo": {"run_id": ..., "tags": [...]}}`.
+store a JSON envelope `{"ccai": {"run_id": ..., "tags": [...]}}`.
 
 See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- `automojo-interop-hyperv/Agents.md`
+- `codecraftai-interop-hyperv/Agents.md`
 
 ---
 
@@ -41,7 +41,7 @@ See Also:
                               │
                               ▼
 ┌──────────────────────────────────────────────────────────────┐
-│        HyperVClient (automojo-interop-hyperv)                │
+│        HyperVClient (codecraftai-interop-hyperv)                │
 │   Get-VM / New-VM / New-VMSwitch / Set-VMNetworkAdapter /    │
 │   New-VHD / Add-VMHardDiskDrive / Start-VM ...               │
 │   PowerShell over WinRM via ICommandRunner                   │
@@ -88,7 +88,7 @@ Command paths used by `apply` (all `| ConvertTo-Json -Compress`):
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/hyperv/
+source/packages/ccai/provisioning/venues/hyperv/
 ├── __init__.py
 ├── hypervcloudprovisioner.py
 ├── hvresolver.py

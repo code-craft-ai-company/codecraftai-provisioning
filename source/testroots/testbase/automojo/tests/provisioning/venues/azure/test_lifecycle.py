@@ -8,7 +8,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -16,28 +16,28 @@ import base64
 
 import pytest
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.exceptions import SchemaSemanticError
 
 from hypothesis import given, HealthCheck, settings
 from hypothesis import strategies as st
 
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-from automojo.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
-from automojo.provisioning.venues.azure.azurecloudprovisioner import (
+from ccai.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
+from ccai.provisioning.venues.azure.azurecloudprovisioner import (
     AzureCloudProvisioner
 )
-from automojo.provisioning.venues.azure.azuresessionfactory import (
+from ccai.provisioning.venues.azure.azuresessionfactory import (
     AzureSessionFactory
 )
-from automojo.provisioning.venues.azure.azurespec import AzureSpec
+from ccai.provisioning.venues.azure.azurespec import AzureSpec
 
 from ._fakeazure import FakeAzureWorld
 from ._specfactory import basic_spec, ib_instance
@@ -496,7 +496,7 @@ def test_plan_emits_delete_for_owned_orphan(venue, credential,
                                region_config=region_config,
                                session_factory=session_factory,
                                spec=full_spec)
-    # Realise the full spec so the instance carries automojo owner tags.
+    # Realise the full spec so the instance carries ccai owner tags.
     provisioner.apply(aspects=aspects)
 
     # Re-plan against a spec from which the instance + volume have been

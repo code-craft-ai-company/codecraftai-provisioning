@@ -8,23 +8,23 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
 
-from automojo.provisioning.venues.coreweave.cwerrors import (
+from ccai.provisioning.venues.coreweave.cwerrors import (
     ConfirmationRequiredError, CwValidationError
 )
 
-from automojo.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
 
-from automojo.tests.provisioning.venues.coreweave.testsupport import (
+from ccai.tests.provisioning.venues.coreweave.testsupport import (
     FakeNodePool, MockCoreweaveClient, MockKubernetesClient,
     MockVpnControlPlane, make_gpu_job, make_provisioner, make_service,
     make_slurm_venue, make_spec
@@ -275,7 +275,7 @@ def test_destroy_sunk_tears_down_the_bundle():
 
     # Re-render the bundle and seed the cluster store so destroy has
     # something concrete to tear down.
-    from automojo.provisioning.venues.coreweave.cwsunkrenderer import (
+    from ccai.provisioning.venues.coreweave.cwsunkrenderer import (
         CwSunkRenderer
     )
     bundle = CwSunkRenderer().render(namespace="default",

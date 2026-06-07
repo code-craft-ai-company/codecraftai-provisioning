@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -17,29 +17,29 @@ import unittest
 from pathlib import Path
 from typing import Any, Dict, List
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
-from automojo.provisioning.model.cloud.cloudprovisioner import CloudProvisioner
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.model.cloud.provisionedresource import (
+from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.cloud.cloudprovisioner import CloudProvisioner
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )
-from automojo.provisioning.model.cloud.provisioningplan import ProvisioningPlan
-from automojo.provisioning.model.cloud.provisioningresult import (
+from ccai.provisioning.model.cloud.provisioningplan import ProvisioningPlan
+from ccai.provisioning.model.cloud.provisioningresult import (
     ProvisioningResult
 )
-from automojo.provisioning.model.cloud.plannedaction import PlannedAction
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.cloud.plannedaction import PlannedAction
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-from automojo.provisioning.model.cloud.validationresult import ValidationResult
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.model.cloud.validationresult import ValidationResult
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.cloudprovisionerregistry import (
+from ccai.provisioning.cloudprovisionerregistry import (
     CloudProvisionerRegistry
 )
-from automojo.provisioning.provisioningengine import ProvisioningEngine
-from automojo.provisioning.state.provisioningstatestore import (
+from ccai.provisioning.provisioningengine import ProvisioningEngine
+from ccai.provisioning.state.provisioningstatestore import (
     ProvisioningStateStore
 )
 

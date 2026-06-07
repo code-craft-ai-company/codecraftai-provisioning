@@ -8,18 +8,18 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.exceptions import SchemaSemanticError
 
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-from automojo.provisioning.venues.equinix_metal.equinixmetalcloudprovisioner import (
+from ccai.provisioning.venues.equinix_metal.equinixmetalcloudprovisioner import (
     EquinixMetalCloudProvisioner
 )
 
@@ -262,7 +262,7 @@ def test_plan_emits_inplace_update_for_tag_drift(venue, credential,
     provisioner.apply(aspects=aspects)
 
     drifted = basic_spec()
-    drifted.instances[0].tags["automojo:purpose"] = "production"
+    drifted.instances[0].tags["ccai:purpose"] = "production"
     provisioner = _provisioner(
         venue=venue, credential=credential, project_config=project_config,
         spec=drifted, mock_client=mock_client,
@@ -292,7 +292,7 @@ def test_apply_realizes_tag_drift_in_place(venue, credential,
     mock_client.calls.clear()
 
     drifted = basic_spec()
-    drifted.instances[0].tags["automojo:purpose"] = "production"
+    drifted.instances[0].tags["ccai:purpose"] = "production"
     provisioner = _provisioner(
         venue=venue, credential=credential, project_config=project_config,
         spec=drifted, mock_client=mock_client,
@@ -311,7 +311,7 @@ def test_apply_realizes_tag_drift_in_place(venue, credential,
         entry.split("=", 1) for entry in device.get("tags", [])
         if "=" in entry
     )
-    assert observed.get("automojo:purpose") == "production"
+    assert observed.get("ccai:purpose") == "production"
     return
 
 
@@ -329,7 +329,7 @@ def test_reapply_after_tag_drift_is_skip(venue, credential, project_config,
     provisioner.apply(aspects=aspects)
 
     drifted = basic_spec()
-    drifted.instances[0].tags["automojo:purpose"] = "production"
+    drifted.instances[0].tags["ccai:purpose"] = "production"
     provisioner = _provisioner(
         venue=venue, credential=credential, project_config=project_config,
         spec=drifted, mock_client=mock_client,

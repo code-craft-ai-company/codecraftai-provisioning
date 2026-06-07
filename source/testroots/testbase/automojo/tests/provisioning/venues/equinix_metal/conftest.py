@@ -7,20 +7,20 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.credentials.equinixmetalapitokencredential import (
+from ccai.credentials.equinixmetalapitokencredential import (
     EquinixMetalApiTokenCredential
 )
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.equinix_metal.metalprojectconfig import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.equinix_metal.metalprojectconfig import (
     MetalProjectConfig
 )
 
@@ -46,7 +46,7 @@ def project_config() -> MetalProjectConfig:
     """
     rtnval = MetalProjectConfig(
         project_id="proj-test", metro="sv",
-        default_tags={"automojo:component": "test"},
+        default_tags={"ccai:component": "test"},
     )
     return rtnval
 

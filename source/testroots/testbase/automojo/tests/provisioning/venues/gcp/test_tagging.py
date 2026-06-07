@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -16,8 +16,8 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from automojo.provisioning.venues.google.gcperrors import GcpValidationError
-from automojo.provisioning.venues.google.gcptagging import (
+from ccai.provisioning.venues.google.gcperrors import GcpValidationError
+from ccai.provisioning.venues.google.gcptagging import (
     base_resource_labels, from_labels, is_label_conformant,
     sanitise_label_component, to_labels
 )
@@ -56,23 +56,23 @@ def test_to_labels_replaces_illegal_characters() -> None:
     """
         Illegal characters (':', '.') are replaced with underscores.
     """
-    out = to_labels(neutral_tags={"automojo:component": "web.tier"})
-    assert out == {"automojo_component": "web_tier"}
+    out = to_labels(neutral_tags={"ccai:component": "web.tier"})
+    assert out == {"ccai_component": "web_tier"}
     return
 
 
 def test_base_resource_labels_contains_owner_keys() -> None:
     """
-        ``base_resource_labels`` includes the required automojo keys.
+        ``base_resource_labels`` includes the required ccai keys.
     """
     labels = base_resource_labels(
         run_id="r1", resource_name="vpc-a", resource_kind="network",
         extra={"team": "ml"}, defaults={"component": "test"},
     )
-    assert labels["automojo_owned-by"] == "automojo-provisioning"
-    assert labels["automojo_owner"] == "r1"
-    assert labels["automojo_resource-name"] == "vpc-a"
-    assert labels["automojo_resource-kind"] == "network"
+    assert labels["ccai_owned-by"] == "codecraftai-provisioning"
+    assert labels["ccai_owner"] == "r1"
+    assert labels["ccai_resource-name"] == "vpc-a"
+    assert labels["ccai_resource-kind"] == "network"
     assert labels["team"] == "ml"
     assert labels["component"] == "test"
     return

@@ -2,13 +2,13 @@
 
 ## Introduction
 
-The `venue-digitalocean` feature provides `automojo-provisioning` with the ability
+The `venue-digitalocean` feature provides `codecraftai-provisioning` with the ability
 to stand up infrastructure on DigitalOcean.  It implements the `CloudProvisioner`
 lifecycle defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) and maps the
 neutral resource model in [cloud-resource-model](../cloud-resource-model/design.md)
 onto DigitalOcean primitives via the `pydo` SDK surfaced by
-`automojo-interop-digitalocean`.
+`codecraftai-interop-digitalocean`.
 
 The venue covers VPC, Droplet, Cloud Firewall, Block Storage Volume, Spaces (object
 storage), and DNS records.  DigitalOcean has **no native shared-filesystem service
@@ -47,7 +47,7 @@ Every method on `DigitalOceanCloudProvisioner` accepts `aspects: Aspects`.
 #### Acceptance Criteria
 
 1. WHEN `plan(spec, aspects)` is called THE SYSTEM SHALL list resources tagged
-   with the spec's `automojo-run-id` and emit `PlanAction`s.
+   with the spec's `codecraftai-run-id` and emit `PlanAction`s.
 2. WHEN a Droplet's size or backups setting drifts THE SYSTEM SHALL emit
    `UPDATE`; size changes are UPDATE-by-recreate.
 3. WHEN a firewall rule set drifts THE SYSTEM SHALL emit `UPDATE`.

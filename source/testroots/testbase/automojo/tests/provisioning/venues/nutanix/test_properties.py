@@ -9,7 +9,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -18,19 +18,19 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from automojo.restclient.nutanix.aspectsnutanix import AspectsNutanix
-from automojo.restclient.nutanix.model.nutanixtaskhandle import (
+from ccai.restclient.nutanix.aspectsnutanix import AspectsNutanix
+from ccai.restclient.nutanix.model.nutanixtaskhandle import (
     NutanixTaskHandle
 )
 
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.nutanix.nutanixcloudprovisioner import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.nutanix.nutanixcloudprovisioner import (
     NutanixCloudProvisioner
 )
-from automojo.provisioning.venues.nutanix.ntxcategorytranslator import (
+from ccai.provisioning.venues.nutanix.ntxcategorytranslator import (
     NtxCategoryTranslator
 )
 
@@ -111,7 +111,7 @@ def test_destroy_is_inverse_of_apply(tag_pairs):
 def test_category_value_round_trip_identity(tag_pairs):
     """
         Translating neutral tags to Prism Categories and reading them
-        back is the identity (modulo the injected automojo-run-id entry).
+        back is the identity (modulo the injected codecraftai-run-id entry).
     """
     client = MockNutanixClient()
     provisioner = NutanixCloudProvisioner(venue=_venue(), client=client,

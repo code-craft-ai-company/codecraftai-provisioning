@@ -8,17 +8,17 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from typing import Any, Dict, List, Optional
 
-from automojo.interop.hyperv.model.hypervvhdxinfo import HypervVhdxInfo
-from automojo.interop.hyperv.model.hypervvirtualswitch import (
+from ccai.interop.hyperv.model.hypervvhdxinfo import HypervVhdxInfo
+from ccai.interop.hyperv.model.hypervvirtualswitch import (
     HypervVirtualSwitch
 )
-from automojo.interop.hyperv.model.hypervvm import HypervVm
+from ccai.interop.hyperv.model.hypervvm import HypervVm
 
 
 class _SwitchesGroup:

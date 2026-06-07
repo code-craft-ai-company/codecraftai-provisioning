@@ -7,15 +7,15 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from automojo.provisioning.venues.linode.linoderesolver import LinodeResolver
-from automojo.provisioning.venues.linode.linodetagtranslator import (
+from ccai.provisioning.venues.linode.linoderesolver import LinodeResolver
+from ccai.provisioning.venues.linode.linodetagtranslator import (
     LinodeTagTranslator
 )
 

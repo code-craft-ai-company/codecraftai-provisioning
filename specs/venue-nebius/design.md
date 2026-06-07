@@ -5,7 +5,7 @@
 `NebiusCloudProvisioner` realises the neutral resource model on Nebius.  The
 product shape is GPU-cloud-typical: VPC, Subnet, SG, Instance, Disk, GPU
 Cluster (IB-enabled placement), managed file storage, managed object storage.
-All API calls go through `automojo-interop-nebius`'s `NebiusClient` on
+All API calls go through `codecraftai-interop-nebius`'s `NebiusClient` on
 `RestClientBase`.
 
 Nebius's structural choice is the **parent_id** — every resource is anchored
@@ -16,7 +16,7 @@ See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- `automojo-interop-nebius/Agents.md`
+- `codecraftai-interop-nebius/Agents.md`
 
 ---
 
@@ -41,7 +41,7 @@ See Also:
                               │
                               ▼
 ┌──────────────────────────────────────────────────────────────┐
-│        NebiusClient (automojo-interop-nebius)                │
+│        NebiusClient (codecraftai-interop-nebius)                │
 │   vpc / subnet / sg / ssh / gpu-cluster / instance /         │
 │   disk / file-storage / object-storage  REST                 │
 └──────────────────────────────────────────────────────────────┘
@@ -85,7 +85,7 @@ REST call paths used by `apply`:
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/nebius/
+source/packages/ccai/provisioning/venues/nebius/
 ├── __init__.py
 ├── nebiuscloudprovisioner.py
 ├── nebiusresolver.py
@@ -103,7 +103,7 @@ source/packages/automojo/provisioning/venues/nebius/
 
 ## Idempotency
 
-Reads filter by `labels.automojo-run-id`.  GPU Cluster lookups by name
+Reads filter by `labels.codecraftai-run-id`.  GPU Cluster lookups by name
 precede create.  Preset (instance type) changes are UPDATE-by-recreate gated
 on `aspects.confirm`.
 

@@ -8,7 +8,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -17,12 +17,12 @@ import os
 
 import pytest
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.exceptions import SchemaSemanticError
 
-from automojo.provisioning.venues.lambdalabs.lambdalabscloudprovisioner import (
+from ccai.provisioning.venues.lambdalabs.lambdalabscloudprovisioner import (
     LambdalabsCloudProvisioner
 )
-from automojo.provisioning.venues.lambdalabs.llsidecartag import LlSidecarTag
+from ccai.provisioning.venues.lambdalabs.llsidecartag import LlSidecarTag
 
 from ._mockclient import (
     MockLambdalabsClient, RecordingVpnControlPlane

@@ -8,7 +8,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -17,15 +17,15 @@ import os
 
 import pytest
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.exceptions import SchemaSemanticError
 
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-from automojo.provisioning.venues.proxmox.proxmoxcloudprovisioner import (
+from ccai.provisioning.venues.proxmox.proxmoxcloudprovisioner import (
     ProxmoxCloudProvisioner
 )
-from automojo.provisioning.venues.proxmox.pveerrors import (
+from ccai.provisioning.venues.proxmox.pveerrors import (
     ConfirmationRequiredError
 )
 

@@ -7,25 +7,25 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.credentials.basecredential import BaseCredential
-from automojo.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.credentials.basecredential import BaseCredential
+from ccai.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
-from automojo.provisioning.model.cloud.cloudsubnet import CloudSubnet
-from automojo.provisioning.venues.google.gcperrors import GcpValidationError
-from automojo.provisioning.venues.google.googlecloudprovisioner import (
+from ccai.provisioning.model.cloud.cloudsubnet import CloudSubnet
+from ccai.provisioning.venues.google.gcperrors import GcpValidationError
+from ccai.provisioning.venues.google.googlecloudprovisioner import (
     GoogleCloudProvisioner
 )
 
@@ -211,7 +211,7 @@ def test_validate_rejects_load_balancer(make_provisioner, aspects) -> None:
     """
         Load balancers are deferred to v1.5 and rejected at validate.
     """
-    from automojo.provisioning.model.cloud.cloudloadbalancer import (
+    from ccai.provisioning.model.cloud.cloudloadbalancer import (
         CloudLoadBalancer
     )
     spec = basic_spec()

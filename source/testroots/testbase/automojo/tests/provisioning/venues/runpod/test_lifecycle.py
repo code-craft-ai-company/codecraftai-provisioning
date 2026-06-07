@@ -8,23 +8,23 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-from automojo.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
 
-from automojo.provisioning.venues.runpod.rperrors import (
+from ccai.provisioning.venues.runpod.rperrors import (
     ConfirmationRequiredError, RpCapacityError, RpValidationError
 )
-from automojo.provisioning.venues.runpod.rpnaming import pod_name
+from ccai.provisioning.venues.runpod.rpnaming import pod_name
 
-from automojo.tests.provisioning.venues.runpod.testsupport import (
+from ccai.tests.provisioning.venues.runpod.testsupport import (
     FakeGpuType, FakePod, MockRunpodClient, MockVpnControlPlane, TEST_RUN_ID,
     make_gpu_job, make_provisioner, make_service, make_spec
 )
@@ -109,10 +109,10 @@ def test_validate_rejects_unmappable_gpu():
         A workload whose accelerator model has no RunPod GPU type mapping is
         rejected.
     """
-    from automojo.provisioning.model.cloud.cloudacceleratorspec import (
+    from ccai.provisioning.model.cloud.cloudacceleratorspec import (
         CloudAcceleratorSpec
     )
-    from automojo.provisioning.model.workload.workloadjob import WorkloadJob
+    from ccai.provisioning.model.workload.workloadjob import WorkloadJob
 
     bad_accel = CloudAcceleratorSpec(kind="GPU", model="TPU_V5",
                                      count=1, memory_gb=32)

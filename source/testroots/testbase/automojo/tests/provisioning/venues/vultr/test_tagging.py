@@ -7,14 +7,14 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from automojo.provisioning.venues.vultr.vultrtagtranslator import (
+from ccai.provisioning.venues.vultr.vultrtagtranslator import (
     VultrTagTranslator
 )
 

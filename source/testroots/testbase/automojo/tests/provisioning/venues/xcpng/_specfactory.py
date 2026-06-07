@@ -7,30 +7,30 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from typing import Dict, List, Optional
 
-from automojo.provisioning.model.cloud.clouddnsrecord import CloudDnsRecord
-from automojo.provisioning.model.cloud.cloudimage import CloudImage
-from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.provisioning.model.cloud.clouddnsrecord import CloudDnsRecord
+from ccai.provisioning.model.cloud.cloudimage import CloudImage
+from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.cloudloadbalancer import (
+from ccai.provisioning.model.cloud.cloudloadbalancer import (
     CloudLoadBalancer
 )
-from automojo.provisioning.model.cloud.cloudnetwork import CloudNetwork
-from automojo.provisioning.model.cloud.cloudobjectbucket import (
+from ccai.provisioning.model.cloud.cloudnetwork import CloudNetwork
+from ccai.provisioning.model.cloud.cloudobjectbucket import (
     CloudObjectBucket
 )
-from automojo.provisioning.model.cloud.cloudstoragevolume import (
+from ccai.provisioning.model.cloud.cloudstoragevolume import (
     CloudStorageVolume
 )
-from automojo.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
-from automojo.provisioning.venues.xcpng.xcpngspec import XcpngSpec
+from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.provisioning.venues.xcpng.xcpngspec import XcpngSpec
 
 
 def make_image() -> CloudImage:

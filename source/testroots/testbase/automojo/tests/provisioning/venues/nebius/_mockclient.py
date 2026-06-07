@@ -8,26 +8,26 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from typing import Any, List, Optional, Tuple
 
-from automojo.restclient.nebius.model.nebiusvpc import NebiusVpc
-from automojo.restclient.nebius.model.nebiussubnet import NebiusSubnet
-from automojo.restclient.nebius.model.nebiussecuritygroup import (
+from ccai.restclient.nebius.model.nebiusvpc import NebiusVpc
+from ccai.restclient.nebius.model.nebiussubnet import NebiusSubnet
+from ccai.restclient.nebius.model.nebiussecuritygroup import (
     NebiusSecurityGroup
 )
-from automojo.restclient.nebius.model.nebiussshkey import NebiusSshKey
-from automojo.restclient.nebius.model.nebiusdisk import NebiusDisk
-from automojo.restclient.nebius.model.nebiusplacementgroup import (
+from ccai.restclient.nebius.model.nebiussshkey import NebiusSshKey
+from ccai.restclient.nebius.model.nebiusdisk import NebiusDisk
+from ccai.restclient.nebius.model.nebiusplacementgroup import (
     NebiusPlacementGroup
 )
-from automojo.restclient.nebius.model.nebiusvm import NebiusVm
-from automojo.restclient.nebius.model.nebiusfilesystem import NebiusFilesystem
-from automojo.restclient.nebius.model.nebiusmounttarget import NebiusMountTarget
-from automojo.restclient.nebius.model.nebiustaskhandle import NebiusTaskHandle
+from ccai.restclient.nebius.model.nebiusvm import NebiusVm
+from ccai.restclient.nebius.model.nebiusfilesystem import NebiusFilesystem
+from ccai.restclient.nebius.model.nebiusmounttarget import NebiusMountTarget
+from ccai.restclient.nebius.model.nebiustaskhandle import NebiusTaskHandle
 
 
 class _State:

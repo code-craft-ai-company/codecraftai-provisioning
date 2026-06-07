@@ -8,23 +8,23 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from typing import Any, Dict, List
 
-from automojo.restclient.lambdalabs.model.lambdalabscluster import (
+from ccai.restclient.lambdalabs.model.lambdalabscluster import (
     LambdalabsCluster
 )
-from automojo.restclient.lambdalabs.model.lambdalabsfilesystem import (
+from ccai.restclient.lambdalabs.model.lambdalabsfilesystem import (
     LambdalabsFilesystem
 )
-from automojo.restclient.lambdalabs.model.lambdalabsinstance import (
+from ccai.restclient.lambdalabs.model.lambdalabsinstance import (
     LambdalabsInstance
 )
-from automojo.restclient.lambdalabs.model.lambdalabssshkey import LambdalabsSshKey
-from automojo.restclient.lambdalabs.model.lambdalabsterminationresult import (
+from ccai.restclient.lambdalabs.model.lambdalabssshkey import LambdalabsSshKey
+from ccai.restclient.lambdalabs.model.lambdalabsterminationresult import (
     LambdalabsTerminationResult
 )
 

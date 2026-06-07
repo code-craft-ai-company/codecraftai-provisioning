@@ -7,24 +7,24 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.credentials.gcpserviceaccountkeycredential import (
+from ccai.credentials.gcpserviceaccountkeycredential import (
     GcpServiceAccountKeyCredential
 )
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.google.gcpregionconfig import GcpRegionConfig
-from automojo.provisioning.venues.google.gcpsessionfactory import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.google.gcpregionconfig import GcpRegionConfig
+from ccai.provisioning.venues.google.gcpsessionfactory import (
     SERVICE_COMPUTE, SERVICE_TPU, SERVICE_STORAGE, SERVICE_DNS
 )
-from automojo.provisioning.venues.google.googlecloudprovisioner import (
+from ccai.provisioning.venues.google.googlecloudprovisioner import (
     GoogleCloudProvisioner
 )
 
@@ -40,7 +40,7 @@ def credential() -> GcpServiceAccountKeyCredential:
     """
     rtnval = GcpServiceAccountKeyCredential(
         identifier="gcp-test", categories=["cloud-venue"],
-        project_id="automojo-test", client_email="svc@automojo-test.iam"
+        project_id="codecraftai-test", client_email="svc@codecraftai-test.iam"
                                                  ".gserviceaccount.com",
         private_key_id="abcdef0123456789",
         private_key="-----BEGIN PRIVATE KEY-----\nFAKE\n"
@@ -55,9 +55,9 @@ def region_config() -> GcpRegionConfig:
         Return a deterministic GcpRegionConfig.
     """
     rtnval = GcpRegionConfig(
-        project="automojo-test", region="us-central1",
+        project="codecraftai-test", region="us-central1",
         zone="us-central1-a",
-        default_tags={"automojo:component": "test"},
+        default_tags={"ccai:component": "test"},
     )
     return rtnval
 
@@ -69,7 +69,7 @@ def venue() -> CloudVenue:
     """
     rtnval = CloudVenue(
         name="gcp-test", provider="gcp",
-        account="automojo-test",
+        account="codecraftai-test",
         region="us-central1", credential="gcp-test",
     )
     return rtnval
