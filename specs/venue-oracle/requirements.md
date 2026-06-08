@@ -2,12 +2,12 @@
 
 ## Introduction
 
-The `venue-oracle` feature provides `automojo-provisioning` with the ability to
+The `venue-oracle` feature provides `codecraftai-provisioning` with the ability to
 stand up infrastructure on Oracle Cloud Infrastructure.  It implements the
 `CloudProvisioner` lifecycle defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) and maps the
 neutral resource model in [cloud-resource-model](../cloud-resource-model/design.md)
-onto OCI primitives via the `oci` SDK surfaced by `automojo-interop-oracle`.
+onto OCI primitives via the `oci` SDK surfaced by `codecraftai-interop-oracle`.
 
 The venue covers VCN (Virtual Cloud Network), Subnet, Security List (and
 optionally Network Security Groups), Compute Instance, Block Volume, Object
@@ -45,7 +45,7 @@ Every method on `OracleCloudProvisioner` accepts `aspects: Aspects`.
 #### Acceptance Criteria
 
 1. WHEN `plan(spec, aspects)` is called THE SYSTEM SHALL list resources by the
-   `automojo-run-id` freeform tag and emit `PlanAction`s.
+   `codecraftai-run-id` freeform tag and emit `PlanAction`s.
 2. WHEN security-list rules drift THE SYSTEM SHALL emit `UPDATE`.
 
 ---

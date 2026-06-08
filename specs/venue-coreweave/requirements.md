@@ -2,14 +2,14 @@
 
 ## Introduction
 
-The `venue-coreweave` feature provides `automojo-provisioning` with the ability
+The `venue-coreweave` feature provides `codecraftai-provisioning` with the ability
 to stand up GPU workloads on CoreWeave Cloud (CKS — CoreWeave Kubernetes
 Service).  It implements the **`WorkloadProvisioner`** lifecycle per PLAN
 §7.2: `validate / plan / apply / destroy / inventory` on `WorkloadCluster`,
 `WorkloadJob`, and `WorkloadService` rather than on `CloudInstance`.  It
-composes `automojo-interop-kubernetes` (the official Python K8s client wrapped
+composes `codecraftai-interop-kubernetes` (the official Python K8s client wrapped
 in Aspects per IMPLEMENTATION-PLAN §1.17) to talk to the cluster, and
-`automojo-interop-coreweave` to mint a kubeconfig and to interrogate
+`codecraftai-interop-coreweave` to mint a kubeconfig and to interrogate
 CoreWeave-specific machine types and node pools.
 
 Per PLAN §7.6: CoreWeave auth flow is "mint kubeconfig, then drive Kubernetes."
@@ -95,7 +95,7 @@ Every method on `CoreweaveWorkloadProvisioner` accepts `aspects: Aspects`.
 #### Acceptance Criteria
 
 1. WHEN `inventory(spec, aspects)` is called THE SYSTEM SHALL list all K8s
-   resources carrying the `automojo-run-id` label and emit
+   resources carrying the `codecraftai-run-id` label and emit
    `ProvisionedResource` records with Pod IPs and Service endpoints.
 
 ---

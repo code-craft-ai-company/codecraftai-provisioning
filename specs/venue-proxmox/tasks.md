@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/proxmox/` tree per `design.md`.
-- [x] 2. Add `automojo-interop-proxmox` dep.
+- [x] 2. Add `codecraftai-interop-proxmox` dep.
 - [x] 3. Declare `PveValidationError`, `PveConflictError`,
   `ConfirmationRequiredError` in `pveerrors.py`.
 

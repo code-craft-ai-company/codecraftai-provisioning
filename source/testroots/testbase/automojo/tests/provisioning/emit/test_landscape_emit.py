@@ -7,22 +7,22 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import unittest
 
-from automojo.provisioning.model.cloud.provisionedresource import (
+from ccai.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.landscape.deviceaddressblock import (
+from ccai.provisioning.landscape.deviceaddressblock import (
     DeviceAddressBlock
 )
-from automojo.provisioning.landscape.landscapeemitter import LandscapeEmitter
+from ccai.provisioning.landscape.landscapeemitter import LandscapeEmitter
 
 
 class _FakeControlPlane:

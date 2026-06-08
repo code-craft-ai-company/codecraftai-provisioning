@@ -7,20 +7,20 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.credentials.linodeapitokencredential import (
+from ccai.credentials.linodeapitokencredential import (
     LinodeApiTokenCredential
 )
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.linode.linoderegionconfig import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.linode.linoderegionconfig import (
     LinodeRegionConfig
 )
 
@@ -46,7 +46,7 @@ def region_config() -> LinodeRegionConfig:
     """
     rtnval = LinodeRegionConfig(
         region="us-east", object_storage_cluster="us-east-1",
-        default_tags={"automojo:component": "test"},
+        default_tags={"ccai:component": "test"},
     )
     return rtnval
 

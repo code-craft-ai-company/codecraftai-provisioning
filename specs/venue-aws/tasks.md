@@ -4,7 +4,7 @@
 
 - [x] 1. Create `provisioning/venues/aws/` module tree with the file layout from
   `design.md`.
-- [x] 2. Add `automojo-interop-aws` and `boto3` to `pyproject.toml`.
+- [x] 2. Add `codecraftai-interop-aws` and `boto3` to `pyproject.toml`.
 - [x] 3. Declare `AwsValidationError`, `AwsConflictError`, `AwsCapacityError`,
   `ConfirmationRequiredError` in `awserrors.py`.
 

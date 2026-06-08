@@ -29,7 +29,7 @@ resumability and destroy contracts that the lifecycle layer depends on.
    - `result.yaml` — `Dict[venue_name, ProvisioningResult]`, updated atomically
      after each stage.
    - `inventory.yaml` — full `Dict[venue_name, List[ProvisionedResource]]`.
-   - `landscape.yaml` — block consumable by `automojo-landscaping` (see
+   - `landscape.yaml` — block consumable by `codecraftai-landscaping` (see
      [landscape-inventory-emit](../landscape-inventory-emit/design.md)).
    - `stages.log` — per-stage entry/exit/duration records.
 3. WHEN any of the YAML files is written THE SYSTEM SHALL write to a `.tmp` file

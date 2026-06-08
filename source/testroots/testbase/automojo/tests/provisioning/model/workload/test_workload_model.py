@@ -7,23 +7,23 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import unittest
 
-from automojo.provisioning.model.exceptions import SchemaValidationError
-from automojo.provisioning.model.workload.workloadvenue import WorkloadVenue
-from automojo.provisioning.model.workload.workloadvenuekind import (
+from ccai.provisioning.model.exceptions import SchemaValidationError
+from ccai.provisioning.model.workload.workloadvenue import WorkloadVenue
+from ccai.provisioning.model.workload.workloadvenuekind import (
     WorkloadVenueKind
 )
-from automojo.provisioning.model.workload.nodepoolspec import NodePoolSpec
-from automojo.provisioning.model.workload.autoscalingspec import AutoscalingSpec
-from automojo.provisioning.model.workload.workloadcluster import WorkloadCluster
-from automojo.provisioning.model.workload.workloadjob import WorkloadJob
-from automojo.provisioning.model.workload.workloadservice import WorkloadService
-from automojo.provisioning.model.workload.workloadprovisioner import (
+from ccai.provisioning.model.workload.nodepoolspec import NodePoolSpec
+from ccai.provisioning.model.workload.autoscalingspec import AutoscalingSpec
+from ccai.provisioning.model.workload.workloadcluster import WorkloadCluster
+from ccai.provisioning.model.workload.workloadjob import WorkloadJob
+from ccai.provisioning.model.workload.workloadservice import WorkloadService
+from ccai.provisioning.model.workload.workloadprovisioner import (
     WorkloadProvisioner
 )
 

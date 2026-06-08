@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -15,8 +15,8 @@ import unittest
 
 from hypothesis import given, settings, strategies as st
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
-from automojo.provisioning.dependencygraph import (
+from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.dependencygraph import (
     DependencyGraph, build_dependency_graph,
 )
 

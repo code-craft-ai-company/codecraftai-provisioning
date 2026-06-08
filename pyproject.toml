@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "automojo-provisioning"
-description = "Automation Mojo - Provisioning Package"
+name = "codecraftai-provisioning"
+description = "Code Craft AI - Provisioning Package"
 version = "0.0.1"
 authors = [
     "Myron Walker"
@@ -15,37 +15,37 @@ classifiers = [
 keywords = [
     "python",
     "automation",
-    "automojo",
+    "ccai",
     "provisioning",
     "cloud"
 ]
-packages = [{include="automojo", from="source/packages"}]
+packages = [{include="ccai", from="source/packages"}]
 include = [
-    { path = "source/packages/automojo/provisioning/model/cloud/accelerators.yaml", format = ["sdist", "wheel"] }
+    { path = "source/packages/ccai/provisioning/model/cloud/accelerators.yaml", format = ["sdist", "wheel"] }
 ]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
 pyyaml = "^6.0.2"
 requests = "^2.32.5"
-automojo-errors = { git = "https://github.com/automationmojo/automojo-errors.git", branch = "main" }
-automojo-interfaces = { git = "https://github.com/automationmojo/automojo-interfaces.git", branch = "main" }
-automojo-credentials = { git = "https://github.com/automationmojo/automojo-credentials.git", branch = "main" }
-automojo-restclient-base = { git = "https://github.com/automationmojo/automojo-restclient-base.git", branch = "main" }
-automojo-configuration = { git = "https://github.com/automationmojo/automojo-configuration.git", branch = "main" }
-automojo-landscaping = { git = "https://github.com/automationmojo/automojo-landscaping.git", branch = "main" }
-automojo-restclient-vsphere = { git = "https://github.com/automationmojo/automojo-restclient-vsphere.git", branch = "main" }
-automojo-interop-kubernetes = { git = "https://github.com/automationmojo/automojo-interop-kubernetes.git", branch = "main" }
-automojo-restclient-coreweave = { git = "https://github.com/automationmojo/automojo-restclient-coreweave.git", branch = "main" }
-automojo-restclient-lambdalabs = { git = "https://github.com/automationmojo/automojo-restclient-lambdalabs.git", branch = "main" }
-automojo-restclient-crusoe = { git = "https://github.com/automationmojo/automojo-restclient-crusoe.git", branch = "main" }
-automojo-restclient-nebius = { git = "https://github.com/automationmojo/automojo-restclient-nebius.git", branch = "main" }
-automojo-restclient-runpod = { git = "https://github.com/automationmojo/automojo-restclient-runpod.git", branch = "main" }
-automojo-restclient-proxmox = { git = "https://github.com/automationmojo/automojo-restclient-proxmox.git", branch = "main" }
-automojo-interop-libvirt = { git = "https://github.com/automationmojo/automojo-interop-libvirt.git", branch = "main" }
-automojo-interop-xen = { git = "https://github.com/automationmojo/automojo-interop-xen.git", branch = "main" }
-automojo-interop-hyperv = { git = "https://github.com/automationmojo/automojo-interop-hyperv.git", branch = "main" }
-automojo-restclient-nutanix = { git = "https://github.com/automationmojo/automojo-restclient-nutanix.git", branch = "main" }
+codecraftai-errors = { git = "https://github.com/automationmojo/codecraftai-errors.git", branch = "main" }
+codecraftai-interfaces = { git = "https://github.com/automationmojo/codecraftai-interfaces.git", branch = "main" }
+codecraftai-credentials = { git = "https://github.com/automationmojo/codecraftai-credentials.git", branch = "main" }
+codecraftai-restclient-base = { git = "https://github.com/automationmojo/codecraftai-restclient-base.git", branch = "main" }
+codecraftai-configuration = { git = "https://github.com/automationmojo/codecraftai-configuration.git", branch = "main" }
+codecraftai-landscaping = { git = "https://github.com/automationmojo/codecraftai-landscaping.git", branch = "main" }
+codecraftai-restclient-vsphere = { git = "https://github.com/automationmojo/codecraftai-restclient-vsphere.git", branch = "main" }
+codecraftai-interop-kubernetes = { git = "https://github.com/automationmojo/codecraftai-interop-kubernetes.git", branch = "main" }
+codecraftai-restclient-coreweave = { git = "https://github.com/automationmojo/codecraftai-restclient-coreweave.git", branch = "main" }
+codecraftai-restclient-lambdalabs = { git = "https://github.com/automationmojo/codecraftai-restclient-lambdalabs.git", branch = "main" }
+codecraftai-restclient-crusoe = { git = "https://github.com/automationmojo/codecraftai-restclient-crusoe.git", branch = "main" }
+codecraftai-restclient-nebius = { git = "https://github.com/automationmojo/codecraftai-restclient-nebius.git", branch = "main" }
+codecraftai-restclient-runpod = { git = "https://github.com/automationmojo/codecraftai-restclient-runpod.git", branch = "main" }
+codecraftai-restclient-proxmox = { git = "https://github.com/automationmojo/codecraftai-restclient-proxmox.git", branch = "main" }
+codecraftai-interop-libvirt = { git = "https://github.com/automationmojo/codecraftai-interop-libvirt.git", branch = "main" }
+codecraftai-interop-xen = { git = "https://github.com/automationmojo/codecraftai-interop-xen.git", branch = "main" }
+codecraftai-interop-hyperv = { git = "https://github.com/automationmojo/codecraftai-interop-hyperv.git", branch = "main" }
+codecraftai-restclient-nutanix = { git = "https://github.com/automationmojo/codecraftai-restclient-nutanix.git", branch = "main" }
 
 [tool.poetry.group.cloud-sdks]
 optional = true

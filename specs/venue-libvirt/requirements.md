@@ -2,13 +2,13 @@
 
 ## Introduction
 
-The `venue-libvirt` feature provides `automojo-provisioning` with the ability to
+The `venue-libvirt` feature provides `codecraftai-provisioning` with the ability to
 stand up VMs on a single libvirt host or a small farm.  It implements the
 `CloudProvisioner` lifecycle defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) and maps the
 neutral resource model in [cloud-resource-model](../cloud-resource-model/design.md)
 onto libvirt primitives via the `libvirt-python` bindings surfaced by
-`automojo-interop-libvirt` (not REST — native bindings; the bindings are wrapped
+`codecraftai-interop-libvirt` (not REST — native bindings; the bindings are wrapped
 behind a connection-pool abstraction).
 
 The venue covers Network (libvirt `network` XML, NAT or bridged), Storage Pool
@@ -43,7 +43,7 @@ Every method on `LibvirtCloudProvisioner` accepts `aspects: Aspects`.
 #### Acceptance Criteria
 
 1. WHEN `plan(spec, aspects)` is called THE SYSTEM SHALL list Domains, Networks,
-   and Volumes whose metadata contains the `automojo-run-id` element.
+   and Volumes whose metadata contains the `codecraftai-run-id` element.
 2. WHEN Domain XML drifts (vCPUs, memory, disk count) THE SYSTEM SHALL emit
    `UPDATE` where libvirt supports live edit, otherwise UPDATE-by-recreate.
 
@@ -96,8 +96,8 @@ deterministically, so plan and inventory queries are reliable.
 #### Acceptance Criteria
 
 1. WHEN translating neutral tags THE SYSTEM SHALL embed them inside the Domain
-   XML `<metadata><automojo:tags>...</automojo:tags></metadata>` block using
-   the namespace `https://automationmojo.com/provisioning/v1`.
+   XML `<metadata><ccai:tags>...</ccai:tags></metadata>` block using
+   the namespace `https://code-craft.ai/provisioning/v1`.
 2. WHEN reading Domain XML back THE SYSTEM SHALL recover the neutral tag list
    such that round-tripping is the identity.
 

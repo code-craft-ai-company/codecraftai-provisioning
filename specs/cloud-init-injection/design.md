@@ -126,7 +126,7 @@ this by emitting NO additional hostname registration step (per §3 plan asymmetr
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/cloudinit/
+source/packages/ccai/provisioning/cloudinit/
 ├── vpncloudinitrenderer.py        # render_cloud_init
 ├── azurecserenderer.py            # render_azure_cse
 ├── vsphereguestcustomizationrenderer.py
@@ -141,9 +141,9 @@ source/packages/automojo/provisioning/cloudinit/
   renderer contract.
 - [provisioning-engine-pipeline](../provisioning-engine-pipeline/design.md) —
   invokes the renderer during `BOOTSTRAP_VPN`.
-- `automojo-credentials/specs/tailscale-credentials` — auth-key source.
-- `automojo-credentials/specs/twingate-credentials` — connector token source.
-- `automojo-interop-vsphere/specs/vsphere-guest-customization` — consumer of the
+- `codecraftai-credentials/specs/tailscale-credentials` — auth-key source.
+- `codecraftai-credentials/specs/twingate-credentials` — connector token source.
+- `codecraftai-interop-vsphere/specs/vsphere-guest-customization` — consumer of the
   vSphere wrapper.
 - venue plugins (aws, azure, gcp, ...): each call the renderer at instance-create
   time.

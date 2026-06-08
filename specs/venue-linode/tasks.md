@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/linode/` tree per `design.md`.
-- [ ] 2. Add `automojo-interop-linode` + `linode_api4` deps. (deferred: cross-repo dependency wiring owned by package packaging step)
+- [ ] 2. Add `codecraftai-interop-linode` + `linode_api4` deps. (deferred: cross-repo dependency wiring owned by package packaging step)
 - [x] 3. Declare `LinodeValidationError`, `LinodeConflictError`,
   `ConfirmationRequiredError` in `linodeerrors.py`.
 

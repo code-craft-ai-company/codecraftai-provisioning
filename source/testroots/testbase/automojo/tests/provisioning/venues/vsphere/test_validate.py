@@ -7,26 +7,26 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.cloudloadbalancer import (
+from ccai.provisioning.model.cloud.cloudloadbalancer import (
     CloudLoadBalancer
 )
-from automojo.provisioning.model.cloud.cloudobjectbucket import (
+from ccai.provisioning.model.cloud.cloudobjectbucket import (
     CloudObjectBucket
 )
-from automojo.provisioning.venues.vsphere.vserrors import VsValidationError
-from automojo.provisioning.venues.vsphere.vspherecloudprovisioner import (
+from ccai.provisioning.venues.vsphere.vserrors import VsValidationError
+from ccai.provisioning.venues.vsphere.vspherecloudprovisioner import (
     VSphereCloudProvisioner
 )
-from automojo.provisioning.venues.vsphere.vspherevenueconfig import (
+from ccai.provisioning.venues.vsphere.vspherevenueconfig import (
     VSphereVenueConfig
 )
 
@@ -109,7 +109,7 @@ def test_validate_accepts_lb_with_nsx(venue, credential) -> None:
     """
     config = VSphereVenueConfig(
         host="vcenter.lab", datacenter="DC1", cluster="Cluster1",
-        folder="/DC1/vm/automojo", content_library_ids=["lib-1"],
+        folder="/DC1/vm/ccai", content_library_ids=["lib-1"],
         nsx_available=True, subnet_vlan_ids={"pg-a": 1020},
     )
     spec = basic_spec()

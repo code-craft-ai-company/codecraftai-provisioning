@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/libvirt/` tree per `design.md`.
-- [ ] 2. Add `automojo-interop-libvirt` + `libvirt-python` deps. (deferred: cross-repo dependency wiring owned by package packaging step)
+- [ ] 2. Add `codecraftai-interop-libvirt` + `libvirt-python` deps. (deferred: cross-repo dependency wiring owned by package packaging step)
 - [x] 3. Declare `LvValidationError`, `LvConflictError`,
   `ConfirmationRequiredError` in `lverrors.py`.
 

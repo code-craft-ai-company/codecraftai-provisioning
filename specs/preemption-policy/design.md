@@ -125,7 +125,7 @@ others default to `False`.
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/preemption/
+source/packages/ccai/provisioning/preemption/
 ├── preemptionpolicy.py
 ├── preemptionevent.py
 ├── preemptionhandler.py        # handle_preemption()

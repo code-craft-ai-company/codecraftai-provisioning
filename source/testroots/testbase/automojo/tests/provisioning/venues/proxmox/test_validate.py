@@ -7,24 +7,24 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.model.cloud.cloudimage import CloudImage
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.provisioning.model.cloud.cloudimage import CloudImage
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
-from automojo.provisioning.venues.proxmox.proxmoxcloudprovisioner import (
+from ccai.provisioning.venues.proxmox.proxmoxcloudprovisioner import (
     ProxmoxCloudProvisioner
 )
-from automojo.provisioning.venues.proxmox.proxmoxspec import ProxmoxSpec
-from automojo.provisioning.venues.proxmox.pveerrors import PveValidationError
+from ccai.provisioning.venues.proxmox.proxmoxspec import ProxmoxSpec
+from ccai.provisioning.venues.proxmox.pveerrors import PveValidationError
 
 from ._mockclient import MockProxmoxClient
 from ._specfactory import (
@@ -76,7 +76,7 @@ def test_validate_dns_record_is_warning(venue, aspects):
     """
         DNS records produce a warning rather than an error.
     """
-    from automojo.provisioning.model.cloud.clouddnsrecord import (
+    from ccai.provisioning.model.cloud.clouddnsrecord import (
         CloudDnsRecord
     )
 

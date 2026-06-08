@@ -7,32 +7,32 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.credentials.basecredential import BaseCredential
-from automojo.provisioning.model.cloud.cloudimage import CloudImage
-from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
-from automojo.provisioning.model.exceptions import SchemaSemanticError
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.credentials.basecredential import BaseCredential
+from ccai.provisioning.model.cloud.cloudimage import CloudImage
+from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
+from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.cloudobjectbucket import (
+from ccai.provisioning.model.cloud.cloudobjectbucket import (
     CloudObjectBucket
 )
-from automojo.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
-from automojo.provisioning.venues.hetzner.hetznercloudprovisioner import (
+from ccai.provisioning.venues.hetzner.hetznercloudprovisioner import (
     HetznerCloudProvisioner
 )
-from automojo.provisioning.venues.hetzner.hetznererrors import (
+from ccai.provisioning.venues.hetzner.hetznererrors import (
     HetznerValidationError
 )
-from automojo.provisioning.venues.hetzner.hetznerspec import HetznerSpec
+from ccai.provisioning.venues.hetzner.hetznerspec import HetznerSpec
 
 from ._specfactory import basic_spec
 

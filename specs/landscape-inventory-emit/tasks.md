@@ -39,5 +39,5 @@
 
 ## Documentation
 
-- [x] 26. Cross-link `automojo-landscaping/specs/landscape-yaml-schema` (target schema)
+- [x] 26. Cross-link `codecraftai-landscaping/specs/landscape-yaml-schema` (target schema)
 - [x] 27. Document the partial-apply behaviour in the module docstring

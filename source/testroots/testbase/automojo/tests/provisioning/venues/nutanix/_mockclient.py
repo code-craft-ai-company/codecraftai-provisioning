@@ -8,25 +8,25 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from typing import Any, Dict, List, Optional
 
-from automojo.restclient.nutanix.model.nutanixcategory import NutanixCategory
-from automojo.restclient.nutanix.model.nutanixcluster import NutanixCluster
-from automojo.restclient.nutanix.model.nutaniximage import NutanixImage
-from automojo.restclient.nutanix.model.nutanixsecuritypolicy import (
+from ccai.restclient.nutanix.model.nutanixcategory import NutanixCategory
+from ccai.restclient.nutanix.model.nutanixcluster import NutanixCluster
+from ccai.restclient.nutanix.model.nutaniximage import NutanixImage
+from ccai.restclient.nutanix.model.nutanixsecuritypolicy import (
     NutanixSecurityPolicy
 )
-from automojo.restclient.nutanix.model.nutanixsubnet import NutanixSubnet
-from automojo.restclient.nutanix.model.nutanixtaskstatus import NutanixTaskStatus
-from automojo.restclient.nutanix.model.nutanixvm import NutanixVm
-from automojo.restclient.nutanix.model.nutanixvolumegroup import (
+from ccai.restclient.nutanix.model.nutanixsubnet import NutanixSubnet
+from ccai.restclient.nutanix.model.nutanixtaskstatus import NutanixTaskStatus
+from ccai.restclient.nutanix.model.nutanixvm import NutanixVm
+from ccai.restclient.nutanix.model.nutanixvolumegroup import (
     NutanixVolumeGroup
 )
-from automojo.restclient.nutanix.model.nutanixvpc import NutanixVpc
+from ccai.restclient.nutanix.model.nutanixvpc import NutanixVpc
 
 
 class _MockTaskHandle:

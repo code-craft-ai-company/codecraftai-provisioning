@@ -7,11 +7,11 @@ not a `CloudProvisioner`.  The unit of provisioning is a Kubernetes workload
 graph (Deployments / StatefulSets / Jobs / Services / Ingresses / PVCs), not
 a VM.  The provisioner composes two interop clients:
 
-1. `automojo-interop-coreweave` — minimal client that authenticates with a
+1. `codecraftai-interop-coreweave` — minimal client that authenticates with a
    `CoreweaveApiCredential`, mints a kubeconfig (TTL-managed), enumerates
    node pools, and exposes CoreWeave-specific machine type metadata.
-2. `automojo-interop-kubernetes` — the official K8s Python client wrapped in
-   the automojo Aspects pattern (IMPLEMENTATION-PLAN §1.17).  All actual
+2. `codecraftai-interop-kubernetes` — the official K8s Python client wrapped in
+   the ccai Aspects pattern (IMPLEMENTATION-PLAN §1.17).  All actual
    resource calls go here.
 
 PLAN §7.6 commits CoreWeave to the "mint kubeconfig, chain to K8s" auth flow.
@@ -25,8 +25,8 @@ See Also:
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [workload-venue-model](../workload-venue-model/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- `automojo-interop-coreweave/Agents.md`
-- `automojo-interop-kubernetes/specs/kubernetes-client/design.md`
+- `codecraftai-interop-coreweave/Agents.md`
+- `codecraftai-interop-kubernetes/specs/kubernetes-client/design.md`
 
 ---
 
@@ -52,7 +52,7 @@ See Also:
      ▼                                       ▼
 ┌──────────────────────────┐    ┌──────────────────────────────┐
 │ CoreweaveClient          │    │ KubernetesClient             │
-│ automojo-interop-coreweave│   │ automojo-interop-kubernetes  │
+│ codecraftai-interop-coreweave│   │ codecraftai-interop-kubernetes  │
 │  mint_kubeconfig         │    │  apply_manifest / get / ...  │
 └──────────────────────────┘    └──────────────────────────────┘
 ```
@@ -90,7 +90,7 @@ Call paths used by `apply`:
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/coreweave/
+source/packages/ccai/provisioning/venues/coreweave/
 ├── __init__.py
 ├── coreweaveworkloadprovisioner.py
 ├── cwnodepoolselector.py        # accelerator → node pool selector
@@ -111,7 +111,7 @@ source/packages/automojo/provisioning/venues/coreweave/
 
 The K8s interop's `apply_manifest` is server-side apply (or
 `create-or-replace`) and is idempotent at the API level.  Re-applying an
-unchanged manifest is a SKIP.  The provisioner adds the `automojo-run-id`
+unchanged manifest is a SKIP.  The provisioner adds the `codecraftai-run-id`
 label to every resource and queries by it during plan/inventory.  Kubeconfig
 freshness is re-checked at each call and re-minted if expired.
 

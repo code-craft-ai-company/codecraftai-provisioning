@@ -9,25 +9,25 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from hypothesis import given, settings, strategies as st
 
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.xcpng.xcpngcloudprovisioner import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.xcpng.xcpngcloudprovisioner import (
     XcpngCloudProvisioner
 )
-from automojo.provisioning.venues.xcpng.xentagtranslator import (
+from ccai.provisioning.venues.xcpng.xentagtranslator import (
     XenTagTranslator
 )
-from automojo.provisioning.venues.xcpng.xcpngspec import XcpngSpec
+from ccai.provisioning.venues.xcpng.xcpngspec import XcpngSpec
 
-from automojo.interop.xen.model.xenvm import XenVm
+from ccai.interop.xen.model.xenvm import XenVm
 
 from ._mockclient import MockXenClient, RecordingVpnControlPlane
 from ._specfactory import make_instance, make_network

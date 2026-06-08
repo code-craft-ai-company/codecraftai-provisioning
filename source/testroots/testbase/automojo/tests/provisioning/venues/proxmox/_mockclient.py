@@ -8,17 +8,17 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from typing import Any, Dict, List
 
-from automojo.restclient.proxmox.model.proxmoxnetworkinterface import (
+from ccai.restclient.proxmox.model.proxmoxnetworkinterface import (
     ProxmoxNetworkInterface
 )
-from automojo.restclient.proxmox.model.proxmoxnode import ProxmoxNode
-from automojo.restclient.proxmox.model.proxmoxvmstatus import ProxmoxVmStatus
+from ccai.restclient.proxmox.model.proxmoxnode import ProxmoxNode
+from ccai.restclient.proxmox.model.proxmoxvmstatus import ProxmoxVmStatus
 
 
 class _MockTaskHandle:

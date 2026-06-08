@@ -104,7 +104,7 @@ shared_fs_mounts:  Optional[List[SharedFsMountSpec]]    = None
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/model/cloud/
+source/packages/ccai/provisioning/model/cloud/
 ├── cloudacceleratorspec.py
 ├── cloudinterconnect.py
 ├── cloudsharedfilesystem.py

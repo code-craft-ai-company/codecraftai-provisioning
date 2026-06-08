@@ -8,34 +8,34 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.cloudloadbalancer import (
+from ccai.provisioning.model.cloud.cloudloadbalancer import (
     CloudLoadBalancer
 )
-from automojo.provisioning.model.cloud.cloudobjectbucket import (
+from ccai.provisioning.model.cloud.cloudobjectbucket import (
     CloudObjectBucket
 )
-from automojo.provisioning.model.cloud.cloudsecuritygroup import (
+from ccai.provisioning.model.cloud.cloudsecuritygroup import (
     CloudSecurityGroup
 )
-from automojo.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
-from automojo.provisioning.model.cloud.cloudstoragevolume import (
+from ccai.provisioning.model.cloud.cloudstoragevolume import (
     CloudStorageVolume
 )
-from automojo.provisioning.venues.equinix_metal.equinixmetalcloudprovisioner import (
+from ccai.provisioning.venues.equinix_metal.equinixmetalcloudprovisioner import (
     EquinixMetalCloudProvisioner
 )
-from automojo.provisioning.venues.equinix_metal.metalerrors import (
+from ccai.provisioning.venues.equinix_metal.metalerrors import (
     MetalValidationError
 )
 

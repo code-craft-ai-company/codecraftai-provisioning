@@ -151,7 +151,7 @@ shared with `CloudProvisioner` (see
 | `RayWorkloadProvisioner`        | declared; `apply` raises NIE    |
 | `NomadWorkloadProvisioner`      | declared; `apply` raises NIE    |
 
-`KubernetesWorkloadProvisioner` consumes `automojo-interop-kubernetes` for all API
+`KubernetesWorkloadProvisioner` consumes `codecraftai-interop-kubernetes` for all API
 calls.  CoreWeave's provisioner subclasses `KubernetesWorkloadProvisioner` and
 overrides only the credential exchange (`CoreweaveApiCredential → kubeconfig`).
 
@@ -160,7 +160,7 @@ overrides only the credential exchange (`CoreweaveApiCredential → kubeconfig`)
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/model/workload/
+source/packages/ccai/provisioning/model/workload/
 ├── workloadvenue.py
 ├── workloadvenuekind.py
 ├── workloadprovisioner.py             # abstract base
@@ -170,16 +170,16 @@ source/packages/automojo/provisioning/model/workload/
 ├── nodepoolspec.py
 └── autoscalingspec.py
 
-source/packages/automojo/provisioning/venues/kubernetes/
+source/packages/ccai/provisioning/venues/kubernetes/
 └── kubernetesworkloadprovisioner.py
 
-source/packages/automojo/provisioning/venues/slurm/
+source/packages/ccai/provisioning/venues/slurm/
 └── slurmworkloadprovisioner.py        # NIE in v1
 
-source/packages/automojo/provisioning/venues/ray/
+source/packages/ccai/provisioning/venues/ray/
 └── rayworkloadprovisioner.py          # NIE in v1
 
-source/packages/automojo/provisioning/venues/nomad/
+source/packages/ccai/provisioning/venues/nomad/
 └── nomadworkloadprovisioner.py        # NIE in v1
 ```
 
@@ -194,7 +194,7 @@ source/packages/automojo/provisioning/venues/nomad/
 - [accelerator-catalog](../accelerator-catalog/design.md) — accelerator resolution.
 - [provisioning-engine-pipeline](../provisioning-engine-pipeline/design.md) — drives a
   mixed list of `CloudVenue` and `WorkloadVenue` entries.
-- [workload-provisioning-config-schema](../../../automojo-configuration/specs/workload-provisioning-config-schema/design.md)
+- [workload-provisioning-config-schema](../../../codecraftai-configuration/specs/workload-provisioning-config-schema/design.md)
   — YAML schema fragment consumed by `from_dict`.
 
 ---

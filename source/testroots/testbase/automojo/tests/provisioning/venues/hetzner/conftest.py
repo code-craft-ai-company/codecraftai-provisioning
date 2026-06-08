@@ -7,20 +7,20 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.credentials.hetznerapitokencredential import (
+from ccai.credentials.hetznerapitokencredential import (
     HetznerApiTokenCredential
 )
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.hetzner.hetznerlocationconfig import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.hetzner.hetznerlocationconfig import (
     HetznerLocationConfig
 )
 
@@ -45,7 +45,7 @@ def location_config() -> HetznerLocationConfig:
     """
     rtnval = HetznerLocationConfig(
         location="nbg1",
-        default_labels={"automojo.component": "test"})
+        default_labels={"ccai.component": "test"})
     return rtnval
 
 

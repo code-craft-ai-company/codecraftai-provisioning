@@ -7,24 +7,24 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import unittest
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.model.cloud.provisionedresource import (
+from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-from automojo.provisioning.model.cloud._fake.fakecloudprovisioner import (
+from ccai.provisioning.model.cloud._fake.fakecloudprovisioner import (
     FakeCloudProvisioner
 )
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
 

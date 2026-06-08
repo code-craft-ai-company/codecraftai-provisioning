@@ -7,31 +7,31 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import unittest
 import warnings
 
-from automojo.provisioning.model.exceptions import (
+from ccai.provisioning.model.exceptions import (
     SchemaValidationError, SchemaSemanticError
 )
-from automojo.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
-from automojo.provisioning.model.cloud.cloudinterconnect import CloudInterconnect
-from automojo.provisioning.model.cloud.sharedfsmountspec import SharedFsMountSpec
-from automojo.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.provisioning.model.cloud.cloudinterconnect import CloudInterconnect
+from ccai.provisioning.model.cloud.sharedfsmountspec import SharedFsMountSpec
+from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
-from automojo.provisioning.model.cloud.cloudimage import CloudImage
-from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
-from automojo.provisioning.model.cloud.validators import resolve_mount_targets
-from automojo.provisioning.model.cloud.venuecapability import (
+from ccai.provisioning.model.cloud.cloudimage import CloudImage
+from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
+from ccai.provisioning.model.cloud.validators import resolve_mount_targets
+from ccai.provisioning.model.cloud.venuecapability import (
     VenueCapability, venue_capability
 )
-from automojo.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
 
 
 def _basic_image() -> CloudImage:

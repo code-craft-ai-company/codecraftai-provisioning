@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The `venue-aws` feature provides `automojo-provisioning` with the ability to stand up,
+The `venue-aws` feature provides `codecraftai-provisioning` with the ability to stand up,
 reconcile, and tear down infrastructure on Amazon Web Services.  It implements the
 `CloudProvisioner` lifecycle defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
@@ -23,7 +23,7 @@ VPN bring-up is honoured by injecting Tailscale/Twingate cloud-init snippets int
 
 Every method on `AwsCloudProvisioner` accepts an `aspects: Aspects` parameter so the
 caller controls retries, timeouts, persistence, and confirmation.  All AWS API
-interaction is delegated to `automojo-interop-aws` and reuses the `boto3` session built
+interaction is delegated to `codecraftai-interop-aws` and reuses the `boto3` session built
 from an `AwsAccessKeyCredential`.  No direct `boto3.client(...)` calls exist outside
 that interop layer.
 
@@ -70,7 +70,7 @@ updated, or skipped before any change is applied.
    equality) THE SYSTEM SHALL emit a `PlanAction(kind=SKIP)`.
 4. WHEN a resource is present but mutable attributes differ THE SYSTEM SHALL emit a
    `PlanAction(kind=UPDATE)` listing the attribute deltas.
-5. WHEN the live account holds a resource carrying the spec's `automojo-run-id` tag
+5. WHEN the live account holds a resource carrying the spec's `codecraftai-run-id` tag
    that is not in the spec THE SYSTEM SHALL emit a `PlanAction(kind=DELETE)`.
 
 ---
@@ -105,7 +105,7 @@ provisioner created, in reverse dependency order, so that orphans are not left b
 
 1. WHEN `destroy(spec, aspects)` is called and `aspects.confirm` is `True` THE SYSTEM
    SHALL delete instances, then volumes, then security groups, then subnets, then
-   networks tagged with the matching `automojo-run-id`.
+   networks tagged with the matching `codecraftai-run-id`.
 2. WHEN a resource is already absent THE SYSTEM SHALL treat the deletion as a no-op
    success.
 3. WHEN `aspects.confirm` is `False` THE SYSTEM SHALL refuse to destroy and raise
@@ -119,12 +119,12 @@ provisioner created, in reverse dependency order, so that orphans are not left b
 ### Requirement 5: Inventory Existing Resources
 
 **User Story:** As a coordinator, I want to enumerate every resource this provisioner
-manages, so that `automojo-landscaping` can consume the result as a landscape file.
+manages, so that `codecraftai-landscaping` can consume the result as a landscape file.
 
 #### Acceptance Criteria
 
 1. WHEN `inventory(spec, aspects)` is called THE SYSTEM SHALL query AWS for every
-   resource carrying the `automojo-run-id` tag matching the spec.
+   resource carrying the `codecraftai-run-id` tag matching the spec.
 2. WHEN inventory succeeds THE SYSTEM SHALL return a list of `ProvisionedResource`
    entries containing public IP, private IP, overlay IP (if known), and tags.
 

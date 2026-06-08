@@ -7,27 +7,27 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.model.cloud.cloudimage import CloudImage
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.provisioning.model.cloud.cloudimage import CloudImage
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.cloudsecuritygroup import (
+from ccai.provisioning.model.cloud.cloudsecuritygroup import (
     CloudSecurityGroup
 )
-from automojo.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
-from automojo.provisioning.venues.libvirt.libvirtcloudprovisioner import (
+from ccai.provisioning.venues.libvirt.libvirtcloudprovisioner import (
     LibvirtCloudProvisioner
 )
-from automojo.provisioning.venues.libvirt.libvirtspec import LibvirtSpec
-from automojo.provisioning.venues.libvirt.lverrors import LvValidationError
+from ccai.provisioning.venues.libvirt.libvirtspec import LibvirtSpec
+from ccai.provisioning.venues.libvirt.lverrors import LvValidationError
 
 from ._mockclient import MockLibvirtClient
 from ._specfactory import (

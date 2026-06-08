@@ -5,20 +5,20 @@
 `AwsCloudProvisioner` is a concrete `CloudProvisioner` that maps the neutral resource
 model onto AWS via `boto3`.  It is the largest and most exercised venue and serves as
 the reference shape every other venue follows.  All AWS calls go through
-`automojo-interop-aws`'s `AwsClient`, which owns the `boto3.Session` and exposes
+`codecraftai-interop-aws`'s `AwsClient`, which owns the `boto3.Session` and exposes
 service-scoped sub-clients (`ec2`, `s3`, `route53`, `fsx`).  This module owns no HTTP
 or AWS session state of its own.
 
 The provisioner follows the §2.7.3 pipeline: validate → plan → apply networking →
 apply compute → apply DNS/object/LB → bootstrap VPN → verify → emit inventory.  Every
 mutating step is preceded by a read-before-create check on a deterministic resource
-key derived from the spec name plus the `automojo-run-id` tag.
+key derived from the spec name plus the `codecraftai-run-id` tag.
 
 See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- `automojo-interop-aws/Agents.md`
+- `codecraftai-interop-aws/Agents.md`
 
 ---
 
@@ -47,7 +47,7 @@ See Also:
                           │
                           ▼
 ┌──────────────────────────────────────────────────────────────┐
-│                AwsClient (automojo-interop-aws)              │
+│                AwsClient (codecraftai-interop-aws)              │
 │   ec2 / s3 / route53 / fsx / efa  REST/SDK calls             │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -78,7 +78,7 @@ REST/SDK call paths used by `apply`:
 
 | Neutral model | AWS resource | Notes |
 | --- | --- | --- |
-| `CloudNetwork` | VPC | `cidr` → `CidrBlock`; tagged with `automojo-run-id`. |
+| `CloudNetwork` | VPC | `cidr` → `CidrBlock`; tagged with `codecraftai-run-id`. |
 | `CloudSubnet` | Subnet + (if `public=True`) IGW + route | One route table per public subnet group. |
 | `CloudSecurityGroup` | SG | `ingress_rules` → `authorize_security_group_ingress`. |
 | `CloudKeyPair` | EC2 KeyPair (imported) | `public_key_material` → `import_key_pair`. |
@@ -100,7 +100,7 @@ REST/SDK call paths used by `apply`:
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/aws/
+source/packages/ccai/provisioning/venues/aws/
 ├── __init__.py
 ├── awscloudprovisioner.py        # AwsCloudProvisioner (validate/plan/apply/destroy/inventory)
 ├── awsresolver.py                # image/size/accelerator → AWS identifiers
@@ -136,7 +136,7 @@ class AwsApplyResult:
 
 Every mutating call is preceded by a `describe_*` query keyed on:
 
-- the spec's `automojo-run-id` tag (`apod` + run hash)
+- the spec's `codecraftai-run-id` tag (`apod` + run hash)
 - the resource's spec `name` (mapped to a `Name` tag for searchability)
 
 If the resource exists and its mutable attributes match the spec, the action is

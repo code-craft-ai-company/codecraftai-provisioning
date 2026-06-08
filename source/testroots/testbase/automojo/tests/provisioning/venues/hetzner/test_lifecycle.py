@@ -8,7 +8,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -16,20 +16,20 @@ import os
 
 import pytest
 
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-from automojo.provisioning.model.exceptions import SchemaSemanticError
-from automojo.provisioning.venues.hetzner.hetznercloudprovisioner import (
+from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.venues.hetzner.hetznercloudprovisioner import (
     HetznerCloudProvisioner
 )
-from automojo.provisioning.venues.hetzner.hetznererrors import (
+from ccai.provisioning.venues.hetzner.hetznererrors import (
     HetznerValidationError
 )
-from automojo.provisioning.venues.hetzner.hetznerinventory import (
+from ccai.provisioning.venues.hetzner.hetznerinventory import (
     HetznerInventory
 )
 

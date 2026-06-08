@@ -8,24 +8,24 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import base64
 
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
 import pytest
 
-from automojo.provisioning.venues.xcpng.xcpngcloudprovisioner import (
+from ccai.provisioning.venues.xcpng.xcpngcloudprovisioner import (
     XcpngCloudProvisioner
 )
-from automojo.provisioning.venues.xcpng.xencloudinitrenderer import (
+from ccai.provisioning.venues.xcpng.xencloudinitrenderer import (
     XENSTORE_USERDATA_KEY
 )
-from automojo.provisioning.venues.xcpng.xenerrors import (
+from ccai.provisioning.venues.xcpng.xenerrors import (
     ConfirmationRequiredError
 )
 
@@ -241,7 +241,7 @@ def test_destroy_without_confirm_raises(venue, aspects):
     """
     import pytest
 
-    from automojo.provisioning.model.exceptions import SchemaSemanticError
+    from ccai.provisioning.model.exceptions import SchemaSemanticError
 
     client = MockXenClient()
     provisioner = _provisioner(venue=venue, spec=basic_spec(), client=client)

@@ -7,22 +7,22 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
-from automojo.provisioning.venues.linode.linodecloudprovisioner import (
+from ccai.provisioning.venues.linode.linodecloudprovisioner import (
     LinodeCloudProvisioner
 )
-from automojo.provisioning.venues.linode.linodeerrors import (
+from ccai.provisioning.venues.linode.linodeerrors import (
     LinodeValidationError
 )
 
@@ -106,9 +106,9 @@ def test_validate_rejects_unknown_image(venue, credential, region_config,
         An image family the linode venue cannot serve is rejected with a
         consistent SchemaSemanticError naming the venue and family.
     """
-    from automojo.provisioning.model.cloud.cloudimage import CloudImage
-    from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
-    from automojo.provisioning.model.exceptions import SchemaSemanticError
+    from ccai.provisioning.model.cloud.cloudimage import CloudImage
+    from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
+    from ccai.provisioning.model.exceptions import SchemaSemanticError
 
     spec = basic_spec()
     bad_image = CloudImage(family="windows-server", version="2022",

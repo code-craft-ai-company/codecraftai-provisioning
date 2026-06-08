@@ -11,7 +11,7 @@
   indexes, load-time uniqueness + injectivity invariants.
   - `resolve` returns `None` for unrecognised tokens (passthrough signal).
   - `supported_venues`, `vcpu`, `memory_gb`, `inverse_lookup`, `is_known_token`.
-  - Lazy thread-safe singleton + `AUTOMOJO_INSTANCE_SIZE_CATALOG` override +
+  - Lazy thread-safe singleton + `CCAI_INSTANCE_SIZE_CATALOG` override +
     `reset_default_instance_size_catalog()`.
 
 - [x] 4. Fix the `CloudInstance.size` docstring to be honest about neutral tokens

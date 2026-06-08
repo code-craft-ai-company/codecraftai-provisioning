@@ -7,25 +7,25 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.cloudloadbalancer import (
+from ccai.provisioning.model.cloud.cloudloadbalancer import (
     CloudLoadBalancer
 )
-from automojo.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
-from automojo.provisioning.venues.digitalocean.digitaloceancloudprovisioner import (
+from ccai.provisioning.venues.digitalocean.digitaloceancloudprovisioner import (
     DigitalOceanCloudProvisioner
 )
-from automojo.provisioning.venues.digitalocean.doerrors import (
+from ccai.provisioning.venues.digitalocean.doerrors import (
     DoValidationError
 )
 
@@ -143,7 +143,7 @@ def test_validate_rejects_unmapped_gpu(
     """
         An accelerator with no DigitalOcean GPU droplet is rejected.
     """
-    from automojo.provisioning.model.cloud.cloudacceleratorspec import (
+    from ccai.provisioning.model.cloud.cloudacceleratorspec import (
         CloudAcceleratorSpec
     )
     accel = CloudAcceleratorSpec(kind="GPU", model="MI300X", count=8,

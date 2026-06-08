@@ -124,7 +124,7 @@ declares success.
 #### Acceptance Criteria
 
 1. WHEN `VERIFY` runs THE SYSTEM SHALL poll each created instance for `running`
-   state using `automojo-waiting` with aspects-controlled interval and timeout.
+   state using `codecraftai-waiting` with aspects-controlled interval and timeout.
 2. WHEN an instance has `vpn_join` set THE SYSTEM SHALL additionally poll
    `IVPNControlPlane.list_devices` until the instance appears.
 3. WHEN any instance fails to reach the expected state inside the aspect-controlled
@@ -135,7 +135,7 @@ declares success.
 
 ### Requirement 7: Emit Landscape Inventory
 
-**User Story:** As a downstream `automojo-landscaping` user, I want a usable
+**User Story:** As a downstream `codecraftai-landscaping` user, I want a usable
 `landscape.yaml`-compatible block at the end of every successful run.
 
 #### Acceptance Criteria

@@ -5,13 +5,13 @@
 The landscape-inventory-emit module produces a `landscape.yaml`-compatible block from
 the per-venue inventory produced by `provisioner.inventory(...)`.  The emit step is
 the final stage of the provisioning pipeline and is what makes a freshly-provisioned
-environment immediately usable by `automojo-landscaping` without any manual file
+environment immediately usable by `codecraftai-landscaping` without any manual file
 authoring.
 
 The module is small: one converter class that walks the inventory, optionally calls
 the VPN control plane for overlay addresses, and emits a YAML document that round-
 trips through landscape's own loader.  All schema details that landscape cares about
-live in `automojo-landscaping/specs/landscape-yaml-schema`; this module is the
+live in `codecraftai-landscaping/specs/landscape-yaml-schema`; this module is the
 **writer**, not the schema definition.
 
 ---
@@ -123,7 +123,7 @@ For each instance with `vpn_join`:
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/landscape/
+source/packages/ccai/provisioning/landscape/
 ├── landscapeemitter.py
 ├── deviceaddressblock.py
 └── overlayaddressresolver.py
@@ -140,9 +140,9 @@ source/packages/automojo/provisioning/landscape/
 - [cloud-resource-model](../cloud-resource-model/design.md) — source of instance
   attributes.
 - [vpn-join-spec](../vpn-join-spec/design.md) — drives overlay resolution.
-- `automojo-interfaces/specs/address-plane-types` — `DeviceAddressSet` shape that
+- `codecraftai-interfaces/specs/address-plane-types` — `DeviceAddressSet` shape that
   landscape consumes.
-- `automojo-interfaces/specs/vpn-control-plane-protocol` — `list_devices`.
+- `codecraftai-interfaces/specs/vpn-control-plane-protocol` — `list_devices`.
 
 ---
 
@@ -158,5 +158,5 @@ source/packages/automojo/provisioning/landscape/
   mappings; assert overlay block present.
 - **Overlay-failure test** — fake control plane raises; emitter still produces
   device entries and logs a warning.
-- **Round-trip test** — emitted file loaded by `automojo-landscaping` test loader
+- **Round-trip test** — emitted file loaded by `codecraftai-landscaping` test loader
   (or a stub matching the schema) without warnings.

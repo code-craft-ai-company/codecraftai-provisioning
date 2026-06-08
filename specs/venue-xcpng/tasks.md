@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/xcpng/` tree per `design.md`.
-- [x] 2. Add `automojo-interop-xen` dep.
+- [x] 2. Add `codecraftai-interop-xen` dep.
 - [x] 3. Declare `XenValidationError`, `XenConflictError`,
   `ConfirmationRequiredError` in `xenerrors.py`.
 

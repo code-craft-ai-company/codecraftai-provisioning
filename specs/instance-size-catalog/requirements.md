@@ -64,7 +64,7 @@ Algebraic properties property tests enforce:
 
 1. THE SYSTEM SHALL expose a process-wide default singleton via
    `default_instance_size_catalog()` / `CloudInstanceSizeCatalog.default()`.
-2. THE SYSTEM SHALL honour the `AUTOMOJO_INSTANCE_SIZE_CATALOG` env-var override.
+2. THE SYSTEM SHALL honour the `CCAI_INSTANCE_SIZE_CATALOG` env-var override.
 3. THE SYSTEM SHALL expose `reset_default_instance_size_catalog()` for test isolation.
 
 ### Requirement 4: Venue Resolver Wiring

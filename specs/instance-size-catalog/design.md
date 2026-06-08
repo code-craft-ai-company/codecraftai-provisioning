@@ -65,7 +65,7 @@ published on the requested venue.
 ## Singleton
 
 `default_instance_size_catalog()` lazily builds a thread-safe process-wide
-singleton, honouring `AUTOMOJO_INSTANCE_SIZE_CATALOG`.
+singleton, honouring `CCAI_INSTANCE_SIZE_CATALOG`.
 `reset_default_instance_size_catalog()` clears it for tests.
 
 ## Venue Resolver Wiring

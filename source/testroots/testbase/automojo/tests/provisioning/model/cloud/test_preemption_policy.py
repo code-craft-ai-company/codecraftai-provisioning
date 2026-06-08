@@ -7,16 +7,16 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import unittest
 
-from automojo.provisioning.model.exceptions import SchemaValidationError
-from automojo.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
-from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
-from automojo.provisioning.model.cloud.cloudimage import CloudImage
+from ccai.provisioning.model.exceptions import SchemaValidationError
+from ccai.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
+from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
+from ccai.provisioning.model.cloud.cloudimage import CloudImage
 
 
 def _image() -> CloudImage:

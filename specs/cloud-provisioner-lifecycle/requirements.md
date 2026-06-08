@@ -116,7 +116,7 @@ provisioned without parsing logs.
 
 1. WHEN `inventory` runs THE SYSTEM SHALL return a list of `ProvisionedResource`
    objects, each carrying `kind`, `name`, `venue_id`, `attributes`, and `tags`.
-2. THE SYSTEM SHALL identify resources owned by automojo via a stable tag set the
+2. THE SYSTEM SHALL identify resources owned by ccai via a stable tag set the
    subclass applies on creation.
 3. THE SYSTEM SHALL be safe to call after a failed apply (partial inventory is
    surfaced as-is, not as an error).

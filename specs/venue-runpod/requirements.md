@@ -2,11 +2,11 @@
 
 ## Introduction
 
-The `venue-runpod` feature provides `automojo-provisioning` with the ability
+The `venue-runpod` feature provides `codecraftai-provisioning` with the ability
 to stand up container-shaped GPU workloads on RunPod.  It implements the
 **`WorkloadProvisioner`** lifecycle per PLAN §7.2 (`validate / plan / apply /
 destroy / inventory`) on Pod templates and persistent Network Volumes.  All
-API calls go through `automojo-interop-runpod` against the RunPod GraphQL
+API calls go through `codecraftai-interop-runpod` against the RunPod GraphQL
 endpoint.
 
 RunPod is container-shaped, not VM-shaped: there is no concept of a network,

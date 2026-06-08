@@ -2,13 +2,13 @@
 
 ## Introduction
 
-The `venue-proxmox` feature provides `automojo-provisioning` with the ability to
+The `venue-proxmox` feature provides `codecraftai-provisioning` with the ability to
 stand up VMs and LXC containers on Proxmox Virtual Environment.  It implements
 the `CloudProvisioner` lifecycle defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) and maps the
 neutral resource model in [cloud-resource-model](../cloud-resource-model/design.md)
 onto Proxmox primitives via the Proxmox REST API (port 8006, ticket-auth)
-surfaced by `automojo-interop-proxmox` (built on `automojo-restclient-base`).
+surfaced by `codecraftai-interop-proxmox` (built on `codecraftai-restclient-base`).
 
 The venue covers Cluster Network (Linux Bridge or SDN VNet), VM (KVM/QEMU)
 clone-from-template, LXC container template clone, Storage (Ceph RBD, ZFS,
@@ -43,7 +43,7 @@ Every method on `ProxmoxCloudProvisioner` accepts `aspects: Aspects`.
 #### Acceptance Criteria
 
 1. WHEN `plan(spec, aspects)` is called THE SYSTEM SHALL list resources by the
-   `automojo-run-id` Proxmox tag (Proxmox tags are simple strings).
+   `codecraftai-run-id` Proxmox tag (Proxmox tags are simple strings).
 2. WHEN VM hardware drifts THE SYSTEM SHALL emit `UPDATE` where Proxmox supports
    in-place reconfigure (CPU/RAM hot-plug), otherwise UPDATE-by-recreate.
 

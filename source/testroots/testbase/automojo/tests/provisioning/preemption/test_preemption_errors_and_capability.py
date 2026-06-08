@@ -8,16 +8,16 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import unittest
 
-from automojo.provisioning.model.cloud._fake.fakecloudprovisioner import (
+from ccai.provisioning.model.cloud._fake.fakecloudprovisioner import (
     FakeCloudProvisioner
 )
-from automojo.provisioning.preemption.preemptionerrors import (
+from ccai.provisioning.preemption.preemptionerrors import (
     ProvisioningPreemptionError
 )
 
@@ -46,35 +46,35 @@ class SupportsPreemptionTests(unittest.TestCase):
         return
 
     def test_aws_supports_preemption(self) -> None:
-        from automojo.provisioning.venues.aws.awscloudprovisioner import (
+        from ccai.provisioning.venues.aws.awscloudprovisioner import (
             AwsCloudProvisioner
         )
         self.assertTrue(AwsCloudProvisioner.supports_preemption())
         return
 
     def test_azure_supports_preemption(self) -> None:
-        from automojo.provisioning.venues.azure.azurecloudprovisioner import (
+        from ccai.provisioning.venues.azure.azurecloudprovisioner import (
             AzureCloudProvisioner
         )
         self.assertTrue(AzureCloudProvisioner.supports_preemption())
         return
 
     def test_gcp_supports_preemption(self) -> None:
-        from automojo.provisioning.venues.google.googlecloudprovisioner import (
+        from ccai.provisioning.venues.google.googlecloudprovisioner import (
             GoogleCloudProvisioner
         )
         self.assertTrue(GoogleCloudProvisioner.supports_preemption())
         return
 
     def test_oracle_supports_preemption(self) -> None:
-        from automojo.provisioning.venues.oracle.oraclecloudprovisioner import (
+        from ccai.provisioning.venues.oracle.oraclecloudprovisioner import (
             OracleCloudProvisioner
         )
         self.assertTrue(OracleCloudProvisioner.supports_preemption())
         return
 
     def test_lambdalabs_supports_preemption(self) -> None:
-        from automojo.provisioning.venues.lambdalabs.lambdalabscloudprovisioner \
+        from ccai.provisioning.venues.lambdalabs.lambdalabscloudprovisioner \
             import LambdalabsCloudProvisioner
         self.assertTrue(LambdalabsCloudProvisioner.supports_preemption())
         return

@@ -7,13 +7,13 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from hypothesis import given, strategies as st
 
-from automojo.provisioning.venues.digitalocean.dotagtranslator import (
+from ccai.provisioning.venues.digitalocean.dotagtranslator import (
     from_do, to_do
 )
 

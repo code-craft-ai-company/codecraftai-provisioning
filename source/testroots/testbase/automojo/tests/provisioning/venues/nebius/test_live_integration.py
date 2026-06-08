@@ -12,7 +12,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -20,11 +20,11 @@ import os
 
 import pytest
 
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.nebius.nebiuscloudprovisioner import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.nebius.nebiuscloudprovisioner import (
     NebiusCloudProvisioner
 )
 
@@ -46,10 +46,10 @@ def test_live_apply_inventory_destroy() -> None:
     if token is None or parent_id is None:
         pytest.skip("NEBIUS_SA_TOKEN / NEBIUS_PARENT_ID are not set.")
 
-    from automojo.credentials.nebiusserviceaccountcredential import (
+    from ccai.credentials.nebiusserviceaccountcredential import (
         NebiusServiceAccountCredential
     )
-    from automojo.restclient.nebius.nebiusclient import NebiusClient
+    from ccai.restclient.nebius.nebiusclient import NebiusClient
 
     credential = NebiusServiceAccountCredential(
         identifier="nebius-live", categories=["hpc-venue"], token=token,

@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -16,35 +16,35 @@ import unittest
 
 from hypothesis import given, settings, strategies as st
 
-from automojo.provisioning.model.exceptions import (
+from ccai.provisioning.model.exceptions import (
     SchemaValidationError, SchemaSemanticError
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.model.cloud.cloudnetwork import CloudNetwork
-from automojo.provisioning.model.cloud.cloudsubnet import CloudSubnet
-from automojo.provisioning.model.cloud.cloudingressrule import CloudIngressRule
-from automojo.provisioning.model.cloud.cloudegressrule import CloudEgressRule
-from automojo.provisioning.model.cloud.cloudsecuritygroup import CloudSecurityGroup
-from automojo.provisioning.model.cloud.cloudkeypair import CloudKeyPair
-from automojo.provisioning.model.cloud.cloudimage import CloudImage
-from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
-from automojo.provisioning.model.cloud.cloudstoragevolume import CloudStorageVolume
-from automojo.provisioning.model.cloud.cloudobjectbucket import CloudObjectBucket
-from automojo.provisioning.model.cloud.cloudloadbalancer import CloudLoadBalancer
-from automojo.provisioning.model.cloud.cloudloadbalancerlistener import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.model.cloud.cloudnetwork import CloudNetwork
+from ccai.provisioning.model.cloud.cloudsubnet import CloudSubnet
+from ccai.provisioning.model.cloud.cloudingressrule import CloudIngressRule
+from ccai.provisioning.model.cloud.cloudegressrule import CloudEgressRule
+from ccai.provisioning.model.cloud.cloudsecuritygroup import CloudSecurityGroup
+from ccai.provisioning.model.cloud.cloudkeypair import CloudKeyPair
+from ccai.provisioning.model.cloud.cloudimage import CloudImage
+from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
+from ccai.provisioning.model.cloud.cloudstoragevolume import CloudStorageVolume
+from ccai.provisioning.model.cloud.cloudobjectbucket import CloudObjectBucket
+from ccai.provisioning.model.cloud.cloudloadbalancer import CloudLoadBalancer
+from ccai.provisioning.model.cloud.cloudloadbalancerlistener import (
     CloudLoadBalancerListener
 )
-from automojo.provisioning.model.cloud.storageclass import StorageClass
-from automojo.provisioning.model.cloud.clouddnsrecord import CloudDnsRecord
-from automojo.provisioning.model.cloud.cloudresourcekind import CloudResourceKind
-from automojo.provisioning.model.cloud.cloudresourceprofile import (
+from ccai.provisioning.model.cloud.storageclass import StorageClass
+from ccai.provisioning.model.cloud.clouddnsrecord import CloudDnsRecord
+from ccai.provisioning.model.cloud.cloudresourcekind import CloudResourceKind
+from ccai.provisioning.model.cloud.cloudresourceprofile import (
     CloudResourceProfile, resolve_kind, model_class_for_kind
 )
-from automojo.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
-from automojo.provisioning.model.cloud.validators import (
+from ccai.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
+from ccai.provisioning.model.cloud.validators import (
     cidrs_overlap, subnet_contained_in_network
 )
-from automojo.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
 
 
 def _basic_image() -> CloudImage:
@@ -332,7 +332,7 @@ class CloudLoadBalancerListenerTests(unittest.TestCase):
 class VenueStorageClassMappingTests(unittest.TestCase):
 
     def test_aws_volume_class_mapping(self) -> None:
-        from automojo.provisioning.venues.aws.resources.volumemanager import (
+        from ccai.provisioning.venues.aws.resources.volumemanager import (
             map_storage_class
         )
         self.assertEqual(
@@ -346,7 +346,7 @@ class VenueStorageClassMappingTests(unittest.TestCase):
         return
 
     def test_azure_volume_class_mapping(self) -> None:
-        from automojo.provisioning.venues.azure.resources.diskmanager import (
+        from ccai.provisioning.venues.azure.resources.diskmanager import (
             map_storage_class
         )
         self.assertEqual(
@@ -361,7 +361,7 @@ class VenueStorageClassMappingTests(unittest.TestCase):
         return
 
     def test_gcp_volume_class_mapping(self) -> None:
-        from automojo.provisioning.venues.google.resources.diskmanager import (
+        from ccai.provisioning.venues.google.resources.diskmanager import (
             resolve_disk_type
         )
         self.assertEqual(
@@ -638,7 +638,7 @@ class RuleProtocolEnumTests(unittest.TestCase):
         return
 
     def test_egress_rule_protocol_coerces_enum(self) -> None:
-        from automojo.provisioning.model.cloud.networkprotocol import (
+        from ccai.provisioning.model.cloud.networkprotocol import (
             NetworkProtocol
         )
         rule = CloudEgressRule(protocol=NetworkProtocol.ALL,

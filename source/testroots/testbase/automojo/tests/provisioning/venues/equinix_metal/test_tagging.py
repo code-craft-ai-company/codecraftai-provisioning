@@ -7,16 +7,16 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.venues.equinix_metal.metalerrors import (
+from ccai.provisioning.venues.equinix_metal.metalerrors import (
     MetalValidationError
 )
-from automojo.provisioning.venues.equinix_metal.metaltagtranslator import (
+from ccai.provisioning.venues.equinix_metal.metaltagtranslator import (
     MetalTagTranslator, base_resource_tags, OWNER_TAG_KEY, RUN_ID_TAG_KEY
 )
 
@@ -84,6 +84,6 @@ def test_base_resource_tags_carries_owner_and_run_id() -> None:
                               resource_kind="instance")
     encoded = MetalTagTranslator.to_metal(neutral_tags=tags)
     flat = MetalTagTranslator.flat_dict(strings=encoded)
-    assert flat.get(OWNER_TAG_KEY) == "automojo-provisioning"
+    assert flat.get(OWNER_TAG_KEY) == "codecraftai-provisioning"
     assert flat.get(RUN_ID_TAG_KEY) == "run-7"
     return

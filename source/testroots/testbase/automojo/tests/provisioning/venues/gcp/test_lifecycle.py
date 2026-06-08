@@ -7,26 +7,26 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.exceptions import SchemaSemanticError
 
-from automojo.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-from automojo.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
-from automojo.provisioning.venues.google.gcpsessionfactory import (
+from ccai.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
+from ccai.provisioning.venues.google.gcpsessionfactory import (
     SERVICE_COMPUTE, SERVICE_TPU, SERVICE_STORAGE, SERVICE_DNS
 )
-from automojo.provisioning.venues.google.gcpspec import GcpSpec
-from automojo.provisioning.venues.google.googlecloudprovisioner import (
+from ccai.provisioning.venues.google.gcpspec import GcpSpec
+from ccai.provisioning.venues.google.googlecloudprovisioner import (
     GoogleCloudProvisioner
 )
 
@@ -308,7 +308,7 @@ def test_plan_emits_delete_for_owned_orphan(make_provisioner, venue,
     """
     full_spec = basic_spec()
     provisioner, fakes = make_provisioner(spec=full_spec)
-    # Realise the full spec so the instance carries automojo owner labels.
+    # Realise the full spec so the instance carries ccai owner labels.
     provisioner.apply(aspects=aspects)
 
     # Build a second provisioner over the SAME fake clients but a spec

@@ -3,7 +3,7 @@
 ## Introduction
 
 The cloud resource model defines the **neutral**, venue-independent Python classes that
-describe every primitive piece of cloud infrastructure `automojo-provisioning` knows how
+describe every primitive piece of cloud infrastructure `codecraftai-provisioning` knows how
 to stand up: networks, subnets, security groups and their rules, key pairs, images,
 instances, storage volumes, object buckets, load balancers, and DNS records.  These
 classes are the shared vocabulary that every venue provisioner (AWS, Azure, GCP,

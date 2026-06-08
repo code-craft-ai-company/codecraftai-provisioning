@@ -10,7 +10,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -19,18 +19,18 @@ import tempfile
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.libvirt.libvirtcloudprovisioner import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.libvirt.libvirtcloudprovisioner import (
     LibvirtCloudProvisioner
 )
-from automojo.provisioning.venues.libvirt.libvirtspec import LibvirtSpec
-from automojo.provisioning.venues.libvirt.lvmetadatatranslator import (
+from ccai.provisioning.venues.libvirt.libvirtspec import LibvirtSpec
+from ccai.provisioning.venues.libvirt.lvmetadatatranslator import (
     LvMetadataTranslator
 )
-from automojo.provisioning.venues.libvirt.lvseedisobuilder import (
+from ccai.provisioning.venues.libvirt.lvseedisobuilder import (
     LvSeedIsoBuilder
 )
 
@@ -192,7 +192,7 @@ def test_validate_rejects_unsupported_kinds(venue, aspects):
     import pytest
 
     from ._specfactory import bucket_lb_dns_spec
-    from automojo.provisioning.venues.libvirt.lverrors import (
+    from ccai.provisioning.venues.libvirt.lverrors import (
         LvValidationError
     )
 

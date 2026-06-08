@@ -3,7 +3,7 @@
 ## Overview
 
 `LambdalabsCloudProvisioner` realises the neutral resource model on the Lambda
-Labs Cloud through `automojo-interop-lambdalabs`, which wraps the Lambda Cloud
+Labs Cloud through `codecraftai-interop-lambdalabs`, which wraps the Lambda Cloud
 REST API on `RestClientBase`.  Lambda's API surface is the smallest of any
 public venue in this plan: Instances, SSH Keys, File Systems, and 1-Click
 Clusters.  No VPC.  No firewall.  No object storage.  No DNS.  The provisioner
@@ -18,7 +18,7 @@ See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- `automojo-interop-lambdalabs/Agents.md`
+- `codecraftai-interop-lambdalabs/Agents.md`
 
 ---
 
@@ -43,7 +43,7 @@ See Also:
                               │
                               ▼
 ┌──────────────────────────────────────────────────────────────┐
-│        LambdalabsClient (automojo-interop-lambdalabs)        │
+│        LambdalabsClient (codecraftai-interop-lambdalabs)        │
 │   instances / ssh-keys / file-systems / 1-click-clusters     │
 │   RestClientBase against cloud.lambda.ai/api/v1              │
 └──────────────────────────────────────────────────────────────┘
@@ -81,7 +81,7 @@ REST call paths used by `apply`:
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/lambdalabs/
+source/packages/ccai/provisioning/venues/lambdalabs/
 ├── __init__.py
 ├── lambdalabscloudprovisioner.py
 ├── llresolver.py

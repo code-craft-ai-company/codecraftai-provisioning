@@ -8,23 +8,23 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from automojo.credentials.oraclecloudapikeycredential import (
+from ccai.credentials.oraclecloudapikeycredential import (
     OracleCloudApiKeyCredential
 )
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
-from automojo.provisioning.venues.oracle.ociregionconfig import OciRegionConfig
-from automojo.provisioning.venues.oracle.oraclecloudprovisioner import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
+from ccai.provisioning.venues.oracle.ociregionconfig import OciRegionConfig
+from ccai.provisioning.venues.oracle.oraclecloudprovisioner import (
     OracleCloudProvisioner
 )
 

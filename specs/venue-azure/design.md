@@ -6,7 +6,7 @@
 distinguishing structural choice for Azure is the explicit `ResourceGroup`: this
 provisioner treats the ResourceGroup as the apex container for an `apod`'s resources
 and uses the run-id as the tag scope inside it.  All ARM/SDK calls flow through
-`automojo-interop-azure`'s `AzureClient`, which wraps `azure-identity` +
+`codecraftai-interop-azure`'s `AzureClient`, which wraps `azure-identity` +
 `azure-mgmt-resource` + the per-service `azure-mgmt-*` SDKs.
 
 The implementation follows the §2.7.3 pipeline.  GPU/RDMA support is realised by
@@ -17,8 +17,8 @@ See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- [azure-credentials](../../../automojo-credentials/specs/azure-credentials/design.md)
-- `automojo-interop-azure/Agents.md`
+- [azure-credentials](../../../codecraftai-credentials/specs/azure-credentials/design.md)
+- `codecraftai-interop-azure/Agents.md`
 
 ---
 
@@ -43,7 +43,7 @@ See Also:
                           │
                           ▼
 ┌──────────────────────────────────────────────────────────────┐
-│                AzureClient (automojo-interop-azure)          │
+│                AzureClient (codecraftai-interop-azure)          │
 │   resource / network / compute / storage / dns / lustre      │
 │   azure-mgmt-* SDK calls                                     │
 └──────────────────────────────────────────────────────────────┘
@@ -96,7 +96,7 @@ All long-running ARM calls expose `LROPoller`; the venue's apply stages call
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/azure/
+source/packages/ccai/provisioning/venues/azure/
 ├── __init__.py
 ├── azurecloudprovisioner.py
 ├── azureresolver.py             # image URN / VM size / accelerator → SKU
@@ -130,7 +130,7 @@ class AzureApplyResult:
 
 The ResourceGroup is the primary tag scope.  Every resource read uses a `.get(...)`
 that returns `None` (after catching `ResourceNotFoundError`) when absent.  Mutating
-calls are skipped when the live resource's `tags["automojo-run-id"]` matches the spec
+calls are skipped when the live resource's `tags["codecraftai-run-id"]` matches the spec
 and mutable attributes are equal.  VM SKU changes are treated as UPDATE-by-recreate
 because Azure does not permit resize across families with attached disks; the
 recreate is gated on `aspects.confirm`.

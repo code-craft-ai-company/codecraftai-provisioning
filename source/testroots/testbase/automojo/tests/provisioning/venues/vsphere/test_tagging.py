@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -15,8 +15,8 @@ import pytest
 
 from hypothesis import given, strategies as st
 
-from automojo.provisioning.venues.vsphere.vserrors import VsValidationError
-from automojo.provisioning.venues.vsphere.vstagtranslator import (
+from ccai.provisioning.venues.vsphere.vserrors import VsValidationError
+from ccai.provisioning.venues.vsphere.vstagtranslator import (
     base_resource_tags, belongs_to_run, from_vs, to_vs
 )
 

@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/google/` tree per `design.md`.
-- [x] 2. Add `automojo-interop-gcp` + `google-cloud-compute`,
+- [x] 2. Add `codecraftai-interop-gcp` + `google-cloud-compute`,
   `google-cloud-tpu`, `google-cloud-storage`, `google-cloud-dns`,
   `google-cloud-filestore`, `google-cloud-parallelstore` deps.
 - [x] 3. Declare `GcpValidationError`, `GcpConflictError`,
@@ -72,4 +72,4 @@
 ## Documentation
 
 - [ ] 29. Author `provisioning/venues/google/README.md` cross-linking the (deferred: README.md not yet authored)
-  resource model, lifecycle, vpn-join, and `automojo-interop-gcp`.
+  resource model, lifecycle, vpn-join, and `codecraftai-interop-gcp`.

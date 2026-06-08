@@ -4,8 +4,8 @@
 
 `GcpCloudProvisioner` realises the neutral resource model on Google Cloud Platform.
 The defining structural choice for GCP is the project as the apex container — all
-resources are scoped to a project, and the `automojo-run-id` label is the per-run
-discriminator inside it.  All Google API calls go through `automojo-interop-gcp`'s
+resources are scoped to a project, and the `codecraftai-run-id` label is the per-run
+discriminator inside it.  All Google API calls go through `codecraftai-interop-gcp`'s
 `GcpClient`, which wraps `google-auth` plus the `google-cloud-compute`,
 `google-cloud-tpu`, `google-cloud-storage`, `google-cloud-dns`, and
 `google-cloud-filestore` / `google-cloud-parallelstore` SDKs.
@@ -18,8 +18,8 @@ See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- [gcp-credentials](../../../automojo-credentials/specs/gcp-credentials/design.md)
-- `automojo-interop-gcp/Agents.md`
+- [gcp-credentials](../../../codecraftai-credentials/specs/gcp-credentials/design.md)
+- `codecraftai-interop-gcp/Agents.md`
 
 ---
 
@@ -44,7 +44,7 @@ See Also:
                               │
                               ▼
 ┌──────────────────────────────────────────────────────────────┐
-│                GcpClient (automojo-interop-gcp)              │
+│                GcpClient (codecraftai-interop-gcp)              │
 │   compute / tpu_v2 / storage / dns / filestore / parallel    │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -92,7 +92,7 @@ SDK call paths used by `apply`:
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/google/
+source/packages/ccai/provisioning/venues/google/
 ├── __init__.py
 ├── googlecloudprovisioner.py
 ├── gcpresolver.py

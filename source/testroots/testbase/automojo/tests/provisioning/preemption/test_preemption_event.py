@@ -7,15 +7,15 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import unittest
 
-from automojo.provisioning.model.exceptions import SchemaValidationError
-from automojo.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
-from automojo.provisioning.preemption.preemptionevent import PreemptionEvent
+from ccai.provisioning.model.exceptions import SchemaValidationError
+from ccai.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
+from ccai.provisioning.preemption.preemptionevent import PreemptionEvent
 
 
 class PreemptionEventTests(unittest.TestCase):

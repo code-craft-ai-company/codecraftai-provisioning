@@ -9,22 +9,22 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.model.cloud.cloudimage import CloudImage
-from automojo.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.cloud.cloudimage import CloudImage
+from ccai.provisioning.model.exceptions import SchemaSemanticError
 
-from automojo.provisioning.venues.aws.resources.imageresolver import (
+from ccai.provisioning.venues.aws.resources.imageresolver import (
     ImageResolver as AwsImageResolver
 )
-from automojo.provisioning.venues.azure.resources.imageresolver import (
+from ccai.provisioning.venues.azure.resources.imageresolver import (
     ImageResolver as AzureImageResolver
 )
-from automojo.provisioning.venues.digitalocean.doresolver import DoResolver
+from ccai.provisioning.venues.digitalocean.doresolver import DoResolver
 
 
 class _FakeAwsSessionFactory:
@@ -129,7 +129,7 @@ def test_aws_accepts_canonical_family() -> None:
                        architecture="x86_64")
     # The fake catalog resolves nothing, so a supported family reaches the
     # catalog-miss path rather than the unsupported-family rejection.
-    from automojo.provisioning.venues.aws.awserrors import AwsValidationError
+    from ccai.provisioning.venues.aws.awserrors import AwsValidationError
     with pytest.raises(AwsValidationError):
         resolver.resolve(image=image)
     return

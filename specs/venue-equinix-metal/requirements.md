@@ -2,13 +2,13 @@
 
 ## Introduction
 
-The `venue-equinix-metal` feature provides `automojo-provisioning` with the ability
+The `venue-equinix-metal` feature provides `codecraftai-provisioning` with the ability
 to provision **bare-metal** infrastructure on Equinix Metal.  It implements the
 `CloudProvisioner` lifecycle defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) and maps the
 neutral resource model in [cloud-resource-model](../cloud-resource-model/design.md)
 onto Equinix Metal primitives via the `packet-python` SDK surfaced by
-`automojo-interop-equinix-metal`.
+`codecraftai-interop-equinix-metal`.
 
 The venue covers Projects (apex container), Project SSH Keys, VLANs and Layer-2
 networks, IP Reservations, and **Devices** (bare-metal servers).  Equinix Metal
@@ -46,7 +46,7 @@ Every method on `EquinixMetalCloudProvisioner` accepts `aspects: Aspects`.
 #### Acceptance Criteria
 
 1. WHEN `plan(spec, aspects)` is called THE SYSTEM SHALL list resources by the
-   `automojo-run-id` tag and emit `PlanAction`s.
+   `codecraftai-run-id` tag and emit `PlanAction`s.
 2. WHEN device hostname or tags drift THE SYSTEM SHALL emit `UPDATE`; plan
    changes are UPDATE-by-recreate.
 

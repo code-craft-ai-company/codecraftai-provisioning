@@ -8,25 +8,25 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import unittest
 
-from automojo.provisioning.model.exceptions import SchemaValidationError
-from automojo.provisioning.model.cloud.plannedaction import PlannedAction
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.exceptions import SchemaValidationError
+from ccai.provisioning.model.cloud.plannedaction import PlannedAction
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-from automojo.provisioning.model.cloud.provisioningplan import ProvisioningPlan
-from automojo.provisioning.model.cloud.provisionedresource import (
+from ccai.provisioning.model.cloud.provisioningplan import ProvisioningPlan
+from ccai.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )
-from automojo.provisioning.model.cloud.provisioningresult import (
+from ccai.provisioning.model.cloud.provisioningresult import (
     ProvisioningResult
 )
-from automojo.provisioning.model.cloud.validationresult import ValidationResult
+from ccai.provisioning.model.cloud.validationresult import ValidationResult
 
 
 class PlannedActionTests(unittest.TestCase):

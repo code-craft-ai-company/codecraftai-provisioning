@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -16,8 +16,8 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from automojo.provisioning.venues.aws.awserrors import AwsValidationError
-from automojo.provisioning.venues.aws.awstagging import (
+from ccai.provisioning.venues.aws.awserrors import AwsValidationError
+from ccai.provisioning.venues.aws.awstagging import (
     AWS_TAG_VALUE_MAX, from_aws, to_aws, base_resource_tags
 )
 
@@ -49,10 +49,10 @@ def test_base_resource_tags_contains_owner_run_name_kind() -> None:
         run_id="r1", resource_name="vpc-a", resource_kind="network",
         extra={"team": "ml"}, defaults={"component": "test"},
     )
-    assert flat["automojo:owned-by"] == "automojo-provisioning"
-    assert flat["automojo:owner"] == "r1"
-    assert flat["automojo:resource-name"] == "vpc-a"
-    assert flat["automojo:resource-kind"] == "network"
+    assert flat["ccai:owned-by"] == "codecraftai-provisioning"
+    assert flat["ccai:owner"] == "r1"
+    assert flat["ccai:resource-name"] == "vpc-a"
+    assert flat["ccai:resource-kind"] == "network"
     assert flat["team"] == "ml"
     assert flat["component"] == "test"
     return

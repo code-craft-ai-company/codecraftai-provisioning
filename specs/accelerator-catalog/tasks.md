@@ -21,7 +21,7 @@
 ## Singleton + Overrides
 
 - [x] 12. Implement `default_accelerator_catalog()` with thread-safe lazy init
-- [x] 13. Implement `AUTOMOJO_ACCELERATOR_CATALOG` env-var override
+- [x] 13. Implement `CCAI_ACCELERATOR_CATALOG` env-var override
 - [x] 14. Document override precedence: env-var > packaged file
 
 ## Error Surfaces

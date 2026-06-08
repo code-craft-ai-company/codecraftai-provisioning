@@ -7,25 +7,25 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.model.cloud.cloudimage import CloudImage
-from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.provisioning.model.cloud.cloudimage import CloudImage
+from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
-from automojo.provisioning.venues.nutanix.nutanixcloudprovisioner import (
+from ccai.provisioning.venues.nutanix.nutanixcloudprovisioner import (
     NutanixCloudProvisioner
 )
-from automojo.provisioning.venues.nutanix.nutanixspec import NutanixSpec
-from automojo.provisioning.venues.nutanix.ntxerrors import NtxValidationError
+from ccai.provisioning.venues.nutanix.nutanixspec import NutanixSpec
+from ccai.provisioning.venues.nutanix.ntxerrors import NtxValidationError
 
 from ._mockclient import MockNutanixClient
 from ._specfactory import (

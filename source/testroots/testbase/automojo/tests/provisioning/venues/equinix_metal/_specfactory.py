@@ -7,25 +7,25 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from typing import List, Optional
 
-from automojo.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
-from automojo.provisioning.model.cloud.cloudimage import CloudImage
-from automojo.provisioning.model.cloud.cloudinstance import CloudInstance
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.provisioning.model.cloud.cloudimage import CloudImage
+from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.cloudkeypair import CloudKeyPair
-from automojo.provisioning.model.cloud.cloudnetwork import CloudNetwork
-from automojo.provisioning.model.cloud.cloudsubnet import CloudSubnet
-from automojo.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
-from automojo.provisioning.venues.equinix_metal.metalspec import MetalSpec
+from ccai.provisioning.model.cloud.cloudkeypair import CloudKeyPair
+from ccai.provisioning.model.cloud.cloudnetwork import CloudNetwork
+from ccai.provisioning.model.cloud.cloudsubnet import CloudSubnet
+from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.provisioning.venues.equinix_metal.metalspec import MetalSpec
 
 
 _PUBLIC_KEY = (
@@ -71,7 +71,7 @@ def basic_spec(*, with_vpn: bool = False,
         name="dev-a", profile_ref="default", image=image, size=size,
         subnet="sub-a", keypair="kp-a", vpn_join=vpn_join,
         accelerators=accelerators, interconnect=interconnect,
-        tags={"automojo:purpose": "test"},
+        tags={"ccai:purpose": "test"},
     )
 
     rtnval = MetalSpec(networks=[network], subnets=[subnet],

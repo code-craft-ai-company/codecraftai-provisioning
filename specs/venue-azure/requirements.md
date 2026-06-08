@@ -2,13 +2,13 @@
 
 ## Introduction
 
-The `venue-azure` feature provides `automojo-provisioning` with the ability to stand
+The `venue-azure` feature provides `codecraftai-provisioning` with the ability to stand
 up infrastructure on Microsoft Azure.  It implements the `CloudProvisioner`
 lifecycle defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) and maps the
 neutral resource model from [cloud-resource-model](../cloud-resource-model/design.md)
 onto Azure primitives via the `azure-mgmt-*` SDKs surfaced by
-`automojo-interop-azure`.  Azure adds one structural concept absent from AWS — the
+`codecraftai-interop-azure`.  Azure adds one structural concept absent from AWS — the
 `ResourceGroup` — that the provisioner treats as the apex container for an `apod`'s
 resources.
 
@@ -20,7 +20,7 @@ Azure NetApp Files (ANF) as an alternative for `kind=AZUREFILES`.
 
 Each method on `AzureCloudProvisioner` accepts an `aspects: Aspects` argument so the
 caller controls timeouts, retries, persistence, and confirmation.  All Azure SDK
-calls are delegated to `automojo-interop-azure`; the venue holds no SDK clients
+calls are delegated to `codecraftai-interop-azure`; the venue holds no SDK clients
 directly.
 
 ---
@@ -55,7 +55,7 @@ subscription so I know what `apply` will do.
 #### Acceptance Criteria
 
 1. WHEN `plan(spec, aspects)` is called THE SYSTEM SHALL query the
-   `ResourceGroup` and every contained resource by `automojo-run-id` tag.
+   `ResourceGroup` and every contained resource by `codecraftai-run-id` tag.
 2. WHEN a resource is absent THE SYSTEM SHALL emit `PlanAction(kind=CREATE)`.
 3. WHEN a resource matches THE SYSTEM SHALL emit `PlanAction(kind=SKIP)`.
 4. WHEN tag drift, NSG rule drift, or VM size drift is detected THE SYSTEM SHALL

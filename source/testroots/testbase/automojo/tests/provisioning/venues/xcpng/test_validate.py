@@ -7,17 +7,17 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.venues.xcpng.xcpngcloudprovisioner import (
+from ccai.provisioning.venues.xcpng.xcpngcloudprovisioner import (
     XcpngCloudProvisioner
 )
-from automojo.provisioning.venues.xcpng.xenerrors import XenValidationError
-from automojo.provisioning.venues.xcpng.xcpngspec import XcpngSpec
+from ccai.provisioning.venues.xcpng.xenerrors import XenValidationError
+from ccai.provisioning.venues.xcpng.xcpngspec import XcpngSpec
 
 from ._mockclient import MockXenClient
 from ._specfactory import (
@@ -128,7 +128,7 @@ def test_validate_warns_on_security_group(venue, aspects):
     """
         Security groups produce a warning recording tag-only intent.
     """
-    from automojo.provisioning.model.cloud.cloudsecuritygroup import (
+    from ccai.provisioning.model.cloud.cloudsecuritygroup import (
         CloudSecurityGroup
     )
     spec = basic_spec()

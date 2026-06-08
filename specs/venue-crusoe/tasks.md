@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/crusoe/` tree per `design.md`.
-- [x] 2. Add `automojo-interop-crusoe` dep.
+- [x] 2. Add `codecraftai-interop-crusoe` dep.
 - [x] 3. Declare `CrusoeValidationError`, `CrusoeConflictError`,
   `ConfirmationRequiredError` in `crusoeerrors.py`.
 

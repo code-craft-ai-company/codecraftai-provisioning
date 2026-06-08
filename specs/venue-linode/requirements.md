@@ -2,13 +2,13 @@
 
 ## Introduction
 
-The `venue-linode` feature provides `automojo-provisioning` with the ability to
+The `venue-linode` feature provides `codecraftai-provisioning` with the ability to
 stand up infrastructure on Linode (Akamai Connected Cloud).  It implements the
 `CloudProvisioner` lifecycle defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) and maps the
 neutral resource model in [cloud-resource-model](../cloud-resource-model/design.md)
 onto Linode primitives via the `linode_api4` SDK surfaced by
-`automojo-interop-linode`.
+`codecraftai-interop-linode`.
 
 The venue covers VPC, Instance (Linode), Cloud Firewall, Block Storage Volume,
 Object Storage, and Domain records.  GPU offerings are limited (RTX 4000 / RTX
@@ -40,7 +40,7 @@ Every method on `LinodeCloudProvisioner` accepts `aspects: Aspects`.
 #### Acceptance Criteria
 
 1. WHEN `plan(spec, aspects)` is called THE SYSTEM SHALL list resources by the
-   `automojo-run-id` tag on Instances, Firewalls, VPCs, and Volumes.
+   `codecraftai-run-id` tag on Instances, Firewalls, VPCs, and Volumes.
 2. WHEN attributes drift THE SYSTEM SHALL emit `UPDATE`; type changes are
    UPDATE-by-resize when Linode allows it, otherwise UPDATE-by-recreate.
 

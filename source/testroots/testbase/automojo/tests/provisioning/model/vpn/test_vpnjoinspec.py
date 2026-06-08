@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -16,22 +16,22 @@ import unittest
 
 from hypothesis import assume, given, settings, strategies as st
 
-from automojo.provisioning.model.exceptions import (
+from ccai.provisioning.model.exceptions import (
     SchemaValidationError, SchemaSemanticError
 )
-from automojo.credentials.tailscaleoauthcredential import TailscaleOAuthCredential
-from automojo.credentials.tailscaleauthkeycredential import (
+from ccai.credentials.tailscaleoauthcredential import TailscaleOAuthCredential
+from ccai.credentials.tailscaleauthkeycredential import (
     TailscaleAuthKeyCredential
 )
-from automojo.credentials.twingateserviceaccountcredential import (
+from ccai.credentials.twingateserviceaccountcredential import (
     TwingateServiceAccountCredential
 )
 
-from automojo.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
-from automojo.provisioning.model.vpn.hostnametemplate import (
+from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.provisioning.model.vpn.hostnametemplate import (
     render_hostname, render_hostnames
 )
-from automojo.provisioning.model.vpn.vpncredentialresolver import (
+from ccai.provisioning.model.vpn.vpncredentialresolver import (
     resolve_control_plane_credential
 )
 

@@ -8,18 +8,18 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import unittest
 
-from automojo.provisioning.model.cloud.cloudinstancesizecatalog import (
+from ccai.provisioning.model.cloud.cloudinstancesizecatalog import (
     reset_default_instance_size_catalog
 )
-from automojo.provisioning.venues.hetzner.hetznerresolver import HetznerResolver
-from automojo.provisioning.venues.linode.linoderesolver import LinodeResolver
-from automojo.provisioning.venues.digitalocean.doresolver import DoResolver
+from ccai.provisioning.venues.hetzner.hetznerresolver import HetznerResolver
+from ccai.provisioning.venues.linode.linoderesolver import LinodeResolver
+from ccai.provisioning.venues.digitalocean.doresolver import DoResolver
 
 
 class ResolverWiringTests(unittest.TestCase):

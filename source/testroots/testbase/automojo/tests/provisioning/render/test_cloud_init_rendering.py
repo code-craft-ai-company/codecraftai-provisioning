@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -17,11 +17,11 @@ import unittest
 
 import yaml
 
-from automojo.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
-from automojo.provisioning.cloudinit.cloudinitrenderererror import (
+from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.provisioning.cloudinit.cloudinitrenderererror import (
     CloudInitRendererError
 )
-from automojo.provisioning.cloudinit.vpncloudinitrenderer import (
+from ccai.provisioning.cloudinit.vpncloudinitrenderer import (
     render_cloud_init, render_azure_cse,
     render_vsphere_guest_customization,
 )

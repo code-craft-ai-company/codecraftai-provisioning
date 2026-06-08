@@ -7,23 +7,23 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.credentials.azureserviceprincipalcredential import (
+from ccai.credentials.azureserviceprincipalcredential import (
     AzureServicePrincipalCredential
 )
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.azure.azureregionconfig import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.azure.azureregionconfig import (
     AzureRegionConfig
 )
-from automojo.provisioning.venues.azure.azuresessionfactory import (
+from ccai.provisioning.venues.azure.azuresessionfactory import (
     AzureSessionFactory
 )
 
@@ -51,7 +51,7 @@ def region_config() -> AzureRegionConfig:
     rtnval = AzureRegionConfig(
         subscription_id="sub-test-0001", location="eastus",
         resource_group="rg-testrun01",
-        default_tags={"automojo:component": "test"},
+        default_tags={"ccai:component": "test"},
     )
     return rtnval
 

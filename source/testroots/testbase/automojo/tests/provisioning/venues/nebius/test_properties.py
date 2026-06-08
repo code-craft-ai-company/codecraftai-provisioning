@@ -9,20 +9,20 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from hypothesis import given, settings, strategies as st
 
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.nebius.nebiuscloudprovisioner import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.nebius.nebiuscloudprovisioner import (
     NebiusCloudProvisioner
 )
-from automojo.provisioning.venues.nebius.nebiuslabeltranslator import (
+from ccai.provisioning.venues.nebius.nebiuslabeltranslator import (
     NebiusLabelTranslator
 )
 

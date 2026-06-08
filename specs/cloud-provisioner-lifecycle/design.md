@@ -77,8 +77,8 @@ class ProvisioningResult(SchemaObject):
 
 
 class CloudProvisioner(ABC):
-    OWNER_TAG_KEY: str = "automojo:owned-by"
-    OWNER_TAG_VALUE: str = "automojo-provisioning"
+    OWNER_TAG_KEY: str = "ccai:owned-by"
+    OWNER_TAG_VALUE: str = "codecraftai-provisioning"
 
     def __init__(self, *, venue: CloudVenue, spec: CloudProvisioningSpec) -> None:
         self._venue = venue
@@ -145,7 +145,7 @@ accidental destruction in interactive contexts.
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/model/cloud/
+source/packages/ccai/provisioning/model/cloud/
 ├── cloudprovisioner.py                # abstract base (fleshed out)
 ├── plannedaction.py
 ├── plannedactionintent.py
@@ -153,7 +153,7 @@ source/packages/automojo/provisioning/model/cloud/
 ├── provisionedresource.py
 └── provisioningresult.py
 
-source/packages/automojo/provisioning/model/cloud/_fake/
+source/packages/ccai/provisioning/model/cloud/_fake/
 └── fakecloudprovisioner.py            # in-memory subclass for property tests
 ```
 
@@ -187,7 +187,7 @@ SDK mock with the same shape, it is non-conforming and the bug is in the subclas
 - [provisioning-state-persistence](../provisioning-state-persistence/design.md) —
   writes `ProvisioningResult` to disk.
 - [workload-venue-model](../workload-venue-model/design.md) — sibling lifecycle.
-- `automojo-interfaces/specs/task-handle-protocol` — used by async venue APIs.
+- `codecraftai-interfaces/specs/task-handle-protocol` — used by async venue APIs.
 
 ---
 

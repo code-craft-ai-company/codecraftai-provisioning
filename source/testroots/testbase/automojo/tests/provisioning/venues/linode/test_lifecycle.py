@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -15,15 +15,15 @@ import base64
 
 import pytest
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.exceptions import SchemaSemanticError
 
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-from automojo.provisioning.venues.linode.linodecloudprovisioner import (
+from ccai.provisioning.venues.linode.linodecloudprovisioner import (
     LinodeCloudProvisioner
 )
 
@@ -322,11 +322,11 @@ def test_inventory_persist_writes_file(venue, credential, region_config,
     """
         Inventory persistence writes linode-inventory.json under the run.
     """
-    from automojo.provisioning.venues.linode.linodeinventory import (
+    from ccai.provisioning.venues.linode.linodeinventory import (
         LinodeInventory
     )
-    from automojo.provisioning.venues.linode.linodereader import LinodeReader
-    from automojo.provisioning.venues.linode.linodetagtranslator import (
+    from ccai.provisioning.venues.linode.linodereader import LinodeReader
+    from ccai.provisioning.venues.linode.linodetagtranslator import (
         LinodeTagTranslator
     )
 

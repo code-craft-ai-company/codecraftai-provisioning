@@ -2,13 +2,13 @@
 
 ## Introduction
 
-The `venue-hyperv` feature provides `automojo-provisioning` with the ability to
+The `venue-hyperv` feature provides `codecraftai-provisioning` with the ability to
 stand up VMs on Microsoft Hyper-V hosts (standalone or in a Failover Cluster).
 It implements the `CloudProvisioner` lifecycle defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) and maps the
 neutral resource model in [cloud-resource-model](../cloud-resource-model/design.md)
 onto Hyper-V primitives.  Hyper-V exposes no REST API in the box; the
-`automojo-interop-hyperv` package wraps **PowerShell over WinRM** through an
+`codecraftai-interop-hyperv` package wraps **PowerShell over WinRM** through an
 `ICommandRunner`, invoking the `Hyper-V` PowerShell module
 (`New-VM`, `New-VMSwitch`, `Set-VMNetworkAdapter`, etc.).
 
@@ -43,7 +43,7 @@ Every method on `HypervCloudProvisioner` accepts `aspects: Aspects`.
 #### Acceptance Criteria
 
 1. WHEN `plan(spec, aspects)` is called THE SYSTEM SHALL list VMs and Switches
-   on the host whose notes / KVP-pool entries carry the `automojo-run-id`
+   on the host whose notes / KVP-pool entries carry the `codecraftai-run-id`
    marker and emit `PlanAction`s.
 2. WHEN VM hardware drifts THE SYSTEM SHALL emit `UPDATE` via
    `Set-VM` / `Set-VMProcessor` / `Set-VMMemory`.
@@ -96,7 +96,7 @@ Every method on `HypervCloudProvisioner` accepts `aspects: Aspects`.
 #### Acceptance Criteria
 
 1. WHEN translating neutral tags THE SYSTEM SHALL store them in `VM.Notes` as a
-   JSON object under the key `automojo`.
+   JSON object under the key `ccai`.
 2. WHEN reading `VM.Notes` back THE SYSTEM SHALL parse the JSON and recover
    the neutral tag list such that round-tripping is the identity.
 

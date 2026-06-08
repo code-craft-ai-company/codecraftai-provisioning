@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -15,13 +15,13 @@ import pytest
 
 import requests_mock as requests_mock_lib
 
-from automojo.credentials.vultrapikeycredential import VultrApiKeyCredential
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.credentials.vultrapikeycredential import VultrApiKeyCredential
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.vultr.vultrclient import VultrClient
-from automojo.provisioning.venues.vultr.vultrcloudprovisioner import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.vultr.vultrclient import VultrClient
+from ccai.provisioning.venues.vultr.vultrcloudprovisioner import (
     VultrCloudProvisioner
 )
 
@@ -93,7 +93,7 @@ def provisioner_factory(venue, credential):
     def _make(*, client, spec, vpn_control_plane=None):
         rtnval = VultrCloudProvisioner(
             venue=venue, credential=credential, spec=spec, client=client,
-            default_tags={"automojo:component": "test"},
+            default_tags={"ccai:component": "test"},
             vpn_control_plane=vpn_control_plane,
         )
         return rtnval

@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/nebius/` tree per `design.md`.
-- [x] 2. Add `automojo-interop-nebius` dep.
+- [x] 2. Add `codecraftai-interop-nebius` dep.
 - [x] 3. Declare `NebiusValidationError`, `NebiusConflictError`,
   `ConfirmationRequiredError` in `nebiuserrors.py`.
 

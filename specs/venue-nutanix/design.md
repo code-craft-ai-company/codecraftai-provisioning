@@ -4,19 +4,19 @@
 
 `NutanixCloudProvisioner` realises the neutral resource model on Nutanix AHV
 clusters via Prism Central.  All API calls go through
-`automojo-interop-nutanix`'s `NutanixClient`, which wraps the Prism Central
+`codecraftai-interop-nutanix`'s `NutanixClient`, which wraps the Prism Central
 v3/v4 REST APIs on `RestClientBase`.  Prism Central is the apex container;
 clusters (UUIDs) are the placement targets.
 
 Prism uses **Categories + Values** as its native tagging system; the
-provisioner uses `automojo-run-id` as a Category Name and the run id string
+provisioner uses `codecraftai-run-id` as a Category Name and the run id string
 as its Value, alongside one Category per neutral tag key.
 
 See Also:
 - [cloud-resource-model](../cloud-resource-model/design.md)
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md)
 - [vpn-join-spec](../vpn-join-spec/design.md)
-- `automojo-interop-nutanix/Agents.md`
+- `codecraftai-interop-nutanix/Agents.md`
 
 ---
 
@@ -41,7 +41,7 @@ See Also:
                               │
                               ▼
 ┌──────────────────────────────────────────────────────────────┐
-│        NutanixClient (automojo-interop-nutanix)              │
+│        NutanixClient (codecraftai-interop-nutanix)              │
 │   vpcs / subnets / images / vms / categories / flow / tasks  │
 │   RestClientBase against https://<pc>:9440/api/nutanix/v3    │
 └──────────────────────────────────────────────────────────────┘
@@ -84,7 +84,7 @@ REST call paths used by `apply`:
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/venues/nutanix/
+source/packages/ccai/provisioning/venues/nutanix/
 ├── __init__.py
 ├── nutanixcloudprovisioner.py
 ├── ntxresolver.py

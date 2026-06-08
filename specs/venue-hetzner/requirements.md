@@ -2,13 +2,13 @@
 
 ## Introduction
 
-The `venue-hetzner` feature provides `automojo-provisioning` with the ability to
+The `venue-hetzner` feature provides `codecraftai-provisioning` with the ability to
 stand up infrastructure on Hetzner Cloud.  It implements the `CloudProvisioner`
 lifecycle defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) and maps the
 neutral resource model in [cloud-resource-model](../cloud-resource-model/design.md)
 onto Hetzner primitives via the `hcloud` SDK surfaced by
-`automojo-interop-hetzner`.
+`codecraftai-interop-hetzner`.
 
 The venue covers Network, Server, Firewall, Volume, and DNS records (via the
 Hetzner DNS API).  Hetzner Cloud has no native object storage of the S3 class —
@@ -44,7 +44,7 @@ Every method on `HetznerCloudProvisioner` accepts `aspects: Aspects`.
 #### Acceptance Criteria
 
 1. WHEN `plan(spec, aspects)` is called THE SYSTEM SHALL list resources by the
-   `automojo-run-id` label on Servers, Firewalls, Networks, and Volumes.
+   `codecraftai-run-id` label on Servers, Firewalls, Networks, and Volumes.
 2. WHEN attributes drift THE SYSTEM SHALL emit `UPDATE`; server type changes are
    UPDATE-by-recreate.
 

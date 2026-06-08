@@ -11,7 +11,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -20,16 +20,16 @@ import tempfile
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from automojo.restclient.runpod.enums.runpodcloudtype import RunpodCloudType
-from automojo.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.restclient.runpod.enums.runpodcloudtype import RunpodCloudType
+from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
 
-from automojo.provisioning.venues.runpod.rpapplystages import RpApplyStages
-from automojo.provisioning.venues.runpod.rpcontainerstartrenderer import (
+from ccai.provisioning.venues.runpod.rpapplystages import RpApplyStages
+from ccai.provisioning.venues.runpod.rpcontainerstartrenderer import (
     RpContainerStartRenderer
 )
-from automojo.provisioning.venues.runpod.rpsidecartag import RpSidecarTag
+from ccai.provisioning.venues.runpod.rpsidecartag import RpSidecarTag
 
-from automojo.tests.provisioning.venues.runpod.testsupport import (
+from ccai.tests.provisioning.venues.runpod.testsupport import (
     MockRunpodClient, make_gpu_job, make_provisioner, make_service, make_spec
 )
 

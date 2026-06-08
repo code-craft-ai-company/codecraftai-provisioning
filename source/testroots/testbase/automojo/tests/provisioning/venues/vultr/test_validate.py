@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -16,13 +16,13 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
-from automojo.provisioning.venues.vultr.vultrerrors import (
+from ccai.provisioning.venues.vultr.vultrerrors import (
     VultrValidationError
 )
 
@@ -68,12 +68,12 @@ def test_validate_rejects_interconnect(kind) -> None:
     """
     import requests_mock as rmlib
 
-    from automojo.credentials.vultrapikeycredential import (
+    from ccai.credentials.vultrapikeycredential import (
         VultrApiKeyCredential
     )
-    from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-    from automojo.provisioning.venues.vultr.vultrclient import VultrClient
-    from automojo.provisioning.venues.vultr.vultrcloudprovisioner import (
+    from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+    from ccai.provisioning.venues.vultr.vultrclient import VultrClient
+    from ccai.provisioning.venues.vultr.vultrcloudprovisioner import (
         VultrCloudProvisioner
     )
 
@@ -109,12 +109,12 @@ def test_validate_rejects_shared_fs(kind) -> None:
     """
     import requests_mock as rmlib
 
-    from automojo.credentials.vultrapikeycredential import (
+    from ccai.credentials.vultrapikeycredential import (
         VultrApiKeyCredential
     )
-    from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-    from automojo.provisioning.venues.vultr.vultrclient import VultrClient
-    from automojo.provisioning.venues.vultr.vultrcloudprovisioner import (
+    from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+    from ccai.provisioning.venues.vultr.vultrclient import VultrClient
+    from ccai.provisioning.venues.vultr.vultrcloudprovisioner import (
         VultrCloudProvisioner
     )
 

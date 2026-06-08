@@ -8,24 +8,24 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.exceptions import SchemaSemanticError
 
 from hypothesis import given, settings, strategies as st
 
-from automojo.provisioning.model.cloud.plannedactionintent import (
+from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-from automojo.provisioning.venues.vsphere.vspherecloudprovisioner import (
+from ccai.provisioning.venues.vsphere.vspherecloudprovisioner import (
     VSphereCloudProvisioner
 )
-from automojo.provisioning.venues.vsphere.vserrors import VsCapacityError
-from automojo.provisioning.venues.vsphere.vspherevenueconfig import (
+from ccai.provisioning.venues.vsphere.vserrors import VsCapacityError
+from ccai.provisioning.venues.vsphere.vspherevenueconfig import (
     VSphereVenueConfig
 )
 
@@ -284,8 +284,8 @@ def test_apply_idempotence_property(size) -> None:
         Property: apply ∘ apply == apply.  The second apply creates nothing
         new and skips every VM/subnet for any instance size.
     """
-    from automojo.credentials.vspherecredential import VSphereCredential
-    from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
+    from ccai.credentials.vspherecredential import VSphereCredential
+    from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
 
     venue = CloudVenue(
         name="vsphere-prop", provider="vsphere",
@@ -298,10 +298,10 @@ def test_apply_idempotence_property(size) -> None:
     )
     config = VSphereVenueConfig(
         host="vcenter.lab", datacenter="DC1", cluster="Cluster1",
-        folder="/DC1/vm/automojo", content_library_ids=["lib-1"],
+        folder="/DC1/vm/ccai", content_library_ids=["lib-1"],
         subnet_vlan_ids={"pg-a": 1020},
     )
-    from automojo.provisioning.aspects.provisioningaspects import (
+    from ccai.provisioning.aspects.provisioningaspects import (
         ProvisioningAspects
     )
     aspects = ProvisioningAspects(runid="prop01", verify_interval=0.01)

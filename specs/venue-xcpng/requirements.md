@@ -2,13 +2,13 @@
 
 ## Introduction
 
-The `venue-xcpng` feature provides `automojo-provisioning` with the ability to
+The `venue-xcpng` feature provides `codecraftai-provisioning` with the ability to
 stand up VMs on XCP-ng or Citrix Hypervisor (XenServer) pools.  It implements
 the `CloudProvisioner` lifecycle defined in
 [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) and maps the
 neutral resource model in [cloud-resource-model](../cloud-resource-model/design.md)
 onto Xen primitives via the XAPI XML-RPC interface surfaced by
-`automojo-interop-xen`.
+`codecraftai-interop-xen`.
 
 The venue covers Pool/Host, Network (PIF/VIF/Bridge), Storage Repository (SR;
 LVM-iSCSI, NFS, EXT, ZFS), VM (clone from template), VDI, and the XCP-ng
@@ -42,7 +42,7 @@ Every method on `XcpngCloudProvisioner` accepts `aspects: Aspects`.
 #### Acceptance Criteria
 
 1. WHEN `plan(spec, aspects)` is called THE SYSTEM SHALL list VMs and Networks
-   whose `other_config["automojo-run-id"]` matches and emit `PlanAction`s.
+   whose `other_config["codecraftai-run-id"]` matches and emit `PlanAction`s.
 2. WHEN VM CPU/RAM drifts THE SYSTEM SHALL emit `UPDATE` honouring XenServer's
    memory ballooning when applicable.
 

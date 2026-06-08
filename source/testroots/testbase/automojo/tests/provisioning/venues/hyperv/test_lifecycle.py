@@ -8,22 +8,22 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.exceptions import SchemaSemanticError
 
-from automojo.provisioning.venues.hyperv.hypervcloudprovisioner import (
+from ccai.provisioning.venues.hyperv.hypervcloudprovisioner import (
     HypervCloudProvisioner
 )
-from automojo.provisioning.venues.hyperv.hverrors import (
+from ccai.provisioning.venues.hyperv.hverrors import (
     ConfirmationRequiredError
 )
 
-from automojo.tests.provisioning.venues.hyperv import _specfactory
+from ccai.tests.provisioning.venues.hyperv import _specfactory
 
 
 def _provisioner(*, venue, client, host_config, spec, vpn_control_plane=None):
@@ -196,7 +196,7 @@ def test_unconfirmed_resize_requires_confirm(venue, client, host_config,
 def test_apply_encodes_run_id_into_notes(venue, client, host_config,
                                          aspects):
     """
-        apply writes the automojo run-id envelope into VM.Notes.
+        apply writes the ccai run-id envelope into VM.Notes.
     """
     spec = _specfactory.make_basic_spec()
     provisioner = _provisioner(venue=venue, client=client,
@@ -206,7 +206,7 @@ def test_apply_encodes_run_id_into_notes(venue, client, host_config,
 
     vm_record = client.vms_state["vm-app"]
     assert "hvrun01" in vm_record.notes
-    assert "automojo" in vm_record.notes
+    assert "ccai" in vm_record.notes
     return
 
 
@@ -264,7 +264,7 @@ def test_inventory_ignores_foreign_vms(venue, client, host_config, aspects):
         inventory does not report VMs that are not run-owned.
     """
     spec = _specfactory.make_basic_spec()
-    client.seed_vm(name="foreign-vm", notes="not-automojo")
+    client.seed_vm(name="foreign-vm", notes="not-ccai")
     provisioner = _provisioner(venue=venue, client=client,
                                host_config=host_config, spec=spec)
 

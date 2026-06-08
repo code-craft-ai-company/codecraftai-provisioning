@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -17,14 +17,14 @@ import unittest
 
 from hypothesis import given, settings, strategies as st
 
-from automojo.errors.exceptions import ConfigurationError
+from ccai.errors.exceptions import ConfigurationError
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
-from automojo.provisioning.model.cloud.cloudacceleratorcatalog import (
+from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.cloud.cloudacceleratorcatalog import (
     CloudAcceleratorCatalog, default_accelerator_catalog,
     reset_default_accelerator_catalog
 )
-from automojo.provisioning.model.cloud.cloudacceleratorcatalogentry import (
+from ccai.provisioning.model.cloud.cloudacceleratorcatalogentry import (
     CloudAcceleratorCatalogEntry
 )
 
@@ -149,14 +149,14 @@ class CatalogLoaderTests(unittest.TestCase):
             )
             with open(yaml_path, "w") as fh:
                 fh.write(content)
-            os.environ["AUTOMOJO_ACCELERATOR_CATALOG"] = yaml_path
+            os.environ["CCAI_ACCELERATOR_CATALOG"] = yaml_path
             try:
                 reset_default_accelerator_catalog()
                 cat = default_accelerator_catalog()
                 names = [e.neutral_name for e in cat.entries()]
                 self.assertEqual(names, ["ONLY"])
             finally:
-                del os.environ["AUTOMOJO_ACCELERATOR_CATALOG"]
+                del os.environ["CCAI_ACCELERATOR_CATALOG"]
                 reset_default_accelerator_catalog()
         return
 

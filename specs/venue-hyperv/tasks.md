@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/hyperv/` tree per `design.md`.
-- [ ] 2. Add `automojo-interop-hyperv` dep. (deferred: cross-repo dependency wiring owned by package packaging step)
+- [ ] 2. Add `codecraftai-interop-hyperv` dep. (deferred: cross-repo dependency wiring owned by package packaging step)
 - [x] 3. Declare `HvValidationError`, `HvConflictError`,
   `ConfirmationRequiredError` in `hverrors.py`.
 

@@ -7,21 +7,21 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
-from automojo.provisioning.model.cloud.cloudnetwork import CloudNetwork
-from automojo.provisioning.venues.lambdalabs.lambdalabscloudprovisioner import (
+from ccai.provisioning.model.cloud.cloudnetwork import CloudNetwork
+from ccai.provisioning.venues.lambdalabs.lambdalabscloudprovisioner import (
     LambdalabsCloudProvisioner
 )
-from automojo.provisioning.venues.lambdalabs.llerrors import LlValidationError
-from automojo.provisioning.venues.lambdalabs.lambdalabsspec import (
+from ccai.provisioning.venues.lambdalabs.llerrors import LlValidationError
+from ccai.provisioning.venues.lambdalabs.lambdalabsspec import (
     LambdalabsSpec
 )
 

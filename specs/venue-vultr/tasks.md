@@ -3,8 +3,8 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/vultr/` tree per `design.md`.
-- [ ] 2. Add `automojo-interop-vultr` dep (built on (deferred: cross-repo dependency wiring owned by package packaging step)
-  `automojo-restclient-base`).
+- [ ] 2. Add `codecraftai-interop-vultr` dep (built on (deferred: cross-repo dependency wiring owned by package packaging step)
+  `codecraftai-restclient-base`).
   > Deviation: per the M13 directive the venue calls the Vultr v2 REST API
   > directly via `requests` (same pattern as the AWS venue using boto3); no
   > separate interop package.  The REST surface lives in `vultrclient.py`.

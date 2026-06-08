@@ -8,19 +8,19 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 from base64 import b64decode
 
-from automojo.provisioning.venues.nutanix.nutanixcloudprovisioner import (
+from ccai.provisioning.venues.nutanix.nutanixcloudprovisioner import (
     NutanixCloudProvisioner
 )
 
 import pytest
 
-from automojo.provisioning.venues.nutanix.ntxerrors import (
+from ccai.provisioning.venues.nutanix.ntxerrors import (
     ConfirmationRequiredError
 )
 

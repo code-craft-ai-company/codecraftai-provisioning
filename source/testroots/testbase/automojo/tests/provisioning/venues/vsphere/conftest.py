@@ -7,18 +7,18 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.credentials.vspherecredential import VSphereCredential
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.credentials.vspherecredential import VSphereCredential
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.vsphere.vspherevenueconfig import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.vsphere.vspherevenueconfig import (
     VSphereVenueConfig
 )
 
@@ -55,12 +55,12 @@ def config() -> VSphereVenueConfig:
     """
     rtnval = VSphereVenueConfig(
         host="vcenter.lab", datacenter="DC1", cluster="Cluster1",
-        folder="/DC1/vm/automojo",
+        folder="/DC1/vm/ccai",
         content_library_ids=["lib-1"],
         template_folder="/DC1/vm/templates",
         nsx_available=False,
         subnet_vlan_ids={"pg-a": 1020},
-        default_tags={"automojo:component": "test"},
+        default_tags={"ccai:component": "test"},
     )
     return rtnval
 

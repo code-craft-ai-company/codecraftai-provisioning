@@ -9,7 +9,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -22,17 +22,17 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from automojo.credentials.lambdalabsapikeycredential import (
+from ccai.credentials.lambdalabsapikeycredential import (
     LambdalabsApiKeyCredential
 )
-from automojo.provisioning.aspects.provisioningaspects import (
+from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from automojo.provisioning.model.cloud.cloudvenue import CloudVenue
-from automojo.provisioning.venues.lambdalabs.lambdalabscloudprovisioner import (
+from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
+from ccai.provisioning.venues.lambdalabs.lambdalabscloudprovisioner import (
     LambdalabsCloudProvisioner
 )
-from automojo.provisioning.venues.lambdalabs.llsidecartag import LlSidecarTag
+from ccai.provisioning.venues.lambdalabs.llsidecartag import LlSidecarTag
 
 from ._mockclient import (
     MockLambdalabsClient
@@ -40,7 +40,7 @@ from ._mockclient import (
 from ._specfactory import (
     basic_spec, cluster_spec, make_instance
 )
-from automojo.provisioning.venues.lambdalabs.lambdalabsspec import (
+from ccai.provisioning.venues.lambdalabs.lambdalabsspec import (
     LambdalabsSpec
 )
 
@@ -180,10 +180,10 @@ def test_gpu_sku_resolution_maps_accelerator_to_slug():
         The resolver maps the H100_SXM neutral name to the Lambda Labs
         ``gpu_8x_h100_sxm5`` slug.
     """
-    from automojo.provisioning.model.cloud.cloudacceleratorspec import (
+    from ccai.provisioning.model.cloud.cloudacceleratorspec import (
         CloudAcceleratorSpec
     )
-    from automojo.provisioning.venues.lambdalabs.llresolver import LlResolver
+    from ccai.provisioning.venues.lambdalabs.llresolver import LlResolver
 
     resolver = LlResolver()
     accel = CloudAcceleratorSpec(kind="GPU", model="H100_SXM", count=8,

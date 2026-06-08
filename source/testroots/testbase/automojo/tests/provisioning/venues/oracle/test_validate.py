@@ -8,24 +8,24 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
 import pytest
 
-from automojo.credentials.basecredential import BaseCredential
-from automojo.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.credentials.basecredential import BaseCredential
+from ccai.provisioning.model.cloud.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
-from automojo.provisioning.model.cloud.cloudinterconnect import (
+from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from automojo.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
-from automojo.provisioning.venues.oracle.ocierrors import OciValidationError
-from automojo.provisioning.venues.oracle.oraclecloudprovisioner import (
+from ccai.provisioning.venues.oracle.ocierrors import OciValidationError
+from ccai.provisioning.venues.oracle.oraclecloudprovisioner import (
     OracleCloudProvisioner
 )
 

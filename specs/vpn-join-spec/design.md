@@ -101,7 +101,7 @@ _DNS_LABEL_RE = re.compile(r"^(?!-)[a-z0-9-]{1,63}(?<!-)$")
 ## Module Layout
 
 ```
-source/packages/automojo/provisioning/model/vpn/
+source/packages/ccai/provisioning/model/vpn/
 ├── __init__.py
 ├── vpnjoinspec.py          # VPNJoinSpec
 └── hostnamerenderer.py     # render_hostnames + DNS-label helpers
@@ -110,7 +110,7 @@ source/packages/automojo/provisioning/model/vpn/
 Cloud-init rendering lives in:
 
 ```
-source/packages/automojo/provisioning/cloudinit/
+source/packages/ccai/provisioning/cloudinit/
 ├── vpncloudinitrenderer.py # render_cloud_init
 ```
 
@@ -161,8 +161,8 @@ storage.
 - [cloud-resource-model](../cloud-resource-model/design.md) — `CloudInstance.vpn_join`.
 - [cloud-provisioner-lifecycle](../cloud-provisioner-lifecycle/design.md) — runs the
   mint + render + inject flow.
-- `automojo-interfaces/specs/vpn-control-plane-protocol` — `IVPNControlPlane.mint_authkey`.
-- `automojo-credentials/specs/tailscale-credentials` — credential classes.
+- `codecraftai-interfaces/specs/vpn-control-plane-protocol` — `IVPNControlPlane.mint_authkey`.
+- `codecraftai-credentials/specs/tailscale-credentials` — credential classes.
 
 ---
 

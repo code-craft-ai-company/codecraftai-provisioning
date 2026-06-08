@@ -7,7 +7,7 @@
 """
 
 __author__ = "Myron Walker"
-__copyright__ = "Copyright 2026, Automation Mojo LLC"
+__copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
@@ -17,10 +17,10 @@ import unittest
 
 from hypothesis import given, settings, strategies as st
 
-from automojo.errors.exceptions import ConfigurationError
+from ccai.errors.exceptions import ConfigurationError
 
-from automojo.provisioning.model.exceptions import SchemaSemanticError
-from automojo.provisioning.model.cloud.cloudinstancesizecatalog import (
+from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.provisioning.model.cloud.cloudinstancesizecatalog import (
     CloudInstanceSizeCatalog, default_instance_size_catalog,
     reset_default_instance_size_catalog
 )
@@ -156,14 +156,14 @@ class CatalogLoaderTests(unittest.TestCase):
             )
             with open(yaml_path, "w") as fh:
                 fh.write(content)
-            os.environ["AUTOMOJO_INSTANCE_SIZE_CATALOG"] = yaml_path
+            os.environ["CCAI_INSTANCE_SIZE_CATALOG"] = yaml_path
             try:
                 reset_default_instance_size_catalog()
                 cat = default_instance_size_catalog()
                 tokens = [e.token for e in cat.entries()]
                 self.assertEqual(tokens, ["general.small"])
             finally:
-                del os.environ["AUTOMOJO_INSTANCE_SIZE_CATALOG"]
+                del os.environ["CCAI_INSTANCE_SIZE_CATALOG"]
                 reset_default_instance_size_catalog()
         return
 

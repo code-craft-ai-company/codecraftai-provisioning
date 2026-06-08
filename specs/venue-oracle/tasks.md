@@ -3,7 +3,7 @@
 ## Scaffolding
 
 - [x] 1. Create `provisioning/venues/oracle/` tree per `design.md`.
-- [x] 2. Add `automojo-interop-oracle` + `oci` SDK deps.
+- [x] 2. Add `codecraftai-interop-oracle` + `oci` SDK deps.
 - [x] 3. Declare `OciValidationError`, `OciConflictError`,
   `ConfirmationRequiredError` in `ocierrors.py`.
 
@@ -48,4 +48,4 @@
 ## Documentation
 
 - [ ] 23. Author `provisioning/venues/oracle/README.md` cross-linking the (deferred: README.md not yet authored)
-  resource model, lifecycle, vpn-join, and `automojo-interop-oracle`.
+  resource model, lifecycle, vpn-join, and `codecraftai-interop-oracle`.
