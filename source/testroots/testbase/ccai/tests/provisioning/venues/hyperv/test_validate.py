@@ -19,7 +19,7 @@ from ccai.provisioning.venues.hyperv.hypervcloudprovisioner import (
 )
 from ccai.provisioning.venues.hyperv.hypervspec import HypervSpec
 
-from ccai.tests.provisioning.venues.hyperv import _specfactory
+from . import _specfactory
 
 
 def _provisioner(*, venue, client, host_config, spec):

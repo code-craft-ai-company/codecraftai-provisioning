@@ -24,7 +24,7 @@ from ccai.provisioning.venues.coreweave.cwerrors import (
 
 from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
 
-from ccai.tests.provisioning.venues.coreweave.testsupport import (
+from .testsupport import (
     FakeNodePool, MockCoreweaveClient, MockKubernetesClient,
     MockVpnControlPlane, make_gpu_job, make_provisioner, make_service,
     make_slurm_venue, make_spec

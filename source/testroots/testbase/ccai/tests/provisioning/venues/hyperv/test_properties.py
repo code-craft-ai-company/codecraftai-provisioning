@@ -29,8 +29,8 @@ from ccai.provisioning.venues.hyperv.hypervcloudprovisioner import (
     HypervCloudProvisioner
 )
 
-from ccai.tests.provisioning.venues.hyperv import _specfactory
-from ccai.tests.provisioning.venues.hyperv._mockclient import (
+from . import _specfactory
+from ._mockclient import (
     MockHypervClient
 )
 

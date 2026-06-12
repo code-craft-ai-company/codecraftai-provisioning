@@ -29,7 +29,7 @@ from ccai.provisioning.venues.runpod.rpcontainerstartrenderer import (
 )
 from ccai.provisioning.venues.runpod.rpsidecartag import RpSidecarTag
 
-from ccai.tests.provisioning.venues.runpod.testsupport import (
+from .testsupport import (
     MockRunpodClient, make_gpu_job, make_provisioner, make_service, make_spec
 )
 

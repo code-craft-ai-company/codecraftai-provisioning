@@ -28,6 +28,10 @@ from ccai.provisioning.venues.azure.azuretagging import (
 )
 from ccai.provisioning.venues.azure.azuretask import resolve_poller
 
+from ccai.xmodules.xlogging.enhancedloggers import getEnhancedLogger
+
+logger = getEnhancedLogger()
+
 
 class VnetManager:
     """
@@ -156,15 +160,23 @@ class VnetManager:
 
             :returns: List of destroyed VNet names.
         """
+        from azure.core.exceptions import ResourceNotFoundError
+
         client = self._network()
         deleted: List[str] = []
         try:
             listing = list(client.virtual_networks.list(
                 resource_group_name=resource_group
             ))
-        except Exception:
+        except ResourceNotFoundError:
+            # The resource group does not exist -> nothing is owned to destroy.
             rtnval = deleted
             return rtnval
+        except Exception as xcpt:
+            # Do NOT mask a transient/auth/list failure as "nothing owned"; that
+            # would corrupt destroy reporting (silently leaving resources alive).
+            logger.warning("Failed to list Azure virtual networks for destroy in resource_group=%s: %s" % (resource_group, xcpt))
+            raise
 
         for vnet in listing:
             if not belongs_to_run(azure_tags=getattr(vnet, "tags", None),
@@ -193,15 +205,23 @@ class VnetManager:
 
             :returns: List of ProvisionedResource entries.
         """
+        from azure.core.exceptions import ResourceNotFoundError
+
         client = self._network()
         out: List[ProvisionedResource] = []
         try:
             listing = list(client.virtual_networks.list(
                 resource_group_name=resource_group
             ))
-        except Exception:
+        except ResourceNotFoundError:
+            # The resource group does not exist -> nothing is owned.
             rtnval = out
             return rtnval
+        except Exception as xcpt:
+            # Do NOT mask a transient/auth/list failure as "nothing owned"; that
+            # would under-report ownership and corrupt inventory.
+            logger.warning("Failed to list Azure virtual networks for inventory in resource_group=%s: %s" % (resource_group, xcpt))
+            raise
 
         for vnet in listing:
             live_tags = getattr(vnet, "tags", None)

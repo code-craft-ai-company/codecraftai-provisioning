@@ -314,7 +314,7 @@ class XenApplyStages:
         }
         rtnval = ProvisionedResource(
             kind="instance", name=inst.name, venue_id=vm.uuid,
-            attributes=attributes, tags=list(neutral_tags))
+            attributes=attributes, tags=dict(neutral_tags))
         return rtnval
 
     def _render_cloud_init(self, *, inst: CloudInstance, venue_name: str,

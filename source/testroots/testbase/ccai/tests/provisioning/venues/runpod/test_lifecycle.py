@@ -24,7 +24,7 @@ from ccai.provisioning.venues.runpod.rperrors import (
 )
 from ccai.provisioning.venues.runpod.rpnaming import pod_name
 
-from ccai.tests.provisioning.venues.runpod.testsupport import (
+from .testsupport import (
     FakeGpuType, FakePod, MockRunpodClient, MockVpnControlPlane, TEST_RUN_ID,
     make_gpu_job, make_provisioner, make_service, make_spec
 )

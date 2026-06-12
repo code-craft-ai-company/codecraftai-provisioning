@@ -203,6 +203,10 @@ class LvSeedIsoBuilder:
         if not os.path.exists(directory):
             os.makedirs(directory, exist_ok=True)
 
+        # The cidata user-data can embed a minted VPN/Tailscale authkey, so the
+        # staging dir and its files must not be world-readable on multi-user hosts.
+        os.chmod(directory, 0o700)
+
         documents = {
             "user-data": user_data,
             "meta-data": meta_data,
@@ -210,7 +214,10 @@ class LvSeedIsoBuilder:
         }
         for filename, text in documents.items():
             path = os.path.join(directory, filename)
-            with open(path, "w", encoding="utf-8") as fh:
+            # Create with 0600 atomically (no world-readable window) since
+            # user-data may contain a secret.
+            fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
                 fh.write(text)
 
         rtnval = directory

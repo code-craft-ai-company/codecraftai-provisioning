@@ -23,7 +23,7 @@ from ccai.provisioning.venues.hyperv.hverrors import (
     ConfirmationRequiredError
 )
 
-from ccai.tests.provisioning.venues.hyperv import _specfactory
+from . import _specfactory
 
 
 def _provisioner(*, venue, client, host_config, spec, vpn_control_plane=None):

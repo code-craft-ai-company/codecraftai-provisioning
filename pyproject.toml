@@ -3,13 +3,13 @@ name = "codecraftai-provisioning"
 description = "Code Craft AI - Provisioning Package"
 version = "0.0.1"
 authors = [
-    "Myron Walker"
+    "Myron Walker <myron.walker@gmail.com>"
 ]
 readme = "README.rst"
-license = "LICENSE.txt"
+license = "LicenseRef-CodeCraftAI-Dual-License"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
+    "License :: Other/Proprietary License",
     "Operating System :: POSIX"
 ]
 keywords = [
@@ -61,11 +61,13 @@ azure-mgmt-storage = "^21.0"
 google-cloud-compute = "^1.19"
 google-cloud-storage = "^2.18"
 google-cloud-dns = "^0.35"
+google-cloud-tpu = "^1.18"
 oci = "^2.130"
 pydo = "^0.3"
 hcloud = "^2.0"
 linode-api4 = "^5.20"
 vultr = "^1.0"
+packet-python = "^1.43"
 
 [tool.poetry.group.dev.dependencies]
 hypothesis = "^6.0"
