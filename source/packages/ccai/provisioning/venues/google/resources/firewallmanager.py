@@ -19,6 +19,9 @@ from ccai.provisioning.model.cloud.cloudsecuritygroup import (
 from ccai.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )
+from ccai.provisioning.venues.google.gcpoperations import (
+    resource_or_none, wait_for_operation
+)
 from ccai.provisioning.venues.google.gcpsessionfactory import (
     GcpSessionFactory, SERVICE_COMPUTE
 )
@@ -26,7 +29,8 @@ from ccai.provisioning.venues.google.gcpidempotency import (
     belongs_to_run
 )
 from ccai.provisioning.venues.google.gcptagging import (
-    base_resource_labels, from_labels, RESOURCE_NAME_LABEL_KEY
+    from_labels, owner_description, parse_owner_labels,
+    RESOURCE_NAME_LABEL_KEY
 )
 
 
@@ -39,7 +43,7 @@ def _ingress_rule_to_firewall_allowed(rule: Any) -> Dict[str, Any]:
         :returns: A dict in the GCP firewall ``allowed`` schema.
     """
     protocol = rule.protocol if rule.protocol != "all" else "all"
-    out: Dict[str, Any] = {"IPProtocol": protocol}
+    out: Dict[str, Any] = {"I_p_protocol": protocol}
     if rule.protocol != "all":
         out["ports"] = ["{}-{}".format(rule.from_port, rule.to_port)]
     rtnval = out
@@ -53,7 +57,9 @@ class FirewallManager:
         GCP firewall is network-scoped, not instance-scoped: a neutral
         :class:`CloudSecurityGroup` is realised as one firewall rule per
         ingress entry, all targeting the parent VPC network.  Source CIDRs
-        come from each rule's ``source_cidrs``.
+        come from each rule's ``source_cidrs``.  Firewall rules have no
+        ``labels`` field, so ownership and the neutral name are carried in the
+        ``description`` field.
     """
 
     KIND: str = "firewall"
@@ -90,19 +96,21 @@ class FirewallManager:
         rtnval = "codecraftai-{}-{}-{}".format(run_id, sg_name, index).lower()
         return rtnval
 
-    def find(self, *, run_id: str, name: str) -> Optional[Dict[str, Any]]:
+    def find(self, *, run_id: str, name: str) -> Optional[Any]:
         """
-            Find an existing owned firewall rule by run+name labels.
+            Find an existing owned firewall rule by run+name.
 
             :param run_id: Run identifier.
             :param name: Neutral security group name.
 
-            :returns: The first firewall rule resource dict, or None.
+            :returns: The first firewall rule resource, or None.
         """
         for entry in self.list_raw(run_id=run_id):
-            labels = entry.get("labels", {})
+            labels = parse_owner_labels(description=entry.description)
+            if labels is None:
+                continue
             if labels.get(RESOURCE_NAME_LABEL_KEY, "") == name:
-                rtnval: Optional[Dict[str, Any]] = entry
+                rtnval: Optional[Any] = entry
                 return rtnval
         rtnval = None
         return rtnval
@@ -135,12 +143,16 @@ class FirewallManager:
             gcp_name = self._gcp_name(run_id=run_id, sg_name=desired.name,
                                       index=index)
             rule_names.append(gcp_name)
-            existing = client.get(project=project, firewall=gcp_name)
-            if existing is not None and belongs_to_run(
-                    labels=existing.get("labels", {}), run_id=run_id):
-                continue
+            existing = resource_or_none(fetch=client.get, project=project,
+                                        firewall=gcp_name)
+            if existing is not None:
+                existing_labels = parse_owner_labels(
+                    description=existing.description
+                )
+                if belongs_to_run(labels=existing_labels, run_id=run_id):
+                    continue
 
-            labels = base_resource_labels(
+            description = owner_description(
                 run_id=run_id, resource_name=desired.name,
                 resource_kind=self.KIND, extra=dict(desired.tags),
                 defaults=default_tags,
@@ -155,9 +167,11 @@ class FirewallManager:
                 "direction": "INGRESS",
                 "source_ranges": source_cidrs,
                 "allowed": [_ingress_rule_to_firewall_allowed(rule)],
-                "labels": labels,
+                "description": description,
             }
-            client.insert(project=project, firewall_resource=body)
+            operation = client.insert(project=project,
+                                      firewall_resource=body)
+            wait_for_operation(operation=operation)
 
         first_name = rule_names[0] if len(rule_names) > 0 else (
             "codecraftai-{}-{}-0".format(run_id, desired.name).lower()
@@ -166,11 +180,16 @@ class FirewallManager:
         attributes["firewall_names"] = rule_names
         attributes["network"] = network_self_link
 
-        existing_first = client.get(project=project, firewall=first_name)
-        tag_source = (
-            existing_first.get("labels", {})
-            if existing_first is not None else {}
-        )
+        existing_first = resource_or_none(fetch=client.get, project=project,
+                                          firewall=first_name)
+        if existing_first is not None:
+            tag_source = parse_owner_labels(
+                description=existing_first.description
+            )
+        else:
+            tag_source = None
+        if tag_source is None:
+            tag_source = {}
 
         rtnval = ProvisionedResource(
             kind=self.KIND, name=desired.name, venue_id=first_name,
@@ -192,7 +211,7 @@ class FirewallManager:
         project = self._session_factory.project
         deleted: List[str] = []
         for entry in self.list_raw(run_id=run_id):
-            gcp_name = entry.get("name", "")
+            gcp_name = entry.name
             if len(gcp_name) == 0:
                 continue
             try:
@@ -203,20 +222,20 @@ class FirewallManager:
         rtnval = deleted
         return rtnval
 
-    def list_raw(self, *, run_id: str) -> List[Dict[str, Any]]:
+    def list_raw(self, *, run_id: str) -> List[Any]:
         """
-            Return raw owned firewall rule resource dicts for the run.
+            Return raw owned firewall rule resources for the run.
 
             :param run_id: Run identifier.
 
-            :returns: List of firewall rule resource dicts.
+            :returns: List of firewall rule resources.
         """
         client = self._client()
         project = self._session_factory.project
-        out: List[Dict[str, Any]] = []
+        out: List[Any] = []
         for entry in client.list(project=project):
-            if belongs_to_run(labels=entry.get("labels", {}),
-                              run_id=run_id):
+            labels = parse_owner_labels(description=entry.description)
+            if belongs_to_run(labels=labels, run_id=run_id):
                 out.append(entry)
         rtnval = out
         return rtnval
@@ -231,15 +250,17 @@ class FirewallManager:
         """
         out: List[ProvisionedResource] = []
         for entry in self.list_raw(run_id=run_id):
-            labels = entry.get("labels", {})
+            labels = parse_owner_labels(description=entry.description)
+            if labels is None:
+                labels = {}
             name = labels.get(RESOURCE_NAME_LABEL_KEY, "")
             if len(name) == 0:
                 continue
             attributes: Dict[str, Any] = {}
-            attributes["gcp_name"] = entry.get("name", "")
+            attributes["gcp_name"] = entry.name
             resource = ProvisionedResource(
                 kind=self.KIND, name=name,
-                venue_id=entry.get("name", ""),
+                venue_id=entry.name,
                 attributes=attributes,
                 tags=from_labels(labels=labels),
             )

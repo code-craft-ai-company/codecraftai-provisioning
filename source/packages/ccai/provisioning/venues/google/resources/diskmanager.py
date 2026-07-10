@@ -20,6 +20,9 @@ from ccai.provisioning.model.cloud.storageclass import StorageClass
 from ccai.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )
+from ccai.provisioning.venues.google.gcpoperations import (
+    labels_of, resource_or_none, wait_for_operation
+)
 from ccai.provisioning.venues.google.gcpsessionfactory import (
     GcpSessionFactory, SERVICE_COMPUTE
 )
@@ -94,7 +97,7 @@ class DiskManager:
         return rtnval
 
     def find(self, *, run_id: str, name: str,
-             zone: str) -> Optional[Dict[str, Any]]:
+             zone: str) -> Optional[Any]:
         """
             Find an existing owned Persistent Disk by run+name labels.
 
@@ -102,19 +105,22 @@ class DiskManager:
             :param name: Neutral volume name.
             :param zone: Zone the disk lives in.
 
-            :returns: The disk resource dict, or None.
+            :returns: The disk resource, or None.
         """
         client = self._client()
         project = self._session_factory.project
         gcp_name = self._gcp_name(run_id=run_id, name=name)
-        existing = client.get(project=project, zone=zone, disk=gcp_name)
+        existing = resource_or_none(fetch=client.get, project=project,
+                                    zone=zone, disk=gcp_name)
         if existing is None:
-            rtnval: Optional[Dict[str, Any]] = None
+            rtnval: Optional[Any] = None
             return rtnval
-        if not belongs_to_run(labels=existing.get("labels", {}),
+
+        if not belongs_to_run(labels=labels_of(resource=existing),
                               run_id=run_id):
             rtnval = None
             return rtnval
+
         rtnval = existing
         return rtnval
 
@@ -150,20 +156,27 @@ class DiskManager:
                 "type": "zones/{}/diskTypes/{}".format(zone, disk_type),
                 "labels": labels,
             }
-            client.insert(project=project, zone=zone, disk_resource=body)
+            operation = client.insert(project=project, zone=zone,
+                                      disk_resource=body)
+            wait_for_operation(operation=operation)
             existing = client.get(project=project, zone=zone, disk=gcp_name)
 
+        disk_id = str(existing.id) if existing.id != 0 else gcp_name
+        size_gb = existing.size_gb if existing.size_gb != 0 else desired.size_gb
+
         attributes: Dict[str, Any] = {}
-        attributes["disk_id"] = str(existing.get("id", gcp_name))
+        attributes["disk_id"] = disk_id
         attributes["gcp_name"] = gcp_name
         attributes["zone"] = zone
-        attributes["size_gb"] = existing.get("size_gb", desired.size_gb)
-        attributes["disk_type"] = resolve_disk_type(storage_class=desired.storage_class)
+        attributes["size_gb"] = size_gb
+        attributes["disk_type"] = resolve_disk_type(
+            storage_class=desired.storage_class
+        )
 
         rtnval = ProvisionedResource(
             kind=self.KIND, name=desired.name, venue_id=gcp_name,
             attributes=attributes,
-            tags=from_labels(labels=existing.get("labels", {})),
+            tags=from_labels(labels=labels_of(resource=existing)),
         )
         return rtnval
 
@@ -182,7 +195,7 @@ class DiskManager:
         project = self._session_factory.project
         deleted: List[str] = []
         for entry in self.list_raw(run_id=run_id, zone=zone):
-            gcp_name = entry.get("name", "")
+            gcp_name = entry.name
             if len(gcp_name) == 0:
                 continue
             try:
@@ -194,20 +207,20 @@ class DiskManager:
         return rtnval
 
     def list_raw(self, *, run_id: str,
-                 zone: str) -> List[Dict[str, Any]]:
+                 zone: str) -> List[Any]:
         """
-            Return raw owned Persistent Disk resource dicts for the run.
+            Return raw owned Persistent Disk resources for the run.
 
             :param run_id: Run identifier.
             :param zone: Zone to scan.
 
-            :returns: List of disk resource dicts.
+            :returns: List of disk resources.
         """
         client = self._client()
         project = self._session_factory.project
-        out: List[Dict[str, Any]] = []
+        out: List[Any] = []
         for entry in client.list(project=project, zone=zone):
-            if belongs_to_run(labels=entry.get("labels", {}),
+            if belongs_to_run(labels=labels_of(resource=entry),
                               run_id=run_id):
                 out.append(entry)
         rtnval = out
@@ -225,17 +238,18 @@ class DiskManager:
         """
         out: List[ProvisionedResource] = []
         for entry in self.list_raw(run_id=run_id, zone=zone):
-            labels = entry.get("labels", {})
+            labels = labels_of(resource=entry)
             name = labels.get(RESOURCE_NAME_LABEL_KEY, "")
             if len(name) == 0:
                 continue
+            entry_id = str(entry.id) if entry.id != 0 else entry.name
             attributes: Dict[str, Any] = {}
-            attributes["disk_id"] = str(entry.get("id", entry.get("name")))
-            attributes["gcp_name"] = entry.get("name", "")
-            attributes["size_gb"] = entry.get("size_gb", 0)
+            attributes["disk_id"] = entry_id
+            attributes["gcp_name"] = entry.name
+            attributes["size_gb"] = entry.size_gb
             resource = ProvisionedResource(
                 kind=self.KIND, name=name,
-                venue_id=entry.get("name", ""),
+                venue_id=entry.name,
                 attributes=attributes,
                 tags=from_labels(labels=labels),
             )

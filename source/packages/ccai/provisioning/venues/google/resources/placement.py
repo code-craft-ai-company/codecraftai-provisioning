@@ -13,6 +13,9 @@ __credits__ = []
 
 from typing import Any, Dict, List
 
+from ccai.provisioning.venues.google.gcpoperations import (
+    resource_or_none, wait_for_operation
+)
 from ccai.provisioning.venues.google.gcpsessionfactory import (
     GcpSessionFactory, SERVICE_COMPUTE
 )
@@ -20,7 +23,7 @@ from ccai.provisioning.venues.google.gcpidempotency import (
     belongs_to_run
 )
 from ccai.provisioning.venues.google.gcptagging import (
-    base_resource_labels
+    owner_description, parse_owner_labels
 )
 
 
@@ -31,7 +34,8 @@ class PlacementManager:
         Unlike AWS EFA (instance-fabric) or InfiniBand, GCP achieves tight
         accelerator coupling for the A3 family via a region-scoped compact
         ``ResourcePolicy``.  One policy is created per logical interconnect
-        group; every member instance attaches to it.
+        group; every member instance attaches to it.  ResourcePolicy has no
+        ``labels`` field, so ownership is carried in the ``description`` field.
     """
 
     KIND: str = "placement"
@@ -86,14 +90,17 @@ class PlacementManager:
         gcp_name = self.policy_name(run_id=run_id,
                                     logical_name=logical_name)
 
-        existing = client.get(project=project, region=region,
-                              resource_policy=gcp_name)
-        if existing is not None and belongs_to_run(
-                labels=existing.get("labels", {}), run_id=run_id):
-            rtnval = gcp_name
-            return rtnval
+        existing = resource_or_none(fetch=client.get, project=project,
+                                    region=region, resource_policy=gcp_name)
+        if existing is not None:
+            existing_labels = parse_owner_labels(
+                description=existing.description
+            )
+            if belongs_to_run(labels=existing_labels, run_id=run_id):
+                rtnval = gcp_name
+                return rtnval
 
-        labels = base_resource_labels(
+        description = owner_description(
             run_id=run_id, resource_name=logical_name,
             resource_kind=self.KIND, defaults=default_tags,
         )
@@ -103,10 +110,11 @@ class PlacementManager:
             "group_placement_policy": {
                 "collocation": "COLLOCATED",
             },
-            "labels": labels,
+            "description": description,
         }
-        client.insert(project=project, region=region,
-                      resource_policy_resource=body)
+        operation = client.insert(project=project, region=region,
+                                  resource_policy_resource=body)
+        wait_for_operation(operation=operation)
         rtnval = gcp_name
         return rtnval
 
@@ -125,10 +133,10 @@ class PlacementManager:
         project = self._session_factory.project
         deleted: List[str] = []
         for entry in client.list(project=project, region=region):
-            if not belongs_to_run(labels=entry.get("labels", {}),
-                                  run_id=run_id):
+            labels = parse_owner_labels(description=entry.description)
+            if not belongs_to_run(labels=labels, run_id=run_id):
                 continue
-            gcp_name = entry.get("name", "")
+            gcp_name = entry.name
             if len(gcp_name) == 0:
                 continue
             try:

@@ -11,11 +11,19 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+import json
 import os
 
 from typing import Any, Dict, List, Optional
 
 from ccai.provisioning.venues.google.gcperrors import GcpValidationError
+
+
+# GCP VPC networks, subnetworks, firewall rules and resource policies have no
+# ``labels`` field.  Their ownership + neutral-name + tag round-trip is carried
+# in the ``description`` field instead, behind this marker prefix so it can be
+# recognised and parsed back without colliding with a user description.
+OWNER_DESCRIPTION_PREFIX = "ccai-provisioning:"
 
 
 # GCP labels do not allow ':' in keys, so the ccai namespace separator is
@@ -203,4 +211,79 @@ def base_resource_labels(*, run_id: str, resource_name: str,
             labels[key] = value
 
     rtnval = labels
+    return rtnval
+
+
+def owner_description(*, run_id: str, resource_name: str,
+                      resource_kind: str,
+                      extra: Optional[Dict[str, str]] = None,
+                      defaults: Optional[Dict[str, str]] = None) -> str:
+    """
+        Build the ``description`` payload for a label-less GCP resource.
+
+        The payload embeds the same label mapping a label-bearing resource
+        would carry, so ownership checks and tag read-back reuse the label
+        helpers unchanged.
+
+        :param run_id: The provisioning run identifier.
+        :param resource_name: Neutral resource name.
+        :param resource_kind: Neutral resource kind string.
+        :param extra: Optional user-declared tags.
+        :param defaults: Optional venue default tags.
+
+        :returns: A ``description`` string carrying the owner marker.
+    """
+    labels = base_resource_labels(
+        run_id=run_id, resource_name=resource_name,
+        resource_kind=resource_kind, extra=extra, defaults=defaults,
+    )
+    payload: Dict[str, Any] = {"version": 1, "labels": labels}
+    encoded = json.dumps(payload, sort_keys=True)
+    rtnval = "{}{}".format(OWNER_DESCRIPTION_PREFIX, encoded)
+    return rtnval
+
+
+def parse_owner_labels(*, description: Optional[str]
+                       ) -> Optional[Dict[str, str]]:
+    """
+        Recover the embedded label mapping from a resource ``description``.
+
+        Returns ``None`` for a description that is missing, does not carry the
+        owner marker, or cannot be decoded — i.e. a resource not owned by this
+        provisioner.  Absence and non-ownership are legitimate values here, so
+        a malformed marker is treated as not-owned rather than raised.
+
+        :param description: The resource ``description`` field (may be None).
+
+        :returns: The embedded ``{key: value}`` label dict, or ``None``.
+    """
+    if description is None:
+        rtnval: Optional[Dict[str, str]] = None
+        return rtnval
+
+    if not description.startswith(OWNER_DESCRIPTION_PREFIX):
+        rtnval = None
+        return rtnval
+
+    encoded = description[len(OWNER_DESCRIPTION_PREFIX):]
+    try:
+        payload = json.loads(encoded)
+    except (ValueError, TypeError):
+        rtnval = None
+        return rtnval
+
+    if not isinstance(payload, dict):
+        rtnval = None
+        return rtnval
+
+    labels = payload.get("labels", None)
+    if not isinstance(labels, dict):
+        rtnval = None
+        return rtnval
+
+    out: Dict[str, str] = {}
+    for key in labels:
+        out[str(key)] = str(labels[key])
+
+    rtnval = out
     return rtnval

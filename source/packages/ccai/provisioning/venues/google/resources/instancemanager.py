@@ -34,6 +34,9 @@ from ccai.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )
 from ccai.provisioning.venues.google.gcperrors import GcpValidationError
+from ccai.provisioning.venues.google.gcpoperations import (
+    labels_of, resource_or_none, wait_for_operation
+)
 from ccai.provisioning.venues.google.gcpsessionfactory import (
     GcpSessionFactory, SERVICE_COMPUTE
 )
@@ -232,7 +235,7 @@ class InstanceManager:
         return rtnval
 
     def find(self, *, run_id: str, name: str,
-             zone: str) -> Optional[Dict[str, Any]]:
+             zone: str) -> Optional[Any]:
         """
             Find an existing owned instance by run+name labels.
 
@@ -240,20 +243,22 @@ class InstanceManager:
             :param name: Neutral instance name.
             :param zone: Zone the instance lives in.
 
-            :returns: An instance resource dict or None.
+            :returns: An instance resource or None.
         """
         client = self._client()
         project = self._session_factory.project
         gcp_name = self._gcp_name(run_id=run_id, name=name)
-        existing = client.get(project=project, zone=zone,
-                              instance=gcp_name)
+        existing = resource_or_none(fetch=client.get, project=project,
+                                    zone=zone, instance=gcp_name)
         if existing is None:
-            rtnval: Optional[Dict[str, Any]] = None
+            rtnval: Optional[Any] = None
             return rtnval
-        if not belongs_to_run(labels=existing.get("labels", {}),
+
+        if not belongs_to_run(labels=labels_of(resource=existing),
                               run_id=run_id):
             rtnval = None
             return rtnval
+
         rtnval = existing
         return rtnval
 
@@ -294,7 +299,7 @@ class InstanceManager:
             resource = ProvisionedResource(
                 kind=self.KIND, name=desired.name, venue_id=gcp_name,
                 attributes=attributes,
-                tags=from_labels(labels=existing.get("labels", {})),
+                tags=from_labels(labels=labels_of(resource=existing)),
             )
             info["vpn_device_id"] = None
             rtnval = (resource, info)
@@ -337,7 +342,7 @@ class InstanceManager:
 
         if bool(desired.public_ip) is True:
             body["network_interfaces"][0]["access_configs"] = [
-                {"name": "External NAT", "type": "ONE_TO_ONE_NAT"}
+                {"name": "External NAT", "type_": "ONE_TO_ONE_NAT"}
             ]
 
         # GPU guest accelerators.
@@ -382,10 +387,10 @@ class InstanceManager:
                 "provisioning_model": "STANDARD",
             }
 
-        client.insert(project=project, zone=zone, instance_resource=body)
+        operation = client.insert(project=project, zone=zone,
+                                  instance_resource=body)
+        wait_for_operation(operation=operation)
         created = client.get(project=project, zone=zone, instance=gcp_name)
-        if created is None:
-            created = body
 
         attributes = self._instance_attributes(existing=created, zone=zone)
         attributes["machine_type"] = machine_type
@@ -396,41 +401,47 @@ class InstanceManager:
         if len(user_data_body) > 0:
             attributes["user_data_present"] = True
 
+        created_labels = labels_of(resource=created)
+        if len(created_labels) == 0:
+            created_labels = labels
+
         resource = ProvisionedResource(
             kind=self.KIND, name=desired.name, venue_id=gcp_name,
             attributes=attributes,
-            tags=from_labels(labels=created.get("labels", labels)),
+            tags=from_labels(labels=created_labels),
         )
         info["vpn_device_id"] = None
         info["user_data_body"] = user_data_body
         rtnval = (resource, info)
         return rtnval
 
-    def _instance_attributes(self, *, existing: Dict[str, Any],
+    def _instance_attributes(self, *, existing: Any,
                              zone: str) -> Dict[str, Any]:
         """
             Build the attributes dict for a ProvisionedResource.
 
-            :param existing: GCP instance resource dict.
+            :param existing: GCP instance resource.
             :param zone: Zone the instance lives in.
 
             :returns: Attributes dict.
         """
         out: Dict[str, Any] = {}
-        out["instance_id"] = str(existing.get("id", existing.get("name", "")))
-        out["gcp_name"] = existing.get("name", "")
+        instance_id = (
+            str(existing.id) if existing.id != 0 else existing.name
+        )
+        out["instance_id"] = instance_id
+        out["gcp_name"] = existing.name
         out["zone"] = zone
-        out["status"] = existing.get("status", "")
+        out["status"] = existing.status
 
         private_ip = ""
         public_ip = ""
-        for nic in existing.get("network_interfaces", []):
+        for nic in existing.network_interfaces:
             if len(private_ip) == 0:
-                private_ip = nic.get("network_i_p", nic.get("network_ip", ""))
-            for access in nic.get("access_configs", []):
+                private_ip = nic.network_i_p
+            for access in nic.access_configs:
                 if len(public_ip) == 0:
-                    public_ip = access.get("nat_i_p",
-                                           access.get("nat_ip", ""))
+                    public_ip = access.nat_i_p
         out["private_ip"] = private_ip
         out["public_ip"] = public_ip
         rtnval = out
@@ -451,10 +462,10 @@ class InstanceManager:
         project = self._session_factory.project
         records: List[Dict[str, Any]] = []
         for entry in self.list_raw(run_id=run_id, zone=zone):
-            gcp_name = entry.get("name", "")
+            gcp_name = entry.name
             if len(gcp_name) == 0:
                 continue
-            labels = entry.get("labels", {})
+            labels = labels_of(resource=entry)
             records.append({
                 "instance_name": gcp_name,
                 "vpn_device_id": labels.get("ccai_vpn-device-id", None),
@@ -468,20 +479,20 @@ class InstanceManager:
         return rtnval
 
     def list_raw(self, *, run_id: str,
-                 zone: str) -> List[Dict[str, Any]]:
+                 zone: str) -> List[Any]:
         """
-            Return raw owned instance resource dicts for the run.
+            Return raw owned instance resources for the run.
 
             :param run_id: Run identifier.
             :param zone: Zone to scan.
 
-            :returns: List of instance resource dicts.
+            :returns: List of instance resources.
         """
         client = self._client()
         project = self._session_factory.project
-        out: List[Dict[str, Any]] = []
+        out: List[Any] = []
         for entry in client.list(project=project, zone=zone):
-            if belongs_to_run(labels=entry.get("labels", {}),
+            if belongs_to_run(labels=labels_of(resource=entry),
                               run_id=run_id):
                 out.append(entry)
         rtnval = out
@@ -499,14 +510,14 @@ class InstanceManager:
         """
         out: List[ProvisionedResource] = []
         for entry in self.list_raw(run_id=run_id, zone=zone):
-            labels = entry.get("labels", {})
+            labels = labels_of(resource=entry)
             name = labels.get(RESOURCE_NAME_LABEL_KEY, "")
             if len(name) == 0:
                 continue
             attributes = self._instance_attributes(existing=entry, zone=zone)
             resource = ProvisionedResource(
                 kind=self.KIND, name=name,
-                venue_id=entry.get("name", ""),
+                venue_id=entry.name,
                 attributes=attributes,
                 tags=from_labels(labels=labels),
             )

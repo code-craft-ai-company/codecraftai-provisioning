@@ -26,9 +26,11 @@ class DnsManager:
     """
         Manager for Cloud DNS record sets.
 
-        Records are upserted into a managed zone resolved by ``zone``.  v1
-        has no read-side diff: ``ensure`` performs an upsert change every
-        apply (idempotent at the API level).
+        Records are upserted into a pre-existing managed zone resolved by
+        ``zone``.  v1 is attach-only: the managed zone must already exist.
+        ``ensure`` deletes any current record set with the same name+type and
+        re-creates it in a single change, which is idempotent at the API
+        level.
     """
 
     KIND: str = "dns"
@@ -63,14 +65,20 @@ class DnsManager:
             :returns: A ProvisionedResource describing the record set.
         """
         client = self._client()
-        record_body: Dict[str, Any] = {
-            "name": desired.name,
-            "type": desired.record_type,
-            "ttl": desired.ttl_seconds,
-            "rrdatas": list(desired.values),
-        }
-        client.upsert_record_set(zone_name=desired.zone,
-                                 record_set=record_body)
+        zone = client.zone(desired.zone)
+
+        new_record = zone.resource_record_set(
+            desired.name, desired.record_type, desired.ttl_seconds,
+            list(desired.values),
+        )
+
+        changes = zone.changes()
+        for record in zone.list_resource_record_sets():
+            if (record.name == desired.name
+                    and record.record_type == desired.record_type):
+                changes.delete_record_set(record)
+        changes.add_record_set(new_record)
+        changes.create()
 
         attributes: Dict[str, Any] = {}
         attributes["zone"] = desired.zone
@@ -94,13 +102,17 @@ class DnsManager:
             :param aspects: Aspects.
         """
         client = self._client()
-        record_body: Dict[str, Any] = {
-            "name": desired.name,
-            "type": desired.record_type,
-        }
         try:
-            client.delete_record_set(zone_name=desired.zone,
-                                     record_set=record_body)
+            zone = client.zone(desired.zone)
+            changes = zone.changes()
+            pending = 0
+            for record in zone.list_resource_record_sets():
+                if (record.name == desired.name
+                        and record.record_type == desired.record_type):
+                    changes.delete_record_set(record)
+                    pending += 1
+            if pending > 0:
+                changes.create()
         except Exception:
             pass
         return

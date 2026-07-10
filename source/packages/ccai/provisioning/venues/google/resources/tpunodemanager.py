@@ -23,6 +23,9 @@ from ccai.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )
 from ccai.provisioning.venues.google.gcperrors import GcpValidationError
+from ccai.provisioning.venues.google.gcpoperations import (
+    labels_of, resource_or_none, wait_for_operation
+)
 from ccai.provisioning.venues.google.gcpsessionfactory import (
     GcpSessionFactory, SERVICE_TPU
 )
@@ -52,6 +55,23 @@ def is_tpu_instance(*, instance: CloudInstance) -> bool:
         rtnval = False
         return rtnval
     rtnval = accelerators[0].kind == "TPU"
+    return rtnval
+
+
+def _endpoint_ips(*, node: Any) -> List[str]:
+    """
+        Collect the non-empty host IPs from a TPU node's endpoints.
+
+        :param node: A TPU ``Node`` resource.
+
+        :returns: List of host IP strings.
+    """
+    host_ips: List[str] = []
+    for endpoint in node.network_endpoints:
+        ip_addr = endpoint.ip_address
+        if len(ip_addr) > 0:
+            host_ips.append(ip_addr)
+    rtnval = host_ips
     return rtnval
 
 
@@ -152,7 +172,7 @@ class TpuNodeManager:
         return rtnval
 
     def find(self, *, run_id: str, name: str,
-             zone: str) -> Optional[Dict[str, Any]]:
+             zone: str) -> Optional[Any]:
         """
             Find an existing owned TPU node by run+name labels.
 
@@ -160,19 +180,21 @@ class TpuNodeManager:
             :param name: Neutral instance name.
             :param zone: Zone the TPU node lives in.
 
-            :returns: The TPU node resource dict, or None.
+            :returns: The TPU node resource, or None.
         """
         client = self._client()
         node_id = self._node_id(run_id=run_id, name=name)
         node_path = "{}/nodes/{}".format(self._parent(zone=zone), node_id)
-        existing = client.get_node(name=node_path)
+        existing = resource_or_none(fetch=client.get_node, name=node_path)
         if existing is None:
-            rtnval: Optional[Dict[str, Any]] = None
+            rtnval: Optional[Any] = None
             return rtnval
-        if not belongs_to_run(labels=existing.get("labels", {}),
+
+        if not belongs_to_run(labels=labels_of(resource=existing),
                               run_id=run_id):
             rtnval = None
             return rtnval
+
         rtnval = existing
         return rtnval
 
@@ -219,30 +241,24 @@ class TpuNodeManager:
                 "runtime_version": "tpu-vm-base",
                 "labels": labels,
             }
-            client.create_node(parent=self._parent(zone=zone),
-                                node_id=node_id, node=node_body)
+            operation = client.create_node(parent=self._parent(zone=zone),
+                                            node_id=node_id, node=node_body)
+            wait_for_operation(operation=operation)
             existing = client.get_node(
                 name="{}/nodes/{}".format(self._parent(zone=zone), node_id)
             )
-            if existing is None:
-                existing = node_body
 
         attributes: Dict[str, Any] = {}
         attributes["tpu_node_id"] = node_id
         attributes["zone"] = zone
-        attributes["accelerator_type"] = existing.get("accelerator_type", "")
-        attributes["state"] = existing.get("state", "")
-        host_ips: List[str] = []
-        for endpoint in existing.get("network_endpoints", []):
-            ip_addr = endpoint.get("ip_address", "")
-            if len(ip_addr) > 0:
-                host_ips.append(ip_addr)
-        attributes["host_ips"] = host_ips
+        attributes["accelerator_type"] = existing.accelerator_type
+        attributes["state"] = str(existing.state)
+        attributes["host_ips"] = _endpoint_ips(node=existing)
 
         rtnval = ProvisionedResource(
             kind=self.KIND, name=desired.name, venue_id=node_id,
             attributes=attributes,
-            tags=from_labels(labels=existing.get("labels", {})),
+            tags=from_labels(labels=labels_of(resource=existing)),
         )
         return rtnval
 
@@ -260,7 +276,7 @@ class TpuNodeManager:
         client = self._client()
         deleted: List[str] = []
         for entry in self.list_raw(run_id=run_id, zone=zone):
-            node_name = entry.get("name", "")
+            node_name = entry.name
             if len(node_name) == 0:
                 continue
             try:
@@ -272,19 +288,19 @@ class TpuNodeManager:
         return rtnval
 
     def list_raw(self, *, run_id: str,
-                 zone: str) -> List[Dict[str, Any]]:
+                 zone: str) -> List[Any]:
         """
-            Return raw owned TPU node resource dicts for the run.
+            Return raw owned TPU node resources for the run.
 
             :param run_id: Run identifier.
             :param zone: Zone to scan.
 
-            :returns: List of TPU node resource dicts.
+            :returns: List of TPU node resources.
         """
         client = self._client()
-        out: List[Dict[str, Any]] = []
+        out: List[Any] = []
         for entry in client.list_nodes(parent=self._parent(zone=zone)):
-            if belongs_to_run(labels=entry.get("labels", {}),
+            if belongs_to_run(labels=labels_of(resource=entry),
                               run_id=run_id):
                 out.append(entry)
         rtnval = out
@@ -302,23 +318,19 @@ class TpuNodeManager:
         """
         out: List[ProvisionedResource] = []
         for entry in self.list_raw(run_id=run_id, zone=zone):
-            labels = entry.get("labels", {})
+            labels = labels_of(resource=entry)
             name = labels.get(RESOURCE_NAME_LABEL_KEY, "")
             if len(name) == 0:
                 continue
+            node_name = entry.name
+            tpu_node_id = node_name.rsplit("/", 1)[-1]
             attributes: Dict[str, Any] = {}
-            node_name = entry.get("name", "")
-            attributes["tpu_node_id"] = node_name.rsplit("/", 1)[-1]
-            attributes["accelerator_type"] = entry.get("accelerator_type", "")
-            host_ips: List[str] = []
-            for endpoint in entry.get("network_endpoints", []):
-                ip_addr = endpoint.get("ip_address", "")
-                if len(ip_addr) > 0:
-                    host_ips.append(ip_addr)
-            attributes["host_ips"] = host_ips
+            attributes["tpu_node_id"] = tpu_node_id
+            attributes["accelerator_type"] = entry.accelerator_type
+            attributes["host_ips"] = _endpoint_ips(node=entry)
             resource = ProvisionedResource(
                 kind=self.KIND, name=name,
-                venue_id=attributes["tpu_node_id"],
+                venue_id=tpu_node_id,
                 attributes=attributes,
                 tags=from_labels(labels=labels),
             )
