@@ -388,6 +388,7 @@ class PveApplyStages:
                 rule_spec = ProxmoxFirewallRuleSpec(
                     action=rule["action"], rule_type=rule["type"],
                     enable=True, proto=rule["proto"], dport=rule["dport"],
+                    source=rule.get("source", None),
                     comment="ccai sg {}".format(sg.name),
                 )
                 self._client.firewall.add_vm_firewall_rule(
@@ -415,11 +416,28 @@ class PveApplyStages:
                     dport = str(from_port)
                 else:
                     dport = "{}:{}".format(from_port, to_port)
-                rules.append({
-                    "action": "ACCEPT", "type": "in",
-                    "proto": getattr(entry, "protocol", "tcp"),
-                    "dport": dport,
-                })
+                proto = getattr(entry, "protocol", "tcp")
+                source_cidrs = getattr(entry, "source_cidrs", None)
+
+                # Emit one firewall rule per declared source CIDR so the rule
+                # stays scoped to the operator's intended origins.  A Proxmox
+                # rule carries a single 'source'; dropping source_cidrs (the
+                # prior behaviour) silently widened every rule to ACCEPT from
+                # anywhere.  Only when no CIDRs are declared is the rule left
+                # source-less (any), matching the declared intent.
+                if source_cidrs is not None and len(source_cidrs) > 0:
+                    for cidr in source_cidrs:
+                        rules.append({
+                            "action": "ACCEPT", "type": "in",
+                            "proto": proto, "dport": dport,
+                            "source": cidr,
+                        })
+                else:
+                    rules.append({
+                        "action": "ACCEPT", "type": "in",
+                        "proto": proto, "dport": dport,
+                        "source": None,
+                    })
         rtnval = rules
         return rtnval
 

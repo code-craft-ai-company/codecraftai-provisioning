@@ -222,6 +222,67 @@ class NtxApplyStages:
                 result.created.append(resource)
         return
 
+    @staticmethod
+    def _security_policy_resources(*, sg: Any) -> Dict[str, Any]:
+        """
+            Translate a CloudSecurityGroup into a Prism Central Flow
+            ``network_security_rule`` ``resources`` payload.
+
+            Each neutral ingress rule becomes one ``inbound_allow_list`` entry
+            per declared source CIDR, carrying the protocol and port range.
+            The prior behaviour passed ``rules={}``, so every Flow policy was
+            created empty and the declared security posture was silently
+            discarded.
+
+            :param sg: The neutral :class:`CloudSecurityGroup`.
+
+            :returns: The ``resources`` sub-payload for the intent spec.
+        """
+        inbound: List[Dict[str, Any]] = []
+        ingress = getattr(sg, "ingress_rules", None)
+        if ingress is not None:
+            for entry in ingress:
+                protocol = getattr(entry, "protocol", "tcp")
+                from_port = getattr(entry, "from_port", 0)
+                to_port = getattr(entry, "to_port", from_port)
+                source_cidrs = getattr(entry, "source_cidrs", None)
+                if source_cidrs is None or len(source_cidrs) == 0:
+                    source_cidrs = ["0.0.0.0/0"]
+
+                for cidr in source_cidrs:
+                    if "/" in cidr:
+                        ip_part, prefix_part = cidr.split("/", 1)
+                        prefix_length = int(prefix_part)
+                    else:
+                        ip_part = cidr
+                        prefix_length = 32
+
+                    item: Dict[str, Any] = {
+                        "ip_subnet": {"ip": ip_part,
+                                      "prefix_length": prefix_length},
+                    }
+                    protocol_token = protocol.upper()
+                    if protocol_token == "ALL":
+                        item["protocol"] = "ALL"
+                    else:
+                        item["protocol"] = protocol_token
+                        port_range_list = [{"start_port": from_port,
+                                            "end_port": to_port}]
+                        if protocol_token == "UDP":
+                            item["udp_port_range_list"] = port_range_list
+                        else:
+                            item["tcp_port_range_list"] = port_range_list
+                    inbound.append(item)
+
+        resources: Dict[str, Any] = {
+            "app_rule": {
+                "action": "APPLY",
+                "inbound_allow_list": inbound,
+                "outbound_allow_list": [{"peer_specification_type": "ALL"}],
+            },
+        }
+        return resources
+
     def _apply_security_policies(self, *, spec: NutanixSpec, run_id: str,
                                  result: NtxApplyResult,
                                  aspects: Any) -> None:
@@ -245,7 +306,10 @@ class NtxApplyStages:
                                            run_id=run_id)
             existed = venue_name in live_names
 
-            policy_spec = SecurityPolicySpec(name=venue_name, rules={})
+            policy_spec = SecurityPolicySpec(
+                name=venue_name,
+                rules=self._security_policy_resources(sg=sg),
+            )
             handle = self._client.security_policies.create(
                 spec=policy_spec, aspects=aspects
             )

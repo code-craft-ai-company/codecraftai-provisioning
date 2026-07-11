@@ -231,6 +231,22 @@ class AwsCloudProvisioner(CloudProvisioner):
         for net in spec.networks:
             network_cidrs[net.name] = net.cidr
 
+        # Name-reference sets used to reject dangling references: a spec that
+        # points an instance at a nonexistent subnet (or a security group at a
+        # nonexistent network) must fail validate() rather than silently drop
+        # the resource at apply and still report success.
+        network_names = {net.name for net in spec.networks}
+        subnet_names = {subnet.name for subnet in spec.subnets}
+        security_group_names = {sg.name for sg in spec.security_groups}
+
+        for sg in spec.security_groups:
+            if sg.network not in network_names:
+                errors.append({
+                    "resource": sg.name,
+                    "error": ("Security group references unknown network: "
+                              "{}.").format(sg.network),
+                })
+
         # Bucket region check (model already mandates; defensive).
         for bucket in spec.buckets:
             if bucket.region is None or len(bucket.region) == 0:
@@ -257,6 +273,25 @@ class AwsCloudProvisioner(CloudProvisioner):
 
         # Per-instance: interconnect + accelerator + EFA family check.
         for instance in spec.instances:
+            if instance.subnet not in subnet_names:
+                errors.append({
+                    "resource": instance.name,
+                    "error": ("Instance references unknown subnet: "
+                              "{}.").format(instance.subnet),
+                })
+
+            declared_sgs = (
+                instance.security_groups
+                if instance.security_groups is not None else []
+            )
+            for sg_ref in declared_sgs:
+                if sg_ref not in security_group_names:
+                    errors.append({
+                        "resource": instance.name,
+                        "error": ("Instance references unknown security "
+                                  "group: {}.").format(sg_ref),
+                    })
+
             if instance.interconnect is not None:
                 if instance.interconnect.kind in _REJECTED_INTERCONNECTS:
                     errors.append({
@@ -591,6 +626,7 @@ class AwsCloudProvisioner(CloudProvisioner):
         created: List[ProvisionedResource] = []
         updated: List[ProvisionedResource] = []
         skipped: List[str] = []
+        errors: List[Dict[str, Any]] = []
         vpn_records: List[Dict[str, Any]] = []
 
         spec = self._spec
@@ -613,6 +649,11 @@ class AwsCloudProvisioner(CloudProvisioner):
         for subnet in spec.subnets:
             parent = network_state.get(subnet.network, None)
             if parent is None:
+                errors.append({
+                    "resource": subnet.name,
+                    "error": ("Subnet references unknown network {!r}; not "
+                              "created.").format(subnet.network),
+                })
                 continue
             vpc_id = parent.attributes.get("vpc_id", "")
             igw_id = parent.attributes.get("igw_id", "")
@@ -631,6 +672,11 @@ class AwsCloudProvisioner(CloudProvisioner):
         for sg in spec.security_groups:
             parent = network_state.get(sg.network, None)
             if parent is None:
+                errors.append({
+                    "resource": sg.name,
+                    "error": ("Security group references unknown network "
+                              "{!r}; not created.").format(sg.network),
+                })
                 continue
             vpc_id = parent.attributes.get("vpc_id", "")
             existed = self._sg_mgr.find(run_id=run_id, name=sg.name) is not None
@@ -662,6 +708,11 @@ class AwsCloudProvisioner(CloudProvisioner):
         for inst in spec.instances:
             subnet_res = subnet_state.get(inst.subnet, None)
             if subnet_res is None:
+                errors.append({
+                    "resource": inst.name,
+                    "error": ("Instance references unresolved subnet {!r}; "
+                              "not launched.").format(inst.subnet),
+                })
                 continue
             subnet_id = subnet_res.attributes.get("subnet_id", "")
 
@@ -750,7 +801,7 @@ class AwsCloudProvisioner(CloudProvisioner):
         self._last_vpn_records = vpn_records
 
         rtnval = ProvisioningResult(created=created, updated=updated,
-                                    skipped=skipped, errors=[])
+                                    skipped=skipped, errors=errors)
         return rtnval
 
     # ------------------------------------------------------------------

@@ -247,6 +247,22 @@ class GoogleCloudProvisioner(CloudProvisioner):
         for net in spec.networks:
             network_cidrs[net.name] = net.cidr
 
+        # Name-reference sets used to reject dangling references: a spec that
+        # points an instance at a nonexistent subnet (or a firewall at a
+        # nonexistent network) must fail validate() rather than silently drop
+        # the resource at apply and still report success.
+        network_names = {net.name for net in spec.networks}
+        subnet_names = {subnet.name for subnet in spec.subnets}
+        security_group_names = {sg.name for sg in spec.security_groups}
+
+        for sg in spec.security_groups:
+            if sg.network not in network_names:
+                errors.append({
+                    "resource": sg.name,
+                    "error": ("Security group references unknown network: "
+                              "{}.").format(sg.network),
+                })
+
         # Shared FS kind acceptance.
         for sfs in spec.shared_filesystems:
             if sfs.kind in _UNSUPPORTED_FS_KINDS:
@@ -276,6 +292,25 @@ class GoogleCloudProvisioner(CloudProvisioner):
         # Per-instance: interconnect / accelerator / TPU / placement checks.
         compact_groups: Dict[str, List[str]] = {}
         for instance in spec.instances:
+            if instance.subnet not in subnet_names:
+                errors.append({
+                    "resource": instance.name,
+                    "error": ("Instance references unknown subnet: "
+                              "{}.").format(instance.subnet),
+                })
+
+            declared_sgs = (
+                instance.security_groups
+                if instance.security_groups is not None else []
+            )
+            for sg_ref in declared_sgs:
+                if sg_ref not in security_group_names:
+                    errors.append({
+                        "resource": instance.name,
+                        "error": ("Instance references unknown security "
+                                  "group: {}.").format(sg_ref),
+                    })
+
             if instance.interconnect is not None:
                 kind = instance.interconnect.kind
                 if kind == "EFA":
@@ -662,6 +697,7 @@ class GoogleCloudProvisioner(CloudProvisioner):
         created: List[ProvisionedResource] = []
         updated: List[ProvisionedResource] = []
         skipped: List[str] = []
+        errors: List[Dict[str, Any]] = []
         vpn_records: List[Dict[str, Any]] = []
 
         spec = self._spec
@@ -686,6 +722,11 @@ class GoogleCloudProvisioner(CloudProvisioner):
         for subnet in spec.subnets:
             parent = network_state.get(subnet.network, None)
             if parent is None:
+                errors.append({
+                    "resource": subnet.name,
+                    "error": ("Subnet references unknown network {!r}; not "
+                              "created.").format(subnet.network),
+                })
                 continue
             network_link = parent.attributes.get("self_link", "")
             existed = self._subnet_mgr.find(
@@ -706,6 +747,11 @@ class GoogleCloudProvisioner(CloudProvisioner):
         for sg in spec.security_groups:
             parent = network_state.get(sg.network, None)
             if parent is None:
+                errors.append({
+                    "resource": sg.name,
+                    "error": ("Security group references unknown network "
+                              "{!r}; firewall not created.").format(sg.network),
+                })
                 continue
             network_link = parent.attributes.get("self_link", "")
             existed = self._firewall_mgr.find(
@@ -760,6 +806,11 @@ class GoogleCloudProvisioner(CloudProvisioner):
 
             subnet_res = subnet_state.get(inst.subnet, None)
             if subnet_res is None:
+                errors.append({
+                    "resource": inst.name,
+                    "error": ("Instance references unresolved subnet {!r}; "
+                              "not launched.").format(inst.subnet),
+                })
                 continue
             subnet_link = subnet_res.attributes.get("self_link", "")
             parent_net = None
@@ -844,7 +895,7 @@ class GoogleCloudProvisioner(CloudProvisioner):
         self._last_vpn_records = vpn_records
 
         rtnval = ProvisioningResult(created=created, updated=updated,
-                                    skipped=skipped, errors=[])
+                                    skipped=skipped, errors=errors)
         return rtnval
 
     # ------------------------------------------------------------------

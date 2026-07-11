@@ -271,8 +271,16 @@ class NebiusApplyStages:
                                              aspects=aspects)
         instance_ids: Dict[str, str] = {}
         for inst in spec.instances:
-            existed = self._find_owned(records=existing_vms, run_id=run_id,
-                                       resource_name=inst.name) is not None
+            found_vm = self._find_owned(records=existing_vms, run_id=run_id,
+                                        resource_name=inst.name)
+            if found_vm is not None:
+                # Idempotent re-apply: the VM already exists for this run.
+                # vms.launch is a bare POST /v1/instances with no server-side
+                # existence check, so launching again creates a duplicate
+                # billed VM.  Reuse the found instance instead of relaunching.
+                instance_ids[inst.name] = found_vm.id
+                skipped.append(inst.name)
+                continue
 
             subnet_id = subnet_ids.get(inst.subnet, None)
             if subnet_id is None:
@@ -320,22 +328,19 @@ class NebiusApplyStages:
                                                  aspects=aspects)
             instance_ids[inst.name] = vm.id
 
-            if existed:
-                skipped.append(inst.name)
-            else:
-                created.append(ProvisionedResource(
-                    kind="instance", name=inst.name, venue_id=vm.id,
-                    attributes={"vm_id": vm.id, "platform": platform,
-                                "preset": preset,
-                                "has_user_data": "user-data" in metadata},
-                ))
-                if inst.vpn_join is not None:
-                    vpn_records.append({
-                        "instance_name": inst.name,
-                        "instance_id": vm.id,
-                        "vpn_provider": inst.vpn_join.provider,
-                        "vpn_device_id": None,
-                    })
+            created.append(ProvisionedResource(
+                kind="instance", name=inst.name, venue_id=vm.id,
+                attributes={"vm_id": vm.id, "platform": platform,
+                            "preset": preset,
+                            "has_user_data": "user-data" in metadata},
+            ))
+            if inst.vpn_join is not None:
+                vpn_records.append({
+                    "instance_name": inst.name,
+                    "instance_id": vm.id,
+                    "vpn_provider": inst.vpn_join.provider,
+                    "vpn_device_id": None,
+                })
 
         for vol in spec.volumes:
             existing_disks = self._client.disks.list(
