@@ -128,6 +128,8 @@ class HypervCloudProvisioner(CloudProvisioner):
 
         self._last_run_id: Optional[str] = None
         self._last_vpn_records: List[Dict[str, Any]] = []
+        self._last_created_networks: List[str] = []
+        self._last_created_volumes: List[str] = []
         return
 
     # ------------------------------------------------------------------
@@ -349,6 +351,18 @@ class HypervCloudProvisioner(CloudProvisioner):
 
         self._last_vpn_records = vpn_records
 
+        # Record what this run actually created (switches and data disks that
+        # did not already exist) so destroy removes only those and never a
+        # shared/pre-existing switch or disk.
+        self._last_created_networks = [
+            resource.name for resource in created
+            if resource.kind == "network"
+        ]
+        self._last_created_volumes = [
+            resource.name for resource in created
+            if resource.kind == "volume"
+        ]
+
         rtnval = ProvisioningResult(created=created, updated=updated,
                                     skipped=skipped, errors=[])
         return rtnval
@@ -370,7 +384,9 @@ class HypervCloudProvisioner(CloudProvisioner):
         self._destroy_stages.destroy(
             spec=self._spec, run_id=run_id,
             vpn_records=self._last_vpn_records,
-            vpn_control_plane=self._vpn_control_plane, aspects=runner)
+            vpn_control_plane=self._vpn_control_plane, aspects=runner,
+            created_networks=self._last_created_networks,
+            created_volumes=self._last_created_volumes)
         return
 
     # ------------------------------------------------------------------

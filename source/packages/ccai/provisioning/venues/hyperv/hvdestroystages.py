@@ -48,18 +48,40 @@ class HvDestroyStages:
 
     def destroy(self, *, spec: Any, run_id: str,
                 vpn_records: List[Dict[str, Any]],
-                vpn_control_plane: Any, aspects: Any) -> None:
+                vpn_control_plane: Any, aspects: Any,
+                created_networks: List[str] = None,
+                created_volumes: List[str] = None) -> None:
         """
             Tear down every run-id-owned resource in reverse apply order.
 
-            :param spec: The HypervSpec (used to bound switch removal).
+            Switches and data VHDX disks have no run-ownership marker, and
+            apply reuses (never creates) a switch or disk that already exists.
+            Destroy therefore removes only the switches and data disks this run
+            actually created — passed in as ``created_networks`` /
+            ``created_volumes`` from the apply result.  Anything not on those
+            lists (a shared External switch, a pre-existing disk) is left
+            untouched: under-cleanup is preferable to severing networking for
+            unrelated VMs.
+
+            :param spec: The HypervSpec (used to bound switch/disk removal).
             :param run_id: The provisioning run identifier.
             :param vpn_records: VPN device records recorded by apply.
             :param vpn_control_plane: Optional IVPNControlPlane impl.
             :param aspects: The AspectsRunner.
+            :param created_networks: Names of switches this run created.
+            :param created_volumes: Names of data volumes this run created.
 
             :returns: ``None``.
         """
+        if created_networks is not None:
+            owned_networks = set(created_networks)
+        else:
+            owned_networks = set()
+
+        if created_volumes is not None:
+            owned_volumes = set(created_volumes)
+        else:
+            owned_volumes = set()
         owned_vm_names: List[str] = []
         for vm in self._client.vms.list_vms(aspects=aspects):
             if self._notes.owned_by(notes_str=vm.notes, run_id=run_id):
@@ -77,6 +99,10 @@ class HvDestroyStages:
 
         if spec is not None:
             for vol in spec.volumes:
+                # Only delete a data disk this run created; a reused/pre-existing
+                # VHDX (e.g. an existing_id-backed data disk) is left in place.
+                if vol.name not in owned_volumes:
+                    continue
                 data_vhdx = self._resolver._join(
                     root=self._host_config.vhd_root,
                     leaf="{}-data.vhdx".format(vol.name))
@@ -93,6 +119,12 @@ class HvDestroyStages:
 
         if spec is not None:
             for net in spec.networks:
+                # Only remove a switch this run created.  apply marks a
+                # pre-existing switch (e.g. a shared External switch) as
+                # skipped, not created, so it never appears here and is never
+                # destroyed out from under unrelated VMs.
+                if net.name not in owned_networks:
+                    continue
                 self._client.switches.remove_switch(name=net.name,
                                                     aspects=aspects)
         return
