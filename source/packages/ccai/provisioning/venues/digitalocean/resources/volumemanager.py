@@ -30,6 +30,11 @@ from ccai.provisioning.venues.digitalocean.dotagtranslator import (
 )
 
 
+
+from ccai.provisioning.venues.digitalocean.dopagination import (
+    collect_all_pages
+)
+
 class VolumeManager:
     """
         Manager for DigitalOcean Block Storage volumes.
@@ -56,8 +61,9 @@ class VolumeManager:
 
             :returns: A list of volume dicts.
         """
-        response = self._client.volumes.list()
-        rtnval = list(response.get("volumes", []))
+        rtnval = collect_all_pages(
+            list_fn=self._client.volumes.list, data_key="volumes",
+        )
         return rtnval
 
     def find(self, *, run_id: str, name: str) -> Optional[Dict[str, Any]]:

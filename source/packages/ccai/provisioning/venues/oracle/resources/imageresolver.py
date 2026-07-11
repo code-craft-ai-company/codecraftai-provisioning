@@ -54,6 +54,9 @@ def os_name_for(*, family: str) -> str:
     return rtnval
 
 
+
+import oci
+
 class ImageResolver:
     """
         Resolver from a venue-neutral :class:`CloudImage` to an OCI image
@@ -102,7 +105,7 @@ class ImageResolver:
         list_kwargs["sort_order"] = "DESC"
 
         try:
-            response = client.list_images(**list_kwargs)
+            response = oci.pagination.list_call_get_all_results(client.list_images, **list_kwargs)
         except Exception as xcpt:
             err_msg_lines = ["OCI ImageResolver list_images call failed."]
             err_msg_lines.append("FAMILY: {}".format(image.family))

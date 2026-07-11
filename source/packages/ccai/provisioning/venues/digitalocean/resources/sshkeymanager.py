@@ -48,6 +48,11 @@ def _fingerprint(*, public_key_material: str) -> str:
     return rtnval
 
 
+
+from ccai.provisioning.venues.digitalocean.dopagination import (
+    collect_all_pages
+)
+
 class SshKeyManager:
     """
         Manager for DigitalOcean account-scoped SSH keys.
@@ -73,8 +78,9 @@ class SshKeyManager:
 
             :returns: A list of SSH key dicts.
         """
-        response = self._client.ssh_keys.list()
-        rtnval = list(response.get("ssh_keys", []))
+        rtnval = collect_all_pages(
+            list_fn=self._client.ssh_keys.list, data_key="ssh_keys",
+        )
         return rtnval
 
     def find(self, *, run_id: str, name: str,

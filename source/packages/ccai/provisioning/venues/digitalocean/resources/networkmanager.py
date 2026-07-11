@@ -29,6 +29,11 @@ from ccai.provisioning.venues.digitalocean.doidempotency import (
 )
 
 
+
+from ccai.provisioning.venues.digitalocean.dopagination import (
+    collect_all_pages
+)
+
 class NetworkManager:
     """
         Manager for DigitalOcean VPCs.
@@ -84,8 +89,9 @@ class NetworkManager:
 
             :returns: A list of VPC dicts.
         """
-        response = self._client.vpcs.list()
-        rtnval = list(response.get("vpcs", []))
+        rtnval = collect_all_pages(
+            list_fn=self._client.vpcs.list, data_key="vpcs",
+        )
         return rtnval
 
     def find(self, *, run_id: str, name: str) -> Optional[Dict[str, Any]]:

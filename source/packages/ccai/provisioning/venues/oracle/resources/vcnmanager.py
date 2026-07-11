@@ -28,6 +28,9 @@ from ccai.provisioning.venues.oracle.ocitagging import (
 )
 
 
+
+import oci
+
 class VcnManager:
     """
         Manager for OCI VCNs (Virtual Cloud Networks).
@@ -68,7 +71,7 @@ class VcnManager:
         """
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
-        response = client.list_vcns(compartment_id=compartment_id)
+        response = oci.pagination.list_call_get_all_results(client.list_vcns, compartment_id=compartment_id)
         for vcn in response.data:
             if matches_resource(entity=vcn, run_id=run_id,
                                 resource_name=name):
@@ -152,7 +155,7 @@ class VcnManager:
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         deleted: List[str] = []
-        response = client.list_vcns(compartment_id=compartment_id)
+        response = oci.pagination.list_call_get_all_results(client.list_vcns, compartment_id=compartment_id)
         for vcn in response.data:
             if not belongs_to_run(entity=vcn, run_id=run_id):
                 continue
@@ -176,7 +179,7 @@ class VcnManager:
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         out: List[ProvisionedResource] = []
-        response = client.list_vcns(compartment_id=compartment_id)
+        response = oci.pagination.list_call_get_all_results(client.list_vcns, compartment_id=compartment_id)
         for vcn in response.data:
             if not belongs_to_run(entity=vcn, run_id=run_id):
                 continue

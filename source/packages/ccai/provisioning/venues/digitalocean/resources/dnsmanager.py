@@ -27,6 +27,11 @@ from ccai.provisioning.venues.digitalocean.doerrors import (
 )
 
 
+
+from ccai.provisioning.venues.digitalocean.dopagination import (
+    collect_all_pages
+)
+
 class DnsManager:
     """
         Manager for DigitalOcean DNS records.
@@ -58,8 +63,11 @@ class DnsManager:
 
             :returns: The record dict, or None.
         """
-        response = self._client.domains.list_records(domain_name=zone)
-        for record in response.get("domain_records", []):
+        records = collect_all_pages(
+            list_fn=self._client.domains.list_records,
+            data_key="domain_records", domain_name=zone,
+        )
+        for record in records:
             if record.get("name", "") == name and record.get("type", "") == record_type:
                 rtnval: Optional[Dict[str, Any]] = record
                 return rtnval

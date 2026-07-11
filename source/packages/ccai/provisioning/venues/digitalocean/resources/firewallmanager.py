@@ -84,6 +84,11 @@ def _outbound_rules(*, group: CloudSecurityGroup) -> List[Dict[str, Any]]:
     return rtnval
 
 
+
+from ccai.provisioning.venues.digitalocean.dopagination import (
+    collect_all_pages
+)
+
 class FirewallManager:
     """
         Manager for DigitalOcean Cloud Firewalls.
@@ -110,8 +115,9 @@ class FirewallManager:
 
             :returns: A list of firewall dicts.
         """
-        response = self._client.firewalls.list()
-        rtnval = list(response.get("firewalls", []))
+        rtnval = collect_all_pages(
+            list_fn=self._client.firewalls.list, data_key="firewalls",
+        )
         return rtnval
 
     def find(self, *, run_id: str, name: str) -> Optional[Dict[str, Any]]:

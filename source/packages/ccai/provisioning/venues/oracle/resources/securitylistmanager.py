@@ -55,6 +55,9 @@ def _protocol_number(*, protocol: str) -> str:
     return rtnval
 
 
+
+import oci
+
 class SecurityListManager:
     """
         Manager for OCI Security Lists.
@@ -96,7 +99,7 @@ class SecurityListManager:
         """
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
-        response = client.list_security_lists(compartment_id=compartment_id)
+        response = oci.pagination.list_call_get_all_results(client.list_security_lists, compartment_id=compartment_id)
         for seclist in response.data:
             if matches_resource(entity=seclist, run_id=run_id,
                                 resource_name=name):
@@ -283,7 +286,7 @@ class SecurityListManager:
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         deleted: List[str] = []
-        response = client.list_security_lists(compartment_id=compartment_id)
+        response = oci.pagination.list_call_get_all_results(client.list_security_lists, compartment_id=compartment_id)
         for seclist in response.data:
             if not belongs_to_run(entity=seclist, run_id=run_id):
                 continue
@@ -307,7 +310,7 @@ class SecurityListManager:
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         out: List[ProvisionedResource] = []
-        response = client.list_security_lists(compartment_id=compartment_id)
+        response = oci.pagination.list_call_get_all_results(client.list_security_lists, compartment_id=compartment_id)
         for seclist in response.data:
             if not belongs_to_run(entity=seclist, run_id=run_id):
                 continue

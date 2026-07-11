@@ -76,6 +76,12 @@ def is_infiniband_sku(*, vm_size: str) -> bool:
     return rtnval
 
 
+
+from azure.core.exceptions import ResourceNotFoundError
+from ccai.xmodules.xlogging.enhancedloggers import getEnhancedLogger
+
+logger = getEnhancedLogger()
+
 class VmManager:
     """
         Manager for Azure Virtual Machines.
@@ -451,9 +457,15 @@ class VmManager:
             listing = list(client.virtual_machines.list(
                 resource_group_name=resource_group
             ))
-        except Exception:
+        except ResourceNotFoundError:
+            # Resource group / listing target absent -> nothing owned.
             rtnval = records
             return rtnval
+        except Exception as xcpt:
+            # Do NOT mask a transient/auth/list failure as 'nothing owned';
+            # that under-reports ownership and corrupts inventory/destroy.
+            logger.warning("Failed to list Azure %s in resource_group=%s: %s" % (self.KIND, resource_group, xcpt))
+            raise
 
         for vm in listing:
             live_tags = getattr(vm, "tags", None)
@@ -493,9 +505,15 @@ class VmManager:
             listing = list(client.virtual_machines.list(
                 resource_group_name=resource_group
             ))
-        except Exception:
+        except ResourceNotFoundError:
+            # Resource group / listing target absent -> nothing owned.
             rtnval = out
             return rtnval
+        except Exception as xcpt:
+            # Do NOT mask a transient/auth/list failure as 'nothing owned';
+            # that under-reports ownership and corrupts inventory/destroy.
+            logger.warning("Failed to list Azure %s in resource_group=%s: %s" % (self.KIND, resource_group, xcpt))
+            raise
 
         for vm in listing:
             live_tags = getattr(vm, "tags", None)

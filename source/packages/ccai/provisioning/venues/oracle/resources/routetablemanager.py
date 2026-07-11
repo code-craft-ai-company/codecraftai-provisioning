@@ -24,6 +24,9 @@ from ccai.provisioning.venues.oracle.ocitagging import (
 )
 
 
+
+import oci
+
 class RouteTableManager:
     """
         Manager for OCI Route Tables.
@@ -74,7 +77,8 @@ class RouteTableManager:
         compartment_id = self._session_factory.region_config.compartment_id
         rt_name = "{}-public-rt".format(network_name)
 
-        response = client.list_route_tables(
+        response = oci.pagination.list_call_get_all_results(
+            client.list_route_tables,
             compartment_id=compartment_id, vcn_id=vcn_id
         )
         for table in response.data:
@@ -117,7 +121,7 @@ class RouteTableManager:
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         deleted: List[str] = []
-        response = client.list_route_tables(compartment_id=compartment_id)
+        response = oci.pagination.list_call_get_all_results(client.list_route_tables, compartment_id=compartment_id)
         for table in response.data:
             if not belongs_to_run(entity=table, run_id=run_id):
                 continue

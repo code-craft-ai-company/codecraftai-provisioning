@@ -25,6 +25,9 @@ from ccai.provisioning.venues.oracle.ocisessionfactory import (
 from ccai.provisioning.venues.oracle.ocierrors import OciValidationError
 
 
+
+import oci
+
 class DnsManager:
     """
         Manager for OCI DNS RRSets.
@@ -65,7 +68,7 @@ class DnsManager:
         target = zone[:-1] if zone.endswith(".") else zone
         client = self._dns()
         compartment_id = self._session_factory.region_config.compartment_id
-        response = client.list_zones(compartment_id=compartment_id)
+        response = oci.pagination.list_call_get_all_results(client.list_zones, compartment_id=compartment_id)
         for entry in response.data:
             if getattr(entry, "name", "") == target:
                 rtnval = target

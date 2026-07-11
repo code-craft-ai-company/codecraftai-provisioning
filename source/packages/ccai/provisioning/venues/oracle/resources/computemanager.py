@@ -66,6 +66,9 @@ def is_bm_gpu_shape(*, shape: str) -> bool:
     return rtnval
 
 
+
+import oci
+
 class ComputeManager:
     """
         Manager for OCI Compute Instances.
@@ -203,7 +206,7 @@ class ComputeManager:
         """
         client = self._compute()
         compartment_id = self._session_factory.region_config.compartment_id
-        response = client.list_instances(compartment_id=compartment_id)
+        response = oci.pagination.list_call_get_all_results(client.list_instances, compartment_id=compartment_id)
         for instance in response.data:
             state = getattr(instance, "lifecycle_state", "")
             if state not in _LIVE_STATES:
@@ -388,7 +391,7 @@ class ComputeManager:
         client = self._compute()
         compartment_id = self._session_factory.region_config.compartment_id
         records: List[Dict[str, Any]] = []
-        response = client.list_instances(compartment_id=compartment_id)
+        response = oci.pagination.list_call_get_all_results(client.list_instances, compartment_id=compartment_id)
         for instance in response.data:
             if not belongs_to_run(entity=instance, run_id=run_id):
                 continue
@@ -421,7 +424,7 @@ class ComputeManager:
         client = self._compute()
         compartment_id = self._session_factory.region_config.compartment_id
         out: List[ProvisionedResource] = []
-        response = client.list_instances(compartment_id=compartment_id)
+        response = oci.pagination.list_call_get_all_results(client.list_instances, compartment_id=compartment_id)
         for instance in response.data:
             if not belongs_to_run(entity=instance, run_id=run_id):
                 continue

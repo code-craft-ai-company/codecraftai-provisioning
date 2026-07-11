@@ -45,6 +45,9 @@ def oci_bucket_name(*, run_id: str, name: str) -> str:
     return rtnval
 
 
+
+import oci
+
 class ObjectStorageManager:
     """
         Manager for OCI Object Storage buckets.
@@ -179,7 +182,8 @@ class ObjectStorageManager:
         compartment_id = self._session_factory.region_config.compartment_id
         deleted: List[str] = []
         try:
-            response = client.list_buckets(
+            response = oci.pagination.list_call_get_all_results(
+                client.list_buckets,
                 namespace_name=self.namespace(),
                 compartment_id=compartment_id,
             )
@@ -220,7 +224,8 @@ class ObjectStorageManager:
         compartment_id = self._session_factory.region_config.compartment_id
         out: List[ProvisionedResource] = []
         try:
-            response = client.list_buckets(
+            response = oci.pagination.list_call_get_all_results(
+                client.list_buckets,
                 namespace_name=self.namespace(),
                 compartment_id=compartment_id,
             )

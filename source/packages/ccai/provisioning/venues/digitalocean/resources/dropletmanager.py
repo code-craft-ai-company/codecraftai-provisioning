@@ -66,6 +66,11 @@ def _private_ipv4(*, droplet: Dict[str, Any]) -> str:
     return rtnval
 
 
+
+from ccai.provisioning.venues.digitalocean.dopagination import (
+    collect_all_pages
+)
+
 class DropletManager:
     """
         Manager for DigitalOcean Droplets.
@@ -101,10 +106,10 @@ class DropletManager:
 
             :returns: A list of Droplet dicts.
         """
-        response = self._client.droplets.list(
-            tag_name=run_tag_string(run_id=run_id)
+        rtnval = collect_all_pages(
+            list_fn=self._client.droplets.list, data_key="droplets",
+            tag_name=run_tag_string(run_id=run_id),
         )
-        rtnval = list(response.get("droplets", []))
         return rtnval
 
     def find(self, *, run_id: str, name: str) -> Optional[Dict[str, Any]]:

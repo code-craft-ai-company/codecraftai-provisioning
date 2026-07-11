@@ -28,6 +28,9 @@ from ccai.provisioning.venues.oracle.ocitagging import (
 )
 
 
+
+import oci
+
 class SubnetManager:
     """
         Manager for OCI Subnets.
@@ -69,7 +72,7 @@ class SubnetManager:
         """
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
-        response = client.list_subnets(compartment_id=compartment_id)
+        response = oci.pagination.list_call_get_all_results(client.list_subnets, compartment_id=compartment_id)
         for subnet in response.data:
             if matches_resource(entity=subnet, run_id=run_id,
                                 resource_name=name):
@@ -162,7 +165,7 @@ class SubnetManager:
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         deleted: List[str] = []
-        response = client.list_subnets(compartment_id=compartment_id)
+        response = oci.pagination.list_call_get_all_results(client.list_subnets, compartment_id=compartment_id)
         for subnet in response.data:
             if not belongs_to_run(entity=subnet, run_id=run_id):
                 continue
@@ -186,7 +189,7 @@ class SubnetManager:
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         out: List[ProvisionedResource] = []
-        response = client.list_subnets(compartment_id=compartment_id)
+        response = oci.pagination.list_call_get_all_results(client.list_subnets, compartment_id=compartment_id)
         for subnet in response.data:
             if not belongs_to_run(entity=subnet, run_id=run_id):
                 continue

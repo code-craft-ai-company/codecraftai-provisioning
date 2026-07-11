@@ -24,6 +24,9 @@ from ccai.provisioning.venues.oracle.ocitagging import (
 )
 
 
+
+import oci
+
 class InternetGatewayManager:
     """
         Manager for OCI Internet Gateways.
@@ -72,7 +75,8 @@ class InternetGatewayManager:
         compartment_id = self._session_factory.region_config.compartment_id
         igw_name = "{}-igw".format(network_name)
 
-        response = client.list_internet_gateways(
+        response = oci.pagination.list_call_get_all_results(
+            client.list_internet_gateways,
             compartment_id=compartment_id, vcn_id=vcn_id
         )
         for gateway in response.data:
@@ -110,7 +114,8 @@ class InternetGatewayManager:
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         deleted: List[str] = []
-        response = client.list_internet_gateways(
+        response = oci.pagination.list_call_get_all_results(
+            client.list_internet_gateways,
             compartment_id=compartment_id
         )
         for gateway in response.data:

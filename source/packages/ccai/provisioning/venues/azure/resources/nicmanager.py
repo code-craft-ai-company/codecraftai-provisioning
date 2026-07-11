@@ -28,6 +28,12 @@ from ccai.provisioning.venues.azure.azuretagging import (
 from ccai.provisioning.venues.azure.azuretask import resolve_poller
 
 
+
+from azure.core.exceptions import ResourceNotFoundError
+from ccai.xmodules.xlogging.enhancedloggers import getEnhancedLogger
+
+logger = getEnhancedLogger()
+
 class NicManager:
     """
         Manager for Azure Network Interfaces.
@@ -167,9 +173,15 @@ class NicManager:
             listing = list(client.network_interfaces.list(
                 resource_group_name=resource_group
             ))
-        except Exception:
+        except ResourceNotFoundError:
+            # Resource group / listing target absent -> nothing owned.
             rtnval = out
             return rtnval
+        except Exception as xcpt:
+            # Do NOT mask a transient/auth/list failure as 'nothing owned';
+            # that under-reports ownership and corrupts inventory/destroy.
+            logger.warning("Failed to list Azure %s in resource_group=%s: %s" % (self.KIND, resource_group, xcpt))
+            raise
 
         for nic in listing:
             live_tags = getattr(nic, "tags", None)
@@ -206,9 +218,15 @@ class NicManager:
             listing = list(client.network_interfaces.list(
                 resource_group_name=resource_group
             ))
-        except Exception:
+        except ResourceNotFoundError:
+            # Resource group / listing target absent -> nothing owned.
             rtnval = deleted
             return rtnval
+        except Exception as xcpt:
+            # Do NOT mask a transient/auth/list failure as 'nothing owned';
+            # that under-reports ownership and corrupts inventory/destroy.
+            logger.warning("Failed to list Azure %s in resource_group=%s: %s" % (self.KIND, resource_group, xcpt))
+            raise
 
         for nic in listing:
             if not belongs_to_run(azure_tags=getattr(nic, "tags", None),

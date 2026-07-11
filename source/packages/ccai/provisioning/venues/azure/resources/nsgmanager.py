@@ -174,6 +174,12 @@ def build_security_rules(*, desired: CloudSecurityGroup
     return rtnval
 
 
+
+from azure.core.exceptions import ResourceNotFoundError
+from ccai.xmodules.xlogging.enhancedloggers import getEnhancedLogger
+
+logger = getEnhancedLogger()
+
 class NsgManager:
     """
         Manager for Azure Network Security Groups.
@@ -305,9 +311,15 @@ class NsgManager:
             listing = list(client.network_security_groups.list(
                 resource_group_name=resource_group
             ))
-        except Exception:
+        except ResourceNotFoundError:
+            # Resource group / listing target absent -> nothing owned.
             rtnval = deleted
             return rtnval
+        except Exception as xcpt:
+            # Do NOT mask a transient/auth/list failure as 'nothing owned';
+            # that under-reports ownership and corrupts inventory/destroy.
+            logger.warning("Failed to list Azure %s in resource_group=%s: %s" % (self.KIND, resource_group, xcpt))
+            raise
 
         for nsg in listing:
             if not belongs_to_run(azure_tags=getattr(nsg, "tags", None),
@@ -342,9 +354,15 @@ class NsgManager:
             listing = list(client.network_security_groups.list(
                 resource_group_name=resource_group
             ))
-        except Exception:
+        except ResourceNotFoundError:
+            # Resource group / listing target absent -> nothing owned.
             rtnval = out
             return rtnval
+        except Exception as xcpt:
+            # Do NOT mask a transient/auth/list failure as 'nothing owned';
+            # that under-reports ownership and corrupts inventory/destroy.
+            logger.warning("Failed to list Azure %s in resource_group=%s: %s" % (self.KIND, resource_group, xcpt))
+            raise
 
         for nsg in listing:
             live_tags = getattr(nsg, "tags", None)

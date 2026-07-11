@@ -25,6 +25,9 @@ from ccai.provisioning.venues.oracle.ocitagging import (
 )
 
 
+
+import oci
+
 class ClusterNetworkManager:
     """
         Manager for OCI RDMA Cluster Networks.
@@ -70,7 +73,8 @@ class ClusterNetworkManager:
         client = self._cm()
         compartment_id = self._session_factory.region_config.compartment_id
         cn_name = "{}-cn".format(group_name)
-        response = client.list_cluster_networks(
+        response = oci.pagination.list_call_get_all_results(
+            client.list_cluster_networks,
             compartment_id=compartment_id
         )
         for cluster in response.data:
@@ -218,7 +222,8 @@ class ClusterNetworkManager:
         client = self._cm()
         compartment_id = self._session_factory.region_config.compartment_id
         deleted: List[str] = []
-        response = client.list_cluster_networks(
+        response = oci.pagination.list_call_get_all_results(
+            client.list_cluster_networks,
             compartment_id=compartment_id
         )
         for cluster in response.data:

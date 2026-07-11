@@ -34,6 +34,9 @@ from ccai.provisioning.venues.oracle.ocitagging import (
 _MIN_VOLUME_GB = 50
 
 
+
+import oci
+
 class BlockVolumeManager:
     """
         Manager for OCI Block Volumes.
@@ -83,7 +86,7 @@ class BlockVolumeManager:
         """
         client = self._block()
         compartment_id = self._session_factory.region_config.compartment_id
-        response = client.list_volumes(compartment_id=compartment_id)
+        response = oci.pagination.list_call_get_all_results(client.list_volumes, compartment_id=compartment_id)
         for volume in response.data:
             if matches_resource(entity=volume, run_id=run_id,
                                 resource_name=name):
@@ -179,7 +182,7 @@ class BlockVolumeManager:
         client = self._block()
         compartment_id = self._session_factory.region_config.compartment_id
         deleted: List[str] = []
-        response = client.list_volumes(compartment_id=compartment_id)
+        response = oci.pagination.list_call_get_all_results(client.list_volumes, compartment_id=compartment_id)
         for volume in response.data:
             if not belongs_to_run(entity=volume, run_id=run_id):
                 continue
@@ -203,7 +206,7 @@ class BlockVolumeManager:
         client = self._block()
         compartment_id = self._session_factory.region_config.compartment_id
         out: List[ProvisionedResource] = []
-        response = client.list_volumes(compartment_id=compartment_id)
+        response = oci.pagination.list_call_get_all_results(client.list_volumes, compartment_id=compartment_id)
         for volume in response.data:
             if not belongs_to_run(entity=volume, run_id=run_id):
                 continue
