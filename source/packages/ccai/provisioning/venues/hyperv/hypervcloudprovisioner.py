@@ -40,6 +40,7 @@ from ccai.provisioning.venues.hyperv.hvcloudinitrenderer import (
 from ccai.provisioning.venues.hyperv.hvdestroystages import (
     HvDestroyStages
 )
+from ccai.errors.exceptions import ConfigurationError
 from ccai.provisioning.venues.hyperv.hverrors import (
     ConfirmationRequiredError, HvValidationError
 )
@@ -471,14 +472,31 @@ class HypervCloudProvisioner(CloudProvisioner):
         for inst in spec.instances:
             if inst.vpn_join is None:
                 continue
+
+            vpn_join = inst.vpn_join
             mint = getattr(self._vpn_control_plane, "mint_authkey", None)
-            if mint is None:
-                rtnval[inst.name] = getattr(self._vpn_control_plane,
-                                            "minted_authkey", "")
+            if mint is not None:
+                # Real IVPNControlPlane contract:
+                # mint_authkey(*, reusable, ephemeral, tags, ttl_seconds, aspects).
+                advertise_tags = list(getattr(vpn_join, "advertise_tags", []))
+                authkey = mint(
+                    reusable=False,
+                    ephemeral=getattr(vpn_join, "ephemeral", True),
+                    tags=advertise_tags, ttl_seconds=3600, aspects=aspects)
             else:
-                rtnval[inst.name] = mint(spec=inst.vpn_join,
-                                         instance_name=inst.name,
-                                         aspects=aspects)
+                # Legacy test double that exposes a pre-minted key attribute.
+                authkey = getattr(self._vpn_control_plane,
+                                  "minted_authkey", None)
+
+            if authkey is None or len(authkey) == 0:
+                err_msg_lines = [
+                    "Failed to mint a VPN auth key for a vpn_join instance."
+                ]
+                err_msg_lines.append("INSTANCE: {}".format(inst.name))
+                err_msg = os.linesep.join(err_msg_lines)
+                raise ConfigurationError(err_msg)
+
+            rtnval[inst.name] = authkey
         return rtnval
 
     def _runner_aspects(self, *, aspects: Any) -> Any:

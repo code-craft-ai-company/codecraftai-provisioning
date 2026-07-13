@@ -91,12 +91,14 @@ class RpContainerStartRenderer:
             effective_hostname = getattr(vpn_join, "hostname_template",
                                          "runpod-pod")
 
-        up_args = ["tailscale", "up", _USERSPACE_FLAG,
+        # Userspace mode is selected by the tailscaled daemon invocation
+        # (_USERSPACE_FLAG on the tailscaled line below), not by `tailscale
+        # up`; and `tailscale up` has no --ephemeral flag — ephemerality is a
+        # property of the minted auth key.  Passing either aborts the set -e
+        # start script before the workload exec, so the pod never runs.
+        up_args = ["tailscale", "up",
                    "--authkey={}".format(effective_key),
                    "--hostname={}".format(effective_hostname)]
-
-        if getattr(vpn_join, "ephemeral", True) is True:
-            up_args.append("--ephemeral")
 
         advertise_tags = getattr(vpn_join, "advertise_tags", None)
         if advertise_tags is not None and len(advertise_tags) > 0:

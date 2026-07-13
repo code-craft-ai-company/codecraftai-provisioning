@@ -12,8 +12,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+import os
+
 from typing import Any, Dict, List, Optional
 
+from ccai.errors.exceptions import ConfigurationError
 from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
 from ccai.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
@@ -237,13 +240,29 @@ class LlApplyStages:
         """
         # `aspects` retained for interface uniformity with the other
         # stage helpers; the renderer itself is pure.
-        _ = aspects
-
         authkey = ""
         if inst.vpn_join is not None and vpn_control_plane is not None:
-            authkey = getattr(vpn_control_plane, "minted_authkey", "")
-            if authkey is None:
-                authkey = ""
+            vpn_join = inst.vpn_join
+            mint = getattr(vpn_control_plane, "mint_authkey", None)
+            if mint is not None:
+                # Real IVPNControlPlane contract:
+                # mint_authkey(*, reusable, ephemeral, tags, ttl_seconds, aspects).
+                advertise_tags = list(getattr(vpn_join, "advertise_tags", []))
+                authkey = mint(
+                    reusable=False,
+                    ephemeral=getattr(vpn_join, "ephemeral", True),
+                    tags=advertise_tags, ttl_seconds=3600, aspects=aspects)
+            else:
+                # Legacy test double that exposes a pre-minted key attribute.
+                authkey = getattr(vpn_control_plane, "minted_authkey", None)
+
+            if authkey is None or len(authkey) == 0:
+                err_msg_lines = [
+                    "Failed to mint a VPN auth key for a vpn_join instance."
+                ]
+                err_msg_lines.append("INSTANCE: {}".format(inst.name))
+                err_msg = os.linesep.join(err_msg_lines)
+                raise ConfigurationError(err_msg)
 
         rtnval = self._user_data_renderer.render(
             instance=inst, authkey=authkey, rendered_hostname=venue_name
