@@ -31,12 +31,12 @@ class SpacesManager:
     """
         Manager for DigitalOcean Spaces buckets.
 
-        Spaces is an S3-compatible object store; the venue talks to it
-        through the ``spaces`` collection on the :class:`DigitalOceanClient`
-        which exposes ``head_bucket`` / ``create_bucket`` / ``delete_bucket``
-        / ``list_buckets``.  Buckets are matched by the
-        ``codecraftai-<run-id>-<name>`` naming convention because Spaces does
-        not carry first-class tags.
+        Spaces is an S3-compatible object store; the DigitalOcean REST API
+        cannot manage its buckets, so the venue talks to it through a boto3 S3
+        client obtained from ``DigitalOceanClient.spaces(region=...)`` and uses
+        the S3 ``head_bucket`` / ``create_bucket`` / ``delete_bucket``
+        operations.  Buckets are matched by the ``codecraftai-<run-id>-<name>``
+        naming convention because Spaces does not carry first-class tags.
     """
 
     KIND: str = "bucket"
@@ -63,6 +63,36 @@ class SpacesManager:
         rtnval = "codecraftai-{}-{}".format(run_id, name)
         return rtnval
 
+    def _bucket_exists(self, *, bucket: str, region: str) -> bool:
+        """
+            Return whether a Spaces bucket exists via an S3 ``head_bucket``.
+
+            The S3 API signals a missing bucket by raising ``ClientError``
+            with a 404/NoSuchBucket code; that one case is recovered to
+            ``False``.  Any other error (auth, throttle) is allowed to bubble
+            rather than be masked as "does not exist".
+
+            :param bucket: The Spaces bucket name.
+            :param region: Spaces region slug.
+
+            :returns: True when the bucket exists.
+        """
+        from botocore.exceptions import ClientError
+
+        s3 = self._client.spaces(region=region)
+        try:
+            s3.head_bucket(Bucket=bucket)
+        except ClientError as xcpt:
+            error = xcpt.response.get("Error", {})
+            code = str(error.get("Code", ""))
+            if code in ("404", "NoSuchBucket", "NotFound"):
+                rtnval = False
+                return rtnval
+            raise
+
+        rtnval = True
+        return rtnval
+
     def find(self, *, run_id: str, name: str, region: str) -> bool:
         """
             Determine whether the Spaces bucket already exists.
@@ -74,10 +104,7 @@ class SpacesManager:
             :returns: True when the bucket exists.
         """
         bucket = self._bucket_name(run_id=run_id, name=name)
-        rtnval = self._client.spaces.head_bucket(bucket=bucket, region=region)
-        if rtnval is True:
-            return rtnval
-        rtnval = False
+        rtnval = self._bucket_exists(bucket=bucket, region=region)
         return rtnval
 
     def ensure(self, *, desired: CloudObjectBucket, run_id: str,
@@ -96,13 +123,10 @@ class SpacesManager:
         """
         bucket = self._bucket_name(run_id=run_id, name=desired.name)
         effective_region = desired.region if desired.region is not None else region
-        exists = self._client.spaces.head_bucket(
-            bucket=bucket, region=effective_region
-        )
+        exists = self._bucket_exists(bucket=bucket, region=effective_region)
         if exists is not True:
-            self._client.spaces.create_bucket(
-                bucket=bucket, region=effective_region
-            )
+            s3 = self._client.spaces(region=effective_region)
+            s3.create_bucket(Bucket=bucket)
 
         neutral_tags = base_resource_tags(
             run_id=run_id, resource_name=desired.name,
@@ -135,8 +159,8 @@ class SpacesManager:
         for name in names:
             bucket = self._bucket_name(run_id=run_id, name=name)
             try:
-                self._client.spaces.delete_bucket(bucket=bucket,
-                                                  region=region)
+                s3 = self._client.spaces(region=region)
+                s3.delete_bucket(Bucket=bucket)
                 deleted.append(bucket)
             except Exception:
                 pass
@@ -157,8 +181,7 @@ class SpacesManager:
         out: List[ProvisionedResource] = []
         for name in names:
             bucket = self._bucket_name(run_id=run_id, name=name)
-            exists = self._client.spaces.head_bucket(bucket=bucket,
-                                                     region=region)
+            exists = self._bucket_exists(bucket=bucket, region=region)
             if exists is not True:
                 continue
             attributes: Dict[str, Any] = {}
