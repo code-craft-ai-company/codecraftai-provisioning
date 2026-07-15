@@ -40,9 +40,11 @@ class LinodeReader:
         Read-only lookup helper for the Linode venue.
 
         Every ``find_*`` method enumerates the matching resource collection
-        on the ``linode_api4`` client, filters by the venue owner + run-id
-        tags, and matches on the neutral resource-name tag.  Instances,
-        firewalls, VPCs, and volumes carry these tags directly.
+        on the ``linode_api4`` client and matches ownership.  Instances,
+        firewalls, and volumes carry the venue owner + run-id tags directly.
+        VPCs, SSH keys, and Object Storage buckets carry no tags on Linode, so
+        they are matched by the venue-scoped label
+        ``codecraftai-<run_id>-<name>`` instead.
     """
 
     def __init__(self, *, client: Any, run_id: str,
@@ -112,27 +114,67 @@ class LinodeReader:
         rtnval = out
         return rtnval
 
+    def _owned_vpc_prefix(self) -> str:
+        """
+            Return the venue-scoped label prefix for this run's VPCs.
+
+            :returns: The ``codecraftai-<run_id>-`` prefix string.
+        """
+        rtnval = "codecraftai-{}-".format(self._run_id)
+        return rtnval
+
+    def owned_vpcs(self) -> List[Any]:
+        """
+            Return every VPC owned by the run, matched by label prefix.
+
+            Linode VPCs carry no tags, so tag-based ``all_owned`` cannot find
+            them; ownership is the ``codecraftai-<run_id>-`` label prefix that
+            apply assigns.
+
+            :returns: The list of owned VPC SDK objects.
+        """
+        prefix = self._owned_vpc_prefix()
+        out: List[Any] = []
+        for vpc in self._client.vpcs():
+            vpc_label = getattr(vpc, "label", None)
+            if vpc_label is not None and vpc_label.startswith(prefix):
+                out.append(vpc)
+        rtnval = out
+        return rtnval
+
     def find_vpc(self, *, name: str) -> Optional[Any]:
         """
             Find an owned VPC by name.
+
+            Linode VPCs do not carry tags, so ownership is matched by the
+            venue-scoped label ``codecraftai-<run_id>-<name>`` — the same
+            convention apply uses when creating them.
 
             :param name: Neutral network name.
 
             :returns: The VPC SDK object, or None.
         """
-        rtnval = self._first_owned(collection=list(self._client.vpcs()),
-                                   name=name)
+        target_label = "codecraftai-{}-{}".format(self._run_id, name)
+        for vpc in self._client.vpcs():
+            vpc_label = getattr(vpc, "label", None)
+            if vpc_label == target_label:
+                rtnval: Optional[Any] = vpc
+                return rtnval
+        rtnval = None
         return rtnval
 
     def find_subnet(self, *, name: str) -> Optional[Any]:
         """
             Find an owned VPC subnet by name.
 
+            The search is scoped to this run's owned VPCs so a subnet label
+            (which is not run-scoped) cannot collide with another run's VPC.
+
             :param name: Neutral subnet name.
 
             :returns: The subnet SDK object, or None.
         """
-        for vpc in self._client.vpcs():
+        for vpc in self.owned_vpcs():
             subnets = getattr(vpc, "subnets", None)
             if subnets is None:
                 continue

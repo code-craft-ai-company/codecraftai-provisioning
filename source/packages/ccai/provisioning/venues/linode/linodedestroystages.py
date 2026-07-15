@@ -124,9 +124,9 @@ class LinodeDestroyStages:
                 collection=list(self._client.networking.firewalls())):
             _delete(obj=firewall)
 
-        # 8. VPC subnets + VPCs.
-        for vpc in self._reader.all_owned(
-                collection=list(self._client.vpcs())):
+        # 8. VPC subnets + VPCs.  VPCs carry no tags, so ownership is by the
+        # venue-scoped label prefix rather than tag-based all_owned.
+        for vpc in self._reader.owned_vpcs():
             subnets = getattr(vpc, "subnets", None)
             if subnets is not None:
                 for subnet in list(subnets):

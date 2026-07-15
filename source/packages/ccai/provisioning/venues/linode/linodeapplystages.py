@@ -13,6 +13,7 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+import base64
 import os
 
 from typing import Any, Dict, List, Optional
@@ -118,9 +119,13 @@ class LinodeApplyStages:
                 resource_kind="network", extra=dict(net.tags),
                 defaults=defaults,
             )
-            created = self._client.vpc_create(
+            # VPC creation lives on the vpcs group (VPCGroup.create), not the
+            # client.  Linode VPCs carry no tags, so ownership is by the
+            # venue-scoped label; the neutral owner tags are still recorded on
+            # the ProvisionedResource for reporting.
+            created = self._client.vpcs.create(
                 label="codecraftai-{}-{}".format(run_id, net.name),
-                region=net.region, tags=tags,
+                region=net.region,
             )
             network_state[net.name] = created
             attributes: Dict[str, Any] = {}
@@ -144,8 +149,10 @@ class LinodeApplyStages:
             parent = network_state.get(subnet.network, None)
             if parent is None:
                 continue
-            created = self._client.vpc_subnet_create(
-                vpc=parent, label=subnet.name, ipv4=subnet.cidr,
+            # Subnets are created on the parent VPC object (VPC.subnet_create),
+            # not the client.
+            created = parent.subnet_create(
+                label=subnet.name, ipv4=subnet.cidr,
             )
             subnet_state[subnet.name] = created
             attributes = {}
@@ -170,7 +177,7 @@ class LinodeApplyStages:
                 defaults=defaults,
             )
             rules = self._firewall_rules(sg=sg)
-            created = self._client.firewall_create(
+            created = self._client.networking.firewall_create(
                 label="codecraftai-{}-{}".format(run_id, sg.name),
                 rules=rules, tags=tags,
             )
@@ -296,11 +303,17 @@ class LinodeApplyStages:
                     firewall_id = getattr(fw_handle, "id", None)
                     break
 
+            # Linode's Metadata service requires user_data to be base64-encoded.
             metadata: Dict[str, Any] = {}
             if metadata_user_data is not None:
-                metadata["user_data"] = metadata_user_data
+                encoded_user_data = base64.b64encode(
+                    metadata_user_data.encode("utf-8")
+                ).decode("ascii")
+                metadata["user_data"] = encoded_user_data
 
-            created = self._client.instance_create(
+            # instance_create lives on the linode group (LinodeGroup), not the
+            # client.
+            created = self._client.linode.instance_create(
                 ltype=type_slug, region=self._region_config.region,
                 image=image_id,
                 label="codecraftai-{}-{}".format(run_id, inst.name),
@@ -408,8 +421,8 @@ class LinodeApplyStages:
             raise SchemaSemanticError(err_msg)
 
         instance_id = getattr(existing, "id", None)
-        self._client.instance_resize(instance_id=instance_id,
-                                     new_type=desired_type)
+        # resize is a method on the Instance object, not the client.
+        existing.resize(new_type=desired_type)
 
         result.updated.append(ProvisionedResource(
             kind="instance", name=inst.name,
@@ -441,7 +454,7 @@ class LinodeApplyStages:
             if cluster is None or len(cluster) == 0:
                 cluster = self._region_config.object_storage_cluster
             created = self._client.object_storage.bucket_create(
-                cluster=cluster, label=bucket.name,
+                cluster_or_region=cluster, label=bucket.name,
             )
             result.created.append(ProvisionedResource(
                 kind="bucket", name=bucket.name,

@@ -79,8 +79,7 @@ class LinodeInventory:
         """
         out: List[ProvisionedResource] = []
 
-        for vpc in self._reader.all_owned(
-                collection=list(self._client.vpcs())):
+        for vpc in self._reader.owned_vpcs():
             out.append(self._record_for(kind="network", obj=vpc))
 
         for firewall in self._reader.all_owned(
