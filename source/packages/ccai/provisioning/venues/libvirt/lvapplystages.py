@@ -262,6 +262,54 @@ class LvApplyStages:
                   or existing.memory_kib != desired_memory_kib)
         return rtnval
 
+    def _data_disk_paths_for(self, *, spec: LibvirtSpec,
+                             instance: CloudInstance, run_id: str,
+                             aspects: Any) -> List[str]:
+        """
+            Resolve the pool paths of the data volumes attached to an instance.
+
+            ``apply_volumes`` runs before ``apply_domains`` and creates every
+            spec volume in the boot-disk pool, so the created volumes are
+            discoverable here.  For each ``spec.volumes`` entry whose
+            ``attached_to`` names this instance, its venue-side volume is
+            matched by name and its pool path collected.  Previously
+            ``_create_domain`` passed ``data_disk_paths=[]`` unconditionally,
+            so a declared ``attached_to`` produced a VM with no data disk and
+            an orphaned volume.
+
+            :param spec: The :class:`LibvirtSpec`.
+            :param instance: The neutral :class:`CloudInstance`.
+            :param run_id: The provisioning run id.
+            :param aspects: Behaviour control for the interop client.
+
+            :returns: The ordered list of attached data-volume pool paths.
+        """
+        attached_volumes = [
+            volume for volume in spec.volumes
+            if volume.attached_to == instance.name
+        ]
+        if len(attached_volumes) == 0:
+            rtnval: List[str] = []
+            return rtnval
+
+        pool_name = self._config.boot_disk_pool
+        live = self._client.volumes.list_volumes(pool_name=pool_name,
+                                                 aspects=aspects)
+        path_by_name: Dict[str, str] = {}
+        for volume in live:
+            path_by_name[volume.name] = volume.path
+
+        paths: List[str] = []
+        for volume in attached_volumes:
+            venue_name = resource_name_for(spec_name=volume.name,
+                                           run_id=run_id)
+            path = path_by_name.get(venue_name, None)
+            if path is not None:
+                paths.append(path)
+
+        rtnval = paths
+        return rtnval
+
     def _create_domain(self, *, spec: LibvirtSpec, instance: CloudInstance,
                        run_id: str, venue_name: str,
                        vpn_control_plane: Optional[Any],
@@ -292,11 +340,14 @@ class LvApplyStages:
             venue_name=venue_name,
             vpn_control_plane=vpn_control_plane, aspects=aspects,
         )
+        data_disk_paths = self._data_disk_paths_for(
+            spec=spec, instance=instance, run_id=run_id, aspects=aspects,
+        )
 
         domain_spec = self._domain_builder.build(
             instance=instance, domain_name=venue_name, run_id=run_id,
             network_name=network_name, boot_disk_path=boot_path,
-            data_disk_paths=[], seed_iso_path=seed_path,
+            data_disk_paths=data_disk_paths, seed_iso_path=seed_path,
         )
         defined = self._client.domains.define_domain(spec=domain_spec,
                                                      aspects=aspects)
