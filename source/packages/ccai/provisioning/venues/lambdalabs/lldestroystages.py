@@ -14,7 +14,9 @@ __credits__ = []
 
 from typing import Any, Dict, List, Optional
 
-from ccai.provisioning.venues.vpncleanup import delete_vpn_device
+from ccai.provisioning.venues.vpncleanup import (
+    deregister_devices_by_hostname
+)
 
 from ccai.provisioning.venues.lambdalabs.llnaming import instance_name_for
 from ccai.provisioning.venues.lambdalabs.lambdalabsspec import (
@@ -89,14 +91,21 @@ class LlDestroyStages:
                 self._client.delete_cluster(cluster_id=cluster.identifier,
                                             aspects=aspects)
 
-        # VPN control-plane device cleanup for VPN-joined instances.
-        if vpn_control_plane is not None:
-            for record in vpn_records:
-                device_id = record.get("vpn_device_id", None)
-                if device_id is None or len(str(device_id)) == 0:
-                    continue
-                delete_vpn_device(vpn_control_plane=vpn_control_plane,
-                                  device_id=device_id, aspects=aspects)
+        # De-register VPN devices durably: each VPN-joined instance joins the
+        # tailnet under its venue-side name (instance_name_for), recomputable
+        # from the spec here, and the real device ids are resolved from the
+        # control plane.  The apply-process vpn_records never populated a
+        # device id and are empty on a fresh destroy.
+        vpn_hostnames: List[str] = []
+        if spec is not None:
+            for inst in spec.instances:
+                if inst.vpn_join is not None:
+                    vpn_hostnames.append(
+                        instance_name_for(spec_name=inst.name, run_id=run_id)
+                    )
+        deregister_devices_by_hostname(
+            vpn_control_plane=vpn_control_plane,
+            hostnames=vpn_hostnames, aspects=aspects)
         return
 
 

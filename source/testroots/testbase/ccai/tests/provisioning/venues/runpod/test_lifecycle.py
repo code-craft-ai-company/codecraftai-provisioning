@@ -315,8 +315,10 @@ def test_destroy_defaults_to_confirm_false():
 
 def test_destroy_deregisters_recorded_vpn_devices():
     """
-        Regression for PV-H8: ``apply`` records every VPN-joined pod's
-        Tailscale device id and ``destroy`` de-registers each recorded id.
+        A VPN-joined pod joins the tailnet under its composed pod-name
+        hostname; ``destroy`` resolves that hostname to the real device id via
+        the control plane and de-registers it — durably, without relying on
+        apply-process device-id state.
     """
     vpn_join = VPNJoinSpec(provider="tailscale",
                            control_plane_credential="ts-cred",
@@ -332,8 +334,12 @@ def test_destroy_deregisters_recorded_vpn_devices():
     recorded = provisioner.registered_vpn_devices
     assert len(recorded) == 1
 
+    # Simulate the pod having joined the tailnet under its pod-name hostname.
+    hostname = recorded[0]
+    vpn.register_device(device_id="dev-real-1", hostname=hostname)
+
     provisioner.destroy(aspects=_Confirm())
-    assert vpn.deleted_devices == recorded
+    assert vpn.deleted_devices == ["dev-real-1"]
 
 
 def test_destroy_deletes_run_network_volumes():

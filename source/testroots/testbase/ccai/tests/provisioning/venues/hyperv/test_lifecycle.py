@@ -322,8 +322,16 @@ def test_destroy_invokes_vpn_cleanup(venue, client, host_config, aspects,
                                host_config=host_config, spec=spec,
                                vpn_control_plane=vpn_control_plane)
     provisioner.apply(aspects=aspects)
-    provisioner.record_vpn_device(instance_name="vm-app",
-                                  device_id="dev-vm-app")
+
+    # The VPN-joined instance joins the tailnet under its vpn_join hostname;
+    # register the matching control-plane device so destroy resolves it
+    # durably (device ids are no longer threaded through apply-process state).
+    vpn_instances = [inst for inst in spec.instances
+                     if inst.vpn_join is not None]
+    assert len(vpn_instances) > 0
+    hostname = vpn_instances[0].vpn_join.hostname_template
+    vpn_control_plane.register_device(device_id="dev-vm-app",
+                                      hostname=hostname)
 
     provisioner.destroy(aspects=confirm_aspects)
 

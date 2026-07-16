@@ -165,9 +165,12 @@ def test_destroy_terminates_and_cleans_vpn(venue, credential, aspects,
                                output_root=str(tmp_path))
     provisioner.apply(aspects=aspects)
 
-    # Seed the captured VPN record with a device id the destroy must clean.
-    records = provisioner._last_vpn_records
-    records[0]["vpn_device_id"] = "device-abc"
+    # The instance joined the tailnet under its venue-side name; register the
+    # matching control-plane device so destroy resolves it durably (device ids
+    # are no longer threaded through apply-process records).
+    live = client.list_instances(aspects=aspects)
+    assert len(live) > 0
+    vpn.register_device(device_id="device-abc", hostname=live[0].name)
 
     provisioner.destroy(aspects=confirm_aspects)
     assert len(client.list_instances(aspects=aspects)) == 0

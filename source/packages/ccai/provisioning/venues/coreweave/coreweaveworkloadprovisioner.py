@@ -60,6 +60,9 @@ from ccai.provisioning.venues.coreweave.cwnodepoolselector import (
 )
 from ccai.provisioning.venues.coreweave.cwsunkrenderer import CwSunkRenderer
 from ccai.provisioning.venues.coreweave.cwvpnsidecar import CwVpnSidecar
+from ccai.provisioning.venues.vpncleanup import (
+    deregister_devices_by_hostname
+)
 
 
 # WorkloadVenue kinds that, absent the Sunk sub-mode, the CoreWeave venue
@@ -620,11 +623,15 @@ class CoreweaveWorkloadProvisioner(WorkloadProvisioner):
         # mount them.
         self._destroy_pvcs(kube=kube, namespace=namespace)
 
-        # De-register every VPN device that the apply registered.
-        if self._vpn_control_plane is not None:
-            for device_id in self._registered_vpn_devices:
-                self._vpn_control_plane.delete_device(device_id=device_id,
-                                                      aspects=aspects)
+        # De-register VPN devices durably: a VPN-joined workload joins the
+        # tailnet under a hostname equal to its workload name, recomputable
+        # from the spec here, and the real device ids are resolved from the
+        # control plane — rather than from an apply-process list that is empty
+        # on a fresh destroy.
+        vpn_hostnames = list(self._spec.vpn_joins.keys())
+        deregister_devices_by_hostname(
+            vpn_control_plane=self._vpn_control_plane,
+            hostnames=vpn_hostnames, aspects=aspects)
 
         # The namespace is removed only when it is owned by this run.
         ns_info = None

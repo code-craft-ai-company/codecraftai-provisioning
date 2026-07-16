@@ -276,7 +276,33 @@ class RecordingVpnControlPlane:
         """
         self.minted_authkey = minted_authkey
         self.deleted_device_ids: List[str] = []
+        self.devices: List[Any] = []
         return
+
+    def register_device(self, *, device_id: str, hostname: str) -> None:
+        """
+            Simulate a client joining the tailnet under a hostname.
+
+            :param device_id: The provider-assigned device id.
+            :param hostname: The hostname the client registered with.
+
+            :returns: ``None``.
+        """
+        from ccai.interfaces.ivpncontrolplane import VPNDeviceRecord
+        self.devices.append(VPNDeviceRecord(
+            device_id=device_id, hostname=hostname, overlay_address=None))
+        return
+
+    def list_devices(self, *, aspects: Any = None) -> List[Any]:
+        """
+            Enumerate the currently-registered devices.
+
+            :param aspects: Behaviour control (unused).
+
+            :returns: The list of device records.
+        """
+        rtnval = list(self.devices)
+        return rtnval
 
     def delete_device(self, *, device_id: str, aspects: Any) -> None:
         """

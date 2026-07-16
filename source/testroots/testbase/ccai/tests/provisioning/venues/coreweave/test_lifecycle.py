@@ -245,8 +245,13 @@ def test_destroy_deregisters_recorded_vpn_devices():
     recorded = provisioner.registered_vpn_devices
     assert len(recorded) == 1
 
+    # The workload joined the tailnet under its workload-name hostname;
+    # register the matching control-plane device so destroy resolves the real
+    # device id durably rather than from apply-process state.
+    vpn.register_device(device_id="dev-real-1", hostname=recorded[0])
+
     provisioner.destroy(aspects=_Confirm())
-    assert vpn.deleted_devices == recorded
+    assert vpn.deleted_devices == ["dev-real-1"]
     return
 
 

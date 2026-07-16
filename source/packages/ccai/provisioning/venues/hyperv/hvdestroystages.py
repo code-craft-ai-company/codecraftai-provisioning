@@ -18,6 +18,9 @@ from ccai.provisioning.venues.hyperv.hvnotestranslator import (
     HvNotesTranslator
 )
 from ccai.provisioning.venues.hyperv.hvresolver import HvResolver
+from ccai.provisioning.venues.vpncleanup import (
+    deregister_devices_by_hostname
+)
 
 
 class HvDestroyStages:
@@ -109,13 +112,21 @@ class HvDestroyStages:
                 self._client.vhdx.delete_vhdx(path=data_vhdx,
                                               aspects=aspects)
 
-        if vpn_control_plane is not None:
-            for record in vpn_records:
-                device_id = record.get("vpn_device_id", None)
-                if device_id is None or len(str(device_id)) == 0:
-                    continue
-                vpn_control_plane.delete_device(device_id=device_id,
-                                                aspects=aspects)
+        # De-register VPN devices durably: each VPN-joined instance joins the
+        # tailnet under the hostname apply rendered for it (its vpn_join
+        # hostname_template), recomputable from the spec here, and the real
+        # device ids are resolved from the control plane.  The apply-process
+        # vpn_records never populated a device id and are empty on a fresh
+        # destroy.
+        if spec is not None:
+            vpn_hostnames = [
+                inst.vpn_join.hostname_template
+                for inst in spec.instances
+                if inst.vpn_join is not None
+            ]
+            deregister_devices_by_hostname(
+                vpn_control_plane=vpn_control_plane,
+                hostnames=vpn_hostnames, aspects=aspects)
 
         if spec is not None:
             for net in spec.networks:

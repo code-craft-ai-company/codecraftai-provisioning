@@ -40,25 +40,54 @@ class FakeVpnControlPlane:
         """
         self.minted_authkey: str = "tskey-test-0000"
         self.deleted_devices: List[str] = []
+        self.devices: List[Any] = []
         self._mint_count: int = 0
         return
 
-    def mint_authkey(self, *, spec: Any, instance_name: str,
-                     aspects: Any) -> str:
+    def mint_authkey(self, *, reusable: bool, ephemeral: bool,
+                     tags: List[str], ttl_seconds: int,
+                     aspects: Any = None) -> str:
         """
-            Mint a deterministic auth key for a VPN-joined instance.
+            Mint a deterministic auth key (real IVPNControlPlane signature).
 
-            :param spec: The VPNJoinSpec.
-            :param instance_name: The instance name.
+            :param reusable: Whether the key is reusable.
+            :param ephemeral: Whether the registration is ephemeral.
+            :param tags: The tags bound to the key.
+            :param ttl_seconds: The key TTL.
             :param aspects: ProvisioningAspects.
 
             :returns: A deterministic auth key string.
         """
         self._mint_count = self._mint_count + 1
-        rtnval = "tskey-{}-{}".format(instance_name, self._mint_count)
+        rtnval = "tskey-{}".format(self._mint_count)
         return rtnval
 
-    def delete_device(self, *, device_id: str, aspects: Any) -> None:
+    def register_device(self, *, device_id: str, hostname: str) -> None:
+        """
+            Simulate a client joining the tailnet under a hostname.
+
+            :param device_id: The provider-assigned device id.
+            :param hostname: The hostname the client registered with.
+
+            :returns: ``None``.
+        """
+        from ccai.interfaces.ivpncontrolplane import VPNDeviceRecord
+        self.devices.append(VPNDeviceRecord(
+            device_id=device_id, hostname=hostname, overlay_address=None))
+        return
+
+    def list_devices(self, *, aspects: Any = None) -> List[Any]:
+        """
+            Enumerate the currently-registered devices.
+
+            :param aspects: ProvisioningAspects.
+
+            :returns: The list of device records.
+        """
+        rtnval = list(self.devices)
+        return rtnval
+
+    def delete_device(self, *, device_id: str, aspects: Any = None) -> None:
         """
             Record a VPN device de-registration.
 

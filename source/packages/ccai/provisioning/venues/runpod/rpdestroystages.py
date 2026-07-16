@@ -15,7 +15,10 @@ __credits__ = []
 
 from typing import Any, List, Optional
 
-from ccai.provisioning.venues.runpod.rpnaming import belongs_to_run
+from ccai.provisioning.venues.runpod.rpnaming import belongs_to_run, pod_name
+from ccai.provisioning.venues.vpncleanup import (
+    deregister_devices_by_hostname
+)
 
 
 class RpDestroyStages:
@@ -43,8 +46,8 @@ class RpDestroyStages:
             :param client: The RunPod interop client.
             :param vpn_control_plane: Optional ``IVPNControlPlane`` used to
                 de-register VPN devices.
-            :param vpn_device_ids: Optional list of Tailscale device ids the
-                apply registered for this run.
+            :param vpn_device_ids: Deprecated and ignored; VPN device ids are
+                now resolved durably from the control plane at destroy time.
             :param aspects: Behaviour control propagated into the VPN
                 de-register call.
 
@@ -62,10 +65,19 @@ class RpDestroyStages:
             client.terminate_pod(pod_id=pod.pod_id)
             terminated.append(pod.pod_id)
 
-        if vpn_control_plane is not None and vpn_device_ids is not None:
-            for device_id in vpn_device_ids:
-                vpn_control_plane.delete_device(device_id=device_id,
-                                                aspects=aspects)
+        # De-register VPN devices durably.  Each VPN-joined pod joins the
+        # tailnet under a hostname equal to its composed pod name, which is
+        # deterministic and recomputable from the spec here; the real device
+        # ids are then resolved from the control plane.  The prior path relied
+        # on an apply-process device-id list (empty on a fresh destroy) and
+        # even passed the pod name as the device id.
+        vpn_hostnames = [
+            pod_name(workload_name=workload_name, run_id_short=run_short)
+            for workload_name in spec.vpn_joins.keys()
+        ]
+        deregister_devices_by_hostname(
+            vpn_control_plane=vpn_control_plane,
+            hostnames=vpn_hostnames, aspects=aspects)
 
         for volume in client.list_network_volumes():
             if belongs_to_run(resource_name=volume.name,
