@@ -291,13 +291,16 @@ class HetznerCloudProvisioner(CloudProvisioner):
 
         authkey_for = self._mint_authkeys(spec=self._spec, aspects=aspects)
 
-        stages.apply_network_and_firewall(
+        network_firewall_state = stages.apply_network_and_firewall(
             spec=self._spec, run_id=run_id, aspects=aspects,
             created=created, skipped=skipped)
         stages.apply_servers_and_volumes(
             spec=self._spec, run_id=run_id, aspects=aspects,
             authkey_for=authkey_for, created=created, updated=updated,
-            skipped=skipped, vpn_records=vpn_records)
+            skipped=skipped, vpn_records=vpn_records,
+            network_handles=network_firewall_state.get("networks", {}),
+            firewall_handles=network_firewall_state.get("firewalls", {}),
+            location=self._location_config.location)
         stages.apply_dns(spec=self._spec, run_id=run_id, aspects=aspects,
                          created=created)
 

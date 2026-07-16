@@ -104,9 +104,15 @@ class HetznerApplyStages:
             :param created: List to append newly created resources to.
             :param skipped: List to append skipped resource names to.
 
-            :returns: A dict of network-name -> ProvisionedResource.
+            :returns: A dict with ``"networks"`` and ``"firewalls"`` maps of
+                neutral-name -> live hcloud handle, for the server stage to
+                attach servers to their declared network and firewalls.
         """
         network_state: Dict[str, ProvisionedResource] = {}
+        # Live hcloud handles threaded to the server stage so servers can be
+        # attached to their declared network / firewalls at create time.
+        network_handles: Dict[str, Any] = {}
+        firewall_handles: Dict[str, Any] = {}
 
         for net in spec.networks:
             existing = self._client.networks.get_by_name(name=net.name)
@@ -117,6 +123,7 @@ class HetznerApplyStages:
                 resource = self._resource_from_network(net=net,
                                                        live=existing)
                 network_state[net.name] = resource
+                network_handles[net.name] = existing
                 skipped.append(net.name)
                 continue
 
@@ -128,6 +135,7 @@ class HetznerApplyStages:
                 name=net.name, ip_range=net.cidr, labels=labels)
             resource = self._resource_from_network(net=net, live=live)
             network_state[net.name] = resource
+            network_handles[net.name] = live
             created.append(resource)
 
         for sg in spec.security_groups:
@@ -136,6 +144,7 @@ class HetznerApplyStages:
                 HetznerLabelTranslator.belongs_to_run(
                     labels=_labels_of(existing), run_id=run_id))
             if owned is True:
+                firewall_handles[sg.name] = existing
                 skipped.append(sg.name)
                 continue
 
@@ -146,6 +155,7 @@ class HetznerApplyStages:
             rules = self._firewall_rules_for(sg=sg)
             live = self._client.firewalls.create(
                 name=sg.name, rules=rules, labels=labels)
+            firewall_handles[sg.name] = live
             resource = ProvisionedResource(
                 kind="security_group", name=sg.name,
                 venue_id=_id_of(live),
@@ -154,7 +164,7 @@ class HetznerApplyStages:
                     labels=_labels_of(live)))
             created.append(resource)
 
-        rtnval = network_state
+        rtnval = {"networks": network_handles, "firewalls": firewall_handles}
         return rtnval
 
     def apply_servers_and_volumes(self, *, spec: HetznerSpec,
@@ -163,7 +173,10 @@ class HetznerApplyStages:
                                   created: List[ProvisionedResource],
                                   updated: List[ProvisionedResource],
                                   skipped: List[str],
-                                  vpn_records: List[Dict[str, Any]]
+                                  vpn_records: List[Dict[str, Any]],
+                                  network_handles: Optional[Dict[str, Any]] = None,
+                                  firewall_handles: Optional[Dict[str, Any]] = None,
+                                  location: Optional[str] = None
                                   ) -> Dict[str, ProvisionedResource]:
         """
             Ensure SSH keys, then Servers, then Volumes.
@@ -176,9 +189,19 @@ class HetznerApplyStages:
             :param updated: List to append in-place updated resources to.
             :param skipped: List to append skipped resource names to.
             :param vpn_records: List to append vpn-device records to.
+            :param network_handles: Map of network-name -> live hcloud Network,
+                from apply_network_and_firewall.
+            :param firewall_handles: Map of sg-name -> live hcloud Firewall,
+                from apply_network_and_firewall.
+            :param location: The Hetzner location (datacenter region) to place
+                servers in.
 
             :returns: A dict of instance-name -> ProvisionedResource.
         """
+        if network_handles is None:
+            network_handles = {}
+        if firewall_handles is None:
+            firewall_handles = {}
         ssh_key_state: Dict[str, Any] = {}
         for kp in spec.keypairs:
             existing = self._client.ssh_keys.get_by_name(name=kp.name)
@@ -247,10 +270,25 @@ class HetznerApplyStages:
                 resource_kind="instance", extra=dict(inst.tags),
                 defaults=self._default_labels)
 
+            # Attach the server to its declared private network (resolved
+            # inst.subnet -> subnet.network), its declared firewalls, and the
+            # configured location — previously omitted, so servers landed in
+            # the default location, on no private network, protected by no
+            # firewall.
+            server_networks = self._networks_for_instance(
+                spec=spec, instance=inst, network_handles=network_handles)
+            server_firewalls = self._firewalls_for_instance(
+                instance=inst, firewall_handles=firewall_handles)
+            server_location = self._location_object(location=location)
+
             live = self._client.servers.create(
                 name=inst.name, server_type=server_type,
                 image=image_name, ssh_keys=ssh_keys,
-                user_data=user_data, labels=labels)
+                user_data=user_data, labels=labels,
+                networks=server_networks if len(server_networks) > 0 else None,
+                firewalls=(server_firewalls
+                           if len(server_firewalls) > 0 else None),
+                location=server_location)
             live_server = self._unwrap_server(result=live)
 
             resource = ProvisionedResource(
@@ -441,6 +479,83 @@ class HetznerApplyStages:
                         "ip_range": getattr(live, "ip_range", net.cidr)},
             tags=HetznerLabelTranslator.from_hetzner(
                 labels=_labels_of(live)))
+        return rtnval
+
+    @staticmethod
+    def _networks_for_instance(*, spec: HetznerSpec, instance: Any,
+                               network_handles: Dict[str, Any]) -> List[Any]:
+        """
+            Resolve the live hcloud networks a server should attach to.
+
+            The instance's declared subnet names a CloudSubnet whose parent
+            network is the private network the server joins (the same
+            subnet -> network resolution the AWS and GCP venues use).
+
+            :param spec: The HetznerSpec.
+            :param instance: The neutral CloudInstance.
+            :param network_handles: Map of network-name -> live hcloud Network.
+
+            :returns: A list of live hcloud Network handles (possibly empty).
+        """
+        subnet_name = getattr(instance, "subnet", None)
+        if subnet_name is None:
+            rtnval: List[Any] = []
+            return rtnval
+
+        network_name = None
+        for subnet in spec.subnets:
+            if subnet.name == subnet_name:
+                network_name = subnet.network
+                break
+
+        if network_name is None:
+            rtnval = []
+            return rtnval
+
+        handle = network_handles.get(network_name, None)
+        if handle is None:
+            rtnval = []
+            return rtnval
+
+        rtnval = [handle]
+        return rtnval
+
+    @staticmethod
+    def _firewalls_for_instance(*, instance: Any,
+                                firewall_handles: Dict[str, Any]) -> List[Any]:
+        """
+            Resolve the live hcloud firewalls a server should be protected by.
+
+            :param instance: The neutral CloudInstance.
+            :param firewall_handles: Map of sg-name -> live hcloud Firewall.
+
+            :returns: A list of live hcloud Firewall handles (possibly empty).
+        """
+        out: List[Any] = []
+        sg_names = (instance.security_groups
+                    if instance.security_groups is not None else [])
+        for sg_name in sg_names:
+            handle = firewall_handles.get(sg_name, None)
+            if handle is not None:
+                out.append(handle)
+        rtnval = out
+        return rtnval
+
+    @staticmethod
+    def _location_object(*, location: Optional[str]) -> Optional[Any]:
+        """
+            Build an hcloud Location object from a location name.
+
+            :param location: The Hetzner location name, or None.
+
+            :returns: An hcloud ``Location``, or None when unspecified.
+        """
+        if location is None or len(location) == 0:
+            rtnval: Optional[Any] = None
+            return rtnval
+
+        from hcloud.locations.domain import Location
+        rtnval = Location(name=location)
         return rtnval
 
     @classmethod
