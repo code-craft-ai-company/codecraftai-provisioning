@@ -31,6 +31,28 @@ from ccai.provisioning.venues.vultr.vultruserdatarenderer import (
 )
 
 
+def _dns_value_exists(*, records: List[Dict[str, Any]], name: str,
+                      record_type: str, data: str) -> bool:
+    """
+        Return whether a DNS record with the given name/type/data exists.
+
+        :param records: Existing Vultr DNS record dicts for the zone.
+        :param name: The record name.
+        :param record_type: The record type.
+        :param data: The record value.
+
+        :returns: True when a matching record is already present.
+    """
+    rtnval = False
+    for entry in records:
+        if (entry.get("name", None) == name
+                and entry.get("type", None) == record_type
+                and entry.get("data", None) == data):
+            rtnval = True
+            return rtnval
+    return rtnval
+
+
 class VultrApplyStages:
     """
         Idempotent apply stages for the Vultr venue.
@@ -385,7 +407,19 @@ class VultrApplyStages:
                 skipped.append(bucket.name)
 
         for record in spec.dns_records:
+            existing_records = self._client.list_all(
+                path="/domains/{}/records".format(record.zone),
+                collection_key="records",
+            )
+            created_any = False
             for value in record.values:
+                # Read-before-create so a re-apply does not POST a duplicate
+                # record for a (name, type, data) that already exists.
+                if _dns_value_exists(records=existing_records,
+                                     name=record.name,
+                                     record_type=record.record_type,
+                                     data=value):
+                    continue
                 self._client.post(
                     path="/domains/{}/records".format(record.zone),
                     json_body={
@@ -395,13 +429,17 @@ class VultrApplyStages:
                         "ttl": record.ttl_seconds,
                     },
                 )
+                created_any = True
             resource = ProvisionedResource(
                 kind="dns", name=record.name,
                 venue_id="{}/{}".format(record.zone, record.name),
                 attributes={"zone": record.zone,
                             "type": record.record_type},
             )
-            created.append(resource)
+            if created_any is True:
+                created.append(resource)
+            else:
+                skipped.append(record.name)
 
         rtnval = {
             "created": created,

@@ -13,8 +13,9 @@ __credits__ = []
 
 import os
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set, Tuple
 
+from ccai.errors.exceptions import ConfigurationError
 from ccai.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )
@@ -327,18 +328,35 @@ class HetznerApplyStages:
             :param created: List to append newly created resources to.
         """
         if self._dns_client is None:
-            for record in spec.dns_records:
-                created.append(ProvisionedResource(
-                    kind="dns", name=record.name,
-                    venue_id="dns-{}-{}".format(record.zone, record.name),
-                    attributes={"zone": record.zone,
-                                "record_type": record.record_type,
-                                "note": "No DNS client configured; record "
-                                        "registered logically only."}))
+            # A spec that declares DNS records cannot be satisfied without a
+            # DNS client.  Previously these were appended to `created` as
+            # "registered logically only" — reporting resources that were
+            # never provisioned.  Fail loudly instead of lying about success.
+            if len(spec.dns_records) > 0:
+                record_names = [record.name for record in spec.dns_records]
+                err_msg_lines = [
+                    "Hetzner spec declares DNS records but no DNS client is "
+                    "configured; the records cannot be provisioned."
+                ]
+                err_msg_lines.append("RECORDS: {}".format(
+                    ", ".join(record_names)))
+                err_msg = os.linesep.join(err_msg_lines)
+                raise ConfigurationError(err_msg)
             return
 
+        # Idempotent upsert.  The DNS client exposes delete-by-(zone, name) but
+        # no per-record read, so each (zone, name) is cleared once per apply
+        # and its desired values re-created — a re-apply is the identity rather
+        # than accumulating duplicate records.  Clearing once (not per record)
+        # preserves multiple record types that share a name within one apply.
+        cleared_names: Set[Tuple[str, str]] = set()
         for record in spec.dns_records:
             zone_id = self._dns_client.get_zone_id(zone_name=record.zone)
+            clear_key = (record.zone, record.name)
+            if clear_key not in cleared_names:
+                self._dns_client.delete_records(zone_name=record.zone,
+                                                name=record.name)
+                cleared_names.add(clear_key)
             for value in record.values:
                 live = self._dns_client.create_record(
                     zone_id=zone_id, name=record.name,
