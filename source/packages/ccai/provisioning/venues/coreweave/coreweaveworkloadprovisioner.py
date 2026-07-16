@@ -691,10 +691,19 @@ class CoreweaveWorkloadProvisioner(WorkloadProvisioner):
     def _destroy_pvcs(self, *, kube: KubernetesClient,
                       namespace: str) -> None:
         """
-            Delete the shared-filesystem PVCs declared by the spec.
+            Delete only the shared-filesystem PVCs this run created.
 
-            Every shared-FS mount carried by a workload binds to a PVC
-            named after the filesystem; each is removed idempotently.
+            CoreWeave v1 shared filesystems are attach-only: every mount binds
+            to an ``existing_id``-backed CSI claim that the operator owns and
+            that ``apply`` never creates (apply validate() requires the
+            existing_id-backed binding and refuses the provision path).  The
+            prior destroy deleted a PVC named after every mounted filesystem,
+            so it removed user-owned claims this run never provisioned —
+            potentially releasing the operator's storage.  Those attach-only
+            claims are now left intact.
+
+            When a provision path is added (v1.5), run-created PVCs must carry
+            the run's ownership label and be deleted by that label here.
 
             :param kube: The :class:`KubernetesClient`.
             :param namespace: The target namespace.
@@ -705,19 +714,9 @@ class CoreweaveWorkloadProvisioner(WorkloadProvisioner):
         if pvcs is None:
             return
 
-        seen: Dict[str, bool] = {}
-        all_workloads = list(self._spec.jobs) + list(self._spec.services)
-        for workload in all_workloads:
-            mounts = getattr(workload, "shared_fs_mounts", None)
-            if mounts is None:
-                continue
-            for mount in mounts:
-                fs_name = mount.filesystem_name
-                if fs_name in seen:
-                    continue
-                seen[fs_name] = True
-                pvcs.delete(name=fs_name, namespace=namespace)
-
+        # No provision path in v1: the run creates no shared-FS PVCs, so there
+        # is nothing this run owns to delete.  Deleting the attach-only claims
+        # would destroy user-owned storage bindings.
         return
 
     # ------------------------------------------------------------------
