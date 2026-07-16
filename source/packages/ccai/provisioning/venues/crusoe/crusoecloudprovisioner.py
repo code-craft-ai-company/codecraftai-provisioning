@@ -46,7 +46,7 @@ from ccai.provisioning.model.cloud.validationresult import ValidationResult
 from ccai.provisioning.model.exceptions import SchemaSemanticError
 
 from ccai.provisioning.venues.crusoe.crusoeerrors import (
-    CrusoeValidationError
+    ConfirmationRequiredError, CrusoeValidationError
 )
 from ccai.provisioning.venues.crusoe.crusoeibpartition import (
     CrusoeIbPartition, interconnect_group_of
@@ -421,6 +421,7 @@ class CrusoeCloudProvisioner(CloudProvisioner):
         project_id = self._project_config.project_id
 
         created: List[ProvisionedResource] = []
+        updated: List[ProvisionedResource] = []
         skipped: List[str] = []
         vpn_records: List[Dict[str, Any]] = []
 
@@ -524,11 +525,40 @@ class CrusoeCloudProvisioner(CloudProvisioner):
         instance_state: Dict[str, Any] = {}
         for inst in spec.instances:
             existed = inst.name in existing_vms
+            recreated = False
             if existed:
                 record = existing_vms[inst.name]
-                instance_state[inst.name] = record
-                skipped.append(inst.name)
-                continue
+                resolved_type = self._resolver.size_to_instance_type(
+                    size_hint=inst.size, accelerators=inst.accelerators,
+                    interconnect=inst.interconnect)
+                drifted = getattr(record, "instance_type",
+                                  None) != resolved_type
+                if drifted is not True:
+                    instance_state[inst.name] = record
+                    skipped.append(inst.name)
+                    continue
+
+                # instance_type drift is realised UPDATE-by-recreate (Crusoe
+                # has no in-place instance-type change).  A terminate+relaunch
+                # is disruptive, so it is gated behind aspects.confirm; without
+                # it the plan's UPDATE intent is refused rather than silently
+                # skipped (the prior behaviour never converged).
+                confirm = self._aspect_attr(aspects=aspects, name="confirm",
+                                            default=False)
+                if confirm is not True:
+                    err_msg_lines = [
+                        "Crusoe apply requires aspects.confirm=True to realise "
+                        "an instance-type change by recreate."]
+                    err_msg_lines.append("INSTANCE: {}".format(inst.name))
+                    err_msg_lines.append("    before: {}".format(
+                        getattr(record, "instance_type", None)))
+                    err_msg_lines.append("    after:  {}".format(resolved_type))
+                    err_msg = os.linesep.join(err_msg_lines)
+                    raise ConfirmationRequiredError(err_msg)
+
+                self._client.vms.terminate(project_id=project_id,
+                                           vm_id=record.vm_id)
+                recreated = True
 
             record = self._launch_instance(
                 inst=inst, project_id=project_id, run_labels=run_labels,
@@ -536,8 +566,12 @@ class CrusoeCloudProvisioner(CloudProvisioner):
                 key_state=key_state, ib_partition_ids=ib_partition_ids,
                 aspects=aspects)
             instance_state[inst.name] = record
-            created.append(self._provisioned(kind="instance", name=inst.name,
-                           venue_id=record.vm_id))
+            provisioned = self._provisioned(kind="instance", name=inst.name,
+                                            venue_id=record.vm_id)
+            if recreated is True:
+                updated.append(provisioned)
+            else:
+                created.append(provisioned)
 
             if inst.vpn_join is not None:
                 vpn_records.append({
@@ -573,7 +607,7 @@ class CrusoeCloudProvisioner(CloudProvisioner):
 
         self._last_vpn_records = vpn_records
 
-        rtnval = ProvisioningResult(created=created, updated=[],
+        rtnval = ProvisioningResult(created=created, updated=updated,
                                     skipped=skipped, errors=[])
         return rtnval
 

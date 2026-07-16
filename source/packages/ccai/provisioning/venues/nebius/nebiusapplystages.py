@@ -271,25 +271,41 @@ class NebiusApplyStages:
                                              aspects=aspects)
         instance_ids: Dict[str, str] = {}
         for inst in spec.instances:
-            found_vm = self._find_owned(records=existing_vms, run_id=run_id,
-                                        resource_name=inst.name)
-            if found_vm is not None:
-                # Idempotent re-apply: the VM already exists for this run.
-                # vms.launch is a bare POST /v1/instances with no server-side
-                # existence check, so launching again creates a duplicate
-                # billed VM.  Reuse the found instance instead of relaunching.
-                instance_ids[inst.name] = found_vm.id
-                skipped.append(inst.name)
-                continue
-
-            subnet_id = subnet_ids.get(inst.subnet, None)
-            if subnet_id is None:
-                continue
-
             preset = self._resolver.size_to_preset(
                 size_hint=inst.size, accelerators=inst.accelerators,
                 interconnect=inst.interconnect,
             )
+            subnet_id = subnet_ids.get(inst.subnet, None)
+
+            found_vm = self._find_owned(records=existing_vms, run_id=run_id,
+                                        resource_name=inst.name)
+            if found_vm is not None:
+                existing_preset = getattr(found_vm, "preset", None)
+                drifted = (existing_preset is not None
+                           and existing_preset != preset)
+                confirm = getattr(aspects, "confirm", False)
+                if (drifted is True and confirm is True
+                        and subnet_id is not None):
+                    # Preset/platform drift is realised UPDATE-by-recreate
+                    # (Nebius has no in-place preset change): terminate the
+                    # existing VM and relaunch below.  The provisioner already
+                    # gates destructive apply on aspects.confirm; the drift+
+                    # confirm+subnet guard here means a VM is never terminated
+                    # unless it can be relaunched.
+                    self._client.vms.terminate(vm_id=found_vm.id,
+                                               aspects=aspects)
+                else:
+                    # Idempotent re-apply: the VM already exists and has not
+                    # drifted (or the change is not confirmed).  vms.launch has
+                    # no server-side existence check, so relaunching would
+                    # duplicate a billed VM.  Reuse the found instance.
+                    instance_ids[inst.name] = found_vm.id
+                    skipped.append(inst.name)
+                    continue
+
+            if subnet_id is None:
+                continue
+
             platform = self._resolver.platform_for_preset(preset=preset)
             image_id = self._resolver.image_to_id(
                 family=inst.image.family, version=inst.image.version,

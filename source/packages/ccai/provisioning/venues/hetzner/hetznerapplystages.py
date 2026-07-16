@@ -20,7 +20,7 @@ from ccai.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )
 from ccai.provisioning.venues.hetzner.hetznererrors import (
-    HetznerValidationError
+    ConfirmationRequiredError, HetznerValidationError
 )
 from ccai.provisioning.venues.hetzner.hetznerlabeltranslator import (
     HetznerLabelTranslator
@@ -225,27 +225,51 @@ class HetznerApplyStages:
 
         instance_state: Dict[str, ProvisionedResource] = {}
         for inst in spec.instances:
-            existing = self._client.servers.get_by_name(name=inst.name)
-            owned = existing is not None and (
-                HetznerLabelTranslator.belongs_to_run(
-                    labels=_labels_of(existing), run_id=run_id))
-            if owned is True:
-                resource = ProvisionedResource(
-                    kind="instance", name=inst.name,
-                    venue_id=_id_of(existing),
-                    attributes={"server_id": _id_of(existing)},
-                    tags=HetznerLabelTranslator.from_hetzner(
-                        labels=_labels_of(existing)))
-                instance_state[inst.name] = resource
-                skipped.append(inst.name)
-                continue
-
             accel_models: List[str] = []
             if inst.accelerators is not None:
                 for entry in inst.accelerators:
                     accel_models.append(entry.model)
             server_type = HetznerResolver.size_to_type(
                 size_hint=inst.size, accelerators=accel_models)
+
+            existing = self._client.servers.get_by_name(name=inst.name)
+            owned = existing is not None and (
+                HetznerLabelTranslator.belongs_to_run(
+                    labels=_labels_of(existing), run_id=run_id))
+            recreated = False
+            if owned is True:
+                live_type = getattr(
+                    getattr(existing, "server_type", None), "name", None)
+                if live_type == server_type:
+                    resource = ProvisionedResource(
+                        kind="instance", name=inst.name,
+                        venue_id=_id_of(existing),
+                        attributes={"server_id": _id_of(existing)},
+                        tags=HetznerLabelTranslator.from_hetzner(
+                            labels=_labels_of(existing)))
+                    instance_state[inst.name] = resource
+                    skipped.append(inst.name)
+                    continue
+
+                # Server-type drift is realised UPDATE-by-recreate (Hetzner has
+                # no in-place server-type change).  A destroy+relaunch is
+                # disruptive, so it is gated behind aspects.confirm; without it
+                # the plan's UPDATE intent is refused rather than silently
+                # skipped (the prior behaviour never converged).
+                confirm = getattr(aspects, "confirm", False)
+                if confirm is not True:
+                    err_msg_lines = [
+                        "Hetzner apply requires aspects.confirm=True to "
+                        "realise a server-type change by recreate."]
+                    err_msg_lines.append("INSTANCE: {}".format(inst.name))
+                    err_msg_lines.append("    before: {}".format(live_type))
+                    err_msg_lines.append("    after:  {}".format(server_type))
+                    err_msg = os.linesep.join(err_msg_lines)
+                    raise ConfirmationRequiredError(err_msg)
+
+                self._client.servers.delete(server=existing)
+                recreated = True
+
             image_name = HetznerResolver.image_to_name(
                 family=inst.image.family, version=inst.image.version,
                 arch=inst.image.architecture)
@@ -300,7 +324,10 @@ class HetznerApplyStages:
                 tags=HetznerLabelTranslator.from_hetzner(
                     labels=_labels_of(live_server)))
             instance_state[inst.name] = resource
-            created.append(resource)
+            if recreated is True:
+                updated.append(resource)
+            else:
+                created.append(resource)
 
             if inst.vpn_join is not None:
                 vpn_records.append({
