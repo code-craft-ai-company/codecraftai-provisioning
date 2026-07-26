@@ -18,7 +18,7 @@ __credits__ = []
 
 from typing import Any, Dict, List, Optional
 
-from azure.core.exceptions import ResourceNotFoundError
+from ccai.restclient.azure.azurearmerror import ResourceNotFoundError
 
 
 class FakeResource:

@@ -29,7 +29,7 @@ from ccai.provisioning.venues.azure.azuretask import resolve_poller
 
 
 
-from azure.core.exceptions import ResourceNotFoundError
+from ccai.restclient.azure.azurearmerror import ResourceNotFoundError
 from ccai.xmodules.xlogging.enhancedloggers import getEnhancedLogger
 
 logger = getEnhancedLogger()

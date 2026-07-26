@@ -160,7 +160,7 @@ class VnetManager:
 
             :returns: List of destroyed VNet names.
         """
-        from azure.core.exceptions import ResourceNotFoundError
+        from ccai.restclient.azure.azurearmerror import ResourceNotFoundError
 
         client = self._network()
         deleted: List[str] = []
@@ -205,7 +205,7 @@ class VnetManager:
 
             :returns: List of ProvisionedResource entries.
         """
-        from azure.core.exceptions import ResourceNotFoundError
+        from ccai.restclient.azure.azurearmerror import ResourceNotFoundError
 
         client = self._network()
         out: List[ProvisionedResource] = []

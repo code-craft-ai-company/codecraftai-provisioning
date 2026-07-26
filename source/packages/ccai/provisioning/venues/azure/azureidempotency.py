@@ -97,7 +97,7 @@ def get_or_none(*, getter: Any, **kwargs: Any) -> Optional[Any]:
 
         :returns: The looked-up object, or None when absent.
     """
-    from azure.core.exceptions import ResourceNotFoundError
+    from ccai.restclient.azure.azurearmerror import ResourceNotFoundError
 
     try:
         result = getter(**kwargs)

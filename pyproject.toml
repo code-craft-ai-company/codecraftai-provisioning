@@ -41,6 +41,7 @@ codecraftai-restclient-crusoe = { git = "https://github.com/automationmojo/codec
 codecraftai-restclient-nebius = { git = "https://github.com/automationmojo/codecraftai-restclient-nebius.git", branch = "main" }
 codecraftai-restclient-runpod = { git = "https://github.com/automationmojo/codecraftai-restclient-runpod.git", branch = "main" }
 codecraftai-restclient-proxmox = { git = "https://github.com/automationmojo/codecraftai-restclient-proxmox.git", branch = "main" }
+codecraftai-restclient-azure = { git = "https://github.com/automationmojo/codecraftai-restclient-azure.git", branch = "main" }
 codecraftai-restclient-digitalocean = { git = "https://github.com/automationmojo/codecraftai-restclient-digitalocean.git", branch = "main" }
 codecraftai-restclient-hetzner = { git = "https://github.com/automationmojo/codecraftai-restclient-hetzner.git", branch = "main" }
 codecraftai-restclient-linode = { git = "https://github.com/automationmojo/codecraftai-restclient-linode.git", branch = "main" }
@@ -68,12 +69,6 @@ optional = true
 
 [tool.poetry.group.cloud-sdks.dependencies]
 boto3 = "^1.34"
-azure-identity = "^1.16"
-azure-mgmt-resource = "^23.0"
-azure-mgmt-network = "^25.0"
-azure-mgmt-compute = "^31.0"
-azure-mgmt-dns = "^8.1"
-azure-mgmt-storage = "^21.0"
 google-cloud-compute = "^1.19"
 google-cloud-storage = "^2.18"
 google-cloud-dns = "^0.35"

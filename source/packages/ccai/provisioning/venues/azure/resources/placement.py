@@ -28,7 +28,7 @@ from ccai.provisioning.venues.azure.azuretagging import (
 
 
 
-from azure.core.exceptions import ResourceNotFoundError
+from ccai.restclient.azure.azurearmerror import ResourceNotFoundError
 from ccai.xmodules.xlogging.enhancedloggers import getEnhancedLogger
 
 logger = getEnhancedLogger()

@@ -175,7 +175,7 @@ def build_security_rules(*, desired: CloudSecurityGroup
 
 
 
-from azure.core.exceptions import ResourceNotFoundError
+from ccai.restclient.azure.azurearmerror import ResourceNotFoundError
 from ccai.xmodules.xlogging.enhancedloggers import getEnhancedLogger
 
 logger = getEnhancedLogger()

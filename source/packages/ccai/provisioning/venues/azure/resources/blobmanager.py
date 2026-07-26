@@ -49,7 +49,7 @@ def storage_account_name(*, run_id: str, name: str) -> str:
 
 
 
-from azure.core.exceptions import ResourceNotFoundError
+from ccai.restclient.azure.azurearmerror import ResourceNotFoundError
 from ccai.xmodules.xlogging.enhancedloggers import getEnhancedLogger
 
 logger = getEnhancedLogger()

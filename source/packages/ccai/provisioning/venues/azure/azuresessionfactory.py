@@ -1,7 +1,8 @@
 """
     .. module:: azuresessionfactory
     :platform: Darwin, Linux, Unix, Windows
-    :synopsis: AzureSessionFactory — lazy builder for azure-mgmt-* clients.
+    :synopsis: AzureSessionFactory — lazy builder for the ARM
+               management clients.
 
     .. moduleauthor:: Myron Walker <myron.walker@gmail.com>
 """
@@ -22,6 +23,15 @@ from ccai.credentials.azureserviceprincipalcredential import (
     AzureServicePrincipalCredential
 )
 from ccai.provisioning.venues.azure.azureerrors import AzureValidationError
+from ccai.restclient.azure.azurearmclient import AzureArmClient
+from ccai.restclient.azure.azuretokenprovider import (
+    AzureTokenProvider
+)
+from ccai.restclient.azure.managementclients import (
+    ComputeManagementClient, DnsManagementClient,
+    NetworkManagementClient, ResourceManagementClient,
+    StorageManagementClient
+)
 from ccai.provisioning.venues.azure.azureregionconfig import (
     AzureRegionConfig
 )
@@ -29,10 +39,10 @@ from ccai.provisioning.venues.azure.azureregionconfig import (
 
 class AzureSessionFactory:
     """
-        Lazy factory that builds ``azure-mgmt-*`` management clients from an
+        Lazy factory that builds the ARM management clients from an
         Azure credential and an :class:`AzureRegionConfig`.
 
-        The :class:`azure.identity` ``TokenCredential`` is constructed on
+        The token provider is constructed on
         first access and cached; each per-service client is likewise built
         once and cached.  No SDK state is created at construction time so
         this class is safe to instantiate in tests that inject mock clients
@@ -51,6 +61,7 @@ class AzureSessionFactory:
         self._credential: Any = credential
         self._region_config: AzureRegionConfig = region_config
         self._token_credential: Optional[Any] = None
+        self._arm_client: Optional[Any] = None
         self._resource_client: Optional[Any] = None
         self._network_client: Optional[Any] = None
         self._compute_client: Optional[Any] = None
@@ -70,13 +81,13 @@ class AzureSessionFactory:
 
     def token_credential(self) -> Any:
         """
-            Return the cached ``azure.identity`` token credential.
+            Return the cached token provider.
 
             Builds a ``ClientSecretCredential`` from a service-principal
             credential, or a ``ManagedIdentityCredential`` from a managed
             identity credential.
 
-            :returns: An ``azure.identity`` token credential.
+            :returns: An :class:`AzureTokenProvider`.
             :raises: AzureValidationError
         """
         if self._token_credential is not None:
@@ -84,8 +95,7 @@ class AzureSessionFactory:
             return rtnval
 
         if isinstance(self._credential, AzureServicePrincipalCredential):
-            from azure.identity import ClientSecretCredential
-            built = ClientSecretCredential(
+            built = AzureTokenProvider(
                 tenant_id=self._credential.tenant_id,
                 client_id=self._credential.client_id,
                 client_secret=self._credential.client_secret,
@@ -95,13 +105,10 @@ class AzureSessionFactory:
             return rtnval
 
         if isinstance(self._credential, AzureManagedIdentityCredential):
-            from azure.identity import ManagedIdentityCredential
-            if self._credential.client_id is not None:
-                built = ManagedIdentityCredential(
-                    client_id=self._credential.client_id
-                )
-            else:
-                built = ManagedIdentityCredential()
+            built = AzureTokenProvider(
+                use_managed_identity=True,
+                client_id=self._credential.client_id,
+            )
             self._token_credential = built
             rtnval = self._token_credential
             return rtnval
@@ -114,6 +121,27 @@ class AzureSessionFactory:
         err_msg = os.linesep.join(err_msg_lines)
         raise AzureValidationError(err_msg)
 
+    def arm_client(self) -> Any:
+        """
+            Return the cached ARM transport, building it on first use.
+
+            All five management clients share one transport, because ARM is a
+            single API.
+
+            :returns: An :class:`AzureArmClient`.
+        """
+        if self._arm_client is not None:
+            rtnval = self._arm_client
+            return rtnval
+
+        built = AzureArmClient(
+            subscription_id=self._region_config.subscription_id,
+            token_provider=self.token_credential(),
+        )
+        self._arm_client = built
+        rtnval = self._arm_client
+        return rtnval
+
     def override_clients(self, *, resource: Optional[Any] = None,
                          network: Optional[Any] = None,
                          compute: Optional[Any] = None,
@@ -123,7 +151,7 @@ class AzureSessionFactory:
             Inject pre-built (mock) management clients.
 
             Used by tests so the venue can be exercised without the
-            ``azure.identity`` token path or real Azure calls.
+            token-acquisition path or real Azure calls.
 
             :param resource: ResourceManagementClient (or mock).
             :param network: NetworkManagementClient (or mock).
@@ -153,11 +181,7 @@ class AzureSessionFactory:
             rtnval = self._resource_client
             return rtnval
 
-        from azure.mgmt.resource import ResourceManagementClient
-        built = ResourceManagementClient(
-            credential=self.token_credential(),
-            subscription_id=self._region_config.subscription_id,
-        )
+        built = ResourceManagementClient(arm_client=self.arm_client())
         self._resource_client = built
         rtnval = self._resource_client
         return rtnval
@@ -172,11 +196,7 @@ class AzureSessionFactory:
             rtnval = self._network_client
             return rtnval
 
-        from azure.mgmt.network import NetworkManagementClient
-        built = NetworkManagementClient(
-            credential=self.token_credential(),
-            subscription_id=self._region_config.subscription_id,
-        )
+        built = NetworkManagementClient(arm_client=self.arm_client())
         self._network_client = built
         rtnval = self._network_client
         return rtnval
@@ -191,11 +211,7 @@ class AzureSessionFactory:
             rtnval = self._compute_client
             return rtnval
 
-        from azure.mgmt.compute import ComputeManagementClient
-        built = ComputeManagementClient(
-            credential=self.token_credential(),
-            subscription_id=self._region_config.subscription_id,
-        )
+        built = ComputeManagementClient(arm_client=self.arm_client())
         self._compute_client = built
         rtnval = self._compute_client
         return rtnval
@@ -210,11 +226,7 @@ class AzureSessionFactory:
             rtnval = self._storage_client
             return rtnval
 
-        from azure.mgmt.storage import StorageManagementClient
-        built = StorageManagementClient(
-            credential=self.token_credential(),
-            subscription_id=self._region_config.subscription_id,
-        )
+        built = StorageManagementClient(arm_client=self.arm_client())
         self._storage_client = built
         rtnval = self._storage_client
         return rtnval
@@ -229,11 +241,7 @@ class AzureSessionFactory:
             rtnval = self._dns_client
             return rtnval
 
-        from azure.mgmt.dns import DnsManagementClient
-        built = DnsManagementClient(
-            credential=self.token_credential(),
-            subscription_id=self._region_config.subscription_id,
-        )
+        built = DnsManagementClient(arm_client=self.arm_client())
         self._dns_client = built
         rtnval = self._dns_client
         return rtnval
