@@ -119,12 +119,13 @@ class AwsCloudProvisioner(CloudProvisioner):
                  region_config: AwsRegionConfig,
                  spec: Optional[AwsSpec] = None,
                  catalog: Optional[CloudAcceleratorCatalog] = None,
-                 vpn_control_plane: Optional[Any] = None) -> None:
+                 vpn_control_plane: Optional[Any] = None,
+                 session_factory: Optional[Any] = None) -> None:
         """
             Construct an AwsCloudProvisioner.
 
             :param venue: CloudVenue.
-            :param credential: AwsAccessKeyCredential used for boto3.
+            :param credential: AwsAccessKeyCredential used to sign requests.
             :param region_config: AwsRegionConfig.
             :param spec: Optional AwsSpec.
             :param catalog: Optional accelerator catalog (defaults to the
@@ -132,13 +133,22 @@ class AwsCloudProvisioner(CloudProvisioner):
             :param vpn_control_plane: Optional ``IVPNControlPlane`` impl;
                                       destroy uses this to de-register
                                       Tailscale / Twingate devices.
+            :param session_factory: Optional pre-built session factory,
+                                    carrying injected service clients.  This
+                                    is the seam every other venue in this
+                                    package already has, and the one the AWS
+                                    tests need in order to stop mocking at
+                                    the SDK layer.
         """
         super().__init__(venue=venue, spec=spec)
         self._credential: AwsAccessKeyCredential = credential
         self._region_config: AwsRegionConfig = region_config
-        self._session_factory: AwsBoto3SessionFactory = AwsBoto3SessionFactory(
-            credential=credential, region_config=region_config
-        )
+        if session_factory is not None:
+            self._session_factory: Any = session_factory
+        else:
+            self._session_factory = AwsBoto3SessionFactory(
+                credential=credential, region_config=region_config
+            )
         if catalog is not None:
             self._catalog: CloudAcceleratorCatalog = catalog
         else:
