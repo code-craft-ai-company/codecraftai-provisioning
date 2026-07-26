@@ -17,7 +17,6 @@ import pytest
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
-from moto import mock_aws
 
 from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
@@ -34,22 +33,30 @@ from ccai.provisioning.venues.aws.awscloudprovisioner import (
 )
 from ccai.provisioning.venues.aws.awsspec import AwsSpec
 
+from ._fakeaws import FakeAwsSessionFactory
 from ._specfactory import basic_spec
 
 
 def _new_provisioner(*, venue, credential, region_config, spec,
-                     vpn_control_plane=None):
+                     vpn_control_plane=None, session_factory=None):
     """
-        Helper: build a provisioner.
+        Helper: build a provisioner over the in-memory AWS.
+
+        A factory is created per call unless one is supplied, so a test that
+        needs to inspect stored state or share it across two provisioners
+        passes its own.
     """
+    if session_factory is None:
+        session_factory = FakeAwsSessionFactory()
+
     rtnval = AwsCloudProvisioner(
         venue=venue, credential=credential, region_config=region_config,
         spec=spec, vpn_control_plane=vpn_control_plane,
+        session_factory=session_factory,
     )
     return rtnval
 
 
-@mock_aws
 def test_plan_then_apply_creates_resources(venue, credential, region_config,
                                            aspects) -> None:
     """
@@ -72,7 +79,6 @@ def test_plan_then_apply_creates_resources(venue, credential, region_config,
     return
 
 
-@mock_aws
 def test_apply_idempotent(venue, credential, region_config, aspects) -> None:
     """
         Re-applying produces only SKIPs and no new created resources.
@@ -106,7 +112,6 @@ def test_apply_idempotent(venue, credential, region_config, aspects) -> None:
     return
 
 
-@mock_aws
 def test_apply_with_vpn_join_injects_user_data(venue, credential,
                                                region_config,
                                                aspects) -> None:
@@ -115,40 +120,29 @@ def test_apply_with_vpn_join_injects_user_data(venue, credential,
         containing the tailscale bring-up reference.
     """
     spec = basic_spec(with_vpn=True)
+    factory = FakeAwsSessionFactory()
     provisioner = _new_provisioner(
         venue=venue, credential=credential, region_config=region_config,
-        spec=spec,
+        spec=spec, session_factory=factory,
     )
     provisioner.apply(aspects=aspects)
 
-    session = provisioner._session_factory.session()
-    ec2 = session.client("ec2", region_name="us-east-1")
-    response = ec2.describe_instances()
+    # Read the fake's instances directly.  The old version went through a
+    # boto3 client and had to tolerate moto returning the user data
+    # double-base64-encoded; the fake stores exactly what the venue sent, so
+    # the assertion can be exact.
     found = False
-    for reservation in response.get("Reservations", []):
-        for entry in reservation.get("Instances", []):
-            instance_id = entry.get("InstanceId", "")
-            attrs = ec2.describe_instance_attribute(
-                InstanceId=instance_id, Attribute="userData"
-            )
-            ud_obj = attrs.get("UserData", {})
-            value = ud_obj.get("Value", "") if isinstance(ud_obj, dict) else ""
-            if value is None or len(value) == 0:
-                continue
-            decoded = base64.b64decode(value).decode("utf-8")
-            # moto sometimes returns the value double-base64-encoded.
-            try:
-                inner = base64.b64decode(decoded).decode("utf-8")
-                decoded_total = inner
-            except Exception:
-                decoded_total = decoded
-            if "tailscale" in decoded_total and "bringup" in decoded_total:
-                found = True
+    for entry in factory.ec2.instances.values():
+        value = entry.get("UserData", "")
+        if value is None or len(value) == 0:
+            continue
+        decoded = base64.b64decode(value).decode("utf-8")
+        if "tailscale" in decoded and "bringup" in decoded:
+            found = True
     assert found is True
     return
 
 
-@mock_aws
 def test_destroy_requires_confirm(venue, credential, region_config,
                                   aspects) -> None:
     """
@@ -165,7 +159,6 @@ def test_destroy_requires_confirm(venue, credential, region_config,
     return
 
 
-@mock_aws
 def test_destroy_reverses_apply(venue, credential, region_config, aspects,
                                 confirm_aspects) -> None:
     """
@@ -189,7 +182,6 @@ def test_destroy_reverses_apply(venue, credential, region_config, aspects,
     return
 
 
-@mock_aws
 def test_gpu_sku_resolution(venue, credential, region_config,
                             aspects) -> None:
     """
@@ -213,7 +205,6 @@ def test_gpu_sku_resolution(venue, credential, region_config,
     return
 
 
-@mock_aws
 def test_efa_attaches_placement_group(venue, credential, region_config,
                                       aspects) -> None:
     """
@@ -226,37 +217,29 @@ def test_efa_attaches_placement_group(venue, credential, region_config,
                                      topology="RAIL_OPTIMIZED")
     spec = basic_spec(instance_size="p5.48xlarge", accelerators=[accel],
                       interconnect=interconnect)
+    factory = FakeAwsSessionFactory()
     provisioner = _new_provisioner(
         venue=venue, credential=credential, region_config=region_config,
-        spec=spec,
+        spec=spec, session_factory=factory,
     )
     result = provisioner.apply(aspects=aspects)
 
-    session = provisioner._session_factory.session()
-    ec2 = session.client("ec2", region_name="us-east-1")
-
-    # Find the instance and check its Placement.
-    response = ec2.describe_instances()
-    pg_seen = ""
-    for reservation in response.get("Reservations", []):
-        for entry in reservation.get("Instances", []):
-            placement = entry.get("Placement", {}) or {}
-            pg_seen = placement.get("GroupName", "") or pg_seen
-    # On moto, placement groups are not modelled but the run_instances call
-    # accepts the GroupName argument; we accept either:
-    #   - moto preserved the placement-group name on the launched instance,
-    #   - or the instance simply launched (placement-group manager swallowed
-    #     the NotImplementedError from describe_placement_groups), in which
-    #     case at least one instance must have been created.
-    instance_created = any(
-        r.kind == "instance" for r in result.created
-    )
+    instance_created = any(r.kind == "instance" for r in result.created)
     assert instance_created is True
-    assert pg_seen == "" or "codecraftai-pg-" in pg_seen
+
+    # The fake models placement groups, which moto did not — so this can now
+    # assert the group was really created AND attached, instead of accepting
+    # either outcome.
+    groups = list(factory.ec2.placement_groups.keys())
+    assert len(groups) == 1
+    assert "codecraftai-pg-" in groups[0]
+
+    placements = [entry.get("Placement", {}).get("GroupName", "")
+                  for entry in factory.ec2.instances.values()]
+    assert groups[0] in placements
     return
 
 
-@mock_aws
 def test_preemption_policy_fail_uses_on_demand(venue, credential,
                                                region_config,
                                                aspects) -> None:
@@ -265,23 +248,18 @@ def test_preemption_policy_fail_uses_on_demand(venue, credential,
         SpotInstanceRequestId).
     """
     spec = basic_spec(preemption=PreemptionPolicy.FAIL)
+    factory = FakeAwsSessionFactory()
     provisioner = _new_provisioner(
         venue=venue, credential=credential, region_config=region_config,
-        spec=spec,
+        spec=spec, session_factory=factory,
     )
     provisioner.apply(aspects=aspects)
-    session = provisioner._session_factory.session()
-    ec2 = session.client("ec2", region_name="us-east-1")
-    response = ec2.describe_instances()
-    for reservation in response.get("Reservations", []):
-        for entry in reservation.get("Instances", []):
-            assert "SpotInstanceRequestId" not in entry or len(
-                entry.get("SpotInstanceRequestId", "")
-            ) == 0
+    for entry in factory.ec2.instances.values():
+        # On-demand means no spot market options were requested at all.
+        assert entry.get("InstanceMarketOptions", None) is None
     return
 
 
-@mock_aws
 def test_preemption_policy_reacquire_uses_spot(venue, credential,
                                                region_config,
                                                aspects) -> None:
@@ -325,7 +303,6 @@ class _RecordingVPN:
         return
 
 
-@mock_aws
 def test_plan_emits_delete_for_owned_orphan(venue, credential,
                                             region_config, aspects) -> None:
     """
@@ -333,9 +310,12 @@ def test_plan_emits_delete_for_owned_orphan(venue, credential,
         surfaced as a DELETE action by the plan-side orphan scan.
     """
     full_spec = basic_spec()
+    # Both provisioners must see the same AWS, or the second finds nothing to
+    # call an orphan.  moto shared state implicitly; the fake is explicit.
+    shared = FakeAwsSessionFactory()
     provisioner = _new_provisioner(
         venue=venue, credential=credential, region_config=region_config,
-        spec=full_spec,
+        spec=full_spec, session_factory=shared,
     )
     # Realise the full spec so the instance carries ccai:owner tags.
     provisioner.apply(aspects=aspects)
@@ -354,7 +334,7 @@ def test_plan_emits_delete_for_owned_orphan(venue, credential,
     )
     orphan_provisioner = _new_provisioner(
         venue=venue, credential=credential, region_config=region_config,
-        spec=spec_without_instance,
+        spec=spec_without_instance, session_factory=shared,
     )
     plan = orphan_provisioner.plan(aspects=aspects)
 
@@ -369,7 +349,6 @@ def test_plan_emits_delete_for_owned_orphan(venue, credential,
     return
 
 
-@mock_aws
 def test_destroy_calls_vpn_delete_device(venue, credential, region_config,
                                          aspects, confirm_aspects) -> None:
     """
