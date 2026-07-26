@@ -13,7 +13,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-from hypothesis import given, settings, strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
@@ -54,8 +55,7 @@ _TAG_TEXT = st.text(
 
 
 @given(repeat_count=st.integers(min_value=2, max_value=5),
-       with_vpn=st.booleans(), with_volume=st.booleans())
-@settings(deadline=None, max_examples=30)
+       with_vpn=st.booleans(), with_volume=st.booleans(), constraints={"max_examples": 30})
 def test_property_apply_is_idempotent(repeat_count, with_vpn,
                                       with_volume) -> None:
     """
@@ -88,8 +88,7 @@ def test_property_apply_is_idempotent(repeat_count, with_vpn,
     return
 
 
-@given(with_vpn=st.booleans(), with_volume=st.booleans())
-@settings(deadline=None, max_examples=20)
+@given(with_vpn=st.booleans(), with_volume=st.booleans(), constraints={"max_examples": 20})
 def test_property_destroy_inverts_apply(with_vpn, with_volume) -> None:
     """
         Destroy after apply returns the venue to its pre-apply VM/VDI state.

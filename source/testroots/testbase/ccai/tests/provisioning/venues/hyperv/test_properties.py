@@ -14,8 +14,8 @@ __credits__ = []
 
 from typing import Dict, List
 
-from hypothesis import given, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
@@ -57,8 +57,7 @@ def _build(*, with_vpn: bool, with_volume: bool):
     return rtnval
 
 
-@settings(max_examples=25, deadline=None)
-@given(with_vpn=st.booleans(), with_volume=st.booleans())
+@given(with_vpn=st.booleans(), with_volume=st.booleans(), constraints={"max_examples": 25})
 def test_apply_idempotent(with_vpn, with_volume):
     """
         apply ∘ apply makes no further mutating calls on the second run.
@@ -78,8 +77,7 @@ def test_apply_idempotent(with_vpn, with_volume):
     return
 
 
-@settings(max_examples=25, deadline=None)
-@given(with_vpn=st.booleans(), with_volume=st.booleans())
+@given(with_vpn=st.booleans(), with_volume=st.booleans(), constraints={"max_examples": 25})
 def test_destroy_is_inverse_of_apply(with_vpn, with_volume):
     """
         destroy ∘ apply restores an empty host (modulo external state).
@@ -104,10 +102,9 @@ _TAG_VALUES = st.text(alphabet="abcdefghijklmnop0123", min_size=0,
                       max_size=12)
 
 
-@settings(max_examples=60, deadline=None)
 @given(tags=st.dictionaries(keys=_TAG_KEYS, values=_TAG_VALUES,
                             min_size=0, max_size=6),
-       run_id=st.text(alphabet="abcdef0123-", min_size=1, max_size=20))
+       run_id=st.text(alphabet="abcdef0123-", min_size=1, max_size=20), constraints={"max_examples": 60})
 def test_notes_json_tag_round_trip_identity(tags, run_id):
     """
         decode(encode(tags, run_id)) recovers the tags and run-id exactly.

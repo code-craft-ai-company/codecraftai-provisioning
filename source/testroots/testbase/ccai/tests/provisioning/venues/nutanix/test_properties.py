@@ -15,8 +15,8 @@ __credits__ = []
 
 import pytest
 
-from hypothesis import given, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.restclient.nutanix.aspectsnutanix import AspectsNutanix
 from ccai.restclient.nutanix.model.nutanixtaskhandle import (
@@ -67,9 +67,8 @@ _TAG_VALUES = st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789",
                       min_size=1, max_size=8)
 
 
-@settings(max_examples=25, deadline=None)
 @given(tag_pairs=st.dictionaries(keys=_TAG_KEYS, values=_TAG_VALUES,
-                                 min_size=0, max_size=4))
+                                 min_size=0, max_size=4), constraints={"max_examples": 25})
 def test_apply_idempotent(tag_pairs):
     """
         apply ∘ apply yields the same VM inventory with no fresh creates.
@@ -86,9 +85,8 @@ def test_apply_idempotent(tag_pairs):
     assert len(client.vms_state) == 1
 
 
-@settings(max_examples=25, deadline=None)
 @given(tag_pairs=st.dictionaries(keys=_TAG_KEYS, values=_TAG_VALUES,
-                                 min_size=0, max_size=4))
+                                 min_size=0, max_size=4), constraints={"max_examples": 25})
 def test_destroy_is_inverse_of_apply(tag_pairs):
     """
         destroy ∘ apply leaves the venue empty of run-owned resources.
@@ -105,9 +103,8 @@ def test_destroy_is_inverse_of_apply(tag_pairs):
     assert len(client.vpcs_state) == 0
 
 
-@settings(max_examples=40, deadline=None)
 @given(tag_pairs=st.dictionaries(keys=_TAG_KEYS, values=_TAG_VALUES,
-                                 min_size=0, max_size=5))
+                                 min_size=0, max_size=5), constraints={"max_examples": 40})
 def test_category_value_round_trip_identity(tag_pairs):
     """
         Translating neutral tags to Prism Categories and reading them

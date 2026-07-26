@@ -17,8 +17,8 @@ __credits__ = []
 
 import tempfile
 
-from hypothesis import given, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.restclient.runpod.enums.runpodcloudtype import RunpodCloudType
 from ccai.interfaces.vpnjoinspec import VPNJoinSpec
@@ -38,9 +38,8 @@ from .testsupport import (
 # apply idempotence
 # ----------------------------------------------------------------------
 
-@settings(max_examples=30, deadline=None)
 @given(job_count=st.integers(min_value=1, max_value=4),
-       service_count=st.integers(min_value=0, max_value=3))
+       service_count=st.integers(min_value=0, max_value=3), constraints={"max_examples": 30})
 def test_apply_idempotent(job_count, service_count):
     """
         ``apply`` ∘ ``apply`` launches no extra pods — the second apply is a
@@ -64,9 +63,8 @@ def test_apply_idempotent(job_count, service_count):
 # destroy is the inverse of apply
 # ----------------------------------------------------------------------
 
-@settings(max_examples=30, deadline=None)
 @given(job_count=st.integers(min_value=1, max_value=4),
-       volume_count=st.integers(min_value=0, max_value=3))
+       volume_count=st.integers(min_value=0, max_value=3), constraints={"max_examples": 30})
 def test_destroy_is_inverse_of_apply(job_count, volume_count):
     """
         After ``apply`` then ``destroy`` the account holds none of the run's
@@ -93,10 +91,9 @@ def test_destroy_is_inverse_of_apply(job_count, volume_count):
 # sidecar-tag round-trip identity
 # ----------------------------------------------------------------------
 
-@settings(max_examples=40, deadline=None)
 @given(tags=st.dictionaries(keys=st.text(min_size=1, max_size=8),
                             values=st.text(min_size=0, max_size=12),
-                            min_size=0, max_size=6))
+                            min_size=0, max_size=6), constraints={"max_examples": 40})
 def test_sidecar_tag_round_trip_identity(tags):
     """
         Writing a neutral tag dict and reading it back recovers the identity.
@@ -112,9 +109,8 @@ def test_sidecar_tag_round_trip_identity(tags):
 # userspace-Tailscale start-script hash determinism
 # ----------------------------------------------------------------------
 
-@settings(max_examples=30, deadline=None)
 @given(hostname=st.text(alphabet="abcdefghijklmnop-", min_size=1,
-                        max_size=16))
+                        max_size=16), constraints={"max_examples": 30})
 def test_userspace_tailscale_start_script_hash_deterministic(hostname):
     """
         For the same inputs the rendered userspace-Tailscale start script is
@@ -140,8 +136,7 @@ def test_userspace_tailscale_start_script_hash_deterministic(hostname):
 # secure vs community tier branch
 # ----------------------------------------------------------------------
 
-@settings(max_examples=20, deadline=None)
-@given(tier=st.sampled_from(("secure", "community", None)))
+@given(tier=st.sampled_from(("secure", "community", None)), constraints={"max_examples": 20})
 def test_secure_vs_community_branch(tier):
     """
         The apply stage maps the spec tier onto the matching RunPod cloud

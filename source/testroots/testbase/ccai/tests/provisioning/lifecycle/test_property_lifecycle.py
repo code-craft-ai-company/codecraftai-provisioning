@@ -13,7 +13,8 @@ __credits__ = []
 
 import unittest
 
-from hypothesis import given, settings, strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
 from ccai.provisioning.model.cloud._fake.fakecloudprovisioner import (
@@ -61,8 +62,7 @@ def _spec_strategy() -> st.SearchStrategy:
 
 class ApplyIdempotenceProperty(unittest.TestCase):
 
-    @settings(max_examples=30, deadline=None)
-    @given(resources=_spec_strategy())
+    @given(resources=_spec_strategy(), constraints={"max_examples": 30})
     def test_apply_apply_equals_apply(self, resources) -> None:
         spec = {"resources": resources}
         fake = FakeCloudProvisioner(venue=_venue(), spec=spec)
@@ -86,8 +86,7 @@ class ApplyIdempotenceProperty(unittest.TestCase):
 
 class DestroyInversibilityProperty(unittest.TestCase):
 
-    @settings(max_examples=30, deadline=None)
-    @given(resources=_spec_strategy())
+    @given(resources=_spec_strategy(), constraints={"max_examples": 30})
     def test_destroy_after_apply_restores_pre_state(self, resources) -> None:
         spec = {"resources": resources}
         fake = FakeCloudProvisioner(venue=_venue(), spec=spec)
@@ -105,8 +104,7 @@ class DestroyInversibilityProperty(unittest.TestCase):
 
 class PlanStabilityProperty(unittest.TestCase):
 
-    @settings(max_examples=30, deadline=None)
-    @given(resources=_spec_strategy())
+    @given(resources=_spec_strategy(), constraints={"max_examples": 30})
     def test_plan_twice_yields_equal_action_lists(self, resources) -> None:
         spec = {"resources": resources}
         fake = FakeCloudProvisioner(venue=_venue(), spec=spec)
@@ -125,8 +123,7 @@ class PlanStabilityProperty(unittest.TestCase):
 
 class OwnerTagInvariantProperty(unittest.TestCase):
 
-    @settings(max_examples=30, deadline=None)
-    @given(resources=_spec_strategy())
+    @given(resources=_spec_strategy(), constraints={"max_examples": 30})
     def test_every_owned_resource_carries_owner_tag(self, resources) -> None:
         spec = {"resources": resources}
         fake = FakeCloudProvisioner(venue=_venue(), spec=spec)

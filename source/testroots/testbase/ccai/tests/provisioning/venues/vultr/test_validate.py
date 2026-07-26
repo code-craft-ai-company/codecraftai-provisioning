@@ -13,8 +13,8 @@ __credits__ = []
 
 import pytest
 
-from hypothesis import given, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
@@ -60,8 +60,7 @@ def test_validate_rejects_unresolvable_region(fake_vultr,
 
 
 @given(kind=st.sampled_from(["INFINIBAND_HDR", "INFINIBAND_NDR",
-                             "INFINIBAND_XDR", "OCI_RDMA", "EFA"]))
-@settings(max_examples=10, deadline=None)
+                             "INFINIBAND_XDR", "OCI_RDMA", "EFA"]), constraints={"max_examples": 10})
 def test_validate_rejects_interconnect(kind) -> None:
     """
         Any non-NONE CloudInterconnect kind is a validate error.
@@ -101,8 +100,7 @@ def test_validate_rejects_interconnect(kind) -> None:
 
 
 @given(kind=st.sampled_from(["LUSTRE", "WEKA", "VAST", "GPFS", "EFS",
-                             "FILESTORE"]))
-@settings(max_examples=12, deadline=None)
+                             "FILESTORE"]), constraints={"max_examples": 12})
 def test_validate_rejects_shared_fs(kind) -> None:
     """
         WEKA/Lustre-class shared filesystems are validate errors.

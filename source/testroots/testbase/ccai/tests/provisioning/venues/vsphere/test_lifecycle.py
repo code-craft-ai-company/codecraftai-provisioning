@@ -16,7 +16,8 @@ import pytest
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
-from hypothesis import given, settings, strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
@@ -277,8 +278,7 @@ def test_datastore_capacity_failure(venue, credential, config,
     return
 
 
-@settings(max_examples=25, deadline=None)
-@given(size=st.sampled_from(["tiny", "small", "medium", "large", "xlarge"]))
+@given(size=st.sampled_from(["tiny", "small", "medium", "large", "xlarge"]), constraints={"max_examples": 25})
 def test_apply_idempotence_property(size) -> None:
     """
         Property: apply ∘ apply == apply.  The second apply creates nothing

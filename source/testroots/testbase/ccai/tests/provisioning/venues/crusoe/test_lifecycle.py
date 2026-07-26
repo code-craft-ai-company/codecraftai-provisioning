@@ -19,8 +19,8 @@ import pytest
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
-from hypothesis import given, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.errors.exceptions import SemanticError
 
@@ -444,8 +444,7 @@ def _make_venue_and_config():
     return rtnval
 
 
-@settings(max_examples=25, deadline=None)
-@given(volume_count=st.integers(min_value=0, max_value=3))
+@given(volume_count=st.integers(min_value=0, max_value=3), constraints={"max_examples": 25})
 def test_apply_idempotent_property(volume_count) -> None:
     """
         For any number of volumes, a second apply creates nothing.
@@ -469,14 +468,13 @@ def test_apply_idempotent_property(volume_count) -> None:
     return
 
 
-@settings(max_examples=40)
 @given(tags=st.lists(
     st.tuples(
         st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122),
                 min_size=1, max_size=8),
         st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122),
                 min_size=1, max_size=8)),
-    min_size=0, max_size=6, unique_by=lambda pair: pair[0]))
+    min_size=0, max_size=6, unique_by=lambda pair: pair[0]), constraints={"max_examples": 40})
 def test_label_round_trip_identity(tags) -> None:
     """
         from_crusoe(to_crusoe(tags)) is the identity for conformant inputs.
@@ -494,8 +492,7 @@ def test_label_round_trip_identity(tags) -> None:
     return
 
 
-@settings(max_examples=20, deadline=None)
-@given(node_count=st.integers(min_value=2, max_value=4))
+@given(node_count=st.integers(min_value=2, max_value=4), constraints={"max_examples": 20})
 def test_ib_partition_grouping(node_count) -> None:
     """
         Multiple IB-interconnect instances sharing a group are attached to a

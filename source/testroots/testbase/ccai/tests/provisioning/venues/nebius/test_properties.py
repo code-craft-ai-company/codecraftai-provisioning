@@ -13,7 +13,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-from hypothesis import given, settings, strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
@@ -48,9 +49,8 @@ def _venue() -> CloudVenue:
 # Idempotent apply
 # ----------------------------------------------------------------------
 
-@settings(max_examples=25, deadline=None)
 @given(repeat=st.integers(min_value=2, max_value=5),
-       with_vpn=st.booleans())
+       with_vpn=st.booleans(), constraints={"max_examples": 25})
 def test_apply_idempotent(repeat, with_vpn):
     """
         Applying a spec N times yields exactly the same inventory as
@@ -81,8 +81,7 @@ def test_apply_idempotent(repeat, with_vpn):
 # destroy is the inverse of apply
 # ----------------------------------------------------------------------
 
-@settings(max_examples=25, deadline=None)
-@given(with_vpn=st.booleans())
+@given(with_vpn=st.booleans(), constraints={"max_examples": 25})
 def test_destroy_is_inverse_of_apply(with_vpn):
     """
         destroy ∘ apply returns the venue inventory to the pre-apply state.
@@ -117,9 +116,8 @@ _VAL = st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789-_",
                min_size=0, max_size=20)
 
 
-@settings(max_examples=80, deadline=None)
 @given(pairs=st.dictionaries(keys=_KEY, values=_VAL,
-                             min_size=0, max_size=8))
+                             min_size=0, max_size=8), constraints={"max_examples": 80})
 def test_label_round_trip_identity_for_conformant_inputs(pairs):
     """
         Round-tripping a conformant neutral tag set through to_nebius then
@@ -142,8 +140,7 @@ def test_label_round_trip_identity_for_conformant_inputs(pairs):
 # GPU-cluster grouping
 # ----------------------------------------------------------------------
 
-@settings(max_examples=20, deadline=None)
-@given(repeat=st.integers(min_value=1, max_value=3))
+@given(repeat=st.integers(min_value=1, max_value=3), constraints={"max_examples": 20})
 def test_gpu_cluster_grouping(repeat):
     """
         Every instance sharing an IB interconnect group lands in exactly one

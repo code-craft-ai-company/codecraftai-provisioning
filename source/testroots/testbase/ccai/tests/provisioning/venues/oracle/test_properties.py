@@ -12,8 +12,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-from hypothesis import HealthCheck, given, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.credentials.oraclecloudapikeycredential import (
     OracleCloudApiKeyCredential
@@ -69,12 +69,10 @@ def _make_provisioner(*, spec):
     return rtnval
 
 
-@settings(max_examples=20, deadline=None,
-          suppress_health_check=[HealthCheck.function_scoped_fixture])
 @given(with_vpn=st.booleans(),
        preemption=st.sampled_from([PreemptionPolicy.FAIL,
                                    PreemptionPolicy.REACQUIRE,
-                                   PreemptionPolicy.BEST_EFFORT]))
+                                   PreemptionPolicy.BEST_EFFORT]), constraints={"max_examples": 20})
 def test_apply_idempotent(with_vpn, preemption) -> None:
     """
         apply ∘ apply == apply: the second apply mutates nothing — every
@@ -101,9 +99,7 @@ def test_apply_idempotent(with_vpn, preemption) -> None:
     return
 
 
-@settings(max_examples=20, deadline=None,
-          suppress_health_check=[HealthCheck.function_scoped_fixture])
-@given(with_vpn=st.booleans())
+@given(with_vpn=st.booleans(), constraints={"max_examples": 20})
 def test_destroy_is_inverse_of_apply(with_vpn) -> None:
     """
         destroy ∘ apply == nop: after destroy the venue inventory is empty.

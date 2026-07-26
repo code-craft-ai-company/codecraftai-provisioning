@@ -13,8 +13,8 @@ __credits__ = []
 
 import pytest
 
-from hypothesis import given, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.venues.azure.azureerrors import (
     AzureValidationError
@@ -78,7 +78,6 @@ def test_base_resource_tags_contains_owner_run_name_kind() -> None:
     return
 
 
-@settings(max_examples=40, deadline=None)
 @given(st.dictionaries(
     keys=st.text(min_size=1, max_size=20,
                  alphabet=st.characters(min_codepoint=0x41,
@@ -87,7 +86,7 @@ def test_base_resource_tags_contains_owner_run_name_kind() -> None:
                    alphabet=st.characters(min_codepoint=0x41,
                                           max_codepoint=0x7a)),
     min_size=0, max_size=8,
-))
+), constraints={"max_examples": 40})
 def test_tag_round_trip_identity(tag_map) -> None:
     """
         from_azure(to_azure(x)) == x for any tag dict.

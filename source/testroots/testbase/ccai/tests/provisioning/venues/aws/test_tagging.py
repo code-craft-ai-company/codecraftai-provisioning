@@ -13,8 +13,8 @@ __credits__ = []
 
 import pytest
 
-from hypothesis import given, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.venues.aws.awserrors import AwsValidationError
 from ccai.provisioning.venues.aws.awstagging import (
@@ -68,7 +68,6 @@ def test_to_aws_rejects_oversize_value() -> None:
     return
 
 
-@settings(max_examples=25, deadline=None)
 @given(st.dictionaries(
     keys=st.text(min_size=1, max_size=20,
                  alphabet=st.characters(min_codepoint=0x41,
@@ -77,7 +76,7 @@ def test_to_aws_rejects_oversize_value() -> None:
                    alphabet=st.characters(min_codepoint=0x41,
                                           max_codepoint=0x7a)),
     min_size=0, max_size=8,
-))
+), constraints={"max_examples": 25})
 def test_round_trip_identity(tag_map) -> None:
     """
         from_aws(to_aws(x)) == x.

@@ -15,7 +15,8 @@ import json
 import re
 import unittest
 
-from hypothesis import given, settings, strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 import yaml
 
@@ -64,11 +65,10 @@ def _tailscale_spec_strategy() -> st.SearchStrategy:
 
 class CloudInitYamlValidityProperty(unittest.TestCase):
 
-    @settings(max_examples=30, deadline=None)
     @given(spec=_tailscale_spec_strategy(),
            authkey=_authkey_st,
            hostname=_hostname_st,
-           family=st.sampled_from(_LINUX_FAMILIES))
+           family=st.sampled_from(_LINUX_FAMILIES), constraints={"max_examples": 30})
     def test_render_round_trips_through_yaml(self, spec, authkey,
                                              hostname, family) -> None:
         doc = render_cloud_init(spec=spec, authkey=authkey,
@@ -83,11 +83,10 @@ class CloudInitYamlValidityProperty(unittest.TestCase):
 
 class AuthkeyAppearsOnceProperty(unittest.TestCase):
 
-    @settings(max_examples=30, deadline=None)
     @given(spec=_tailscale_spec_strategy(),
            authkey=_authkey_st,
            hostname=_hostname_st,
-           family=st.sampled_from(_LINUX_FAMILIES))
+           family=st.sampled_from(_LINUX_FAMILIES), constraints={"max_examples": 30})
     def test_authkey_is_only_inside_write_files(self, spec, authkey,
                                                 hostname, family) -> None:
         doc = render_cloud_init(spec=spec, authkey=authkey,
@@ -108,11 +107,10 @@ class AuthkeyAppearsOnceProperty(unittest.TestCase):
 
 class AuthkeyQuotedInShellProperty(unittest.TestCase):
 
-    @settings(max_examples=30, deadline=None)
     @given(spec=_tailscale_spec_strategy(),
            authkey=_authkey_st,
            hostname=_hostname_st,
-           family=st.sampled_from(_LINUX_FAMILIES))
+           family=st.sampled_from(_LINUX_FAMILIES), constraints={"max_examples": 30})
     def test_tailscale_up_authkey_uses_quoted_var(self, spec, authkey,
                                                   hostname, family) -> None:
         doc = render_cloud_init(spec=spec, authkey=authkey,
@@ -128,11 +126,10 @@ class AuthkeyQuotedInShellProperty(unittest.TestCase):
 
 class DeterminismProperty(unittest.TestCase):
 
-    @settings(max_examples=20, deadline=None)
     @given(spec=_tailscale_spec_strategy(),
            authkey=_authkey_st,
            hostname=_hostname_st,
-           family=st.sampled_from(_LINUX_FAMILIES))
+           family=st.sampled_from(_LINUX_FAMILIES), constraints={"max_examples": 20})
     def test_same_inputs_produce_byte_identical_output(self, spec, authkey,
                                                        hostname,
                                                        family) -> None:
@@ -150,11 +147,10 @@ class DeterminismProperty(unittest.TestCase):
 
 class AzureCseJsonValidityProperty(unittest.TestCase):
 
-    @settings(max_examples=20, deadline=None)
     @given(spec=_tailscale_spec_strategy(),
            authkey=_authkey_st,
            hostname=_hostname_st,
-           family=st.sampled_from(_LINUX_FAMILIES))
+           family=st.sampled_from(_LINUX_FAMILIES), constraints={"max_examples": 20})
     def test_azure_cse_json_roundtrip(self, spec, authkey, hostname,
                                       family) -> None:
         doc = render_azure_cse(spec=spec, authkey=authkey,

@@ -11,8 +11,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-from hypothesis import given, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.venues.vultr.vultrtagtranslator import (
     VultrTagTranslator
@@ -32,8 +32,7 @@ _VALUE_CHARS = st.text(
 
 
 @given(pairs=st.dictionaries(keys=_KEY_CHARS, values=_VALUE_CHARS,
-                             min_size=0, max_size=8))
-@settings(max_examples=80, deadline=None)
+                             min_size=0, max_size=8), constraints={"max_examples": 80})
 def test_tag_round_trip_identity(pairs) -> None:
     """
         from_vultr(to_vultr(tags)) is the identity over the key/value set.

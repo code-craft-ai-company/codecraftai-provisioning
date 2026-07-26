@@ -19,8 +19,8 @@ from typing import Dict, List
 
 import pytest
 
-from hypothesis import given, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.credentials.lambdalabsapikeycredential import (
     LambdalabsApiKeyCredential
@@ -79,8 +79,7 @@ def _aspects() -> ProvisioningAspects:
     return rtnval
 
 
-@settings(max_examples=30, deadline=None)
-@given(reapply_count=st.integers(min_value=1, max_value=4))
+@given(reapply_count=st.integers(min_value=1, max_value=4), constraints={"max_examples": 30})
 def test_apply_idempotent(reapply_count):
     """
         Repeated applies over the same client launch exactly one instance
@@ -99,8 +98,7 @@ def test_apply_idempotent(reapply_count):
     return
 
 
-@settings(max_examples=30, deadline=None)
-@given(instance_count=st.integers(min_value=1, max_value=4))
+@given(instance_count=st.integers(min_value=1, max_value=4), constraints={"max_examples": 30})
 def test_destroy_is_inverse_of_apply(instance_count):
     """
         apply followed by destroy leaves no run-owned instances.
@@ -127,7 +125,6 @@ def test_destroy_is_inverse_of_apply(instance_count):
     return
 
 
-@settings(max_examples=60)
 @given(tags=st.dictionaries(
     keys=st.text(alphabet=st.characters(min_codepoint=97,
                                         max_codepoint=122),
@@ -135,7 +132,7 @@ def test_destroy_is_inverse_of_apply(instance_count):
     values=st.text(alphabet=st.characters(min_codepoint=97,
                                           max_codepoint=122),
                    min_size=1, max_size=8),
-    min_size=0, max_size=5))
+    min_size=0, max_size=5), constraints={"max_examples": 60})
 def test_sidecar_tag_round_trip_identity(tags):
     """
         Writing a neutral tag dict and reading it back is the identity.
@@ -147,8 +144,7 @@ def test_sidecar_tag_round_trip_identity(tags):
     return
 
 
-@settings(max_examples=20, deadline=None)
-@given(use_cluster=st.booleans())
+@given(use_cluster=st.booleans(), constraints={"max_examples": 20})
 def test_one_click_vs_single_instance_branch(use_cluster):
     """
         An InfiniBand spec resolves to the 1-Click Cluster API; a plain

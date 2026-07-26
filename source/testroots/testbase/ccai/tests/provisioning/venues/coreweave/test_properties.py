@@ -19,8 +19,8 @@ from typing import Dict, List
 
 import pytest
 
-from hypothesis import given, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.venues.coreweave.cwlabeltranslator import (
     CwLabelTranslator
@@ -42,8 +42,7 @@ _conformant = st.from_regex(re.compile(r"^[a-z]([a-z0-9-]{0,8}[a-z0-9])?$"),
                             fullmatch=True)
 
 
-@settings(max_examples=40, deadline=None)
-@given(job_names=st.lists(_job_name, min_size=1, max_size=4, unique=True))
+@given(job_names=st.lists(_job_name, min_size=1, max_size=4, unique=True), constraints={"max_examples": 40})
 def test_apply_is_idempotent(job_names: List[str]):
     """
         For any set of jobs, ``apply`` composed with itself realises the same
@@ -62,8 +61,7 @@ def test_apply_is_idempotent(job_names: List[str]):
     return
 
 
-@settings(max_examples=40, deadline=None)
-@given(job_names=st.lists(_job_name, min_size=1, max_size=4, unique=True))
+@given(job_names=st.lists(_job_name, min_size=1, max_size=4, unique=True), constraints={"max_examples": 40})
 def test_destroy_is_inverse_of_apply(job_names: List[str]):
     """
         ``destroy`` after ``apply`` leaves no run-labelled resources — the
@@ -85,9 +83,8 @@ def test_destroy_is_inverse_of_apply(job_names: List[str]):
     return
 
 
-@settings(max_examples=100)
 @given(tags=st.dictionaries(_conformant, _conformant, min_size=0,
-                            max_size=6))
+                            max_size=6), constraints={"max_examples": 100})
 def test_label_round_trip_identity_for_conformant_inputs(tags: Dict[str, str]):
     """
         For Kubernetes-conformant inputs, ``from_k8s(to_k8s(...))`` is the
@@ -102,9 +99,8 @@ def test_label_round_trip_identity_for_conformant_inputs(tags: Dict[str, str]):
     return
 
 
-@settings(max_examples=40, deadline=None)
 @given(workload_names=st.lists(_job_name, min_size=0, max_size=4,
-                               unique=True))
+                               unique=True), constraints={"max_examples": 40})
 def test_sunk_bundle_hash_is_deterministic(workload_names: List[str]):
     """
         The Sunk manifest bundle is a deterministic function of its inputs —
@@ -120,8 +116,7 @@ def test_sunk_bundle_hash_is_deterministic(workload_names: List[str]):
     return
 
 
-@settings(max_examples=30, deadline=None)
-@given(want_router=st.booleans())
+@given(want_router=st.booleans(), constraints={"max_examples": 30})
 def test_vpn_sidecar_vs_subnet_router_branch(want_router: bool):
     """
         The VPN renderer produces a pod-sidecar container or a subnet-router

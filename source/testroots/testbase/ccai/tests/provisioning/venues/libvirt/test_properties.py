@@ -16,8 +16,8 @@ __credits__ = []
 
 import tempfile
 
-from hypothesis import given, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
@@ -78,8 +78,7 @@ def _seeded_client() -> MockLibvirtClient:
     return rtnval
 
 
-@settings(max_examples=30, deadline=None)
-@given(reapply_count=st.integers(min_value=1, max_value=4))
+@given(reapply_count=st.integers(min_value=1, max_value=4), constraints={"max_examples": 30})
 def test_apply_idempotent(reapply_count):
     """
         Repeated applies over the same client define exactly one domain
@@ -98,8 +97,7 @@ def test_apply_idempotent(reapply_count):
     return
 
 
-@settings(max_examples=20, deadline=None)
-@given(instance_count=st.integers(min_value=1, max_value=4))
+@given(instance_count=st.integers(min_value=1, max_value=4), constraints={"max_examples": 20})
 def test_destroy_is_inverse_of_apply(instance_count):
     """
         apply followed by destroy leaves no run-owned domains, networks,
@@ -129,7 +127,6 @@ def test_destroy_is_inverse_of_apply(instance_count):
     return
 
 
-@settings(max_examples=80)
 @given(tags=st.dictionaries(
     keys=st.text(
         alphabet=st.characters(
@@ -143,7 +140,7 @@ def test_destroy_is_inverse_of_apply(instance_count):
             whitelist_characters=" :/-_.",
         ),
         min_size=1, max_size=12),
-    min_size=0, max_size=5))
+    min_size=0, max_size=5), constraints={"max_examples": 80})
 def test_metadata_tag_round_trip_identity(tags):
     """
         Embedding a neutral tag dict into XML metadata and extracting it
@@ -162,9 +159,8 @@ def test_metadata_tag_round_trip_identity(tags):
     return
 
 
-@settings(max_examples=40, deadline=None)
 @given(user_data=st.text(min_size=0, max_size=64),
-       meta_data=st.text(min_size=0, max_size=64))
+       meta_data=st.text(min_size=0, max_size=64), constraints={"max_examples": 40})
 def test_seed_iso_content_hash_deterministic(user_data, meta_data):
     """
         Identical seed-ISO inputs always produce an identical content

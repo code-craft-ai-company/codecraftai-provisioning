@@ -14,7 +14,8 @@ __credits__ = []
 import re
 import unittest
 
-from hypothesis import assume, given, settings, strategies as st
+from ccai.testbase.properties import assume, given
+from ccai.testbase.properties import strategies as st
 
 from ccai.interfaces.schemavalidationerror import SchemaValidationError
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
@@ -114,8 +115,7 @@ class HostnameRendererTests(unittest.TestCase):
 
 class HostnameRendererPropertyTests(unittest.TestCase):
 
-    @settings(max_examples=50, deadline=None)
-    @given(st.integers(min_value=2, max_value=20))
+    @given(st.integers(min_value=2, max_value=20), constraints={"max_examples": 50})
     def test_property_uniqueness(self, n_contexts) -> None:
         contexts = [{"index": i} for i in range(n_contexts)]
         rendered = render_hostnames(template="host-{index}",
@@ -123,18 +123,16 @@ class HostnameRendererPropertyTests(unittest.TestCase):
         self.assertEqual(len(set(rendered)), n_contexts)
         return
 
-    @settings(max_examples=50, deadline=None)
-    @given(st.integers(min_value=0, max_value=999))
+    @given(st.integers(min_value=0, max_value=999), constraints={"max_examples": 50})
     def test_property_dns_label_compliance(self, index) -> None:
         rendered = render_hostname(template="host-{index}",
                                    context={"index": index})
         self.assertIsNotNone(_DNS_LABEL_RE.match(rendered))
         return
 
-    @settings(max_examples=50, deadline=None)
     @given(st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789",
                    min_size=1, max_size=10),
-           st.integers(min_value=0, max_value=99))
+           st.integers(min_value=0, max_value=99), constraints={"max_examples": 50})
     def test_property_determinism(self, base, index) -> None:
         template = base + "-{index}"
         a = render_hostname(template=template, context={"index": index})

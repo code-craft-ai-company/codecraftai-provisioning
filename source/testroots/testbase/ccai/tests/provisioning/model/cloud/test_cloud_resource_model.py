@@ -14,7 +14,8 @@ __credits__ = []
 import ipaddress
 import unittest
 
-from hypothesis import given, settings, strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.interfaces.schemavalidationerror import SchemaValidationError
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
@@ -437,8 +438,7 @@ def sibling_subnets_strategy(draw):
 
 class CloudResourcePropertyTests(unittest.TestCase):
 
-    @settings(max_examples=50, deadline=None)
-    @given(cidr_in_network_strategy())
+    @given(cidr_in_network_strategy(), constraints={"max_examples": 50})
     def test_property_subnet_contained_in_network(self, pair) -> None:
         net_cidr, sub_cidr = pair
         self.assertTrue(
@@ -447,8 +447,7 @@ class CloudResourcePropertyTests(unittest.TestCase):
         )
         return
 
-    @settings(max_examples=50, deadline=None)
-    @given(sibling_subnets_strategy())
+    @given(sibling_subnets_strategy(), constraints={"max_examples": 50})
     def test_property_sibling_subnets_no_overlap(self, generated) -> None:
         _net_cidr, subs = generated
         for i in range(len(subs)):
@@ -458,12 +457,11 @@ class CloudResourcePropertyTests(unittest.TestCase):
                 )
         return
 
-    @settings(max_examples=50, deadline=None)
     @given(
         st.sampled_from(_VALID_PROTOCOLS),
         st.integers(min_value=0, max_value=65535),
         st.integers(min_value=0, max_value=65535),
-    )
+     constraints={"max_examples": 50})
     def test_property_ingress_egress_pair_roundtrip(self, protocol, a, b) -> None:
         lo = min(a, b)
         hi = max(a, b)
@@ -591,8 +589,7 @@ _MODEL_CLASS_BUILDERS = (
 
 class AllModelClassesPropertyTests(unittest.TestCase):
 
-    @settings(max_examples=60, deadline=None)
-    @given(st.integers(min_value=0, max_value=100000))
+    @given(st.integers(min_value=0, max_value=100000), constraints={"max_examples": 60})
     def test_property_all_model_classes_roundtrip(self, seed) -> None:
         # Every cloud model class must satisfy from_dict(to_dict(x)) == x.
         for model_cls, builder in _MODEL_CLASS_BUILDERS:

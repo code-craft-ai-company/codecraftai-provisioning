@@ -13,7 +13,8 @@ __credits__ = []
 
 import unittest
 
-from hypothesis import given, settings, strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.dependencygraph import (
@@ -99,8 +100,7 @@ def _valid_spec(draw):
 
 class DependencyGraphProperty(unittest.TestCase):
 
-    @settings(max_examples=30, deadline=None)
-    @given(spec=_valid_spec())
+    @given(spec=_valid_spec(), constraints={"max_examples": 30})
     def test_instance_after_its_subnet(self, spec) -> None:
         graph = build_dependency_graph(spec=spec)
         order = graph.topological_sort()
@@ -111,8 +111,7 @@ class DependencyGraphProperty(unittest.TestCase):
             self.assertLess(sub_pos, inst_pos)
         return
 
-    @settings(max_examples=30, deadline=None)
-    @given(spec=_valid_spec())
+    @given(spec=_valid_spec(), constraints={"max_examples": 30})
     def test_dns_after_referenced_instance(self, spec) -> None:
         graph = build_dependency_graph(spec=spec)
         order = graph.topological_sort()
@@ -122,8 +121,7 @@ class DependencyGraphProperty(unittest.TestCase):
                             positions[("dns", rec["name"])])
         return
 
-    @settings(max_examples=30, deadline=None)
-    @given(spec=_valid_spec())
+    @given(spec=_valid_spec(), constraints={"max_examples": 30})
     def test_topo_sort_stable(self, spec) -> None:
         graph_a = build_dependency_graph(spec=spec)
         graph_b = build_dependency_graph(spec=spec)

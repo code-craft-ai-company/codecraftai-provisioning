@@ -17,8 +17,8 @@ import pytest
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
-from hypothesis import HealthCheck, given, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
@@ -127,10 +127,8 @@ def test_apply_idempotent(venue, credential, region_config, aspects,
     return
 
 
-@settings(max_examples=25, deadline=None,
-          suppress_health_check=[HealthCheck.function_scoped_fixture])
 @given(size=st.sampled_from(["small", "medium", "large", "xlarge"]),
-       with_vpn=st.booleans())
+       with_vpn=st.booleans(), constraints={"max_examples": 25})
 def test_apply_compose_apply_is_idempotent(venue, credential, region_config,
                                            aspects, size, with_vpn) -> None:
     """

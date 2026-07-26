@@ -12,8 +12,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-from hypothesis import given, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.credentials.hetznerapitokencredential import (
     HetznerApiTokenCredential
@@ -54,8 +54,7 @@ def _build_provisioner(*, client: MockHetznerClient, with_vpn: bool
     return rtnval
 
 
-@settings(max_examples=25, deadline=None)
-@given(with_vpn=st.booleans())
+@given(with_vpn=st.booleans(), constraints={"max_examples": 25})
 def test_apply_idempotent(with_vpn: bool) -> None:
     """
         apply ∘ apply == apply: the second apply mutates nothing.
@@ -76,8 +75,7 @@ def test_apply_idempotent(with_vpn: bool) -> None:
     return
 
 
-@settings(max_examples=25, deadline=None)
-@given(with_vpn=st.booleans())
+@given(with_vpn=st.booleans(), constraints={"max_examples": 25})
 def test_destroy_is_inverse_of_apply(with_vpn: bool) -> None:
     """
         destroy ∘ apply == nop: the venue is empty after destroy.
@@ -105,10 +103,9 @@ _VALUE_PART = st.text(
 ).filter(lambda s: s[0].isalnum() and s[-1].isalnum())
 
 
-@settings(max_examples=60, deadline=None)
 @given(pairs=st.lists(
     st.tuples(_KEY_PART, _VALUE_PART), min_size=0, max_size=8,
-    unique_by=lambda t: t[0]))
+    unique_by=lambda t: t[0]), constraints={"max_examples": 60})
 def test_label_round_trip_identity_for_conformant_inputs(pairs) -> None:
     """
         from_hetzner(to_hetzner(x)) == sorted(x) for conformant inputs.

@@ -15,7 +15,8 @@ import os
 import tempfile
 import unittest
 
-from hypothesis import given, settings, strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.errors.exceptions import ConfigurationError
 
@@ -207,11 +208,10 @@ class CatalogPropertyTests(unittest.TestCase):
                 per_venue[key] = entry.token
         return
 
-    @settings(max_examples=30, deadline=None)
     @given(st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789-",
                    min_size=1, max_size=12),
            st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789-",
-                   min_size=1, max_size=12))
+                   min_size=1, max_size=12), constraints={"max_examples": 30})
     def test_property_unknown_token_returns_none(self, token, venue) -> None:
         known_tokens = {e.token for e in self._catalog.entries()}
         if token in known_tokens:

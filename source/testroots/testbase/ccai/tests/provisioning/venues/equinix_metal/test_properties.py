@@ -12,7 +12,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-from hypothesis import given, settings, strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
@@ -69,8 +70,7 @@ _tag_value = st.text(
 
 
 @given(pairs=st.dictionaries(keys=_tag_key, values=_tag_value,
-                             min_size=0, max_size=8))
-@settings(max_examples=120, deadline=None)
+                             min_size=0, max_size=8), constraints={"max_examples": 120})
 def test_tag_round_trip_identity(pairs) -> None:
     """
         ``from_metal(to_metal(x))`` is the identity (key-sorted).
@@ -84,8 +84,7 @@ def test_tag_round_trip_identity(pairs) -> None:
 
 @given(runid=st.text(alphabet="abcdefghij0123456789", min_size=3,
                       max_size=12),
-       with_vpn=st.booleans())
-@settings(max_examples=40, deadline=None)
+       with_vpn=st.booleans(), constraints={"max_examples": 40})
 def test_apply_idempotent(runid, with_vpn) -> None:
     """
         ``apply ∘ apply`` makes no mutating calls and reports SKIPs.
@@ -108,8 +107,7 @@ def test_apply_idempotent(runid, with_vpn) -> None:
 
 
 @given(runid=st.text(alphabet="abcdefghij0123456789", min_size=3,
-                      max_size=12))
-@settings(max_examples=40, deadline=None)
+                      max_size=12), constraints={"max_examples": 40})
 def test_destroy_is_inverse_of_apply(runid) -> None:
     """
         ``destroy ∘ apply`` leaves an empty inventory.

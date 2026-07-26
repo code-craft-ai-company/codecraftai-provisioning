@@ -13,8 +13,8 @@ __credits__ = []
 
 import pytest
 
-from hypothesis import given, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.venues.google.gcperrors import GcpValidationError
 from ccai.provisioning.venues.google.gcptagging import (
@@ -87,7 +87,6 @@ def test_to_labels_rejects_non_string_value() -> None:
     return
 
 
-@settings(max_examples=50, deadline=None)
 @given(st.dictionaries(
     keys=st.text(min_size=1, max_size=20,
                  alphabet=st.characters(min_codepoint=0x61,
@@ -96,7 +95,7 @@ def test_to_labels_rejects_non_string_value() -> None:
                    alphabet=st.characters(min_codepoint=0x61,
                                           max_codepoint=0x7a)),
     min_size=0, max_size=8,
-))
+), constraints={"max_examples": 50})
 def test_label_round_trip_identity_for_conformant_inputs(tag_map) -> None:
     """
         from_labels(to_labels(x)) == x for GCP-conformant inputs.
@@ -112,8 +111,7 @@ def test_label_round_trip_identity_for_conformant_inputs(tag_map) -> None:
     return
 
 
-@settings(max_examples=50, deadline=None)
-@given(st.text(min_size=1, max_size=30))
+@given(st.text(min_size=1, max_size=30), constraints={"max_examples": 50})
 def test_sanitise_label_component_always_conformant(raw) -> None:
     """
         Sanitised components always satisfy the GCP value rules.

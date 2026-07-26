@@ -17,8 +17,8 @@ import pytest
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
-from hypothesis import HealthCheck, given, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
@@ -186,9 +186,7 @@ def test_inventory_persists_to_output(fake_vultr, provisioner_factory,
     return
 
 
-@given(extra_runs=st.integers(min_value=1, max_value=3))
-@settings(max_examples=6, deadline=None,
-          suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(extra_runs=st.integers(min_value=1, max_value=3), constraints={"max_examples": 6})
 def test_apply_compose_apply_idempotence(fake_vultr, provisioner_factory,
                                          aspects, extra_runs) -> None:
     """

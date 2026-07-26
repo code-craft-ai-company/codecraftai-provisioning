@@ -18,8 +18,8 @@ import pytest
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
-from hypothesis import given, HealthCheck, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
@@ -123,11 +123,9 @@ def test_apply_idempotent(venue, credential, region_config,
     return
 
 
-@settings(max_examples=15, deadline=None,
-          suppress_health_check=[HealthCheck.function_scoped_fixture])
 @given(runid=st.text(min_size=4, max_size=12,
                      alphabet=st.characters(min_codepoint=0x61,
-                                            max_codepoint=0x7a)))
+                                            max_codepoint=0x7a)), constraints={"max_examples": 15})
 def test_apply_apply_idempotence_property(venue, credential,
                                           region_config, runid) -> None:
     """

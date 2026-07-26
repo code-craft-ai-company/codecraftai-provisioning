@@ -11,8 +11,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-from hypothesis import given, settings
-from hypothesis import strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.venues.linode.linoderesolver import LinodeResolver
 from ccai.provisioning.venues.linode.linodetagtranslator import (
@@ -33,9 +33,8 @@ _value_strategy = st.text(
 )
 
 
-@settings(max_examples=120, deadline=None)
 @given(pairs=st.dictionaries(keys=_key_strategy, values=_value_strategy,
-                             min_size=0, max_size=8))
+                             min_size=0, max_size=8), constraints={"max_examples": 120})
 def test_tag_round_trip_identity(pairs) -> None:
     """
         ``from_linode(to_linode(x))`` recovers the original tag set.

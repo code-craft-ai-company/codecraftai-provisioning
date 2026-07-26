@@ -15,7 +15,8 @@ import pytest
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
-from hypothesis import HealthCheck, given, settings, strategies as st
+from ccai.testbase.properties import given
+from ccai.testbase.properties import strategies as st
 
 from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
@@ -246,9 +247,7 @@ def test_dns_record_created_and_skipped(venue, credential, region_config,
     return
 
 
-@settings(max_examples=25, deadline=None,
-          suppress_health_check=[HealthCheck.function_scoped_fixture])
-@given(with_vpn=st.booleans(), with_dns=st.booleans())
+@given(with_vpn=st.booleans(), with_dns=st.booleans(), constraints={"max_examples": 25})
 def test_apply_idempotent(venue, credential, region_config, with_vpn,
                           with_dns) -> None:
     """
@@ -272,9 +271,7 @@ def test_apply_idempotent(venue, credential, region_config, with_vpn,
     return
 
 
-@settings(max_examples=25, deadline=None,
-          suppress_health_check=[HealthCheck.function_scoped_fixture])
-@given(with_vpn=st.booleans(), with_dns=st.booleans())
+@given(with_vpn=st.booleans(), with_dns=st.booleans(), constraints={"max_examples": 25})
 def test_destroy_is_inverse_of_apply(venue, credential, region_config,
                                      with_vpn, with_dns) -> None:
     """
