@@ -62,6 +62,10 @@ class MockResource:
 class MockVPC(MockResource):
     """
         Mock VPC carrying a list of subnets.
+
+        Subnets are created on the VPC (``VPC.subnet_create``) and reachable
+        as ``VPC.subnets``, mirroring the real client — teardown deletes them
+        through that attribute, so they must be deletable resources.
     """
 
     def __init__(self, *, store: List[Any], **fields: Any) -> None:
@@ -74,6 +78,59 @@ class MockVPC(MockResource):
         super().__init__(store=store, **fields)
         if not hasattr(self, "subnets"):
             self.subnets: List[Any] = []
+        return
+
+    def subnet_create(self, *, label: str, ipv4: str) -> "MockResource":
+        """
+            Create a subnet in this VPC.
+
+            :param label: The subnet label.
+            :param ipv4: The subnet CIDR.
+
+            :returns: A MockResource subnet, deletable through
+                ``VPC.subnets``.
+        """
+        resource = MockResource(store=self.subnets, label=label, ipv4=ipv4)
+        self.subnets.append(resource)
+        rtnval = resource
+        return rtnval
+
+
+class MockInstance(MockResource):
+    """
+        Mock Linode instance.
+
+        ``resize`` is a method on the INSTANCE, matching production
+        (``existing.resize(new_type=...)``) and the real client. The owning
+        client is held so the shared resize counter still moves.
+    """
+
+    def __init__(self, *, store: List[Any], owner: Any = None,
+                 **fields: Any) -> None:
+        """
+            Construct a MockInstance.
+
+            :param store: Backing collection.
+            :param owner: The owning MockLinodeClient, for call counting.
+            :param fields: Attribute key/values.
+        """
+        super().__init__(store=store, **fields)
+        self._owner = owner
+        return
+
+    def resize(self, *, new_type: str,
+               allow_auto_disk_resize: bool = True) -> None:
+        """
+            Resize this instance to a new type slug.
+
+            :param new_type: The target Linode type slug.
+            :param allow_auto_disk_resize: Accepted and ignored.
+
+            :returns: ``None``
+        """
+        if self._owner is not None:
+            self._owner.resize_calls = self._owner.resize_calls + 1
+        self.type = new_type
         return
 
 
@@ -188,19 +245,40 @@ class _NetworkingNamespace:
         rtnval = list(self._firewall_store)
         return rtnval
 
+    def firewall_create(self, *, label: str, rules: Dict[str, Any],
+                        tags: List[str]) -> MockResource:
+        """
+            Create a Cloud Firewall.
+
+            :param label: The firewall label.
+            :param rules: The firewall rules dict.
+            :param tags: The firewall string tags.
+
+            :returns: A MockResource firewall.
+        """
+        resource = MockResource(store=self._firewall_store, label=label,
+                                rules=rules, tags=list(tags))
+        self._firewall_store.append(resource)
+        rtnval = resource
+        return rtnval
+
 
 class _LinodeNamespace:
     """
         Mock ``client.linode`` namespace exposing instance listing.
     """
 
-    def __init__(self, *, instance_store: List[Any]) -> None:
+    def __init__(self, *, instance_store: List[Any],
+                 owner: Any = None) -> None:
         """
             Construct the linode namespace.
 
             :param instance_store: The instance backing collection.
+            :param owner: The owning MockLinodeClient, threaded onto created
+                instances so the shared resize counter still moves.
         """
         self._instance_store: List[Any] = instance_store
+        self._owner: Any = owner
         return
 
     def instances(self) -> List[Any]:
@@ -210,6 +288,86 @@ class _LinodeNamespace:
             :returns: The instance list.
         """
         rtnval = list(self._instance_store)
+        return rtnval
+
+    def instance_create(self, *, ltype: str, region: str, image: str,
+                        label: str, tags: List[str],
+                        authorized_keys: List[str],
+                        metadata: Dict[str, Any],
+                        firewall: Optional[int],
+                        private_ip: bool) -> MockResource:
+        """
+            Create a Linode instance.
+
+            :param ltype: The Linode type slug.
+            :param region: The Linode region.
+            :param image: The image id.
+            :param label: The instance label.
+            :param tags: The instance string tags.
+            :param authorized_keys: SSH keys injected into the instance.
+            :param metadata: The instance metadata dict (user_data).
+            :param firewall: Optional firewall id.
+            :param private_ip: Whether a private IP is attached.
+
+            :returns: A MockInstance.
+        """
+        resource = MockInstance(
+            store=self._instance_store, owner=self._owner, type=ltype,
+            region=region, image=image, label=label, tags=list(tags),
+            authorized_keys=list(authorized_keys),
+            metadata=dict(metadata), firewall=firewall,
+            private_ip=private_ip,
+        )
+        self._instance_store.append(resource)
+        rtnval = resource
+        return rtnval
+
+
+class _VpcsNamespace:
+    """
+        Mock ``client.vpcs`` namespace.
+
+        CALLABLE so ``client.vpcs()`` lists, with ``create`` so
+        ``client.vpcs.create(...)`` creates — mirroring the real client's
+        group, which is what production calls.
+    """
+
+    def __init__(self, *, vpc_store: List[Any]) -> None:
+        """
+            Construct the vpcs namespace.
+
+            :param vpc_store: The VPC backing collection.
+        """
+        self._vpc_store: List[Any] = vpc_store
+        return
+
+    def __call__(self) -> List[Any]:
+        """
+            Return all VPCs.
+
+            :returns: The VPC list.
+        """
+        rtnval = list(self._vpc_store)
+        return rtnval
+
+    def create(self, *, label: str, region: str,
+               **fields: Any) -> "MockVPC":
+        """
+            Create a VPC.
+
+            Linode VPCs carry no tags, so none are accepted here; extra
+            fields are recorded so a drifting caller is visible.
+
+            :param label: The VPC label.
+            :param region: The Linode region.
+            :param fields: Any further fields.
+
+            :returns: A MockVPC.
+        """
+        resource = MockVPC(store=self._vpc_store, label=label,
+                           region=region, **fields)
+        self._vpc_store.append(resource)
+        rtnval = resource
         return rtnval
 
 
@@ -236,16 +394,25 @@ class _ObjectStorageNamespace:
         rtnval = list(self._bucket_store)
         return rtnval
 
-    def bucket_create(self, *, cluster: str, label: str) -> MockResource:
+    def bucket_create(self, *, label: str,
+                      cluster_or_region: str = "",
+                      cluster: str = "") -> MockResource:
         """
             Create an Object Storage bucket.
 
-            :param cluster: The object-storage cluster.
+            Production passes ``cluster_or_region``, the unified spelling
+            the real client accepts; ``cluster`` remains for direct callers.
+
             :param label: The bucket label.
+            :param cluster_or_region: The cluster or region id.
+            :param cluster: The object-storage cluster (legacy spelling).
 
             :returns: A MockResource bucket.
         """
-        resource = MockResource(store=self._bucket_store, cluster=cluster,
+        located = cluster_or_region
+        if len(located) == 0:
+            located = cluster
+        resource = MockResource(store=self._bucket_store, cluster=located,
                                 label=label)
         self._bucket_store.append(resource)
         rtnval = resource
@@ -281,126 +448,13 @@ class MockLinodeClient:
             firewall_store=self._firewalls
         )
         self.linode: _LinodeNamespace = _LinodeNamespace(
-            instance_store=self._instances
+            instance_store=self._instances, owner=self
         )
         self.object_storage: _ObjectStorageNamespace = (
             _ObjectStorageNamespace(bucket_store=self._buckets)
         )
+        self.vpcs: _VpcsNamespace = _VpcsNamespace(vpc_store=self._vpcs)
         return
-
-    def vpcs(self) -> List[Any]:
-        """
-            Return all VPCs.
-
-            :returns: The VPC list.
-        """
-        rtnval = list(self._vpcs)
-        return rtnval
-
-    def vpc_create(self, *, label: str, region: str,
-                   tags: List[str]) -> MockVPC:
-        """
-            Create a VPC.
-
-            :param label: The VPC label.
-            :param region: The Linode region.
-            :param tags: The VPC string tags.
-
-            :returns: A MockVPC.
-        """
-        resource = MockVPC(store=self._vpcs, label=label, region=region,
-                           tags=list(tags))
-        self._vpcs.append(resource)
-        rtnval = resource
-        return rtnval
-
-    def vpc_subnet_create(self, *, vpc: Any, label: str,
-                          ipv4: str) -> MockResource:
-        """
-            Create a subnet within a VPC.
-
-            :param vpc: The parent MockVPC.
-            :param label: The subnet label.
-            :param ipv4: The subnet CIDR.
-
-            :returns: A MockResource subnet.
-        """
-        resource = MockResource(store=vpc.subnets, label=label, ipv4=ipv4)
-        vpc.subnets.append(resource)
-        rtnval = resource
-        return rtnval
-
-    def firewall_create(self, *, label: str, rules: Dict[str, Any],
-                        tags: List[str]) -> MockResource:
-        """
-            Create a Cloud Firewall.
-
-            :param label: The firewall label.
-            :param rules: The firewall rules dict.
-            :param tags: The firewall string tags.
-
-            :returns: A MockResource firewall.
-        """
-        resource = MockResource(store=self._firewalls, label=label,
-                                rules=rules, tags=list(tags))
-        self._firewalls.append(resource)
-        rtnval = resource
-        return rtnval
-
-    def instance_create(self, *, ltype: str, region: str, image: str,
-                        label: str, tags: List[str],
-                        authorized_keys: List[str],
-                        metadata: Dict[str, Any],
-                        firewall: Optional[int],
-                        private_ip: bool) -> MockResource:
-        """
-            Create a Linode instance.
-
-            :param ltype: The Linode type slug.
-            :param region: The Linode region.
-            :param image: The image id.
-            :param label: The instance label.
-            :param tags: The instance string tags.
-            :param authorized_keys: SSH keys injected into the instance.
-            :param metadata: The instance metadata dict (user_data).
-            :param firewall: Optional firewall id.
-            :param private_ip: Whether a private IP is attached.
-
-            :returns: A MockResource instance.
-        """
-        resource = MockResource(
-            store=self._instances, type=ltype, region=region, image=image,
-            label=label, tags=list(tags),
-            authorized_keys=list(authorized_keys),
-            metadata=dict(metadata), firewall=firewall,
-            private_ip=private_ip,
-        )
-        self._instances.append(resource)
-        rtnval = resource
-        return rtnval
-
-    def instance_resize(self, *, instance_id: int,
-                        new_type: str) -> Optional[Any]:
-        """
-            Resize a Linode instance in place to a new type slug.
-
-            Linode realises a resize via an instance migration that
-            reboots the guest; the live type slug is replaced.
-
-            :param instance_id: The numeric instance id.
-            :param new_type: The target Linode type slug.
-
-            :returns: The resized MockResource, or ``None`` when the
-                instance id is unknown.
-        """
-        self.resize_calls = self.resize_calls + 1
-        for resource in self._instances:
-            if resource.id == instance_id:
-                resource.type = new_type
-                rtnval: Optional[Any] = resource
-                return rtnval
-        rtnval = None
-        return rtnval
 
     def volumes(self) -> List[Any]:
         """
