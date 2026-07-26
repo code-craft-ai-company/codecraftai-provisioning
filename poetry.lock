@@ -2947,21 +2947,6 @@ socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["backports-zstd (>=1.0.0) ; python_version < \"3.14\""]
 
 [[package]]
-name = "vultr"
-version = "1.0.1"
-description = "Vultr.com API Client"
-optional = false
-python-versions = "*"
-groups = ["cloud-sdks"]
-files = [
-    {file = "vultr-1.0.1-py2.py3-none-any.whl", hash = "sha256:16acaae4b71f92d47c7820f81699264e70f15509aadaa37ec831d9e15538cb98"},
-    {file = "vultr-1.0.1.tar.gz", hash = "sha256:3f38849d267808c02fb2b2d9d2e394cb0be5b2d5b422b34bda01c4544060de1b"},
-]
-
-[package.dependencies]
-requests = "*"
-
-[[package]]
 name = "werkzeug"
 version = "3.1.8"
 description = "The comprehensive WSGI web application library."
@@ -3100,4 +3085,4 @@ test = ["pytest", "pytest-cov"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "5cc76bf43996abbd689d5fdbd290d845a3ee69d1fd66fc3caf2731595c564bcb"
+content-hash = "4c7b44b32a8d3c8a617a42cf3756fddead5429d0498b008d55f5fc523c9198c2"

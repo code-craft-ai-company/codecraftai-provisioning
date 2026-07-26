@@ -79,7 +79,6 @@ oci = "^2.130"
 pydo = "^0.3"
 hcloud = "^2.0"
 linode-api4 = "^5.20"
-vultr = "^1.0"
 packet-python = "^1.43"
 
 [tool.poetry.group.dev.dependencies]
