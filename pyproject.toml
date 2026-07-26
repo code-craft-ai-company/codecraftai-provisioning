@@ -79,7 +79,6 @@ google-cloud-dns = "^0.35"
 google-cloud-tpu = "^1.18"
 oci = "^2.130"
 pydo = "^0.3"
-packet-python = "^1.43"
 
 [tool.poetry.group.dev.dependencies]
 hypothesis = "^6.0"

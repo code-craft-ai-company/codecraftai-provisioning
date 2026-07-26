@@ -38,3 +38,37 @@ class ConfirmationRequiredError(RuntimeError):
         Raised when a destroy / DELETE-bearing apply is invoked without
         ``aspects.confirm=True``.
     """
+
+
+class MetalApiRequestError(RuntimeError):
+    """
+        Raised when the Equinix Metal API answers a request with a
+        non-success status.
+
+        This is the transport's error, carrying the HTTP status, the reason
+        the API gave and the raw body.  It stays distinct from
+        :class:`MetalConflictError` and :class:`MetalCapacityError` because
+        those describe provisioning decisions the venue made, not a failed
+        call.
+
+        :ivar status: The HTTP status code.
+        :ivar reason: The reason extracted from the API's error body, or the
+            HTTP reason phrase.
+        :ivar body: The raw response body text.
+    """
+
+    def __init__(self, message: str, *, status: int = 0,
+                 reason: str = "", body: str = "") -> None:
+        """
+            Construct a MetalApiRequestError.
+
+            :param message: The human-readable error message.
+            :param status: The HTTP status code.
+            :param reason: The extracted reason.
+            :param body: The raw response body.
+        """
+        super().__init__(message)
+        self.status: int = status
+        self.reason: str = reason
+        self.body: str = body
+        return

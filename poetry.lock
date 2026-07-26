@@ -2262,21 +2262,6 @@ files = [
 ]
 
 [[package]]
-name = "packet-python"
-version = "1.44.3"
-description = "Equinix Metal (Packet) API client"
-optional = false
-python-versions = "*"
-groups = ["cloud-sdks"]
-files = [
-    {file = "packet-python-1.44.3.tar.gz", hash = "sha256:5957cc10b3a89a5ec7c7bf23cba4c0c251512ee490bbd76db1be8a86cebf7202"},
-    {file = "packet_python-1.44.3-py2.py3-none-any.whl", hash = "sha256:ea1f1eed38e017dbb486572823272ccfac8aad95a4709c0e67f69f6eba72b527"},
-]
-
-[package.dependencies]
-requests = "*"
-
-[[package]]
 name = "paramiko"
 version = "4.0.0"
 description = "SSH2 protocol library"
@@ -2955,4 +2940,4 @@ test = ["pytest", "pytest-cov"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "860d571d83c1d3ccd5254e16ebca229e755be3c5a63db0ec6607d84c983a5058"
+content-hash = "4795c9b08474381e746696d9588910ae39519e97f47f4081bf32f73cb8eabb20"
