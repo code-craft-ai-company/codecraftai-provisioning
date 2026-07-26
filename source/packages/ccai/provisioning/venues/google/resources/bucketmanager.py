@@ -13,7 +13,7 @@ __credits__ = []
 
 from typing import Any, Dict, List, Optional
 
-from google.cloud import storage
+from ccai.restclient.google import storageclient as storage
 
 from ccai.provisioning.model.cloud.cloudobjectbucket import (
     CloudObjectBucket

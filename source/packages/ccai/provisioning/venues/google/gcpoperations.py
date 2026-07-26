@@ -15,7 +15,7 @@ __credits__ = []
 
 from typing import Any, Callable, Dict, Optional
 
-from google.api_core.exceptions import NotFound
+from ccai.restclient.google.googleapierror import NotFound
 
 
 def wait_for_operation(*, operation: Any) -> Any:
@@ -41,7 +41,7 @@ def resource_or_none(*, fetch: Callable[..., Any], **kwargs: Any) -> Optional[An
     """
         Call a google-cloud ``get``-style method, mapping absence to ``None``.
 
-        The real clients raise :class:`google.api_core.exceptions.NotFound`
+        The clients raise :class:`ccai.restclient.google.googleapierror.NotFound`
         for a missing resource rather than returning ``None``.  Catching that
         one exception is a deliberate recover-and-continue: the manager's
         read-before-create idempotency needs "does not exist" as a value, not

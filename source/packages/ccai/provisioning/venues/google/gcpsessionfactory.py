@@ -22,6 +22,16 @@ from ccai.credentials.gcpworkloadidentitycredential import (
     GcpWorkloadIdentityCredential
 )
 from ccai.provisioning.venues.google.gcpregionconfig import GcpRegionConfig
+from ccai.restclient.google.computeclient import ComputeClient
+from ccai.restclient.google.dnsclient import DnsClient
+from ccai.restclient.google.googletokenprovider import (
+    GoogleTokenProvider
+)
+from ccai.restclient.google.googletransport import (
+    GoogleTransport
+)
+from ccai.restclient.google.storageclient import StorageClient
+from ccai.restclient.google.tpuclient import TpuClient
 from ccai.provisioning.venues.google.gcperrors import GcpValidationError
 
 
@@ -83,32 +93,27 @@ class GcpSessionFactory:
 
     def google_credentials(self) -> Any:
         """
-            Return cached ``google.auth`` credentials, building on first call.
+            Return the cached token provider, building on first call.
 
-            :returns: A ``google.auth.credentials.Credentials`` instance.
+            :returns: A :class:`GoogleTokenProvider`.
         """
         if self._google_credentials is not None:
             rtnval = self._google_credentials
             return rtnval
 
         if isinstance(self._credential, GcpServiceAccountKeyCredential):
-            from google.oauth2 import service_account
-            info = {
-                "type": "service_account",
-                "project_id": self._credential.project_id,
-                "private_key_id": self._credential.private_key_id,
-                "private_key": self._credential.private_key,
-                "client_email": self._credential.client_email,
-                "token_uri": self._credential.token_uri,
-            }
-            built = service_account.Credentials.from_service_account_info(info)
+            built = GoogleTokenProvider(
+                client_email=self._credential.client_email,
+                private_key=self._credential.private_key,
+                private_key_id=self._credential.private_key_id,
+                token_uri=self._credential.token_uri,
+            )
             self._google_credentials = built
             rtnval = self._google_credentials
             return rtnval
 
         if isinstance(self._credential, GcpWorkloadIdentityCredential):
-            import google.auth
-            built, _ = google.auth.default()
+            built = GoogleTokenProvider(use_metadata_server=True)
             self._google_credentials = built
             rtnval = self._google_credentials
             return rtnval
@@ -147,28 +152,16 @@ class GcpSessionFactory:
 
         creds = self.google_credentials()
 
+        transport = GoogleTransport(token_provider=creds)
+
         if service_name == SERVICE_COMPUTE:
-            from google.cloud import compute_v1
-            built: Any = {
-                "networks": compute_v1.NetworksClient(credentials=creds),
-                "subnetworks": compute_v1.SubnetworksClient(credentials=creds),
-                "firewalls": compute_v1.FirewallsClient(credentials=creds),
-                "instances": compute_v1.InstancesClient(credentials=creds),
-                "disks": compute_v1.DisksClient(credentials=creds),
-                "resource_policies": compute_v1.ResourcePoliciesClient(
-                    credentials=creds
-                ),
-                "images": compute_v1.ImagesClient(credentials=creds),
-            }
+            built: Any = ComputeClient(transport=transport).sub_clients()
         elif service_name == SERVICE_TPU:
-            from google.cloud import tpu_v2
-            built = tpu_v2.TpuClient(credentials=creds)
+            built = TpuClient(transport=transport)
         elif service_name == SERVICE_STORAGE:
-            from google.cloud import storage
-            built = storage.Client(project=self.project, credentials=creds)
+            built = StorageClient(transport=transport, project=self.project)
         elif service_name == SERVICE_DNS:
-            from google.cloud import dns
-            built = dns.Client(project=self.project, credentials=creds)
+            built = DnsClient(transport=transport, project=self.project)
         else:
             err_msg_lines = ["Unknown GCP service name requested."]
             err_msg_lines.append("REQUESTED: {!r}".format(service_name))
