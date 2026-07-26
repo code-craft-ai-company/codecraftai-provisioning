@@ -173,11 +173,16 @@ class _MockCollection:
         """
             Record a volume attachment.
 
+            The attachment is recorded on the volume's ``server`` field,
+            because that is the field the API reports it in.  An invented
+            field name here would let production code read an attachment that
+            never exists against the live API.
+
             :param volume: The volume object.
             :param server_id: The server id to attach to.
         """
         self._owner.attach_calls += 1
-        setattr(volume, "attached_server_id", server_id)
+        setattr(volume, "server", server_id)
         return
 
     def detach(self, *, volume: Any) -> None:
@@ -187,7 +192,7 @@ class _MockCollection:
             :param volume: The volume object.
         """
         self._owner.detach_calls += 1
-        setattr(volume, "attached_server_id", None)
+        setattr(volume, "server", None)
         return
 
 

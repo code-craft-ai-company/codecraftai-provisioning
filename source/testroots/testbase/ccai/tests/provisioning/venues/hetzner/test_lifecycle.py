@@ -256,6 +256,40 @@ def test_apply_realizes_volume_grow_in_place(venue, credential,
     return
 
 
+def test_volume_grow_preserves_the_attachment_record(venue, credential,
+                                                     location_config, client,
+                                                     aspects) -> None:
+    """
+        Growing an attached volume keeps its attachment in the recorded
+        resource.
+
+        The attachment is read off the live volume's ``server`` field, which
+        is where the API reports it.  Reading a field the API never returns
+        would make every grown volume look detached, losing the attachment
+        from recorded state.
+    """
+    spec = basic_spec()
+    provisioner = _provisioner(venue=venue, credential=credential,
+                               location_config=location_config,
+                               client=client, spec=spec)
+    first = provisioner.apply(aspects=aspects)
+
+    created_volume = [r for r in first.created if r.name == "vol-a"][0]
+    server_id = created_volume.attributes["attached_server_id"]
+    assert server_id is not None
+
+    grown = basic_spec()
+    grown.volumes[0].size_gb = 50
+    provisioner = _provisioner(venue=venue, credential=credential,
+                               location_config=location_config,
+                               client=client, spec=grown)
+    result = provisioner.apply(aspects=aspects)
+
+    updated_volume = [r for r in result.updated if r.name == "vol-a"][0]
+    assert updated_volume.attributes["attached_server_id"] == server_id
+    return
+
+
 def test_reapply_after_volume_grow_is_skip(venue, credential,
                                            location_config, client,
                                            aspects) -> None:

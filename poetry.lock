@@ -936,6 +936,28 @@ reference = "main"
 resolved_reference = "38e7c4ae16b94cdcde61c505102c43af4feab614"
 
 [[package]]
+name = "codecraftai-restclient-hetzner"
+version = "0.0.1"
+description = "Code Craft AI - Hetzner Cloud REST client"
+optional = false
+python-versions = ">=3.10,<4.0"
+groups = ["main"]
+files = []
+develop = false
+
+[package.dependencies]
+codecraftai-credentials = {git = "https://github.com/automationmojo/codecraftai-credentials.git", branch = "main"}
+codecraftai-errors = {git = "https://github.com/automationmojo/codecraftai-errors.git", branch = "main"}
+codecraftai-restclient-base = {git = "https://github.com/automationmojo/codecraftai-restclient-base.git", branch = "main"}
+requests = "^2.32.4"
+
+[package.source]
+type = "git"
+url = "https://github.com/automationmojo/codecraftai-restclient-hetzner.git"
+reference = "main"
+resolved_reference = "a9df08956827549c13fbe8de0d231af88ad57d28"
+
+[[package]]
 name = "codecraftai-restclient-kubernetes"
 version = "0.0.1"
 description = "Code Craft AI - Kubernetes REST client"
@@ -1783,26 +1805,6 @@ files = [
 googleapis-common-protos = ">=1.5.5"
 grpcio = ">=1.83.0"
 protobuf = ">=6.33.5,<8.0.0"
-
-[[package]]
-name = "hcloud"
-version = "2.23.0"
-description = "Official Hetzner Cloud python library"
-optional = false
-python-versions = ">=3.10"
-groups = ["cloud-sdks"]
-files = [
-    {file = "hcloud-2.23.0-py3-none-any.whl", hash = "sha256:5a3fa1bbd1f87bfc5f0c726caebe041b9e1119b4361aafabc12fad284a2c445a"},
-    {file = "hcloud-2.23.0.tar.gz", hash = "sha256:c12dce3f14404ea342d79236292a15fbc4ceeb7861724a09dd3fe60cef513e0b"},
-]
-
-[package.dependencies]
-python-dateutil = ">=2.7.5"
-requests = ">=2.20"
-
-[package.extras]
-docs = ["myst-parser (>=5,<5.2)", "sphinx (>=9,<9.2)", "sphinx-rtd-theme (>=3,<3.2)", "watchdog (>=6,<6.1)"]
-test = ["coverage (>=7.15,<7.16)", "mypy (>=2.3,<2.4)", "pylint (>=4,<4.1)", "pytest (>=9,<9.2)", "pytest-cov (>=7,<7.2)", "types-python-dateutil", "types-requests"]
 
 [[package]]
 name = "hypothesis"
@@ -2953,4 +2955,4 @@ test = ["pytest", "pytest-cov"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "8352f49e09250f1ec9c1ec1769d61be78758d37a9d4901fb8c2374a70e6dea7c"
+content-hash = "860d571d83c1d3ccd5254e16ebca229e755be3c5a63db0ec6607d84c983a5058"

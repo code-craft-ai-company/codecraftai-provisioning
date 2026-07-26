@@ -52,9 +52,9 @@ def _labels_of(obj: Any) -> Dict[str, str]:
 
 def _id_of(obj: Any) -> str:
     """
-        Read the ``id`` attribute off an hcloud-shaped object as a string.
+        Read the ``id`` attribute off a Hetzner resource object as a string.
 
-        :param obj: An hcloud resource object.
+        :param obj: A Hetzner resource object.
 
         :returns: The string id (empty when absent).
     """
@@ -63,6 +63,34 @@ def _id_of(obj: Any) -> str:
         rtnval = ""
         return rtnval
     rtnval = str(raw_id)
+    return rtnval
+
+
+def _attached_server_id_of(volume: Any) -> Optional[str]:
+    """
+        Read the id of the server a live volume is attached to.
+
+        The API reports the attachment as the volume's ``server`` field,
+        carrying the server id (or null when detached).
+
+        :param volume: A live Hetzner volume object.
+
+        :returns: The attached server id as a string, or None when the volume
+            is not attached.
+    """
+    attached = getattr(volume, "server", None)
+    if attached is None:
+        rtnval: Optional[str] = None
+        return rtnval
+
+    # The field is documented as an id, but tolerate an embedded object so a
+    # future expanded response does not silently read as "detached".
+    nested_id = getattr(attached, "id", None)
+    if nested_id is not None:
+        rtnval = str(nested_id)
+        return rtnval
+
+    rtnval = str(attached)
     return rtnval
 
 
@@ -479,7 +507,7 @@ class HetznerApplyStages:
 
         attrs: Dict[str, Any] = {"volume_id": _id_of(existing),
                                  "size_gb": vol.size_gb}
-        attached_server_id = getattr(existing, "attached_server_id", None)
+        attached_server_id = _attached_server_id_of(existing)
         if attached_server_id is not None:
             attrs["attached_server_id"] = attached_server_id
         rtnval = ProvisionedResource(
@@ -571,18 +599,21 @@ class HetznerApplyStages:
     @staticmethod
     def _location_object(*, location: Optional[str]) -> Optional[Any]:
         """
-            Build an hcloud Location object from a location name.
+            Normalise a location name for the server-create call.
+
+            The API names a location by string, so an empty selection becomes
+            None (the field is then omitted and Hetzner picks its default)
+            and anything else passes through as given.
 
             :param location: The Hetzner location name, or None.
 
-            :returns: An hcloud ``Location``, or None when unspecified.
+            :returns: The location name, or None when unspecified.
         """
         if location is None or len(location) == 0:
-            rtnval: Optional[Any] = None
+            rtnval: Optional[str] = None
             return rtnval
 
-        from hcloud.locations.domain import Location
-        rtnval = Location(name=location)
+        rtnval = location
         return rtnval
 
     @classmethod
