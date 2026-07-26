@@ -104,7 +104,8 @@ def test_apply_with_vpn_join_injects_user_data(make_provisioner,
     instances = fakes["compute"]["instances"].list()
     found = False
     for entry in instances:
-        items = entry.get("metadata", {}).get("items", [])
+        metadata = entry.metadata
+        items = metadata.get("items", []) if isinstance(metadata, dict) else []
         for item in items:
             if item.get("key", "") == "user-data":
                 body = item.get("value", "")
@@ -236,7 +237,7 @@ def test_preemption_fail_uses_standard(make_provisioner, aspects) -> None:
     provisioner, fakes = make_provisioner(spec=spec)
     provisioner.apply(aspects=aspects)
     for entry in fakes["compute"]["instances"].list():
-        scheduling = entry.get("scheduling", {})
+        scheduling = entry.scheduling
         assert scheduling.get("preemptible", False) is False
         assert scheduling.get("provisioning_model", "") == "STANDARD"
     return
@@ -250,7 +251,7 @@ def test_preemption_reacquire_uses_spot(make_provisioner, aspects) -> None:
     provisioner, fakes = make_provisioner(spec=spec)
     provisioner.apply(aspects=aspects)
     for entry in fakes["compute"]["instances"].list():
-        scheduling = entry.get("scheduling", {})
+        scheduling = entry.scheduling
         assert scheduling.get("preemptible", False) is True
         assert scheduling.get("provisioning_model", "") == "SPOT"
     return

@@ -14,6 +14,123 @@ __credits__ = []
 from typing import Any, Dict, List, Optional
 
 
+class _FakeOperation:
+    """
+        Stand-in for a Compute ``ExtendedOperation`` / TPU ``Operation``.
+
+        Mutating GCP calls return immediately with an operation rather than
+        the finished resource, and the venue blocks on ``result()`` before
+        reading the resource back — otherwise the follow-up ``get`` races the
+        create and 404s.  A mock that returned ``None`` from a mutation left
+        that wait completely untested, and every caller of it crashed with
+        ``'NoneType' object has no attribute 'result'``.
+    """
+
+    def __init__(self, *, value: Any = None) -> None:
+        """
+            Construct a _FakeOperation.
+
+            :param value: The value ``result()`` should return.
+        """
+        self._value: Any = value
+        self.result_calls: int = 0
+        return
+
+    def result(self, *args: Any, **kwargs: Any) -> Any:
+        """
+            Return the finished operation's value.
+
+            :returns: The value the operation resolved to.
+        """
+        self.result_calls = self.result_calls + 1
+        rtnval = self._value
+        return rtnval
+
+
+# Fields the Compute API models as integers.  Everything else the venue reads
+# is a string or a message.  The distinction matters because protobuf returns
+# TYPED zero values for unset fields, and the venue relies on that:
+# `existing.id != 0` picks the fallback name, and `len(existing.self_link) > 0`
+# picks the fallback link.  Handing back None instead would make str(None) the
+# resource id and crash len().
+_INT_FIELDS = ("id", "size_gb", "disk_size_gb")
+
+
+class _ProtoLike:
+    """
+        Attribute-addressable view over a stored resource dict, with
+        protobuf's zero-value semantics for unset fields.
+
+        The real google-cloud clients return protobuf messages, not dicts, so
+        a mock that handed back dicts left every attribute read in the venue
+        untested — and the venue reads them everywhere.
+    """
+
+    def __init__(self, *, body: Dict[str, Any]) -> None:
+        """
+            Construct a _ProtoLike.
+
+            :param body: The stored resource dict.
+        """
+        object.__setattr__(self, "_body", body)
+        return
+
+    def __getattr__(self, name: str) -> Any:
+        """
+            Resolve a field, defaulting to the protobuf zero value.
+
+            :param name: The field name.
+
+            :returns: The field value, or its typed zero value when unset.
+        """
+        if name.startswith("_") is True:
+            raise AttributeError(name)
+
+        body = object.__getattribute__(self, "_body")
+        if name in body:
+            value = body[name]
+            if isinstance(value, dict) is True:
+                # Map fields (labels) behave as plain dicts in protobuf and
+                # are iterated as such; wrapping them would break that.
+                rtnval = value
+                return rtnval
+            if isinstance(value, list) is True:
+                rtnval = [
+                    _ProtoLike(body=item) if isinstance(item, dict) else item
+                    for item in value
+                ]
+                return rtnval
+            rtnval = value
+            return rtnval
+
+        if name in _INT_FIELDS:
+            rtnval = 0
+            return rtnval
+
+        rtnval = ""
+        return rtnval
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        """
+            Set a field.
+
+            :param name: The field name.
+            :param value: The value to store.
+        """
+        body = object.__getattribute__(self, "_body")
+        body[name] = value
+        return
+
+    def as_dict(self) -> Dict[str, Any]:
+        """
+            Return the underlying dict.
+
+            :returns: The stored resource dict.
+        """
+        rtnval = object.__getattribute__(self, "_body")
+        return rtnval
+
+
 class _ResourceStore:
     """
         Generic keyed store backing one fake compute sub-client.
@@ -56,15 +173,24 @@ class _ResourceStore:
         """
         name = kwargs.get(self._key_param, "")
         scope = kwargs.get("zone", kwargs.get("region", "global"))
-        rtnval = self._items.get(self._store_key(name=name, scope=scope),
-                                 None)
+        found = self._items.get(self._store_key(name=name, scope=scope),
+                                None)
+        if found is None:
+            rtnval: Optional[Any] = None
+            return rtnval
+        rtnval = _ProtoLike(body=found)
         return rtnval
 
-    def insert(self, **kwargs: Any) -> None:
+    def insert(self, **kwargs: Any) -> Any:
         """
-            Store a resource dict.
+            Store a resource dict and return an operation handle.
+
+            Compute mutations answer with an operation, not the resource; the
+            venue waits on it before reading the resource back.
 
             :param kwargs: Call arguments; one ends in ``_resource``.
+
+            :returns: A :class:`_FakeOperation`.
         """
         self.insert_calls += 1
         body: Dict[str, Any] = {}
@@ -74,7 +200,8 @@ class _ResourceStore:
         scope = kwargs.get("zone", kwargs.get("region", "global"))
         name = body.get("name", "")
         self._items[self._store_key(name=name, scope=scope)] = body
-        return
+        rtnval = _FakeOperation()
+        return rtnval
 
     def delete(self, **kwargs: Any) -> None:
         """
@@ -96,7 +223,7 @@ class _ResourceStore:
 
             :returns: A list of resource dicts.
         """
-        rtnval = list(self._items.values())
+        rtnval = [_ProtoLike(body=body) for body in self._items.values()]
         return rtnval
 
 
@@ -140,17 +267,26 @@ class FakeTpuClient:
 
             :returns: The node dict or None.
         """
-        rtnval = self._nodes.get(name, None)
+        found = self._nodes.get(name, None)
+        if found is None:
+            rtnval: Optional[Any] = None
+            return rtnval
+        rtnval = _ProtoLike(body=found)
         return rtnval
 
     def create_node(self, *, parent: str, node_id: str,
-                    node: Dict[str, Any]) -> None:
+                    node: Dict[str, Any]) -> Any:
         """
-            Store a TPU node dict.
+            Store a TPU node dict and return an operation handle.
+
+            Like Compute mutations, TPU node creation answers with an
+            operation the venue waits on before reading the node back.
 
             :param parent: TPU API parent path.
             :param node_id: Node id.
             :param node: The node body.
+
+            :returns: A :class:`_FakeOperation`.
         """
         self.create_calls += 1
         full_name = "{}/nodes/{}".format(parent, node_id)
@@ -159,7 +295,8 @@ class FakeTpuClient:
         stored["state"] = "READY"
         stored["network_endpoints"] = [{"ip_address": "10.128.0.50"}]
         self._nodes[full_name] = stored
-        return
+        rtnval = _FakeOperation()
+        return rtnval
 
     def delete_node(self, *, name: str) -> None:
         """
@@ -182,63 +319,137 @@ class FakeTpuClient:
         out: List[Dict[str, Any]] = []
         for full_name, node in self._nodes.items():
             if full_name.startswith(parent + "/"):
-                out.append(node)
+                out.append(_ProtoLike(body=node))
         rtnval = out
         return rtnval
+
+
+class _FakeBucket:
+    """
+        Stand-in for a ``storage.Bucket``.
+
+        The venue reads ``name`` / ``labels`` / ``location`` off buckets and
+        deletes them via ``bucket.delete(force=True)`` — buckets are active
+        record in the storage SDK, unlike the compute resources.
+    """
+
+    def __init__(self, *, name: str, client: Any,
+                 labels: Optional[Dict[str, str]] = None,
+                 location: str = "",
+                 versioning_enabled: bool = False) -> None:
+        """
+            Construct a _FakeBucket.
+
+            :param name: The bucket name.
+            :param client: The owning fake client.
+            :param labels: The bucket labels.
+            :param location: The bucket location.
+            :param versioning_enabled: Whether versioning is on.
+        """
+        self.name: str = name
+        self.labels: Dict[str, str] = dict(labels or {})
+        self.location: str = location
+        self.versioning_enabled: bool = versioning_enabled
+        self._client = client
+        return
+
+    def delete(self, force: bool = False) -> None:
+        """
+            Delete this bucket.
+
+            :param force: Whether to delete a non-empty bucket.
+        """
+        self._client.remove(name=self.name)
+        return
 
 
 class FakeStorageClient:
     """
         In-memory fake of ``storage.Client``.
+
+        Mirrors the surface the venue uses: ``lookup_bucket`` answers None for
+        an absent bucket rather than raising, ``create_bucket`` takes the
+        bucket OBJECT positionally with a keyword location, and
+        ``list_buckets`` filters by prefix.  The previous fake modelled a
+        different, dict-based API entirely, so none of these paths were
+        exercised.
     """
 
     def __init__(self) -> None:
         """
             Construct a FakeStorageClient.
         """
-        self._buckets: Dict[str, Dict[str, Any]] = {}
+        self._buckets: Dict[str, _FakeBucket] = {}
         self.create_calls: int = 0
         return
 
-    def get_bucket(self, *, bucket_name: str) -> Optional[Dict[str, Any]]:
+    def lookup_bucket(self, bucket_name: str) -> Optional[_FakeBucket]:
         """
-            Return a stored bucket dict by name, or None.
+            Return a bucket by name, or None when it does not exist.
 
-            :param bucket_name: GCS bucket name.
+            :param bucket_name: The bucket name.
 
-            :returns: The bucket dict or None.
+            :returns: The bucket, or None.
         """
         rtnval = self._buckets.get(bucket_name, None)
         return rtnval
 
-    def create_bucket(self, *, bucket_resource: Dict[str, Any]) -> None:
+    def get_bucket(self, bucket_name: str) -> Optional[_FakeBucket]:
         """
-            Store a bucket dict.
+            Return a bucket by name.
 
-            :param bucket_resource: The bucket body.
+            :param bucket_name: The bucket name.
+
+            :returns: The bucket, or None.
+        """
+        rtnval = self._buckets.get(bucket_name, None)
+        return rtnval
+
+    def create_bucket(self, bucket: Any,
+                      location: str = "") -> _FakeBucket:
+        """
+            Create a bucket from a bucket object.
+
+            :param bucket: The bucket to create, carrying name and labels.
+            :param location: The bucket location.
+
+            :returns: The created bucket.
         """
         self.create_calls += 1
-        name = bucket_resource.get("name", "")
-        self._buckets[name] = dict(bucket_resource)
-        return
-
-    def delete_bucket(self, *, bucket_name: str) -> None:
-        """
-            Remove a stored bucket dict.
-
-            :param bucket_name: GCS bucket name.
-        """
-        self._buckets.pop(bucket_name, None)
-        return
-
-    def list_buckets(self) -> List[Dict[str, Any]]:
-        """
-            Return every stored bucket dict.
-
-            :returns: A list of bucket dicts.
-        """
-        rtnval = list(self._buckets.values())
+        name = getattr(bucket, "name", "")
+        built = _FakeBucket(
+            name=name, client=self,
+            labels=dict(getattr(bucket, "labels", None) or {}),
+            location=location,
+            versioning_enabled=bool(
+                getattr(bucket, "versioning_enabled", False)))
+        self._buckets[name] = built
+        rtnval = built
         return rtnval
+
+    def list_buckets(self, prefix: str = "") -> List[_FakeBucket]:
+        """
+            List buckets, optionally filtered by name prefix.
+
+            :param prefix: The name prefix to match.
+
+            :returns: The matching buckets.
+        """
+        out: List[_FakeBucket] = []
+        for name, bucket in self._buckets.items():
+            if len(prefix) == 0 or name.startswith(prefix):
+                out.append(bucket)
+        rtnval = out
+        return rtnval
+
+    def remove(self, *, name: str) -> None:
+        """
+            Drop a bucket from the store.
+
+            :param name: The bucket name.
+        """
+        self._buckets.pop(name, None)
+        return
 
 
 class FakeDnsClient:
