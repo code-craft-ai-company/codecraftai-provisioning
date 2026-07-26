@@ -980,13 +980,12 @@ develop = false
 [package.dependencies]
 codecraftai-errors = {git = "https://github.com/automationmojo/codecraftai-errors.git", branch = "main"}
 codecraftai-interfaces = {git = "https://github.com/automationmojo/codecraftai-interfaces.git", branch = "main"}
-libvirt-python = ">=9.0.0"
 
 [package.source]
 type = "git"
 url = "https://github.com/automationmojo/codecraftai-interop-libvirt.git"
 reference = "main"
-resolved_reference = "b7081ecf8ed7140f2f6bb9b4de23666a1444d345"
+resolved_reference = "e30afa8c829b686d6cef49cdecaa422c1501712f"
 
 [[package]]
 name = "codecraftai-interop-xen"
@@ -2309,17 +2308,6 @@ websocket-client = ">=0.32.0,<0.40.0 || >0.40.0,<0.41.dev0 || >=0.43.dev0"
 
 [package.extras]
 google-auth = ["google-auth (>=1.0.1)"]
-
-[[package]]
-name = "libvirt-python"
-version = "12.5.0"
-description = "The libvirt virtualization API python binding"
-optional = false
-python-versions = ">=3.6"
-groups = ["hypervisors"]
-files = [
-    {file = "libvirt_python-12.5.0.tar.gz", hash = "sha256:25ea2261e0d6cab9d004b700911d88b57911b14528ed04b3487a617ec2b4cda9"},
-]
 
 [[package]]
 name = "linode-api4"
