@@ -41,6 +41,7 @@ codecraftai-restclient-crusoe = { git = "https://github.com/automationmojo/codec
 codecraftai-restclient-nebius = { git = "https://github.com/automationmojo/codecraftai-restclient-nebius.git", branch = "main" }
 codecraftai-restclient-runpod = { git = "https://github.com/automationmojo/codecraftai-restclient-runpod.git", branch = "main" }
 codecraftai-restclient-proxmox = { git = "https://github.com/automationmojo/codecraftai-restclient-proxmox.git", branch = "main" }
+codecraftai-restclient-digitalocean = { git = "https://github.com/automationmojo/codecraftai-restclient-digitalocean.git", branch = "main" }
 codecraftai-restclient-hetzner = { git = "https://github.com/automationmojo/codecraftai-restclient-hetzner.git", branch = "main" }
 codecraftai-restclient-linode = { git = "https://github.com/automationmojo/codecraftai-restclient-linode.git", branch = "main" }
 codecraftai-restclient-nutanix = { git = "https://github.com/automationmojo/codecraftai-restclient-nutanix.git", branch = "main" }
@@ -78,7 +79,6 @@ google-cloud-storage = "^2.18"
 google-cloud-dns = "^0.35"
 google-cloud-tpu = "^1.18"
 oci = "^2.130"
-pydo = "^0.3"
 
 [tool.poetry.group.dev.dependencies]
 hypothesis = "^6.0"

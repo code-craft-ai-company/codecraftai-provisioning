@@ -255,7 +255,8 @@ def test_apply_idempotent(venue, credential, region_config, with_vpn,
         apply ∘ apply is idempotent: a second apply creates nothing.
     """
     raw = MockDigitalOceanRawClient()
-    client = DigitalOceanClient(credential=credential, raw_client=raw)
+    client = DigitalOceanClient(credential=credential, raw_client=raw,
+                                spaces_client=raw.spaces)
     aspects = ProvisioningAspects(runid="idem01", verify_timeout=5.0,
                                   verify_interval=0.01)
     spec = basic_spec(with_vpn=with_vpn, with_dns=with_dns)
@@ -280,7 +281,8 @@ def test_destroy_is_inverse_of_apply(venue, credential, region_config,
         destroy ∘ apply leaves no owned resources behind.
     """
     raw = MockDigitalOceanRawClient()
-    client = DigitalOceanClient(credential=credential, raw_client=raw)
+    client = DigitalOceanClient(credential=credential, raw_client=raw,
+                                spaces_client=raw.spaces)
     aspects = ProvisioningAspects(runid="inv01", verify_timeout=5.0,
                                   verify_interval=0.01)
     confirm = ProvisioningAspects(runid="inv01", confirm=True,

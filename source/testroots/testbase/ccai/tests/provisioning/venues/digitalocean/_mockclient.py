@@ -14,6 +14,10 @@ __credits__ = []
 
 from typing import Any, Dict, List, Optional
 
+from ccai.restclient.digitalocean.digitaloceanapierror import (
+    SpacesRequestError
+)
+
 
 def _tag_matches(*, tags: List[str], tag_name: Optional[str]) -> bool:
     """
@@ -402,48 +406,101 @@ class _DomainsCollection:
 class _SpacesCollection:
     """
         In-memory mock of the Spaces (S3-compatible) bucket surface.
+
+        This mirrors :class:`ccai.restclient.digitalocean.spacesclient.
+        SpacesClient`, which is what the venue actually holds — obtained from
+        ``DigitalOceanClient.spaces(region=...)``.  Two details of that surface
+        are load-bearing and must not be simplified here:
+
+        * the keyword is the capitalised S3 ``Bucket``, not ``bucket``;
+        * a missing bucket RAISES with an S3 error code rather than returning
+          False.  The venue's ``_bucket_exists`` recovers only the
+          404/NoSuchBucket codes and lets everything else bubble, so a mock
+          that returned a bool would leave that discrimination untested — and
+          it is the part that decides whether an auth failure gets silently
+          treated as "bucket absent".
+
+        The region is fixed at construction, exactly as it is for the real
+        client, rather than being a per-call argument.
     """
 
-    def __init__(self, *, store: Dict[str, Any]) -> None:
+    def __init__(self, *, store: Dict[str, Any],
+                 region: str = "nyc3") -> None:
         """
             Construct the collection.
 
             :param store: Shared backing store.
+            :param region: The region this client is scoped to.
         """
         self._store: Dict[str, Any] = store
+        self._region: str = region
         return
 
-    def head_bucket(self, *, bucket: str, region: str) -> bool:
+    @property
+    def region(self) -> str:
         """
-            Report whether a bucket exists.
+            Return the region this client is scoped to.
 
-            :param bucket: The bucket name.
-            :param region: The Spaces region.
-
-            :returns: True when the bucket exists.
+            :returns: The region slug.
         """
-        rtnval = bucket in self._store["spaces"]
+        rtnval = self._region
         return rtnval
 
-    def create_bucket(self, *, bucket: str, region: str) -> None:
+    def head_bucket(self, *, Bucket: str) -> Dict[str, Any]:
+        """
+            Check that a bucket exists.
+
+            :param Bucket: The bucket name.
+
+            :returns: A dict carrying the response status.
+
+            :raises: SpacesRequestError with code ``NoSuchBucket`` when absent.
+        """
+        if Bucket not in self._store["spaces"]:
+            raise SpacesRequestError(
+                "The specified bucket does not exist. BUCKET: {}".format(
+                    Bucket),
+                status=404, code="NoSuchBucket", body="")
+
+        rtnval = {"ResponseMetadata": {"HTTPStatusCode": 200}}
+        return rtnval
+
+    def create_bucket(self, *, Bucket: str) -> Dict[str, Any]:
         """
             Create a bucket.
 
-            :param bucket: The bucket name.
-            :param region: The Spaces region.
-        """
-        self._store["spaces"][bucket] = {"region": region}
-        return
+            :param Bucket: The bucket name.
 
-    def delete_bucket(self, *, bucket: str, region: str) -> None:
+            :returns: A dict carrying the bucket location.
+        """
+        self._store["spaces"][Bucket] = {"region": self._region}
+
+        rtnval = {"Location": "/{}".format(Bucket),
+                  "ResponseMetadata": {"HTTPStatusCode": 200}}
+        return rtnval
+
+    def delete_bucket(self, *, Bucket: str) -> Dict[str, Any]:
         """
             Delete a bucket.
 
-            :param bucket: The bucket name.
-            :param region: The Spaces region.
+            :param Bucket: The bucket name.
+
+            :returns: A dict carrying the response status.
         """
-        self._store["spaces"].pop(bucket, None)
-        return
+        self._store["spaces"].pop(Bucket, None)
+
+        rtnval = {"ResponseMetadata": {"HTTPStatusCode": 204}}
+        return rtnval
+
+    def list_buckets(self) -> Dict[str, Any]:
+        """
+            List every bucket in the store.
+
+            :returns: A dict carrying ``Buckets``.
+        """
+        rtnval = {"Buckets": [{"Name": name}
+                              for name in self._store["spaces"].keys()]}
+        return rtnval
 
 
 class MockDigitalOceanRawClient:

@@ -38,6 +38,11 @@ def credential() -> DigitalOceanApiTokenCredential:
     rtnval = DigitalOceanApiTokenCredential(
         identifier="do-test", categories=["cloud-venue"],
         token="dop_v1_testtoken",
+        # Spaces authenticates with its own key pair, not the API token.  A
+        # credential without them cannot do bucket work at all, so any spec
+        # carrying a bucket needs them present here.
+        spaces_access_key="DO00TESTACCESSKEY",
+        spaces_secret_key="test-spaces-secret",
     )
     return rtnval
 
@@ -78,9 +83,14 @@ def raw_client() -> MockDigitalOceanRawClient:
 @pytest.fixture
 def do_client(credential, raw_client) -> DigitalOceanClient:
     """
-        Return a DigitalOceanClient wrapping the mock pydo client.
+        Return a DigitalOceanClient wrapping the mock clients.
+
+        The Spaces client must be injected too.  Without it, ``spaces()``
+        builds a real S3-compatible client and bucket work reaches the network
+        — which is what every bucket-touching test was doing before.
     """
-    rtnval = DigitalOceanClient(credential=credential, raw_client=raw_client)
+    rtnval = DigitalOceanClient(credential=credential, raw_client=raw_client,
+                                spaces_client=raw_client.spaces)
     return rtnval
 
 

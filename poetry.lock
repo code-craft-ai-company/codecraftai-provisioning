@@ -593,7 +593,7 @@ codecraftai-errors = {git = "https://github.com/automationmojo/codecraftai-error
 type = "git"
 url = "https://github.com/automationmojo/codecraftai-credentials.git"
 reference = "main"
-resolved_reference = "72b2e1b570e7887a999d8038e894d5a561b89257"
+resolved_reference = "0c52375f9670cf6fbae22eb6ebf9a65182eeb0b9"
 
 [[package]]
 name = "codecraftai-dataprofiles"
@@ -886,7 +886,7 @@ requests = "^2.32.5"
 type = "git"
 url = "https://github.com/automationmojo/codecraftai-restclient-base.git"
 reference = "main"
-resolved_reference = "83753ff0df35b09d3f5cb998ffe096e1c7be39a6"
+resolved_reference = "91a7a7931aa1fa1892be2549853883c9bf7ab5bc"
 
 [[package]]
 name = "codecraftai-restclient-coreweave"
@@ -934,6 +934,28 @@ type = "git"
 url = "https://github.com/automationmojo/codecraftai-restclient-crusoe.git"
 reference = "main"
 resolved_reference = "38e7c4ae16b94cdcde61c505102c43af4feab614"
+
+[[package]]
+name = "codecraftai-restclient-digitalocean"
+version = "0.0.1"
+description = "Code Craft AI - DigitalOcean REST client (API v2 + Spaces)"
+optional = false
+python-versions = ">=3.10,<4.0"
+groups = ["main"]
+files = []
+develop = false
+
+[package.dependencies]
+codecraftai-credentials = {git = "https://github.com/automationmojo/codecraftai-credentials.git", branch = "main"}
+codecraftai-errors = {git = "https://github.com/automationmojo/codecraftai-errors.git", branch = "main"}
+codecraftai-restclient-base = {git = "https://github.com/automationmojo/codecraftai-restclient-base.git", branch = "main"}
+requests = "^2.32.4"
+
+[package.source]
+type = "git"
+url = "https://github.com/automationmojo/codecraftai-restclient-digitalocean.git"
+reference = "main"
+resolved_reference = "6609d19789f4c8caa5f98093cf0f31f8ee7e97fd"
 
 [[package]]
 name = "codecraftai-restclient-hetzner"
@@ -2145,28 +2167,6 @@ msal = ">=1.29,<2"
 portalocker = ["portalocker (>=1.4,<4)"]
 
 [[package]]
-name = "msrest"
-version = "0.7.1"
-description = "AutoRest swagger generator Python client runtime."
-optional = false
-python-versions = ">=3.6"
-groups = ["cloud-sdks"]
-files = [
-    {file = "msrest-0.7.1-py3-none-any.whl", hash = "sha256:21120a810e1233e5e6cc7fe40b474eeb4ec6f757a15d7cf86702c369f9567c32"},
-    {file = "msrest-0.7.1.zip", hash = "sha256:6e7661f46f3afd88b75667b7187a92829924446c7ea1d169be8c4bb7eeb788b9"},
-]
-
-[package.dependencies]
-azure-core = ">=1.24.0"
-certifi = ">=2017.4.17"
-isodate = ">=0.6.0"
-requests = ">=2.16,<3.0"
-requests-oauthlib = ">=0.5.0"
-
-[package.extras]
-async = ["aiodns ; python_version >= \"3.5\"", "aiohttp (>=3.0) ; python_version >= \"3.5\""]
-
-[[package]]
 name = "netifaces"
 version = "0.11.0"
 description = "Portable network interface information."
@@ -2205,23 +2205,6 @@ files = [
     {file = "netifaces-0.11.0-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:e76c7f351e0444721e85f975ae92718e21c1f361bda946d60a214061de1f00a1"},
     {file = "netifaces-0.11.0.tar.gz", hash = "sha256:043a79146eb2907edf439899f262b3dfe41717d34124298ed281139a8b93ca32"},
 ]
-
-[[package]]
-name = "oauthlib"
-version = "3.3.1"
-description = "A generic, spec-compliant, thorough implementation of the OAuth request-signing logic"
-optional = false
-python-versions = ">=3.8"
-groups = ["cloud-sdks"]
-files = [
-    {file = "oauthlib-3.3.1-py3-none-any.whl", hash = "sha256:88119c938d2b8fb88561af5f6ee0eec8cc8d552b7bb1f712743136eb7523b7a1"},
-    {file = "oauthlib-3.3.1.tar.gz", hash = "sha256:0f0f8aa759826a193cf66c12ea1af1637f87b9b4622d46e866952bb022e538c9"},
-]
-
-[package.extras]
-rsa = ["cryptography (>=3.0.0)"]
-signals = ["blinker (>=1.4.0)"]
-signedtoken = ["cryptography (>=3.0.0)", "pyjwt (>=2.0.0,<3)"]
 
 [[package]]
 name = "oci"
@@ -2426,28 +2409,6 @@ files = [
     {file = "pycparser-3.0-py3-none-any.whl", hash = "sha256:b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992"},
     {file = "pycparser-3.0.tar.gz", hash = "sha256:600f49d217304a5902ac3c37e1281c9fe94e4d0489de643a9504c5cdfdfc6b29"},
 ]
-
-[[package]]
-name = "pydo"
-version = "0.3.0"
-description = "The official client for interacting with the DigitalOcean API"
-optional = false
-python-versions = "<4.0.0,>=3.7.2"
-groups = ["cloud-sdks"]
-files = [
-    {file = "pydo-0.3.0-py3-none-any.whl", hash = "sha256:31692a864bd2bd1308a3b3cfda9984c6c001829b2554e49c6a8b8a52873b2bb8"},
-    {file = "pydo-0.3.0.tar.gz", hash = "sha256:a95f8bdf3ce9a2a81648ed2f5dace605c2bc52b430ab5a000bc6f93a1e381fd9"},
-]
-
-[package.dependencies]
-azure-core = ">=1.24.0"
-azure-identity = ">=1.5.0"
-isodate = ">=0.6.1"
-msrest = ">=0.7.1"
-typing-extensions = ">=3.7.4"
-
-[package.extras]
-aio = ["aiohttp (>=3.0)"]
 
 [[package]]
 name = "pygments"
@@ -2720,25 +2681,6 @@ requests = ">=2.22,<3"
 fixture = ["fixtures"]
 
 [[package]]
-name = "requests-oauthlib"
-version = "2.0.0"
-description = "OAuthlib authentication support for Requests."
-optional = false
-python-versions = ">=3.4"
-groups = ["cloud-sdks"]
-files = [
-    {file = "requests-oauthlib-2.0.0.tar.gz", hash = "sha256:b3dffaebd884d8cd778494369603a9e7b58d29111bf6b41bdc2dcd87203af4e9"},
-    {file = "requests_oauthlib-2.0.0-py2.py3-none-any.whl", hash = "sha256:7dd8a5c40426b779b0868c404bdef9768deccf22749cde15852df527e6269b36"},
-]
-
-[package.dependencies]
-oauthlib = ">=3.0.0"
-requests = ">=2.0.0"
-
-[package.extras]
-rsa = ["oauthlib[signedtoken] (>=3.0.0)"]
-
-[[package]]
 name = "responses"
 version = "0.26.2"
 description = "A utility library for mocking out the `requests` Python library."
@@ -2940,4 +2882,4 @@ test = ["pytest", "pytest-cov"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "4795c9b08474381e746696d9588910ae39519e97f47f4081bf32f73cb8eabb20"
+content-hash = "345fde05eca37e553a4a32b564d1276eaa44dc0219e1d62a905ddca9bdb321b3"

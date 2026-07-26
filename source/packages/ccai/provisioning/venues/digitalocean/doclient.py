@@ -20,6 +20,10 @@ from ccai.errors.exceptions import ConfigurationError
 from ccai.credentials.digitaloceanapitokencredential import (
     DigitalOceanApiTokenCredential
 )
+from ccai.restclient.digitalocean.digitaloceanrestclient import (
+    DigitalOceanRestClient
+)
+from ccai.restclient.digitalocean.spacesclient import SpacesClient
 
 
 class DigitalOceanClient:
@@ -59,30 +63,18 @@ class DigitalOceanClient:
 
     def _build_raw_client(self) -> Any:
         """
-            Lazily import ``pydo`` and build a real client.
+            Build the DigitalOcean REST client.
 
-            :returns: A ``pydo.Client`` instance.
-            :raises: RuntimeError
+            :returns: A :class:`DigitalOceanRestClient` instance.
         """
-        try:
-            import pydo
-        except ImportError as xcpt:
-            err_msg_lines = ["The 'pydo' SDK is required for live "
-                             "DigitalOcean calls."]
-            err_msg_lines.append("INSTALL: python -m pip install pydo")
-            err_msg_lines.append("CAUSE: {}".format(xcpt))
-            err_msg = os.linesep.join(err_msg_lines)
-            raise RuntimeError(err_msg) from None
-
-        built = pydo.Client(token=self._credential.token)
-        rtnval = built
+        rtnval = DigitalOceanRestClient(token=self._credential.token)
         return rtnval
 
     def raw(self) -> Any:
         """
-            Return the underlying ``pydo`` client, building it if needed.
+            Return the underlying REST client, building it if needed.
 
-            :returns: The raw ``pydo`` client (or injected mock).
+            :returns: The REST client (or injected mock).
         """
         if self._raw_client is None:
             self._raw_client = self._build_raw_client()
@@ -202,14 +194,14 @@ class DigitalOceanClient:
         """
             Return an S3-compatible client for DigitalOcean Spaces in a region.
 
-            The DigitalOcean REST API (pydo) cannot manage Spaces buckets, so
-            bucket lifecycle goes through boto3 against the regional Spaces
-            endpoint using Spaces access keys.  A pre-built client injected via
-            the constructor (for tests) is returned as-is.
+            The DigitalOcean REST API cannot manage Spaces buckets, so bucket
+            lifecycle goes through the S3-compatible Spaces endpoint using
+            Spaces access keys.  A pre-built client injected via the
+            constructor (for tests) is returned as-is.
 
             :param region: The Spaces region slug (e.g. ``nyc3``).
 
-            :returns: A boto3 S3 client bound to the regional Spaces endpoint.
+            :returns: A :class:`SpacesClient` bound to the regional endpoint.
             :raises: ConfigurationError when Spaces credentials are unavailable.
         """
         if self._spaces_client is not None:
@@ -223,14 +215,8 @@ class DigitalOceanClient:
 
         access_key, secret_key = self._resolve_spaces_credentials()
 
-        import boto3
-        session = boto3.session.Session()
-        endpoint_url = "https://{}.digitaloceanspaces.com".format(region)
-        built = session.client(
-            "s3", region_name=region, endpoint_url=endpoint_url,
-            aws_access_key_id=access_key,
-            aws_secret_access_key=secret_key,
-        )
+        built = SpacesClient(access_key=access_key, secret_key=secret_key,
+                             region=region)
         self._spaces_clients_by_region[region] = built
         rtnval = built
         return rtnval

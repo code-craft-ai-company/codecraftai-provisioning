@@ -25,6 +25,9 @@ from ccai.provisioning.venues.digitalocean.doclient import (
 from ccai.provisioning.venues.digitalocean.dotagtranslator import (
     base_resource_tags
 )
+from ccai.restclient.digitalocean.digitaloceanapierror import (
+    SpacesRequestError
+)
 
 
 class SpacesManager:
@@ -32,11 +35,12 @@ class SpacesManager:
         Manager for DigitalOcean Spaces buckets.
 
         Spaces is an S3-compatible object store; the DigitalOcean REST API
-        cannot manage its buckets, so the venue talks to it through a boto3 S3
-        client obtained from ``DigitalOceanClient.spaces(region=...)`` and uses
-        the S3 ``head_bucket`` / ``create_bucket`` / ``delete_bucket``
-        operations.  Buckets are matched by the ``codecraftai-<run-id>-<name>``
-        naming convention because Spaces does not carry first-class tags.
+        cannot manage its buckets, so the venue talks to it through an
+        S3-compatible client obtained from
+        ``DigitalOceanClient.spaces(region=...)`` and uses the S3
+        ``head_bucket`` / ``create_bucket`` / ``delete_bucket`` operations.
+        Buckets are matched by the ``codecraftai-<run-id>-<name>`` naming
+        convention because Spaces does not carry first-class tags.
     """
 
     KIND: str = "bucket"
@@ -67,25 +71,22 @@ class SpacesManager:
         """
             Return whether a Spaces bucket exists via an S3 ``head_bucket``.
 
-            The S3 API signals a missing bucket by raising ``ClientError``
-            with a 404/NoSuchBucket code; that one case is recovered to
-            ``False``.  Any other error (auth, throttle) is allowed to bubble
-            rather than be masked as "does not exist".
+            The S3 API signals a missing bucket with a 404/NoSuchBucket code;
+            that one case is recovered to ``False``.  Any other error (auth,
+            throttle) is allowed to bubble rather than be masked as "does not
+            exist" — masking one would make every apply try to create a bucket
+            it cannot see.
 
             :param bucket: The Spaces bucket name.
             :param region: Spaces region slug.
 
             :returns: True when the bucket exists.
         """
-        from botocore.exceptions import ClientError
-
         s3 = self._client.spaces(region=region)
         try:
             s3.head_bucket(Bucket=bucket)
-        except ClientError as xcpt:
-            error = xcpt.response.get("Error", {})
-            code = str(error.get("Code", ""))
-            if code in ("404", "NoSuchBucket", "NotFound"):
+        except SpacesRequestError as xcpt:
+            if xcpt.code in ("404", "NoSuchBucket", "NotFound"):
                 rtnval = False
                 return rtnval
             raise
