@@ -10,6 +10,12 @@ __author__ = "Myron Walker"
 __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
+from ccai.restclient.oracle import ocimodels
+
+from ccai.restclient.oracle.ocipagination import (
+    list_call_get_all_results
+)
+
 
 from typing import Any, Dict, List
 
@@ -25,7 +31,6 @@ from ccai.provisioning.venues.oracle.ocitagging import (
 
 
 
-import oci
 
 class InternetGatewayManager:
     """
@@ -69,13 +74,12 @@ class InternetGatewayManager:
 
             :returns: The Internet Gateway OCID.
         """
-        import oci
 
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         igw_name = "{}-igw".format(network_name)
 
-        response = oci.pagination.list_call_get_all_results(
+        response = list_call_get_all_results(
             client.list_internet_gateways,
             compartment_id=compartment_id, vcn_id=vcn_id
         )
@@ -89,7 +93,7 @@ class InternetGatewayManager:
             run_id=run_id, resource_name=igw_name,
             resource_kind=self.KIND, defaults=default_tags,
         )
-        details = oci.core.models.CreateInternetGatewayDetails(
+        details = ocimodels.CreateInternetGatewayDetails(
             compartment_id=compartment_id,
             vcn_id=vcn_id,
             is_enabled=True,
@@ -114,7 +118,7 @@ class InternetGatewayManager:
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         deleted: List[str] = []
-        response = oci.pagination.list_call_get_all_results(
+        response = list_call_get_all_results(
             client.list_internet_gateways,
             compartment_id=compartment_id
         )

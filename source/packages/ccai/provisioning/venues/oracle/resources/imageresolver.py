@@ -10,6 +10,10 @@ __author__ = "Myron Walker"
 __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
+from ccai.restclient.oracle.ocipagination import (
+    list_call_get_all_results
+)
+
 
 import os
 
@@ -55,7 +59,6 @@ def os_name_for(*, family: str) -> str:
 
 
 
-import oci
 
 class ImageResolver:
     """
@@ -105,7 +108,7 @@ class ImageResolver:
         list_kwargs["sort_order"] = "DESC"
 
         try:
-            response = oci.pagination.list_call_get_all_results(client.list_images, **list_kwargs)
+            response = list_call_get_all_results(client.list_images, **list_kwargs)
         except Exception as xcpt:
             err_msg_lines = ["OCI ImageResolver list_images call failed."]
             err_msg_lines.append("FAMILY: {}".format(image.family))

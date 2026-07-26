@@ -10,6 +10,12 @@ __author__ = "Myron Walker"
 __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
+from ccai.restclient.oracle import ocimodels
+
+from ccai.restclient.oracle.ocipagination import (
+    list_call_get_all_results
+)
+
 
 from typing import Any, Dict, List, Optional
 
@@ -46,7 +52,6 @@ def oci_bucket_name(*, run_id: str, name: str) -> str:
 
 
 
-import oci
 
 class ObjectStorageManager:
     """
@@ -130,7 +135,6 @@ class ObjectStorageManager:
 
             :returns: A ProvisionedResource describing the bucket.
         """
-        import oci
 
         client = self._os()
         compartment_id = self._session_factory.region_config.compartment_id
@@ -143,7 +147,7 @@ class ObjectStorageManager:
                 resource_kind=self.KIND, extra=dict(desired.tags),
                 defaults=default_tags,
             )
-            details = oci.object_storage.models.CreateBucketDetails(
+            details = ocimodels.CreateBucketDetails(
                 name=bucket_name,
                 compartment_id=compartment_id,
                 freeform_tags=to_freeform(neutral_tags=neutral_tags),
@@ -182,7 +186,7 @@ class ObjectStorageManager:
         compartment_id = self._session_factory.region_config.compartment_id
         deleted: List[str] = []
         try:
-            response = oci.pagination.list_call_get_all_results(
+            response = list_call_get_all_results(
                 client.list_buckets,
                 namespace_name=self.namespace(),
                 compartment_id=compartment_id,
@@ -224,7 +228,7 @@ class ObjectStorageManager:
         compartment_id = self._session_factory.region_config.compartment_id
         out: List[ProvisionedResource] = []
         try:
-            response = oci.pagination.list_call_get_all_results(
+            response = list_call_get_all_results(
                 client.list_buckets,
                 namespace_name=self.namespace(),
                 compartment_id=compartment_id,

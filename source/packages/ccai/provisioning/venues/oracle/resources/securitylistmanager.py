@@ -14,6 +14,12 @@ __author__ = "Myron Walker"
 __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
+from ccai.restclient.oracle import ocimodels
+
+from ccai.restclient.oracle.ocipagination import (
+    list_call_get_all_results
+)
+
 
 from typing import Any, Dict, List, Optional
 
@@ -56,7 +62,6 @@ def _protocol_number(*, protocol: str) -> str:
 
 
 
-import oci
 
 class SecurityListManager:
     """
@@ -99,7 +104,7 @@ class SecurityListManager:
         """
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
-        response = oci.pagination.list_call_get_all_results(client.list_security_lists, compartment_id=compartment_id)
+        response = list_call_get_all_results(client.list_security_lists, compartment_id=compartment_id)
         for seclist in response.data:
             if matches_resource(entity=seclist, run_id=run_id,
                                 resource_name=name):
@@ -117,7 +122,6 @@ class SecurityListManager:
 
             :returns: A list of ``oci`` IngressSecurityRule objects.
         """
-        import oci
 
         out: List[Any] = []
         rules = desired.ingress_rules if desired.ingress_rules is not None else []
@@ -131,22 +135,22 @@ class SecurityListManager:
                 rule_kwargs["source_type"] = "CIDR_BLOCK"
                 rule_kwargs["is_stateless"] = False
                 if protocol == "6" or protocol == "17":
-                    port_range = oci.core.models.PortRange(
+                    port_range = ocimodels.PortRange(
                         min=rule.from_port, max=rule.to_port
                     )
                     if protocol == "6":
                         rule_kwargs["tcp_options"] = (
-                            oci.core.models.TcpOptions(
+                            ocimodels.TcpOptions(
                                 destination_port_range=port_range
                             )
                         )
                     else:
                         rule_kwargs["udp_options"] = (
-                            oci.core.models.UdpOptions(
+                            ocimodels.UdpOptions(
                                 destination_port_range=port_range
                             )
                         )
-                out.append(oci.core.models.IngressSecurityRule(**rule_kwargs))
+                out.append(ocimodels.IngressSecurityRule(**rule_kwargs))
         rtnval = out
         return rtnval
 
@@ -159,7 +163,6 @@ class SecurityListManager:
 
             :returns: A list of ``oci`` EgressSecurityRule objects.
         """
-        import oci
 
         out: List[Any] = []
         rules = desired.egress_rules if desired.egress_rules is not None else []
@@ -173,26 +176,26 @@ class SecurityListManager:
                 rule_kwargs["destination_type"] = "CIDR_BLOCK"
                 rule_kwargs["is_stateless"] = False
                 if protocol == "6" or protocol == "17":
-                    port_range = oci.core.models.PortRange(
+                    port_range = ocimodels.PortRange(
                         min=rule.from_port, max=rule.to_port
                     )
                     if protocol == "6":
                         rule_kwargs["tcp_options"] = (
-                            oci.core.models.TcpOptions(
+                            ocimodels.TcpOptions(
                                 destination_port_range=port_range
                             )
                         )
                     else:
                         rule_kwargs["udp_options"] = (
-                            oci.core.models.UdpOptions(
+                            ocimodels.UdpOptions(
                                 destination_port_range=port_range
                             )
                         )
-                out.append(oci.core.models.EgressSecurityRule(**rule_kwargs))
+                out.append(ocimodels.EgressSecurityRule(**rule_kwargs))
 
         if len(out) == 0:
             # OCI requires at least one egress rule; default allow-all.
-            out.append(oci.core.models.EgressSecurityRule(
+            out.append(ocimodels.EgressSecurityRule(
                 protocol="all", destination="0.0.0.0/0",
                 destination_type="CIDR_BLOCK", is_stateless=False,
             ))
@@ -213,7 +216,6 @@ class SecurityListManager:
 
             :returns: A ProvisionedResource describing the Security List.
         """
-        import oci
 
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
@@ -228,7 +230,7 @@ class SecurityListManager:
                 resource_kind=self.KIND, extra=dict(desired.tags),
                 defaults=default_tags,
             )
-            details = oci.core.models.CreateSecurityListDetails(
+            details = ocimodels.CreateSecurityListDetails(
                 compartment_id=compartment_id,
                 vcn_id=vcn_id,
                 ingress_security_rules=ingress_rules,
@@ -286,7 +288,7 @@ class SecurityListManager:
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         deleted: List[str] = []
-        response = oci.pagination.list_call_get_all_results(client.list_security_lists, compartment_id=compartment_id)
+        response = list_call_get_all_results(client.list_security_lists, compartment_id=compartment_id)
         for seclist in response.data:
             if not belongs_to_run(entity=seclist, run_id=run_id):
                 continue
@@ -310,7 +312,7 @@ class SecurityListManager:
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         out: List[ProvisionedResource] = []
-        response = oci.pagination.list_call_get_all_results(client.list_security_lists, compartment_id=compartment_id)
+        response = list_call_get_all_results(client.list_security_lists, compartment_id=compartment_id)
         for seclist in response.data:
             if not belongs_to_run(entity=seclist, run_id=run_id):
                 continue

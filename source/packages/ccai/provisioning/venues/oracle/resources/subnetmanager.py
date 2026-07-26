@@ -10,6 +10,12 @@ __author__ = "Myron Walker"
 __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
+from ccai.restclient.oracle import ocimodels
+
+from ccai.restclient.oracle.ocipagination import (
+    list_call_get_all_results
+)
+
 
 from typing import Any, Dict, List, Optional
 
@@ -29,7 +35,6 @@ from ccai.provisioning.venues.oracle.ocitagging import (
 
 
 
-import oci
 
 class SubnetManager:
     """
@@ -72,7 +77,7 @@ class SubnetManager:
         """
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
-        response = oci.pagination.list_call_get_all_results(client.list_subnets, compartment_id=compartment_id)
+        response = list_call_get_all_results(client.list_subnets, compartment_id=compartment_id)
         for subnet in response.data:
             if matches_resource(entity=subnet, run_id=run_id,
                                 resource_name=name):
@@ -99,7 +104,6 @@ class SubnetManager:
 
             :returns: A ProvisionedResource describing the subnet.
         """
-        import oci
 
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
@@ -130,7 +134,7 @@ class SubnetManager:
             if desired.public is not True:
                 details_kwargs["prohibit_public_ip_on_vnic"] = True
 
-            details = oci.core.models.CreateSubnetDetails(**details_kwargs)
+            details = ocimodels.CreateSubnetDetails(**details_kwargs)
             created = client.create_subnet(create_subnet_details=details)
             existing = created.data
 
@@ -165,7 +169,7 @@ class SubnetManager:
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         deleted: List[str] = []
-        response = oci.pagination.list_call_get_all_results(client.list_subnets, compartment_id=compartment_id)
+        response = list_call_get_all_results(client.list_subnets, compartment_id=compartment_id)
         for subnet in response.data:
             if not belongs_to_run(entity=subnet, run_id=run_id):
                 continue
@@ -189,7 +193,7 @@ class SubnetManager:
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         out: List[ProvisionedResource] = []
-        response = oci.pagination.list_call_get_all_results(client.list_subnets, compartment_id=compartment_id)
+        response = list_call_get_all_results(client.list_subnets, compartment_id=compartment_id)
         for subnet in response.data:
             if not belongs_to_run(entity=subnet, run_id=run_id):
                 continue

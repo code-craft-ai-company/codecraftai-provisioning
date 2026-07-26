@@ -17,6 +17,9 @@ from typing import Any, Dict, Optional
 from ccai.credentials.oraclecloudapikeycredential import (
     OracleCloudApiKeyCredential
 )
+from ccai.restclient.oracle.ociclients import build_clients
+from ccai.restclient.oracle.ocisigner import OciRequestSigner
+from ccai.restclient.oracle.ocitransport import OciTransport
 from ccai.provisioning.venues.oracle.ociregionconfig import OciRegionConfig
 
 
@@ -87,46 +90,43 @@ class OciSessionFactory:
 
             Supported service names map to ``oci`` SDK client classes:
 
-            - ``virtual_network`` → ``oci.core.VirtualNetworkClient``
-            - ``compute``         → ``oci.core.ComputeClient``
-            - ``compute_management`` → ``oci.core.ComputeManagementClient``
-            - ``blockstorage``    → ``oci.core.BlockstorageClient``
-            - ``object_storage``  → ``oci.object_storage.ObjectStorageClient``
-            - ``dns``             → ``oci.dns.DnsClient``
-            - ``file_storage``    → ``oci.file_storage.FileStorageClient``
+            - ``virtual_network`` → VirtualNetworkClient
+            - ``compute``         → ComputeClient
+            - ``compute_management`` → ComputeManagementClient
+            - ``blockstorage``    → BlockstorageClient
+            - ``object_storage``  → ObjectStorageClient
+            - ``dns``             → DnsClient
+            - ``file_storage``    → FileStorageClient
 
             :param service_name: A supported service identifier.
 
-            :returns: An ``oci`` SDK service client.
+            :returns: An OCI service client.
             :raises: ValueError
         """
         if service_name in self._clients:
             rtnval = self._clients[service_name]
             return rtnval
 
-        import oci
-
         config = self.config()
-        if service_name == "virtual_network":
-            built = oci.core.VirtualNetworkClient(config)
-        elif service_name == "compute":
-            built = oci.core.ComputeClient(config)
-        elif service_name == "compute_management":
-            built = oci.core.ComputeManagementClient(config)
-        elif service_name == "blockstorage":
-            built = oci.core.BlockstorageClient(config)
-        elif service_name == "object_storage":
-            built = oci.object_storage.ObjectStorageClient(config)
-        elif service_name == "dns":
-            built = oci.dns.DnsClient(config)
-        elif service_name == "file_storage":
-            built = oci.file_storage.FileStorageClient(config)
-        else:
+
+        signer = OciRequestSigner(
+            tenancy=str(config.get("tenancy", "")),
+            user=str(config.get("user", "")),
+            fingerprint=str(config.get("fingerprint", "")),
+            private_key=str(config.get("key_content", "")),
+            pass_phrase=config.get("pass_phrase", None),
+        )
+        transport = OciTransport(signer=signer)
+        clients = build_clients(transport=transport,
+                                region=str(config.get("region", "")))
+
+        if service_name not in clients:
             raise ValueError(
                 "OciSessionFactory: unknown service_name {!r}".format(
                     service_name
                 )
             )
+        built = clients[service_name]
 
         self._clients[service_name] = built
         rtnval = built

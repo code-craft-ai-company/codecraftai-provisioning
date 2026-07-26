@@ -11,6 +11,12 @@ __author__ = "Myron Walker"
 __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
+from ccai.restclient.oracle import ocimodels
+
+from ccai.restclient.oracle.ocipagination import (
+    list_call_get_all_results
+)
+
 
 import base64
 import os
@@ -67,7 +73,6 @@ def is_bm_gpu_shape(*, shape: str) -> bool:
 
 
 
-import oci
 
 class ComputeManager:
     """
@@ -206,7 +211,7 @@ class ComputeManager:
         """
         client = self._compute()
         compartment_id = self._session_factory.region_config.compartment_id
-        response = oci.pagination.list_call_get_all_results(client.list_instances, compartment_id=compartment_id)
+        response = list_call_get_all_results(client.list_instances, compartment_id=compartment_id)
         for instance in response.data:
             state = getattr(instance, "lifecycle_state", "")
             if state not in _LIVE_STATES:
@@ -241,7 +246,6 @@ class ComputeManager:
 
             :returns: (ProvisionedResource, info-dict with vpn_device_id).
         """
-        import oci
 
         client = self._compute()
         compartment_id = self._session_factory.region_config.compartment_id
@@ -290,11 +294,11 @@ class ComputeManager:
             defaults=default_tags,
         )
 
-        vnic_details = oci.core.models.CreateVnicDetails(
+        vnic_details = ocimodels.CreateVnicDetails(
             subnet_id=subnet_id,
             assign_public_ip=bool(desired.public_ip),
         )
-        source_details = oci.core.models.InstanceSourceViaImageDetails(
+        source_details = ocimodels.InstanceSourceViaImageDetails(
             image_id=image_id
         )
 
@@ -321,16 +325,16 @@ class ComputeManager:
             policy_value = str(policy)
 
         if policy_value in ("REACQUIRE", "BEST_EFFORT"):
-            action = oci.core.models.TerminatePreemptionAction(
+            action = ocimodels.TerminatePreemptionAction(
                 type="TERMINATE", preserve_boot_volume=False
             )
             launch_kwargs["preemptible_instance_config"] = (
-                oci.core.models.PreemptibleInstanceConfigDetails(
+                ocimodels.PreemptibleInstanceConfigDetails(
                     preemption_action=action
                 )
             )
 
-        details = oci.core.models.LaunchInstanceDetails(**launch_kwargs)
+        details = ocimodels.LaunchInstanceDetails(**launch_kwargs)
         created = client.launch_instance(launch_instance_details=details)
         created_instance = created.data
 
@@ -391,7 +395,7 @@ class ComputeManager:
         client = self._compute()
         compartment_id = self._session_factory.region_config.compartment_id
         records: List[Dict[str, Any]] = []
-        response = oci.pagination.list_call_get_all_results(client.list_instances, compartment_id=compartment_id)
+        response = list_call_get_all_results(client.list_instances, compartment_id=compartment_id)
         for instance in response.data:
             if not belongs_to_run(entity=instance, run_id=run_id):
                 continue
@@ -424,7 +428,7 @@ class ComputeManager:
         client = self._compute()
         compartment_id = self._session_factory.region_config.compartment_id
         out: List[ProvisionedResource] = []
-        response = oci.pagination.list_call_get_all_results(client.list_instances, compartment_id=compartment_id)
+        response = list_call_get_all_results(client.list_instances, compartment_id=compartment_id)
         for instance in response.data:
             if not belongs_to_run(entity=instance, run_id=run_id):
                 continue

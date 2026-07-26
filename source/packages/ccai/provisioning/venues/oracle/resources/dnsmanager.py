@@ -10,6 +10,12 @@ __author__ = "Myron Walker"
 __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
+from ccai.restclient.oracle import ocimodels
+
+from ccai.restclient.oracle.ocipagination import (
+    list_call_get_all_results
+)
+
 
 import os
 
@@ -26,7 +32,6 @@ from ccai.provisioning.venues.oracle.ocierrors import OciValidationError
 
 
 
-import oci
 
 class DnsManager:
     """
@@ -68,7 +73,7 @@ class DnsManager:
         target = zone[:-1] if zone.endswith(".") else zone
         client = self._dns()
         compartment_id = self._session_factory.region_config.compartment_id
-        response = oci.pagination.list_call_get_all_results(client.list_zones, compartment_id=compartment_id)
+        response = list_call_get_all_results(client.list_zones, compartment_id=compartment_id)
         for entry in response.data:
             if getattr(entry, "name", "") == target:
                 rtnval = target
@@ -90,20 +95,19 @@ class DnsManager:
 
             :returns: A ProvisionedResource describing the record.
         """
-        import oci
 
         zone_name = self._zone_name(zone=desired.zone)
         client = self._dns()
 
         records: List[Any] = []
         for value in desired.values:
-            records.append(oci.dns.models.RecordDetails(
+            records.append(ocimodels.RecordDetails(
                 domain=desired.name,
                 rtype=desired.record_type,
                 ttl=desired.ttl_seconds,
                 rdata=value,
             ))
-        rrset_details = oci.dns.models.UpdateRRSetDetails(items=records)
+        rrset_details = ocimodels.UpdateRRSetDetails(items=records)
         client.update_rr_set(
             zone_name_or_id=zone_name,
             domain=desired.name,

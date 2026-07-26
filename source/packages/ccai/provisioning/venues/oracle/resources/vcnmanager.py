@@ -10,6 +10,12 @@ __author__ = "Myron Walker"
 __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
+from ccai.restclient.oracle import ocimodels
+
+from ccai.restclient.oracle.ocipagination import (
+    list_call_get_all_results
+)
+
 
 from typing import Any, Dict, List, Optional
 
@@ -29,7 +35,6 @@ from ccai.provisioning.venues.oracle.ocitagging import (
 
 
 
-import oci
 
 class VcnManager:
     """
@@ -71,7 +76,7 @@ class VcnManager:
         """
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
-        response = oci.pagination.list_call_get_all_results(client.list_vcns, compartment_id=compartment_id)
+        response = list_call_get_all_results(client.list_vcns, compartment_id=compartment_id)
         for vcn in response.data:
             if matches_resource(entity=vcn, run_id=run_id,
                                 resource_name=name):
@@ -106,7 +111,6 @@ class VcnManager:
 
             :returns: A ProvisionedResource describing the VCN.
         """
-        import oci
 
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
@@ -118,7 +122,7 @@ class VcnManager:
                 resource_kind=self.KIND, extra=dict(desired.tags),
                 defaults=default_tags,
             )
-            details = oci.core.models.CreateVcnDetails(
+            details = ocimodels.CreateVcnDetails(
                 compartment_id=compartment_id,
                 cidr_block=desired.cidr,
                 display_name="codecraftai-{}-{}".format(run_id, desired.name),
@@ -155,7 +159,7 @@ class VcnManager:
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         deleted: List[str] = []
-        response = oci.pagination.list_call_get_all_results(client.list_vcns, compartment_id=compartment_id)
+        response = list_call_get_all_results(client.list_vcns, compartment_id=compartment_id)
         for vcn in response.data:
             if not belongs_to_run(entity=vcn, run_id=run_id):
                 continue
@@ -179,7 +183,7 @@ class VcnManager:
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         out: List[ProvisionedResource] = []
-        response = oci.pagination.list_call_get_all_results(client.list_vcns, compartment_id=compartment_id)
+        response = list_call_get_all_results(client.list_vcns, compartment_id=compartment_id)
         for vcn in response.data:
             if not belongs_to_run(entity=vcn, run_id=run_id):
                 continue

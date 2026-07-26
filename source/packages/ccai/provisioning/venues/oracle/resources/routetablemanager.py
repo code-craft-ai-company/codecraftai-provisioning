@@ -10,6 +10,12 @@ __author__ = "Myron Walker"
 __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
+from ccai.restclient.oracle import ocimodels
+
+from ccai.restclient.oracle.ocipagination import (
+    list_call_get_all_results
+)
+
 
 from typing import Any, Dict, List
 
@@ -25,7 +31,6 @@ from ccai.provisioning.venues.oracle.ocitagging import (
 
 
 
-import oci
 
 class RouteTableManager:
     """
@@ -71,13 +76,12 @@ class RouteTableManager:
 
             :returns: The route table OCID.
         """
-        import oci
 
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         rt_name = "{}-public-rt".format(network_name)
 
-        response = oci.pagination.list_call_get_all_results(
+        response = list_call_get_all_results(
             client.list_route_tables,
             compartment_id=compartment_id, vcn_id=vcn_id
         )
@@ -91,12 +95,12 @@ class RouteTableManager:
             run_id=run_id, resource_name=rt_name,
             resource_kind=self.KIND, defaults=default_tags,
         )
-        route_rule = oci.core.models.RouteRule(
+        route_rule = ocimodels.RouteRule(
             destination="0.0.0.0/0",
             destination_type="CIDR_BLOCK",
             network_entity_id=igw_id,
         )
-        details = oci.core.models.CreateRouteTableDetails(
+        details = ocimodels.CreateRouteTableDetails(
             compartment_id=compartment_id,
             vcn_id=vcn_id,
             route_rules=[route_rule],
@@ -121,7 +125,7 @@ class RouteTableManager:
         client = self._vn()
         compartment_id = self._session_factory.region_config.compartment_id
         deleted: List[str] = []
-        response = oci.pagination.list_call_get_all_results(client.list_route_tables, compartment_id=compartment_id)
+        response = list_call_get_all_results(client.list_route_tables, compartment_id=compartment_id)
         for table in response.data:
             if not belongs_to_run(entity=table, run_id=run_id):
                 continue

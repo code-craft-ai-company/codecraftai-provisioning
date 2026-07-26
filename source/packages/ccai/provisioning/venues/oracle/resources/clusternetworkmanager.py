@@ -11,6 +11,12 @@ __author__ = "Myron Walker"
 __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
+from ccai.restclient.oracle import ocimodels
+
+from ccai.restclient.oracle.ocipagination import (
+    list_call_get_all_results
+)
+
 
 from typing import Any, Dict, List, Optional
 
@@ -26,7 +32,6 @@ from ccai.provisioning.venues.oracle.ocitagging import (
 
 
 
-import oci
 
 class ClusterNetworkManager:
     """
@@ -73,7 +78,7 @@ class ClusterNetworkManager:
         client = self._cm()
         compartment_id = self._session_factory.region_config.compartment_id
         cn_name = "{}-cn".format(group_name)
-        response = oci.pagination.list_call_get_all_results(
+        response = list_call_get_all_results(
             client.list_cluster_networks,
             compartment_id=compartment_id
         )
@@ -106,7 +111,6 @@ class ClusterNetworkManager:
 
             :returns: A dict ``{"cluster_network_id", "existed"}``.
         """
-        import oci
 
         client = self._cm()
         compartment_id = self._session_factory.region_config.compartment_id
@@ -130,7 +134,7 @@ class ClusterNetworkManager:
         # InstanceConfiguration resource by OCID.  The shape, image and
         # placement are captured on that configuration; the cluster network
         # only carries the pool size and AD placement.
-        placement = oci.core.models.ClusterNetworkPlacementConfigurationDetails(
+        placement = ocimodels.ClusterNetworkPlacementConfigurationDetails(
             availability_domain=availability_domain,
             primary_subnet_id=subnet_id,
         )
@@ -138,12 +142,12 @@ class ClusterNetworkManager:
             run_id=run_id, group_name=group_name, shape=shape,
             image_id=image_id, subnet_id=subnet_id, freeform=freeform,
         )
-        pool_details = oci.core.models.CreateClusterNetworkInstancePoolDetails(
+        pool_details = ocimodels.CreateClusterNetworkInstancePoolDetails(
             instance_configuration_id=instance_config_id,
             size=member_count,
             display_name="codecraftai-{}-{}-pool".format(run_id, cn_name),
         )
-        create_details = oci.core.models.CreateClusterNetworkDetails(
+        create_details = ocimodels.CreateClusterNetworkDetails(
             compartment_id=compartment_id,
             display_name="codecraftai-{}-{}".format(run_id, cn_name),
             instance_pools=[pool_details],
@@ -176,29 +180,28 @@ class ClusterNetworkManager:
 
             :returns: The InstanceConfiguration OCID.
         """
-        import oci
 
         client = self._cm()
         compartment_id = self._session_factory.region_config.compartment_id
         cfg_name = "{}-cn-config".format(group_name)
 
-        vnic = oci.core.models.InstanceConfigurationCreateVnicDetails(
+        vnic = ocimodels.InstanceConfigurationCreateVnicDetails(
             subnet_id=subnet_id
         )
-        source = oci.core.models.InstanceConfigurationInstanceSourceViaImageDetails(
+        source = ocimodels.InstanceConfigurationInstanceSourceViaImageDetails(
             image_id=image_id
         )
-        launch = oci.core.models.InstanceConfigurationLaunchInstanceDetails(
+        launch = ocimodels.InstanceConfigurationLaunchInstanceDetails(
             compartment_id=compartment_id,
             shape=shape,
             create_vnic_details=vnic,
             source_details=source,
             display_name="codecraftai-{}-{}".format(run_id, cfg_name),
         )
-        instance_details = oci.core.models.ComputeInstanceDetails(
+        instance_details = ocimodels.ComputeInstanceDetails(
             launch_details=launch
         )
-        config_details = oci.core.models.CreateInstanceConfigurationDetails(
+        config_details = ocimodels.CreateInstanceConfigurationDetails(
             compartment_id=compartment_id,
             display_name="codecraftai-{}-{}".format(run_id, cfg_name),
             instance_details=instance_details,
@@ -222,7 +225,7 @@ class ClusterNetworkManager:
         client = self._cm()
         compartment_id = self._session_factory.region_config.compartment_id
         deleted: List[str] = []
-        response = oci.pagination.list_call_get_all_results(
+        response = list_call_get_all_results(
             client.list_cluster_networks,
             compartment_id=compartment_id
         )
