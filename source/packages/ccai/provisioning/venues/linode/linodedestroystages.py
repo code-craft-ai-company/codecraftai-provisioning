@@ -51,7 +51,7 @@ class LinodeDestroyStages:
         """
             Construct a LinodeDestroyStages.
 
-            :param client: A ``linode_api4.LinodeClient``-compatible object.
+            :param client: A :class:`LinodeRestClient`-compatible object.
             :param reader: A LinodeReader.
             :param vpn_control_plane: Optional IVPNControlPlane impl.
         """

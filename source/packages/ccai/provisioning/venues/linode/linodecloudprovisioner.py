@@ -75,7 +75,7 @@ class LinodeCloudProvisioner(CloudProvisioner):
     """
         Linode-venue concrete :class:`CloudProvisioner` implementation.
 
-        Realises the neutral resource model on Linode via the ``linode_api4``
+        Realises the neutral resource model on Linode via the pure-Python
         SDK used directly by this venue (no separate interop package).  The
         five-verb lifecycle composes the resolver, tag translator, reader,
         plan builder, apply / destroy stages, and inventory enumerator.
@@ -98,7 +98,7 @@ class LinodeCloudProvisioner(CloudProvisioner):
             :param spec: Optional LinodeSpec.
             :param vpn_control_plane: Optional IVPNControlPlane impl; destroy
                                       uses this to de-register VPN devices.
-            :param client: Optional pre-built (or mock) ``linode_api4``
+            :param client: Optional pre-built (or mock) Linode REST
                            client; injected for tests.
         """
         super().__init__(venue=venue, spec=spec)

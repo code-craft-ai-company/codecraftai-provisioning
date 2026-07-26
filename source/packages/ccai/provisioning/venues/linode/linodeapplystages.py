@@ -13,7 +13,6 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import base64
 import os
 
 from typing import Any, Dict, List, Optional
@@ -75,7 +74,7 @@ class LinodeApplyStages:
         """
             Construct a LinodeApplyStages.
 
-            :param client: A ``linode_api4.LinodeClient``-compatible object.
+            :param client: A :class:`LinodeRestClient`-compatible object.
             :param reader: A LinodeReader.
             :param resolver: A LinodeResolver.
             :param translator: A LinodeTagTranslator.
@@ -303,13 +302,15 @@ class LinodeApplyStages:
                     firewall_id = getattr(fw_handle, "id", None)
                     break
 
-            # Linode's Metadata service requires user_data to be base64-encoded.
+            # Linode's Metadata service requires user_data to be
+            # base64-encoded, and the renderer ALREADY returns it encoded
+            # (both render and render_raw document a base64 return). Encoding
+            # here as well produced doubly-encoded user_data: cloud-init
+            # received base64 text instead of a cloud-config document and the
+            # guest bootstrap silently did nothing.
             metadata: Dict[str, Any] = {}
             if metadata_user_data is not None:
-                encoded_user_data = base64.b64encode(
-                    metadata_user_data.encode("utf-8")
-                ).decode("ascii")
-                metadata["user_data"] = encoded_user_data
+                metadata["user_data"] = metadata_user_data
 
             # instance_create lives on the linode group (LinodeGroup), not the
             # client.

@@ -39,7 +39,7 @@ class LinodeInventory:
         """
             Construct a LinodeInventory.
 
-            :param client: A ``linode_api4.LinodeClient``-compatible object.
+            :param client: A :class:`LinodeRestClient`-compatible object.
             :param reader: A LinodeReader.
             :param translator: A LinodeTagTranslator.
         """
@@ -48,12 +48,40 @@ class LinodeInventory:
         self._translator: LinodeTagTranslator = translator
         return
 
+    def _name_from_label(self, *, obj: Any) -> str:
+        """
+            Recover a resource's neutral name from its venue-scoped label.
+
+            Linode VPCs carry NO tags, so the tag-derived name is always
+            absent for them and ProvisionedResource rejects the empty
+            result.  Apply names them ``codecraftai-<run_id>-<name>``, and
+            the reader matches ownership on that prefix, so the neutral name
+            is what follows it — the same convention, read backwards.
+
+            :param obj: The Linode object.
+
+            :returns: The neutral name, or an empty string when the label
+                does not carry one.
+        """
+        label = getattr(obj, "label", None)
+        if label is None:
+            rtnval = ""
+            return rtnval
+
+        prefix = self._reader.owned_prefix()
+        if label.startswith(prefix) is True:
+            rtnval = label[len(prefix):]
+            return rtnval
+
+        rtnval = ""
+        return rtnval
+
     def _record_for(self, *, kind: str, obj: Any) -> ProvisionedResource:
         """
             Build a ProvisionedResource for an owned Linode object.
 
             :param kind: The neutral resource kind.
-            :param obj: The Linode SDK object.
+            :param obj: The Linode object.
 
             :returns: A ProvisionedResource.
         """
@@ -61,6 +89,9 @@ class LinodeInventory:
         tag_list = list(tags) if tags is not None else []
         name = self._translator.resource_name_of(strings=tag_list)
         effective_name = name if name is not None else ""
+        if len(effective_name) == 0:
+            # Untagged kinds (VPCs) carry their name in the label instead.
+            effective_name = self._name_from_label(obj=obj)
         venue_id = str(getattr(obj, "id", ""))
         rtnval = ProvisionedResource(
             kind=kind, name=effective_name, venue_id=venue_id,

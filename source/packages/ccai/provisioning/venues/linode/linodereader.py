@@ -2,7 +2,7 @@
     .. module:: linodereader
     :platform: Darwin, Linux, Unix, Windows
     :synopsis: LinodeReader — tag-filtered read-only lookups against the
-               ``linode_api4`` client surface.
+               Linode REST client surface.
 
     .. moduleauthor:: Myron Walker <myron.walker@gmail.com>
 """
@@ -40,7 +40,7 @@ class LinodeReader:
         Read-only lookup helper for the Linode venue.
 
         Every ``find_*`` method enumerates the matching resource collection
-        on the ``linode_api4`` client and matches ownership.  Instances,
+        on the Linode REST client and matches ownership.  Instances,
         firewalls, and volumes carry the venue owner + run-id tags directly.
         VPCs, SSH keys, and Object Storage buckets carry no tags on Linode, so
         they are matched by the venue-scoped label
@@ -52,7 +52,7 @@ class LinodeReader:
         """
             Construct a LinodeReader.
 
-            :param client: A ``linode_api4.LinodeClient``-compatible object.
+            :param client: A :class:`LinodeRestClient`-compatible object.
             :param run_id: The provisioning run identifier.
             :param translator: A LinodeTagTranslator.
         """
@@ -121,6 +121,18 @@ class LinodeReader:
             :returns: The ``codecraftai-<run_id>-`` prefix string.
         """
         rtnval = "codecraftai-{}-".format(self._run_id)
+        return rtnval
+
+    def owned_prefix(self) -> str:
+        """
+            Return the venue-scoped label prefix for this run.
+
+            Exposed because inventory recovers the neutral name of untagged
+            kinds by stripping this prefix from their label.
+
+            :returns: The ``codecraftai-<run_id>-`` prefix string.
+        """
+        rtnval = self._owned_vpc_prefix()
         return rtnval
 
     def owned_vpcs(self) -> List[Any]:

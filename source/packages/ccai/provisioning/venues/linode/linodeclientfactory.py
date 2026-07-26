@@ -1,7 +1,7 @@
 """
     .. module:: linodeclientfactory
     :platform: Darwin, Linux, Unix, Windows
-    :synopsis: LinodeClientFactory — lazy ``linode_api4`` client builder.
+    :synopsis: LinodeClientFactory — lazy Linode REST client builder.
 
     .. moduleauthor:: Myron Walker <myron.walker@gmail.com>
 """
@@ -20,12 +20,13 @@ from ccai.credentials.linodeapitokencredential import (
 
 class LinodeClientFactory:
     """
-        Lazy factory that builds a ``linode_api4.LinodeClient`` from a
-        :class:`LinodeApiTokenCredential`.
+        Lazy factory that builds a
+        :class:`ccai.restclient.linode.linoderestclient.LinodeRestClient`
+        from a :class:`LinodeApiTokenCredential`.
 
-        The SDK is imported on first ``client()`` call so test processes can
-        construct the factory without ``linode_api4`` installed and inject a
-        mock client via :meth:`set_client`.
+        The client is built on first ``client()`` call, so tests can
+        construct the factory and inject a fake via :meth:`set_client`
+        without any network access.
     """
 
     def __init__(self, *, credential: LinodeApiTokenCredential) -> None:
@@ -42,7 +43,7 @@ class LinodeClientFactory:
         """
             Inject a pre-built (or mock) client, bypassing SDK construction.
 
-            :param client: A ``linode_api4.LinodeClient``-compatible object.
+            :param client: A :class:`LinodeRestClient`-compatible object.
         """
         self._client = client
         return
@@ -51,14 +52,16 @@ class LinodeClientFactory:
         """
             Return the cached client, building it on first call.
 
-            :returns: A ``linode_api4.LinodeClient`` instance.
+            :returns: A :class:`LinodeRestClient` instance.
         """
         if self._client is not None:
             rtnval = self._client
             return rtnval
 
-        from linode_api4 import LinodeClient
-        built = LinodeClient(self._credential.token)
+        from ccai.restclient.linode.linoderestclient import (
+            LinodeRestClient
+        )
+        built = LinodeRestClient(token=self._credential.token)
         self._client = built
 
         rtnval = self._client
