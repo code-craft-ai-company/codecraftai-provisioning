@@ -43,7 +43,7 @@ from ccai.provisioning.model.cloud.provisioningresult import (
     ProvisioningResult
 )
 from ccai.provisioning.model.cloud.validationresult import ValidationResult
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 from ccai.provisioning.venues.crusoe.crusoeerrors import (
     ConfirmationRequiredError, CrusoeValidationError

@@ -20,9 +20,8 @@ import yaml
 
 from ccai.errors.exceptions import ConfigurationError
 
-from ccai.provisioning.model.exceptions import (
-    SchemaSemanticError, SchemaValidationError
-)
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
 from ccai.provisioning.model.cloud.cloudinstancesizecatalogentry import (
     CloudInstanceSizeCatalogEntry
 )

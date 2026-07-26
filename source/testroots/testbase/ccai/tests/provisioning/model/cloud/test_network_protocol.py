@@ -13,7 +13,7 @@ __credits__ = []
 
 import unittest
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.model.cloud.networkprotocol import NetworkProtocol
 from ccai.provisioning.model.cloud.cloudingressrule import (
     CloudIngressRule, coerce_network_protocol

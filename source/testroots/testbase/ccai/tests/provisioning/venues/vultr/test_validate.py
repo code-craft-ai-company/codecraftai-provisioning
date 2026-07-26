@@ -19,7 +19,7 @@ from hypothesis import strategies as st
 from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.interfaces.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
 from ccai.provisioning.venues.vultr.vultrerrors import (

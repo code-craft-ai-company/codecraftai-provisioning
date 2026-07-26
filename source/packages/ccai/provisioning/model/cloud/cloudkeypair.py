@@ -11,11 +11,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-from ccai.restclient.base.schemaobject import SchemaObject
-from ccai.restclient.base.schemafield import Field
+from ccai.interfaces.schemaobject import SchemaObject
+from ccai.interfaces.schemafield import Field
 
-from ccai.provisioning.model.exceptions import SchemaValidationError
-from ccai.provisioning.model.cloud.validators import validate_name
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
+from ccai.interfaces.schemavalidators import validate_name
 
 
 class CloudKeyPair(SchemaObject):

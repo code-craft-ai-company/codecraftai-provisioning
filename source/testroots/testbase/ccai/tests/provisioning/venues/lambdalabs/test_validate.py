@@ -13,7 +13,7 @@ __credits__ = []
 
 import pytest
 
-from ccai.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
 from ccai.provisioning.model.cloud.cloudnetwork import CloudNetwork

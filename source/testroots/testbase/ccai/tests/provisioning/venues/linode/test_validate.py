@@ -16,7 +16,7 @@ import pytest
 from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.interfaces.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
 from ccai.provisioning.venues.linode.linodecloudprovisioner import (
@@ -108,7 +108,7 @@ def test_validate_rejects_unknown_image(venue, credential, region_config,
     """
     from ccai.provisioning.model.cloud.cloudimage import CloudImage
     from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
-    from ccai.provisioning.model.exceptions import SchemaSemanticError
+    from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
     spec = basic_spec()
     bad_image = CloudImage(family="windows-server", version="2022",

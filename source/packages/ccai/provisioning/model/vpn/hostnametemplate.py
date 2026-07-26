@@ -16,7 +16,7 @@ import re
 
 from typing import Any, Dict, List
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 
 _TOKEN_RE = re.compile(r"\{([a-zA-Z_][a-zA-Z0-9_]*)\}")

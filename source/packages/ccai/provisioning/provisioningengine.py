@@ -39,9 +39,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import yaml
 
-from ccai.provisioning.model.exceptions import (
-    SchemaSemanticError, SchemaValidationError
-)
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
 from ccai.provisioning.model.cloud.cloudprovisioner import CloudProvisioner
 from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
 from ccai.provisioning.model.cloud.provisioningplan import ProvisioningPlan

@@ -17,7 +17,7 @@ import unittest
 from pathlib import Path
 from typing import Any, Dict, List
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.model.cloud.cloudprovisioner import CloudProvisioner
 from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
 from ccai.provisioning.model.cloud.provisionedresource import (

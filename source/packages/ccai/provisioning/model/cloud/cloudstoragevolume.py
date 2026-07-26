@@ -15,12 +15,12 @@ import os
 
 from typing import Dict, Optional, Union
 
-from ccai.restclient.base.schemaobject import SchemaObject
-from ccai.restclient.base.schemafield import Field
+from ccai.interfaces.schemaobject import SchemaObject
+from ccai.interfaces.schemafield import Field
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.model.cloud.storageclass import StorageClass
-from ccai.provisioning.model.cloud.validators import (
+from ccai.interfaces.schemavalidators import (
     validate_name, validate_positive_int
 )
 

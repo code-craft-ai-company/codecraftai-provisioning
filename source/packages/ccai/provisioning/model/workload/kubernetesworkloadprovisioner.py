@@ -16,7 +16,7 @@ import os
 
 from typing import Any, List, Optional
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.model.cloud.cloudacceleratorcatalog import (
     CloudAcceleratorCatalog
 )
@@ -37,7 +37,7 @@ from ccai.provisioning.model.workload.workloadprovisioner import (
 )
 from ccai.provisioning.model.workload.workloadspec import WorkloadSpec
 from ccai.provisioning.model.workload.workloadvenue import WorkloadVenue
-from ccai.provisioning.model.workload.workloadvenuekind import (
+from ccai.interfaces.workloadvenuekind import (
     WorkloadVenueKind
 )
 

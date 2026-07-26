@@ -14,9 +14,8 @@ __credits__ = []
 import unittest
 
 from ccai.errors.exceptions import SemanticError
-from ccai.provisioning.model.exceptions import (
-    SchemaSemanticError, SchemaValidationError
-)
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
 
 
 class SchemaSemanticErrorHierarchyTests(unittest.TestCase):

@@ -16,9 +16,8 @@ import unittest
 
 from hypothesis import given, settings, strategies as st
 
-from ccai.provisioning.model.exceptions import (
-    SchemaValidationError, SchemaSemanticError
-)
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
 from ccai.provisioning.model.cloud.cloudnetwork import CloudNetwork
 from ccai.provisioning.model.cloud.cloudsubnet import CloudSubnet
@@ -41,10 +40,10 @@ from ccai.provisioning.model.cloud.cloudresourceprofile import (
     CloudResourceProfile, resolve_kind, model_class_for_kind
 )
 from ccai.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
-from ccai.provisioning.model.cloud.validators import (
+from ccai.interfaces.schemavalidators import (
     cidrs_overlap, subnet_contained_in_network
 )
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 
 
 def _basic_image() -> CloudImage:

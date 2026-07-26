@@ -15,10 +15,10 @@ import os
 
 from typing import Any, Dict, Optional, Type, Union
 
-from ccai.restclient.base.schemaobject import SchemaObject
-from ccai.restclient.base.schemafield import Field
+from ccai.interfaces.schemaobject import SchemaObject
+from ccai.interfaces.schemafield import Field
 
-from ccai.provisioning.model.exceptions import SchemaValidationError
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
 from ccai.provisioning.model.cloud.cloudresourcekind import CloudResourceKind
 from ccai.provisioning.model.cloud.cloudnetwork import CloudNetwork
 from ccai.provisioning.model.cloud.cloudsubnet import CloudSubnet

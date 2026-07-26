@@ -16,16 +16,16 @@ import base64
 
 import pytest
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
-from ccai.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
 from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
 from ccai.provisioning.model.cloud.clouddnsrecord import CloudDnsRecord
-from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.interfaces.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
 from ccai.provisioning.model.cloud.plannedactionintent import (

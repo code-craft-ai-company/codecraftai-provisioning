@@ -15,15 +15,15 @@ import os
 
 from typing import List, Optional, Union
 
-from ccai.restclient.base.schemaobject import SchemaObject
-from ccai.restclient.base.schemafield import Field
+from ccai.interfaces.schemaobject import SchemaObject
+from ccai.interfaces.schemafield import Field
 
-from ccai.provisioning.model.exceptions import SchemaValidationError
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
 from ccai.provisioning.model.cloud.networkprotocol import NetworkProtocol
 from ccai.provisioning.model.cloud.cloudingressrule import (
     coerce_network_protocol
 )
-from ccai.provisioning.model.cloud.validators import (
+from ccai.interfaces.schemavalidators import (
     validate_cidr, validate_port_range
 )
 

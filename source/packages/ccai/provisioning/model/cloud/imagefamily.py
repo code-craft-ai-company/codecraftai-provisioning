@@ -18,7 +18,7 @@ import re
 from enum import Enum
 from typing import Dict, Union
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 
 class ImageFamily(str, Enum):

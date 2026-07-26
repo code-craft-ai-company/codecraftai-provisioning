@@ -13,8 +13,8 @@ __credits__ = []
 
 from typing import Optional
 
-from ccai.restclient.base.schemaobject import SchemaObject
-from ccai.restclient.base.schemafield import Field
+from ccai.interfaces.schemaobject import SchemaObject
+from ccai.interfaces.schemafield import Field
 
 
 class DeviceAddressSet(SchemaObject):

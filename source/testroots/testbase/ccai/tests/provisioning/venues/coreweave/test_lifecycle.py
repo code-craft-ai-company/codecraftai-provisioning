@@ -22,7 +22,7 @@ from ccai.provisioning.venues.coreweave.cwerrors import (
     ConfirmationRequiredError, CwValidationError
 )
 
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 
 from .testsupport import (
     FakeNodePool, MockCoreweaveClient, MockKubernetesClient,

@@ -27,7 +27,7 @@ from ccai.provisioning.model.cloud.cloudobjectbucket import (
 from ccai.provisioning.model.cloud.cloudstoragevolume import (
     CloudStorageVolume
 )
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 
 from ccai.provisioning.venues.libvirt.libvirtspec import LibvirtSpec
 from ccai.provisioning.venues.libvirt.libvirtvenueconfig import (

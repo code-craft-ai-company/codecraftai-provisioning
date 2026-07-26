@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import yaml
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.state.atomicwrite import write_tmp_then_rename
 from ccai.provisioning.state.crossplatformlock import cross_platform_lock
 from ccai.provisioning.state.redactforpersistence import (

@@ -13,11 +13,11 @@ __credits__ = []
 
 from typing import Any, Dict, Optional
 
-from ccai.restclient.base.schemaobject import SchemaObject
-from ccai.restclient.base.schemafield import Field
+from ccai.interfaces.schemaobject import SchemaObject
+from ccai.interfaces.schemafield import Field
 
 from ccai.provisioning.model.cloud.deviceaddressset import DeviceAddressSet
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 
 
 class CloudDevice(SchemaObject):

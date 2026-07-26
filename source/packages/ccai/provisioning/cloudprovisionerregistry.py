@@ -15,7 +15,7 @@ import os
 
 from typing import Dict, List, Optional
 
-from ccai.provisioning.model.exceptions import SchemaValidationError
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
 from ccai.provisioning.model.cloud.cloudprovisioner import CloudProvisioner
 
 

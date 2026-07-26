@@ -14,7 +14,7 @@ __credits__ = []
 
 from typing import Any, Dict, List, Optional
 
-from ccai.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
 from ccai.provisioning.model.workload.workloadjob import WorkloadJob

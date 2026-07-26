@@ -14,7 +14,7 @@ __credits__ = []
 
 import unittest
 
-from ccai.provisioning.model.exceptions import SchemaValidationError
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
 from ccai.provisioning.model.cloud.plannedaction import PlannedAction
 from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent

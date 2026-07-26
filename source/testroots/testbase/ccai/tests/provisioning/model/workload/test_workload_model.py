@@ -13,9 +13,9 @@ __credits__ = []
 
 import unittest
 
-from ccai.provisioning.model.exceptions import SchemaValidationError
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
 from ccai.provisioning.model.workload.workloadvenue import WorkloadVenue
-from ccai.provisioning.model.workload.workloadvenuekind import (
+from ccai.interfaces.workloadvenuekind import (
     WorkloadVenueKind
 )
 from ccai.provisioning.model.workload.nodepoolspec import NodePoolSpec

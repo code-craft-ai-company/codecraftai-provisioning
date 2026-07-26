@@ -13,9 +13,9 @@ __credits__ = []
 
 import pytest
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
-from ccai.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
 from ccai.provisioning.model.cloud.plannedactionintent import (

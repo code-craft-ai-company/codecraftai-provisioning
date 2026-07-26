@@ -180,7 +180,7 @@ def test_gpu_sku_resolution_maps_accelerator_to_slug():
         The resolver maps the H100_SXM neutral name to the Lambda Labs
         ``gpu_8x_h100_sxm5`` slug.
     """
-    from ccai.provisioning.model.cloud.cloudacceleratorspec import (
+    from ccai.interfaces.cloudacceleratorspec import (
         CloudAcceleratorSpec
     )
     from ccai.provisioning.venues.lambdalabs.llresolver import LlResolver

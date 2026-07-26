@@ -13,11 +13,11 @@ __credits__ = []
 
 from typing import Dict
 
-from ccai.restclient.base.schemaobject import SchemaObject
-from ccai.restclient.base.schemafield import Field
+from ccai.interfaces.schemaobject import SchemaObject
+from ccai.interfaces.schemafield import Field
 
-from ccai.provisioning.model.exceptions import SchemaValidationError
-from ccai.provisioning.model.cloud.validators import validate_positive_int
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
+from ccai.interfaces.schemavalidators import validate_positive_int
 
 
 _SUPPORTED_FAMILIES = ("general", "compute", "memory")

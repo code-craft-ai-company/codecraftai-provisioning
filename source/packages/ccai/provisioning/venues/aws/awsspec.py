@@ -26,7 +26,7 @@ from ccai.provisioning.model.cloud.cloudobjectbucket import (
 from ccai.provisioning.model.cloud.cloudsecuritygroup import (
     CloudSecurityGroup
 )
-from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.interfaces.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
 from ccai.provisioning.model.cloud.cloudstoragevolume import (

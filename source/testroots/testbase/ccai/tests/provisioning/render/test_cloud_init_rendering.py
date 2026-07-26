@@ -17,7 +17,7 @@ import unittest
 
 import yaml
 
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 from ccai.provisioning.cloudinit.cloudinitrenderererror import (
     CloudInitRendererError
 )

@@ -20,7 +20,7 @@ from ccai.provisioning.model.cloud.cloudinterconnect import (
 from ccai.provisioning.model.cloud.cloudsecuritygroup import (
     CloudSecurityGroup
 )
-from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.interfaces.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
 from ccai.provisioning.venues.libvirt.libvirtcloudprovisioner import (

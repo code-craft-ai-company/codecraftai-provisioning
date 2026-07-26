@@ -26,7 +26,7 @@ from ccai.provisioning.model.cloud.cloudnetwork import CloudNetwork
 from ccai.provisioning.model.cloud.cloudobjectbucket import (
     CloudObjectBucket
 )
-from ccai.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
 from ccai.provisioning.model.cloud.cloudsecuritygroup import (
@@ -37,7 +37,7 @@ from ccai.provisioning.model.cloud.cloudstoragevolume import (
 )
 from ccai.provisioning.model.cloud.cloudsubnet import CloudSubnet
 from ccai.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 from ccai.provisioning.venues.aws.awsspec import AwsSpec
 
 

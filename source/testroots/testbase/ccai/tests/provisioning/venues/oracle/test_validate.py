@@ -15,13 +15,13 @@ __credits__ = []
 import pytest
 
 from ccai.credentials.basecredential import BaseCredential
-from ccai.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
 from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.interfaces.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
 from ccai.provisioning.venues.oracle.ocierrors import OciValidationError

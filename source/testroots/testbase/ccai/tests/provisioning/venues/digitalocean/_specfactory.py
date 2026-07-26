@@ -30,7 +30,7 @@ from ccai.provisioning.model.cloud.cloudsecuritygroup import (
 from ccai.provisioning.model.cloud.cloudstoragevolume import (
     CloudStorageVolume
 )
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 from ccai.provisioning.venues.digitalocean.dospec import DoSpec
 
 

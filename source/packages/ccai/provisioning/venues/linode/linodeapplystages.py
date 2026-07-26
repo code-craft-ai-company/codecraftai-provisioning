@@ -18,7 +18,7 @@ import os
 
 from typing import Any, Dict, List, Optional
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 from ccai.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource

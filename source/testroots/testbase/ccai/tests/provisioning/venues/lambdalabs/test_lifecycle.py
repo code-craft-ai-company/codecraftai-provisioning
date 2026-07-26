@@ -17,7 +17,7 @@ import os
 
 import pytest
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 from ccai.provisioning.venues.lambdalabs.lambdalabscloudprovisioner import (
     LambdalabsCloudProvisioner

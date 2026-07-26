@@ -15,7 +15,7 @@ import os
 
 from typing import Any, Dict, List, Set, Tuple
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 
 # Per-kind preferred stage ordering used as the primary sort key in Kahn's

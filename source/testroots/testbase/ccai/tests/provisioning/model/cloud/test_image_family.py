@@ -14,7 +14,7 @@ __credits__ = []
 
 import unittest
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.model.cloud.imagefamily import (
     ImageArchitecture,
     ImageFamily,

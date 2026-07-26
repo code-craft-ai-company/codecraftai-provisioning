@@ -15,7 +15,7 @@ import base64
 
 import pytest
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st

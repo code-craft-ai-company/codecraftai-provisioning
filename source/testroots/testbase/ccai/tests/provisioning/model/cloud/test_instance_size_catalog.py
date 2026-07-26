@@ -19,7 +19,7 @@ from hypothesis import given, settings, strategies as st
 
 from ccai.errors.exceptions import ConfigurationError
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.model.cloud.cloudinstancesizecatalog import (
     CloudInstanceSizeCatalog, default_instance_size_catalog,
     reset_default_instance_size_catalog

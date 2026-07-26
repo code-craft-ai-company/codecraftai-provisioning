@@ -16,21 +16,20 @@ import warnings
 
 from typing import Any, Dict, List, Optional, Union
 
-from ccai.restclient.base.schemaobject import SchemaObject
-from ccai.restclient.base.schemafield import Field
+from ccai.interfaces.schemaobject import SchemaObject
+from ccai.interfaces.schemafield import Field
 
-from ccai.provisioning.model.exceptions import (
-    SchemaValidationError, SchemaSemanticError
-)
-from ccai.provisioning.model.cloud.validators import validate_name
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.interfaces.schemavalidators import validate_name
 from ccai.provisioning.model.cloud.cloudimage import CloudImage
-from ccai.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
 from ccai.provisioning.model.cloud.cloudinterconnect import CloudInterconnect
-from ccai.provisioning.model.cloud.sharedfsmountspec import SharedFsMountSpec
+from ccai.interfaces.sharedfsmountspec import SharedFsMountSpec
 from ccai.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 
 
 _TRAINING_FABRIC_KINDS = (

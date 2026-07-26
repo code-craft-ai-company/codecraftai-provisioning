@@ -16,7 +16,7 @@ import base64
 
 import pytest
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 from hypothesis import given, HealthCheck, settings
 from hypothesis import strategies as st
@@ -24,7 +24,7 @@ from hypothesis import strategies as st
 from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
-from ccai.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
 from ccai.provisioning.model.cloud.plannedactionintent import (

@@ -16,12 +16,12 @@ import os
 from abc import ABC, abstractmethod
 from typing import Any, List, Optional
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.model.cloud.cloudacceleratorcatalog import (
     CloudAcceleratorCatalog, default_accelerator_catalog
 )
 from ccai.provisioning.model.workload.workloadvenue import WorkloadVenue
-from ccai.provisioning.model.workload.workloadvenuekind import (
+from ccai.interfaces.workloadvenuekind import (
     WorkloadVenueKind
 )
 

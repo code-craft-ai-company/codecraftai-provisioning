@@ -17,7 +17,7 @@ import logging
 from typing import Any, List
 
 from ccai.errors.exceptions import SemanticError
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 
 logger = logging.getLogger(__name__)

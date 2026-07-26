@@ -21,7 +21,7 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from ccai.restclient.runpod.enums.runpodcloudtype import RunpodCloudType
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 
 from ccai.provisioning.venues.runpod.rpapplystages import RpApplyStages
 from ccai.provisioning.venues.runpod.rpcontainerstartrenderer import (

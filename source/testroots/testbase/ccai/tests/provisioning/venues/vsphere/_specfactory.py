@@ -21,7 +21,7 @@ from ccai.provisioning.model.cloud.cloudstoragevolume import (
     CloudStorageVolume
 )
 from ccai.provisioning.model.cloud.cloudsubnet import CloudSubnet
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 from ccai.provisioning.venues.vsphere.vspherespec import VSphereSpec
 
 

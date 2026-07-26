@@ -15,7 +15,7 @@ import os
 
 from typing import Any, Dict, List
 
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 from ccai.provisioning.cloudinit.cloudinitrenderererror import (
     CloudInitRendererError
 )

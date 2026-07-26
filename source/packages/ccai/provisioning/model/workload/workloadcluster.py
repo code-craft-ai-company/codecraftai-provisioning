@@ -13,10 +13,10 @@ __credits__ = []
 
 from typing import Any, Dict, List, Optional
 
-from ccai.restclient.base.schemaobject import SchemaObject
-from ccai.restclient.base.schemafield import Field
+from ccai.interfaces.schemaobject import SchemaObject
+from ccai.interfaces.schemafield import Field
 
-from ccai.provisioning.model.cloud.validators import validate_name
+from ccai.interfaces.schemavalidators import validate_name
 from ccai.provisioning.model.workload.nodepoolspec import NodePoolSpec
 from ccai.provisioning.model.workload.autoscalingspec import AutoscalingSpec
 

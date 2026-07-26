@@ -14,7 +14,7 @@ __credits__ = []
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
 from ccai.provisioning.model.cloud.plannedaction import PlannedAction
 from ccai.provisioning.model.cloud.plannedactionintent import (

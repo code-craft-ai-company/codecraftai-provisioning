@@ -19,7 +19,7 @@ from ccai.provisioning.model.cloud.cloudinstancesizecatalog import (
     CloudInstanceSizeCatalog
 )
 from ccai.provisioning.model.cloud.imagefamily import normalize_family
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 from ccai.provisioning.venues.hetzner.hetznererrors import (
     HetznerValidationError

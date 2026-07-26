@@ -39,7 +39,7 @@ from ccai.provisioning.model.cloud.provisioningresult import (
     ProvisioningResult
 )
 from ccai.provisioning.model.cloud.validationresult import ValidationResult
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.venues.vpncleanup import delete_vpn_device
 
 from ccai.provisioning.venues.azure.azureerrors import (

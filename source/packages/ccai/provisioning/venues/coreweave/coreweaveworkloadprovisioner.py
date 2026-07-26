@@ -39,7 +39,7 @@ from ccai.provisioning.model.workload.workloadprovisioner import (
     WorkloadProvisioner
 )
 from ccai.provisioning.model.workload.workloadvenue import WorkloadVenue
-from ccai.provisioning.model.workload.workloadvenuekind import (
+from ccai.interfaces.workloadvenuekind import (
     WorkloadVenueKind
 )
 

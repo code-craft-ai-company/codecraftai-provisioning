@@ -17,7 +17,7 @@ from ccai.provisioning.model.cloud.cloudimage import CloudImage
 from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.interfaces.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
 from ccai.provisioning.venues.proxmox.proxmoxcloudprovisioner import (

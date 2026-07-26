@@ -23,10 +23,10 @@ from ccai.provisioning.model.cloud.cloudloadbalancer import (
 from ccai.provisioning.model.cloud.cloudobjectbucket import (
     CloudObjectBucket
 )
-from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.interfaces.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
-from ccai.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
 from ccai.provisioning.venues.nebius.nebiuscloudprovisioner import (

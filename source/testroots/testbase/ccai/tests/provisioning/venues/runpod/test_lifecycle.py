@@ -17,7 +17,7 @@ import pytest
 from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 
 from ccai.provisioning.venues.runpod.rperrors import (
     ConfirmationRequiredError, RpCapacityError, RpValidationError
@@ -109,7 +109,7 @@ def test_validate_rejects_unmappable_gpu():
         A workload whose accelerator model has no RunPod GPU type mapping is
         rejected.
     """
-    from ccai.provisioning.model.cloud.cloudacceleratorspec import (
+    from ccai.interfaces.cloudacceleratorspec import (
         CloudAcceleratorSpec
     )
     from ccai.provisioning.model.workload.workloadjob import WorkloadJob

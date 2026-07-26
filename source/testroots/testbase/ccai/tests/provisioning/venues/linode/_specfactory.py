@@ -30,14 +30,14 @@ from ccai.provisioning.model.cloud.cloudobjectbucket import (
 from ccai.provisioning.model.cloud.cloudsecuritygroup import (
     CloudSecurityGroup
 )
-from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.interfaces.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
 from ccai.provisioning.model.cloud.cloudstoragevolume import (
     CloudStorageVolume
 )
 from ccai.provisioning.model.cloud.cloudsubnet import CloudSubnet
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 from ccai.provisioning.venues.linode.linodespec import LinodeSpec
 
 

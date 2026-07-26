@@ -16,9 +16,8 @@ import unittest
 
 from hypothesis import assume, given, settings, strategies as st
 
-from ccai.provisioning.model.exceptions import (
-    SchemaValidationError, SchemaSemanticError
-)
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.credentials.tailscaleoauthcredential import TailscaleOAuthCredential
 from ccai.credentials.tailscaleauthkeycredential import (
     TailscaleAuthKeyCredential
@@ -27,7 +26,7 @@ from ccai.credentials.twingateserviceaccountcredential import (
     TwingateServiceAccountCredential
 )
 
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 from ccai.provisioning.model.vpn.hostnametemplate import (
     render_hostname, render_hostnames
 )

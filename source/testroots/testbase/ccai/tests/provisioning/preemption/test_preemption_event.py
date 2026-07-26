@@ -13,7 +13,7 @@ __credits__ = []
 
 import unittest
 
-from ccai.provisioning.model.exceptions import SchemaValidationError
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
 from ccai.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
 from ccai.provisioning.preemption.preemptionevent import PreemptionEvent
 

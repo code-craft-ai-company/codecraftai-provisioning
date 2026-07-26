@@ -23,8 +23,8 @@ from ccai.credentials.twingateserviceaccountcredential import (
     TwingateServiceAccountCredential
 )
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 
 
 # Per provider, the set of credential classes the control plane accepts.

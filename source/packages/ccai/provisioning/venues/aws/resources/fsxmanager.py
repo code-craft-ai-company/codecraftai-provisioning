@@ -15,7 +15,7 @@ import os
 
 from typing import Any, Dict
 
-from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.interfaces.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
 from ccai.provisioning.model.cloud.provisionedresource import (

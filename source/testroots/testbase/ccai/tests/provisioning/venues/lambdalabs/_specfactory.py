@@ -13,7 +13,7 @@ __credits__ = []
 
 from typing import Dict, List, Optional
 
-from ccai.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
 from ccai.provisioning.model.cloud.clouddnsrecord import CloudDnsRecord
@@ -30,7 +30,7 @@ from ccai.provisioning.model.cloud.cloudnetwork import CloudNetwork
 from ccai.provisioning.model.cloud.cloudobjectbucket import (
     CloudObjectBucket
 )
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 from ccai.provisioning.venues.lambdalabs.lambdalabsspec import (
     LambdalabsSpec
 )

@@ -241,7 +241,7 @@ def test_destroy_without_confirm_raises(venue, aspects):
     """
     import pytest
 
-    from ccai.provisioning.model.exceptions import SchemaSemanticError
+    from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
     client = MockXenClient()
     provisioner = _provisioner(venue=venue, spec=basic_spec(), client=client)

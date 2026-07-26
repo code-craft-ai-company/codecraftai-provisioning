@@ -13,17 +13,17 @@ __credits__ = []
 
 from typing import Any, Dict, List, Optional
 
-from ccai.restclient.base.schemaobject import SchemaObject
-from ccai.restclient.base.schemafield import Field
+from ccai.interfaces.schemaobject import SchemaObject
+from ccai.interfaces.schemafield import Field
 
-from ccai.provisioning.model.exceptions import SchemaValidationError
-from ccai.provisioning.model.cloud.validators import (
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
+from ccai.interfaces.schemavalidators import (
     validate_name, validate_positive_int
 )
-from ccai.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
-from ccai.provisioning.model.cloud.sharedfsmountspec import SharedFsMountSpec
+from ccai.interfaces.sharedfsmountspec import SharedFsMountSpec
 
 
 _SUPPORTED_EXPOSURES = ("ClusterIP", "LoadBalancer", "NodePort")

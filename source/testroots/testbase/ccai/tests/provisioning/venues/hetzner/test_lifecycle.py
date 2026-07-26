@@ -22,7 +22,7 @@ from ccai.provisioning.aspects.provisioningaspects import (
 from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.venues.hetzner.hetznercloudprovisioner import (
     HetznerCloudProvisioner
 )

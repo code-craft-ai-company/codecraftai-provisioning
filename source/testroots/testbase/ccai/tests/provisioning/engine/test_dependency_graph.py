@@ -15,7 +15,7 @@ import unittest
 
 from hypothesis import given, settings, strategies as st
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.dependencygraph import (
     DependencyGraph, build_dependency_graph,
 )

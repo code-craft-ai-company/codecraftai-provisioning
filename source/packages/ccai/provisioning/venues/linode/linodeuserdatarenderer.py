@@ -21,7 +21,7 @@ import yaml
 from ccai.provisioning.cloudinit.vpncloudinitrenderer import (
     render_cloud_init
 )
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 
 
 class LinodeUserDataRenderer:

@@ -19,7 +19,7 @@ from hypothesis import given, settings, strategies as st
 
 import yaml
 
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 from ccai.provisioning.cloudinit.vpncloudinitrenderer import (
     render_cloud_init, render_azure_cse,
 )

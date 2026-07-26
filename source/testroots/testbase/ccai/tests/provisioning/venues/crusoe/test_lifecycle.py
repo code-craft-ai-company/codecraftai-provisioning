@@ -17,14 +17,14 @@ from pathlib import Path
 
 import pytest
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from ccai.errors.exceptions import SemanticError
 
-from ccai.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
 from ccai.provisioning.model.cloud.cloudinterconnect import (
@@ -36,7 +36,7 @@ from ccai.provisioning.model.cloud.cloudloadbalancer import (
 from ccai.provisioning.model.cloud.cloudobjectbucket import (
     CloudObjectBucket
 )
-from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.interfaces.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
 from ccai.provisioning.model.cloud.plannedactionintent import (

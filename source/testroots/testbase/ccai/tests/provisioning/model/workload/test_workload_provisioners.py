@@ -17,15 +17,15 @@ import unittest
 
 from typing import Any, Dict, List, Optional
 
-from ccai.provisioning.model.exceptions import SchemaSemanticError
-from ccai.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
 from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
 from ccai.provisioning.model.workload.workloadvenue import WorkloadVenue
-from ccai.provisioning.model.workload.workloadvenuekind import (
+from ccai.interfaces.workloadvenuekind import (
     WorkloadVenueKind
 )
 from ccai.provisioning.model.workload.nodepoolspec import NodePoolSpec

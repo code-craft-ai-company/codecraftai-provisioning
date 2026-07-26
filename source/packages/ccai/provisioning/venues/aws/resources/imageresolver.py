@@ -17,7 +17,7 @@ from typing import Dict, Optional
 
 from ccai.provisioning.model.cloud.cloudimage import CloudImage
 from ccai.provisioning.model.cloud.imagefamily import normalize_family
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.venues.aws.awsboto3sessionfactory import (
     AwsBoto3SessionFactory
 )

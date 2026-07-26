@@ -15,10 +15,10 @@ import os
 
 from typing import Optional
 
-from ccai.restclient.base.schemaobject import SchemaObject
-from ccai.restclient.base.schemafield import Field
+from ccai.interfaces.schemaobject import SchemaObject
+from ccai.interfaces.schemafield import Field
 
-from ccai.provisioning.model.exceptions import SchemaValidationError
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
 
 
 _SUPPORTED_PROTOCOLS = ("HTTP", "HTTPS", "TCP", "UDP")

@@ -13,14 +13,14 @@ __credits__ = []
 
 from typing import Dict, List, Optional
 
-from ccai.restclient.base.schemaobject import SchemaObject
-from ccai.restclient.base.schemafield import Field
+from ccai.interfaces.schemaobject import SchemaObject
+from ccai.interfaces.schemafield import Field
 
-from ccai.provisioning.model.exceptions import SchemaValidationError
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
 from ccai.provisioning.model.cloud.cloudloadbalancerlistener import (
     CloudLoadBalancerListener
 )
-from ccai.provisioning.model.cloud.validators import validate_name
+from ccai.interfaces.schemavalidators import validate_name
 
 
 _SUPPORTED_SCHEMES = ("internet-facing", "internal")

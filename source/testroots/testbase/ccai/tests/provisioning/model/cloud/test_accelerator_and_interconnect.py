@@ -14,24 +14,23 @@ __credits__ = []
 import unittest
 import warnings
 
-from ccai.provisioning.model.exceptions import (
-    SchemaValidationError, SchemaSemanticError
-)
-from ccai.provisioning.model.cloud.cloudacceleratorspec import (
+from ccai.interfaces.schemavalidationerror import SchemaValidationError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
 from ccai.provisioning.model.cloud.cloudinterconnect import CloudInterconnect
-from ccai.provisioning.model.cloud.sharedfsmountspec import SharedFsMountSpec
-from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.interfaces.sharedfsmountspec import SharedFsMountSpec
+from ccai.interfaces.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
 from ccai.provisioning.model.cloud.cloudimage import CloudImage
 from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
-from ccai.provisioning.model.cloud.validators import resolve_mount_targets
+from ccai.interfaces.schemavalidators import resolve_mount_targets
 from ccai.provisioning.model.cloud.venuecapability import (
     VenueCapability, venue_capability
 )
-from ccai.provisioning.model.vpn.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 
 
 def _basic_image() -> CloudImage:

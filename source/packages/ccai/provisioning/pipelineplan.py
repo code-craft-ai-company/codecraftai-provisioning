@@ -13,8 +13,8 @@ __credits__ = []
 
 from typing import Dict, List, Optional, Tuple
 
-from ccai.restclient.base.schemaobject import SchemaObject
-from ccai.restclient.base.schemafield import Field
+from ccai.interfaces.schemaobject import SchemaObject
+from ccai.interfaces.schemafield import Field
 
 from ccai.provisioning.model.cloud.provisioningplan import ProvisioningPlan
 

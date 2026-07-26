@@ -19,7 +19,7 @@ from ccai.provisioning.model.cloud.cloudinterconnect import (
 from ccai.provisioning.model.cloud.cloudloadbalancer import (
     CloudLoadBalancer
 )
-from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.interfaces.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
 from ccai.provisioning.venues.digitalocean.digitaloceancloudprovisioner import (
@@ -143,7 +143,7 @@ def test_validate_rejects_unmapped_gpu(
     """
         An accelerator with no DigitalOcean GPU droplet is rejected.
     """
-    from ccai.provisioning.model.cloud.cloudacceleratorspec import (
+    from ccai.interfaces.cloudacceleratorspec import (
         CloudAcceleratorSpec
     )
     accel = CloudAcceleratorSpec(kind="GPU", model="MI300X", count=8,

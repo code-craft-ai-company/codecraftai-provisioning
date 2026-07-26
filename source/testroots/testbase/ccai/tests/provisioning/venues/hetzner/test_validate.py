@@ -16,14 +16,14 @@ import pytest
 from ccai.credentials.basecredential import BaseCredential
 from ccai.provisioning.model.cloud.cloudimage import CloudImage
 from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
-from ccai.provisioning.model.exceptions import SchemaSemanticError
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
 from ccai.provisioning.model.cloud.cloudobjectbucket import (
     CloudObjectBucket
 )
-from ccai.provisioning.model.cloud.cloudsharedfilesystem import (
+from ccai.interfaces.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
 from ccai.provisioning.venues.hetzner.hetznercloudprovisioner import (
