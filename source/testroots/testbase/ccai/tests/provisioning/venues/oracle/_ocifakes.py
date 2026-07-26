@@ -39,17 +39,51 @@ def _ocid(*, kind: str) -> str:
 
 class _Response:
     """
-        Minimal stand-in for an ``oci`` SDK response (carries ``.data``).
+        Minimal stand-in for an ``oci`` SDK response.
+
+        Carries ``next_page`` as well as ``data`` because the venue lists
+        through the REAL ``oci.pagination.list_call_get_all_results``, handing
+        it these fakes as the list function.  That paginator reads
+        ``next_page`` to decide whether to keep going, so a response without
+        it fails there rather than in any code this repo owns.
+
+        ``None`` means "this is the last page", which is what a single-page
+        fake should say.
     """
 
-    def __init__(self, *, data: Any) -> None:
+    def __init__(self, *, data: Any, next_page: Any = None,
+                 status: int = 200) -> None:
         """
             Construct a fake response.
 
+            The attribute set matches ``oci.response.Response`` exactly —
+            status, headers, data, request, next_page, request_id, with
+            has_next_page as a property — because the real paginator reads
+            several of them and adding one at a time as each blew up would
+            just be guessing at the contract.
+
             :param data: The payload exposed as ``.data``.
+            :param next_page: The opaque next-page token, or None when the
+                listing is complete.
+            :param status: The HTTP status.
         """
+        self.status = status
+        self.headers: Dict[str, Any] = {}
         self.data = data
+        self.request: Any = None
+        self.next_page = next_page
+        self.request_id = ""
         return
+
+    @property
+    def has_next_page(self) -> bool:
+        """
+            Report whether another page follows.
+
+            :returns: True when a next-page token is present.
+        """
+        rtnval = self.next_page is not None
+        return rtnval
 
 
 class FakeVirtualNetworkClient:
