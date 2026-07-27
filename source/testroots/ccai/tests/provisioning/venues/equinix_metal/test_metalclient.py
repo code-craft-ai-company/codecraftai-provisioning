@@ -16,6 +16,9 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+
 import json
 
 from typing import Any, Dict, List, Optional
@@ -135,7 +138,7 @@ def test_client_exposes_its_project_id():
     return
 
 
-@pytest.mark.parametrize("token,project", [
+@testbase.parametrize("token,project", [
     ("", PROJECT_ID),
     ("tok-abc", ""),
 ])
@@ -226,7 +229,7 @@ def test_list_returns_empty_when_the_collection_is_absent():
     return
 
 
-@pytest.mark.parametrize("method_name,collection,collection_key", [
+@testbase.parametrize("method_name,collection,collection_key", [
     ("list_vlans", "virtual-networks", "virtual_networks"),
     ("list_ip_reservations", "ips", "ip_addresses"),
     ("list_ssh_keys", "ssh-keys", "ssh_keys"),
@@ -356,7 +359,7 @@ def test_update_device_tags_puts_only_the_tag_list():
     return
 
 
-@pytest.mark.parametrize("method_name,kwarg,path", [
+@testbase.parametrize("method_name,kwarg,path", [
     ("delete_vlan", "vlan_id", "/virtual-networks/x1"),
     ("delete_ip_reservation", "reservation_id", "/ips/x1"),
     ("delete_ssh_key", "ssh_key_id", "/ssh-keys/x1"),

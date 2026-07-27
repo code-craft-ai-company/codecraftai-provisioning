@@ -49,8 +49,8 @@ from ccai.provisioning.venues.crusoe.crusoeerrors import (
 )
 
 
-from _mockclient import MockCrusoeClient  # noqa: E402
-from _specfactory import basic_spec  # noqa: E402
+from ._mockclient import MockCrusoeClient
+from ._specfactory import basic_spec
 from .factories import make_provisioner, _Aspects
 
 

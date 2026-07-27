@@ -11,6 +11,9 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+
 import pytest
 
 from ccai.provisioning.model.cloud.cloudinterconnect import (
@@ -58,7 +61,7 @@ def test_validate_happy_path(venue, credential, region_config, do_client,
     return
 
 
-@pytest.mark.parametrize("fs_kind", ["LUSTRE", "WEKA", "VAST", "GPFS"])
+@testbase.parametrize("fs_kind", ["LUSTRE", "WEKA", "VAST", "GPFS"])
 def test_validate_rejects_unsupported_shared_fs_kinds(
         venue, credential, region_config, do_client, aspects, fs_kind
 ) -> None:
