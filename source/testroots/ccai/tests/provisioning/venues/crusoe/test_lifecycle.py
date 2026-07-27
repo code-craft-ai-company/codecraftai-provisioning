@@ -11,6 +11,9 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+
 
 
 import pytest
@@ -51,13 +54,14 @@ from ccai.provisioning.venues.crusoe.crusoeerrors import (
 
 from ._mockclient import MockCrusoeClient
 from ._specfactory import basic_spec
-from .factories import make_provisioner, _Aspects
+from .factories import (_Aspects, create_crusoe_mock_client, make_provisioner)
 
 
 # ----------------------------------------------------------------------
 # validate
 # ----------------------------------------------------------------------
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_validate_happy_path(crusoe_venue, mock_client, project_config,
                              crusoe_aspects) -> None:
     """
@@ -71,6 +75,7 @@ def test_validate_happy_path(crusoe_venue, mock_client, project_config,
     return
 
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_validate_rejects_bucket(crusoe_venue, mock_client, project_config,
                                  crusoe_aspects) -> None:
     """
@@ -85,6 +90,7 @@ def test_validate_rejects_bucket(crusoe_venue, mock_client, project_config,
     return
 
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_validate_rejects_load_balancer(crusoe_venue, mock_client,
                                         project_config,
                                         crusoe_aspects) -> None:
@@ -101,6 +107,7 @@ def test_validate_rejects_load_balancer(crusoe_venue, mock_client,
     return
 
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_validate_rejects_unsupported_fs(crusoe_venue, mock_client,
                                          project_config,
                                          crusoe_aspects) -> None:
@@ -117,6 +124,7 @@ def test_validate_rejects_unsupported_fs(crusoe_venue, mock_client,
     return
 
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_validate_rejects_native_fs_without_existing_id(
         crusoe_venue, mock_client, project_config, crusoe_aspects) -> None:
     """
@@ -132,6 +140,7 @@ def test_validate_rejects_native_fs_without_existing_id(
     return
 
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_validate_rejects_ib_on_non_ib_instance(crusoe_venue, mock_client,
                                                 project_config,
                                                 crusoe_aspects) -> None:
@@ -148,6 +157,7 @@ def test_validate_rejects_ib_on_non_ib_instance(crusoe_venue, mock_client,
     return
 
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_validate_accepts_ib_on_gpu_sku(crusoe_venue, mock_client,
                                         project_config,
                                         crusoe_aspects) -> None:
@@ -171,6 +181,7 @@ def test_validate_accepts_ib_on_gpu_sku(crusoe_venue, mock_client,
 # plan
 # ----------------------------------------------------------------------
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_plan_all_create_on_empty_venue(crusoe_venue, mock_client,
                                         project_config,
                                         crusoe_aspects) -> None:
@@ -186,6 +197,7 @@ def test_plan_all_create_on_empty_venue(crusoe_venue, mock_client,
     return
 
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_re_plan_after_apply_is_all_skip(crusoe_venue, mock_client,
                                          project_config,
                                          crusoe_aspects) -> None:
@@ -206,6 +218,7 @@ def test_re_plan_after_apply_is_all_skip(crusoe_venue, mock_client,
 # apply
 # ----------------------------------------------------------------------
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_apply_creates_resources(crusoe_venue, mock_client, project_config,
                                  crusoe_aspects) -> None:
     """
@@ -223,6 +236,7 @@ def test_apply_creates_resources(crusoe_venue, mock_client, project_config,
     return
 
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_apply_with_vpn_join_renders_user_data(crusoe_venue, mock_client,
                                                project_config,
                                                crusoe_aspects) -> None:
@@ -240,6 +254,7 @@ def test_apply_with_vpn_join_renders_user_data(crusoe_venue, mock_client,
     return
 
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_apply_idempotent_second_run_makes_no_creates(
         crusoe_venue, mock_client, project_config, crusoe_aspects) -> None:
     """
@@ -255,6 +270,7 @@ def test_apply_idempotent_second_run_makes_no_creates(
     return
 
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_apply_reapply_makes_no_vpc_or_sshkey_mutations(
         crusoe_venue, mock_client, project_config, crusoe_aspects) -> None:
     """
@@ -278,6 +294,7 @@ def test_apply_reapply_makes_no_vpc_or_sshkey_mutations(
     return
 
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_apply_resolves_gpu_sku(crusoe_venue, mock_client, project_config,
                                 crusoe_aspects) -> None:
     """
@@ -295,6 +312,7 @@ def test_apply_resolves_gpu_sku(crusoe_venue, mock_client, project_config,
     return
 
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_apply_attaches_ib_partition(crusoe_venue, mock_client,
                                      project_config, crusoe_aspects) -> None:
     """
@@ -320,6 +338,7 @@ def test_apply_attaches_ib_partition(crusoe_venue, mock_client,
 # destroy
 # ----------------------------------------------------------------------
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_destroy_requires_confirm(crusoe_venue, mock_client, project_config,
                                   crusoe_aspects) -> None:
     """
@@ -334,6 +353,7 @@ def test_destroy_requires_confirm(crusoe_venue, mock_client, project_config,
     return
 
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_destroy_is_inverse_of_apply(crusoe_venue, mock_client,
                                      project_config, crusoe_aspects,
                                      crusoe_confirm_aspects) -> None:
@@ -351,6 +371,7 @@ def test_destroy_is_inverse_of_apply(crusoe_venue, mock_client,
     return
 
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_destroy_calls_vpn_delete_device(crusoe_venue, mock_client,
                                          project_config, crusoe_aspects,
                                          crusoe_confirm_aspects) -> None:
@@ -381,6 +402,7 @@ def test_destroy_calls_vpn_delete_device(crusoe_venue, mock_client,
 # inventory
 # ----------------------------------------------------------------------
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_inventory_lists_run_resources(crusoe_venue, mock_client,
                                        project_config,
                                        crusoe_aspects) -> None:
@@ -398,6 +420,7 @@ def test_inventory_lists_run_resources(crusoe_venue, mock_client,
     return
 
 
+@testbase.attach.parameter(create_crusoe_mock_client, identifier="mock_client")
 def test_persist_inventory_writes_json(crusoe_venue, mock_client,
                                        project_config, crusoe_aspects,
                                        tmp_path) -> None:
