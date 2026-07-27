@@ -20,3 +20,8 @@ testbase.originate.parameter(create_azure_region_config, identifier="region_conf
 testbase.originate.parameter(create_azure_venue, identifier="venue")
 testbase.originate.parameter(create_azure_aspects, identifier="aspects")
 testbase.originate.parameter(create_azure_confirm_aspects, identifier="confirm_aspects")
+
+# The stateful doubles are not originated here. Each test needs a
+# unique and fresh setup, so they are attached to the test cases
+# themselves; a scope origination is one instance for the whole
+# package and lets one test's resources leak into the next.

@@ -51,10 +51,10 @@ def _provisioner(*, venue, credential, region_config, session_factory,
     return rtnval
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_validate_happy_path(venue, credential, region_config,
-                             session_factory, aspects) -> None:
+                             world, session_factory, aspects) -> None:
     """
         A clean spec validates successfully.
     """
@@ -67,10 +67,10 @@ def test_validate_happy_path(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_validate_rejects_non_azure_credential(venue, region_config,
-                                               session_factory,
+                                               world, session_factory,
                                                aspects) -> None:
     """
         A non-Azure credential is rejected at validate-time.
@@ -86,10 +86,10 @@ def test_validate_rejects_non_azure_credential(venue, region_config,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_validate_rejects_efa(venue, credential, region_config,
-                              session_factory, aspects) -> None:
+                              world, session_factory, aspects) -> None:
     """
         EFA is rejected — EFA is AWS-only.
     """
@@ -106,10 +106,10 @@ def test_validate_rejects_efa(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_validate_rejects_oci_rdma(venue, credential, region_config,
-                                   session_factory, aspects) -> None:
+                                   world, session_factory, aspects) -> None:
     """
         OCI_RDMA is rejected — OCI_RDMA is Oracle-only.
     """
@@ -124,10 +124,10 @@ def test_validate_rejects_oci_rdma(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_validate_rejects_weka_shared_fs(venue, credential, region_config,
-                                         session_factory, aspects) -> None:
+                                         world, session_factory, aspects) -> None:
     """
         Shared filesystem kind=WEKA is rejected with substitution guidance.
     """
@@ -144,11 +144,11 @@ def test_validate_rejects_weka_shared_fs(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_validate_lustre_requires_existing_id(venue, credential,
                                               region_config,
-                                              session_factory,
+                                              world, session_factory,
                                               aspects) -> None:
     """
         Azure Managed Lustre v1 is attach-only; existing_id is required.
@@ -165,10 +165,10 @@ def test_validate_lustre_requires_existing_id(venue, credential,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_validate_accelerator_resolves(venue, credential, region_config,
-                                       session_factory, aspects) -> None:
+                                       world, session_factory, aspects) -> None:
     """
         H100_SXM resolves on Azure via the catalog.
     """
@@ -184,10 +184,10 @@ def test_validate_accelerator_resolves(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_validate_accelerator_size_conflict(venue, credential,
-                                            region_config, session_factory,
+                                            region_config, world, session_factory,
                                             aspects) -> None:
     """
         An explicit size that disagrees with the resolved SKU is rejected.
@@ -203,11 +203,11 @@ def test_validate_accelerator_size_conflict(venue, credential,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_validate_infiniband_requires_capable_sku(venue, credential,
                                                   region_config,
-                                                  session_factory,
+                                                  world, session_factory,
                                                   aspects) -> None:
     """
         InfiniBand on a non-IB-capable VM size is rejected.
@@ -226,10 +226,10 @@ def test_validate_infiniband_requires_capable_sku(venue, credential,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_validate_infiniband_no_ppg_warns(venue, credential, region_config,
-                                          session_factory, aspects) -> None:
+                                          world, session_factory, aspects) -> None:
     """
         An IB SKU with no placement_group emits a warning (not an error).
     """
@@ -248,10 +248,10 @@ def test_validate_infiniband_no_ppg_warns(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_validate_subnet_containment(venue, credential, region_config,
-                                     session_factory, aspects) -> None:
+                                     world, session_factory, aspects) -> None:
     """
         Subnet CIDRs must be contained in their VNet CIDR.
     """

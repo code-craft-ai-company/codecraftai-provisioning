@@ -74,10 +74,10 @@ class _RecordingVPN:
         return
 
 
-@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 @testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 def test_plan_then_apply_creates_resources(venue, credential, region_config,
-                                           do_client, aspects) -> None:
+                                           raw_client, do_client, aspects) -> None:
     """
         First plan reports CREATEs; apply produces matching resources.
     """
@@ -97,10 +97,10 @@ def test_plan_then_apply_creates_resources(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 @testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 def test_replan_after_apply_is_all_skip(venue, credential, region_config,
-                                        do_client, aspects) -> None:
+                                        raw_client, do_client, aspects) -> None:
     """
         After apply, a re-plan emits no CREATE actions.
     """
@@ -118,11 +118,11 @@ def test_replan_after_apply_is_all_skip(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 @testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 def test_apply_with_vpn_join_injects_user_data(venue, credential,
-                                               region_config, do_client,
-                                               raw_client, aspects) -> None:
+                                               region_config, raw_client,
+                                               do_client, aspects) -> None:
     """
         A Droplet with vpn_join carries cloud-init user_data referencing the
         tailscale bring-up.
@@ -144,10 +144,10 @@ def test_apply_with_vpn_join_injects_user_data(venue, credential,
     return
 
 
-@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 @testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 def test_destroy_requires_confirm(venue, credential, region_config,
-                                  do_client, aspects) -> None:
+                                  raw_client, do_client, aspects) -> None:
     """
         destroy without aspects.confirm=True raises.
     """
@@ -162,9 +162,9 @@ def test_destroy_requires_confirm(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 @testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
-def test_destroy_reverses_apply(venue, credential, region_config, do_client,
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+def test_destroy_reverses_apply(venue, credential, region_config, raw_client, do_client,
                                 aspects, confirm_aspects) -> None:
     """
         After destroy, the inventory comes back empty.
@@ -185,10 +185,10 @@ def test_destroy_reverses_apply(venue, credential, region_config, do_client,
     return
 
 
-@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 @testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 def test_destroy_calls_vpn_delete_device(venue, credential, region_config,
-                                         do_client, aspects,
+                                         raw_client, do_client, aspects,
                                          confirm_aspects) -> None:
     """
         destroy de-registers the Tailscale device via the control plane.
@@ -208,9 +208,9 @@ def test_destroy_calls_vpn_delete_device(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 @testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
-def test_inventory_is_persisted(venue, credential, region_config, do_client,
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+def test_inventory_is_persisted(venue, credential, region_config, raw_client, do_client,
                                 aspects, tmp_path) -> None:
     """
         inventory writes a do-inventory.json under the output root.
@@ -228,10 +228,10 @@ def test_inventory_is_persisted(venue, credential, region_config, do_client,
     return
 
 
-@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 @testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 def test_spaces_bucket_created_and_skipped(venue, credential, region_config,
-                                           do_client, raw_client,
+                                           raw_client, do_client,
                                            aspects) -> None:
     """
         A Spaces bucket is created on first apply and SKIPped on re-apply.
@@ -250,10 +250,10 @@ def test_spaces_bucket_created_and_skipped(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 @testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 def test_dns_record_created_and_skipped(venue, credential, region_config,
-                                        do_client, aspects) -> None:
+                                        raw_client, do_client, aspects) -> None:
     """
         A DNS record is created on first apply and SKIPped on re-apply.
     """

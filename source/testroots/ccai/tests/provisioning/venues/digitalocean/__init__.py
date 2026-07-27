@@ -25,3 +25,8 @@ testbase.originate.parameter(create_digitalocean_confirm_aspects, identifier="co
 # Stands in for pytest tmp_path.
 testbase.originate.parameter(create_temporary_directory,
                              identifier="tmp_path")
+
+# The stateful doubles are not originated here. Each test needs a
+# unique and fresh setup, so they are attached to the test cases
+# themselves; a scope origination is one instance for the whole
+# package and lets one test's resources leak into the next.

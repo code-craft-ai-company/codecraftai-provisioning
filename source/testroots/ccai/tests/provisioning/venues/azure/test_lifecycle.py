@@ -61,10 +61,10 @@ def _provisioner(*, venue, credential, region_config, session_factory,
     return rtnval
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_plan_then_apply_creates_resources(venue, credential,
-                                           region_config, session_factory,
+                                           region_config, world, session_factory,
                                            aspects) -> None:
     """
         First plan reports CREATEs; apply produces matching resources.
@@ -85,10 +85,10 @@ def test_plan_then_apply_creates_resources(venue, credential,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_resource_group_created_first(venue, credential, region_config,
-                                      session_factory, world,
+                                      world, session_factory,
                                       aspects) -> None:
     """
         The apex ResourceGroup exists in the world after apply.
@@ -102,10 +102,10 @@ def test_resource_group_created_first(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_apply_idempotent(venue, credential, region_config,
-                          session_factory, aspects) -> None:
+                          world, session_factory, aspects) -> None:
     """
         Re-applying produces only SKIPs and no new created resources.
     """
@@ -170,11 +170,11 @@ def test_apply_apply_idempotence_property(venue, credential,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_apply_with_vpn_join_injects_custom_data(venue, credential,
                                                  region_config,
-                                                 session_factory, world,
+                                                 world, session_factory,
                                                  aspects) -> None:
     """
         Linux VMs with vpn_join carry base64-encoded cloud-init in
@@ -196,10 +196,10 @@ def test_apply_with_vpn_join_injects_custom_data(venue, credential,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_apply_vpn_join_records_device(venue, credential, region_config,
-                                       session_factory, aspects) -> None:
+                                       world, session_factory, aspects) -> None:
     """
         Applying a VPN-joined spec records a VPN device entry.
     """
@@ -214,11 +214,11 @@ def test_apply_vpn_join_records_device(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_inventory_enumerates_subnets_and_nics(venue, credential,
                                                region_config,
-                                               session_factory,
+                                               world, session_factory,
                                                aspects) -> None:
     """
         Regression for PV-H1: ``inventory`` enumerates the subnets and NICs
@@ -238,10 +238,10 @@ def test_inventory_enumerates_subnets_and_nics(venue, credential,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_destroy_requires_confirm(venue, credential, region_config,
-                                  session_factory, aspects) -> None:
+                                  world, session_factory, aspects) -> None:
     """
         destroy without aspects.confirm=True raises.
     """
@@ -255,10 +255,10 @@ def test_destroy_requires_confirm(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_destroy_reverses_apply(venue, credential, region_config,
-                                session_factory, aspects,
+                                world, session_factory, aspects,
                                 confirm_aspects) -> None:
     """
         After destroy, the inventory comes back empty and the
@@ -300,10 +300,10 @@ class _RecordingVPN:
         return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_destroy_calls_vpn_delete_device(venue, credential, region_config,
-                                         session_factory, aspects,
+                                         world, session_factory, aspects,
                                          confirm_aspects) -> None:
     """
         When vpn_join was set and a device id was recorded, destroy
@@ -325,10 +325,10 @@ def test_destroy_calls_vpn_delete_device(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_gpu_sku_resolution(venue, credential, region_config,
-                            session_factory, aspects) -> None:
+                            world, session_factory, aspects) -> None:
     """
         H100_SXM resolves to ``Standard_ND96isr_H100_v5`` and ends up as the
         VM size on the launched VM.
@@ -351,11 +351,11 @@ def test_gpu_sku_resolution(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_ib_sku_creates_proximity_placement_group(venue, credential,
                                                   region_config,
-                                                  session_factory, world,
+                                                  world, session_factory,
                                                   aspects) -> None:
     """
         An InfiniBand SKU lands the VM into a Proximity Placement Group.
@@ -376,10 +376,10 @@ def test_ib_sku_creates_proximity_placement_group(venue, credential,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_ndv5_ppg_grouping(venue, credential, region_config,
-                           session_factory, world, aspects) -> None:
+                           world, session_factory, aspects) -> None:
     """
         Two InfiniBand VMs sharing an interconnect_group land in the same
         Proximity Placement Group.
@@ -404,11 +404,11 @@ def test_ndv5_ppg_grouping(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_preemption_policy_fail_uses_regular_vm(venue, credential,
                                                 region_config,
-                                                session_factory, world,
+                                                world, session_factory,
                                                 aspects) -> None:
     """
         PreemptionPolicy.FAIL produces a regular (non-spot) VM.
@@ -423,11 +423,11 @@ def test_preemption_policy_fail_uses_regular_vm(venue, credential,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_preemption_policy_reacquire_uses_spot(venue, credential,
                                                region_config,
-                                               session_factory, world,
+                                               world, session_factory,
                                                aspects) -> None:
     """
         PreemptionPolicy.REACQUIRE produces a Spot VM with an eviction
@@ -452,10 +452,10 @@ def test_preemption_policy_reacquire_uses_spot(venue, credential,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_apply_disk_uses_standard_ssd_lrs(venue, credential, region_config,
-                                          session_factory, world,
+                                          world, session_factory,
                                           aspects) -> None:
     """
         A ``standard`` neutral StorageClass maps to a StandardSSD_LRS disk.
@@ -470,10 +470,10 @@ def test_apply_disk_uses_standard_ssd_lrs(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_apply_keypair_injected_into_vm(venue, credential, region_config,
-                                        session_factory, world,
+                                        world, session_factory,
                                         aspects) -> None:
     """
         The CloudKeyPair public key lands in the VM's linux_configuration
@@ -491,11 +491,11 @@ def test_apply_keypair_injected_into_vm(venue, credential, region_config,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_destroy_preserves_foreign_resource_group(venue, credential,
                                                   region_config,
-                                                  session_factory, world,
+                                                  world, session_factory,
                                                   aspects,
                                                   confirm_aspects) -> None:
     """
@@ -521,10 +521,10 @@ def test_destroy_preserves_foreign_resource_group(venue, credential,
     return
 
 
-@testbase.attach.parameter(create_azure_world, identifier="world")
 @testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
 def test_plan_emits_delete_for_owned_orphan(venue, credential,
-                                            region_config, session_factory,
+                                            region_config, world, session_factory,
                                             aspects) -> None:
     """
         An owner-tagged resource that is absent from the desired spec is

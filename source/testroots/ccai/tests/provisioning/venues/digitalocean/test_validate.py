@@ -48,9 +48,9 @@ def _provisioner(*, venue, credential, region_config, do_client, spec):
     return rtnval
 
 
-@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 @testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
-def test_validate_happy_path(venue, credential, region_config, do_client,
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+def test_validate_happy_path(venue, credential, region_config, raw_client, do_client,
                              aspects) -> None:
     """
         A baseline spec validates ok.
@@ -65,11 +65,11 @@ def test_validate_happy_path(venue, credential, region_config, do_client,
     return
 
 
-@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 @testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 @testbase.parametrize("fs_kind", ["LUSTRE", "WEKA", "VAST", "GPFS"])
 def test_validate_rejects_unsupported_shared_fs_kinds(
-        venue, credential, region_config, do_client, aspects, fs_kind
+        venue, credential, region_config, raw_client, do_client, aspects, fs_kind
 ) -> None:
     """
         WEKA/Lustre-class shared filesystems are rejected with substitution
@@ -89,10 +89,10 @@ def test_validate_rejects_unsupported_shared_fs_kinds(
     return
 
 
-@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 @testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 def test_validate_rejects_interconnect_requests(
-        venue, credential, region_config, do_client, aspects
+        venue, credential, region_config, raw_client, do_client, aspects
 ) -> None:
     """
         A non-NONE HPC interconnect is a validate-error.
@@ -111,10 +111,10 @@ def test_validate_rejects_interconnect_requests(
     return
 
 
-@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 @testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 def test_validate_warns_on_load_balancer(
-        venue, credential, region_config, do_client, aspects
+        venue, credential, region_config, raw_client, do_client, aspects
 ) -> None:
     """
         A CloudLoadBalancer is accepted but emits a v1.5-stub warning.
@@ -133,10 +133,10 @@ def test_validate_warns_on_load_balancer(
     return
 
 
-@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 @testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 def test_validate_rejects_unknown_region(
-        venue, credential, region_config, do_client, aspects
+        venue, credential, region_config, raw_client, do_client, aspects
 ) -> None:
     """
         An unknown DigitalOcean region slug on a VPC is rejected.
@@ -152,10 +152,10 @@ def test_validate_rejects_unknown_region(
     return
 
 
-@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 @testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
 def test_validate_rejects_unmapped_gpu(
-        venue, credential, region_config, do_client, aspects
+        venue, credential, region_config, raw_client, do_client, aspects
 ) -> None:
     """
         An accelerator with no DigitalOcean GPU droplet is rejected.
