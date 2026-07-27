@@ -12,8 +12,6 @@ from .factories import (
     create_digitalocean_credential,
     create_digitalocean_region_config,
     create_digitalocean_venue,
-    create_digitalocean_raw_client,
-    create_digitalocean_do_client,
     create_digitalocean_aspects,
     create_digitalocean_confirm_aspects,
 )
@@ -21,8 +19,6 @@ from .factories import (
 testbase.originate.parameter(create_digitalocean_credential, identifier="credential")
 testbase.originate.parameter(create_digitalocean_region_config, identifier="region_config")
 testbase.originate.parameter(create_digitalocean_venue, identifier="venue")
-testbase.originate.parameter(create_digitalocean_raw_client, identifier="raw_client")
-testbase.originate.parameter(create_digitalocean_do_client, identifier="do_client")
 testbase.originate.parameter(create_digitalocean_aspects, identifier="aspects")
 testbase.originate.parameter(create_digitalocean_confirm_aspects, identifier="confirm_aspects")
 

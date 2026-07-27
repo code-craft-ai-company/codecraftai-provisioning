@@ -11,6 +11,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+from .factories import (create_digitalocean_do_client, create_digitalocean_raw_client)
+
+
 import pytest
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
@@ -69,6 +74,8 @@ class _RecordingVPN:
         return
 
 
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+@testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
 def test_plan_then_apply_creates_resources(venue, credential, region_config,
                                            do_client, aspects) -> None:
     """
@@ -90,6 +97,8 @@ def test_plan_then_apply_creates_resources(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+@testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
 def test_replan_after_apply_is_all_skip(venue, credential, region_config,
                                         do_client, aspects) -> None:
     """
@@ -109,6 +118,8 @@ def test_replan_after_apply_is_all_skip(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+@testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
 def test_apply_with_vpn_join_injects_user_data(venue, credential,
                                                region_config, do_client,
                                                raw_client, aspects) -> None:
@@ -133,6 +144,8 @@ def test_apply_with_vpn_join_injects_user_data(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+@testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
 def test_destroy_requires_confirm(venue, credential, region_config,
                                   do_client, aspects) -> None:
     """
@@ -149,6 +162,8 @@ def test_destroy_requires_confirm(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+@testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
 def test_destroy_reverses_apply(venue, credential, region_config, do_client,
                                 aspects, confirm_aspects) -> None:
     """
@@ -170,6 +185,8 @@ def test_destroy_reverses_apply(venue, credential, region_config, do_client,
     return
 
 
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+@testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
 def test_destroy_calls_vpn_delete_device(venue, credential, region_config,
                                          do_client, aspects,
                                          confirm_aspects) -> None:
@@ -191,6 +208,8 @@ def test_destroy_calls_vpn_delete_device(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+@testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
 def test_inventory_is_persisted(venue, credential, region_config, do_client,
                                 aspects, tmp_path) -> None:
     """
@@ -209,6 +228,8 @@ def test_inventory_is_persisted(venue, credential, region_config, do_client,
     return
 
 
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+@testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
 def test_spaces_bucket_created_and_skipped(venue, credential, region_config,
                                            do_client, raw_client,
                                            aspects) -> None:
@@ -229,6 +250,8 @@ def test_spaces_bucket_created_and_skipped(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+@testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
 def test_dns_record_created_and_skipped(venue, credential, region_config,
                                         do_client, aspects) -> None:
     """

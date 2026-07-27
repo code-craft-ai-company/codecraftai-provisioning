@@ -13,6 +13,8 @@ __credits__ = []
 
 from ccai import testbase
 
+from .factories import (create_digitalocean_do_client, create_digitalocean_raw_client)
+
 
 import pytest
 
@@ -46,6 +48,8 @@ def _provisioner(*, venue, credential, region_config, do_client, spec):
     return rtnval
 
 
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+@testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
 def test_validate_happy_path(venue, credential, region_config, do_client,
                              aspects) -> None:
     """
@@ -61,6 +65,8 @@ def test_validate_happy_path(venue, credential, region_config, do_client,
     return
 
 
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+@testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
 @testbase.parametrize("fs_kind", ["LUSTRE", "WEKA", "VAST", "GPFS"])
 def test_validate_rejects_unsupported_shared_fs_kinds(
         venue, credential, region_config, do_client, aspects, fs_kind
@@ -83,6 +89,8 @@ def test_validate_rejects_unsupported_shared_fs_kinds(
     return
 
 
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+@testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
 def test_validate_rejects_interconnect_requests(
         venue, credential, region_config, do_client, aspects
 ) -> None:
@@ -103,6 +111,8 @@ def test_validate_rejects_interconnect_requests(
     return
 
 
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+@testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
 def test_validate_warns_on_load_balancer(
         venue, credential, region_config, do_client, aspects
 ) -> None:
@@ -123,6 +133,8 @@ def test_validate_warns_on_load_balancer(
     return
 
 
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+@testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
 def test_validate_rejects_unknown_region(
         venue, credential, region_config, do_client, aspects
 ) -> None:
@@ -140,6 +152,8 @@ def test_validate_rejects_unknown_region(
     return
 
 
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+@testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
 def test_validate_rejects_unmapped_gpu(
         venue, credential, region_config, do_client, aspects
 ) -> None:

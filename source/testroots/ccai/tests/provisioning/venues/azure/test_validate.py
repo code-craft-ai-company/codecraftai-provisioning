@@ -12,6 +12,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+from .factories import (create_azure_session_factory, create_azure_world)
+
+
 import pytest
 
 from ccai.credentials.basecredential import BaseCredential
@@ -46,6 +51,8 @@ def _provisioner(*, venue, credential, region_config, session_factory,
     return rtnval
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_validate_happy_path(venue, credential, region_config,
                              session_factory, aspects) -> None:
     """
@@ -60,6 +67,8 @@ def test_validate_happy_path(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_validate_rejects_non_azure_credential(venue, region_config,
                                                session_factory,
                                                aspects) -> None:
@@ -77,6 +86,8 @@ def test_validate_rejects_non_azure_credential(venue, region_config,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_validate_rejects_efa(venue, credential, region_config,
                               session_factory, aspects) -> None:
     """
@@ -95,6 +106,8 @@ def test_validate_rejects_efa(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_validate_rejects_oci_rdma(venue, credential, region_config,
                                    session_factory, aspects) -> None:
     """
@@ -111,6 +124,8 @@ def test_validate_rejects_oci_rdma(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_validate_rejects_weka_shared_fs(venue, credential, region_config,
                                          session_factory, aspects) -> None:
     """
@@ -129,6 +144,8 @@ def test_validate_rejects_weka_shared_fs(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_validate_lustre_requires_existing_id(venue, credential,
                                               region_config,
                                               session_factory,
@@ -148,6 +165,8 @@ def test_validate_lustre_requires_existing_id(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_validate_accelerator_resolves(venue, credential, region_config,
                                        session_factory, aspects) -> None:
     """
@@ -165,6 +184,8 @@ def test_validate_accelerator_resolves(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_validate_accelerator_size_conflict(venue, credential,
                                             region_config, session_factory,
                                             aspects) -> None:
@@ -182,6 +203,8 @@ def test_validate_accelerator_size_conflict(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_validate_infiniband_requires_capable_sku(venue, credential,
                                                   region_config,
                                                   session_factory,
@@ -203,6 +226,8 @@ def test_validate_infiniband_requires_capable_sku(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_validate_infiniband_no_ppg_warns(venue, credential, region_config,
                                           session_factory, aspects) -> None:
     """
@@ -223,6 +248,8 @@ def test_validate_infiniband_no_ppg_warns(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_validate_subnet_containment(venue, credential, region_config,
                                      session_factory, aspects) -> None:
     """

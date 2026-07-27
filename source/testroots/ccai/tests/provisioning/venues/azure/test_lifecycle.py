@@ -12,6 +12,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+from .factories import (create_azure_session_factory, create_azure_world)
+
+
 import base64
 
 import pytest
@@ -56,6 +61,8 @@ def _provisioner(*, venue, credential, region_config, session_factory,
     return rtnval
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_plan_then_apply_creates_resources(venue, credential,
                                            region_config, session_factory,
                                            aspects) -> None:
@@ -78,6 +85,8 @@ def test_plan_then_apply_creates_resources(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_resource_group_created_first(venue, credential, region_config,
                                       session_factory, world,
                                       aspects) -> None:
@@ -93,6 +102,8 @@ def test_resource_group_created_first(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_apply_idempotent(venue, credential, region_config,
                           session_factory, aspects) -> None:
     """
@@ -159,6 +170,8 @@ def test_apply_apply_idempotence_property(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_apply_with_vpn_join_injects_custom_data(venue, credential,
                                                  region_config,
                                                  session_factory, world,
@@ -183,6 +196,8 @@ def test_apply_with_vpn_join_injects_custom_data(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_apply_vpn_join_records_device(venue, credential, region_config,
                                        session_factory, aspects) -> None:
     """
@@ -199,6 +214,8 @@ def test_apply_vpn_join_records_device(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_inventory_enumerates_subnets_and_nics(venue, credential,
                                                region_config,
                                                session_factory,
@@ -221,6 +238,8 @@ def test_inventory_enumerates_subnets_and_nics(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_destroy_requires_confirm(venue, credential, region_config,
                                   session_factory, aspects) -> None:
     """
@@ -236,6 +255,8 @@ def test_destroy_requires_confirm(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_destroy_reverses_apply(venue, credential, region_config,
                                 session_factory, aspects,
                                 confirm_aspects) -> None:
@@ -279,6 +300,8 @@ class _RecordingVPN:
         return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_destroy_calls_vpn_delete_device(venue, credential, region_config,
                                          session_factory, aspects,
                                          confirm_aspects) -> None:
@@ -302,6 +325,8 @@ def test_destroy_calls_vpn_delete_device(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_gpu_sku_resolution(venue, credential, region_config,
                             session_factory, aspects) -> None:
     """
@@ -326,6 +351,8 @@ def test_gpu_sku_resolution(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_ib_sku_creates_proximity_placement_group(venue, credential,
                                                   region_config,
                                                   session_factory, world,
@@ -349,6 +376,8 @@ def test_ib_sku_creates_proximity_placement_group(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_ndv5_ppg_grouping(venue, credential, region_config,
                            session_factory, world, aspects) -> None:
     """
@@ -375,6 +404,8 @@ def test_ndv5_ppg_grouping(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_preemption_policy_fail_uses_regular_vm(venue, credential,
                                                 region_config,
                                                 session_factory, world,
@@ -392,6 +423,8 @@ def test_preemption_policy_fail_uses_regular_vm(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_preemption_policy_reacquire_uses_spot(venue, credential,
                                                region_config,
                                                session_factory, world,
@@ -419,6 +452,8 @@ def test_preemption_policy_reacquire_uses_spot(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_apply_disk_uses_standard_ssd_lrs(venue, credential, region_config,
                                           session_factory, world,
                                           aspects) -> None:
@@ -435,6 +470,8 @@ def test_apply_disk_uses_standard_ssd_lrs(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_apply_keypair_injected_into_vm(venue, credential, region_config,
                                         session_factory, world,
                                         aspects) -> None:
@@ -454,6 +491,8 @@ def test_apply_keypair_injected_into_vm(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_destroy_preserves_foreign_resource_group(venue, credential,
                                                   region_config,
                                                   session_factory, world,
@@ -482,6 +521,8 @@ def test_destroy_preserves_foreign_resource_group(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_azure_world, identifier="world")
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
 def test_plan_emits_delete_for_owned_orphan(venue, credential,
                                             region_config, session_factory,
                                             aspects) -> None:
