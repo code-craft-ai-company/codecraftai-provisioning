@@ -11,6 +11,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+from .factories import create_linode_mock_client
+
+
 import base64
 
 import pytest
@@ -68,6 +73,7 @@ class _RecordingVPN:
         return
 
 
+@testbase.attach.parameter(create_linode_mock_client, identifier="mock_client")
 def test_plan_then_apply_creates_resources(venue, credential, region_config,
                                            aspects, mock_client) -> None:
     """
@@ -89,6 +95,7 @@ def test_plan_then_apply_creates_resources(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_linode_mock_client, identifier="mock_client")
 def test_replan_after_apply_is_all_skip(venue, credential, region_config,
                                         aspects, mock_client) -> None:
     """
@@ -107,6 +114,7 @@ def test_replan_after_apply_is_all_skip(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_linode_mock_client, identifier="mock_client")
 def test_apply_idempotent(venue, credential, region_config, aspects,
                           mock_client) -> None:
     """
@@ -151,6 +159,7 @@ def test_apply_compose_apply_is_idempotent(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_linode_mock_client, identifier="mock_client")
 def test_apply_with_vpn_join_injects_user_data(venue, credential,
                                                region_config, aspects,
                                                mock_client) -> None:
@@ -176,6 +185,7 @@ def test_apply_with_vpn_join_injects_user_data(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_linode_mock_client, identifier="mock_client")
 def test_apply_realises_instance_resize_in_place(venue, credential,
                                                  region_config,
                                                  confirm_aspects,
@@ -205,6 +215,7 @@ def test_apply_realises_instance_resize_in_place(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_linode_mock_client, identifier="mock_client")
 def test_replan_after_resize_emits_skip(venue, credential, region_config,
                                         confirm_aspects,
                                         mock_client) -> None:
@@ -236,6 +247,7 @@ def test_replan_after_resize_emits_skip(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_linode_mock_client, identifier="mock_client")
 def test_unconfirmed_resize_raises_semantic_error(venue, credential,
                                                   region_config, aspects,
                                                   mock_client) -> None:
@@ -260,6 +272,7 @@ def test_unconfirmed_resize_raises_semantic_error(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_linode_mock_client, identifier="mock_client")
 def test_destroy_requires_confirm(venue, credential, region_config,
                                   aspects, mock_client) -> None:
     """
@@ -275,6 +288,7 @@ def test_destroy_requires_confirm(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_linode_mock_client, identifier="mock_client")
 def test_destroy_reverses_apply(venue, credential, region_config, aspects,
                                 confirm_aspects, mock_client) -> None:
     """
@@ -295,6 +309,7 @@ def test_destroy_reverses_apply(venue, credential, region_config, aspects,
     return
 
 
+@testbase.attach.parameter(create_linode_mock_client, identifier="mock_client")
 def test_destroy_calls_vpn_delete_device(venue, credential, region_config,
                                          aspects, confirm_aspects,
                                          mock_client) -> None:
@@ -314,6 +329,7 @@ def test_destroy_calls_vpn_delete_device(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_linode_mock_client, identifier="mock_client")
 def test_inventory_persist_writes_file(venue, credential, region_config,
                                        aspects, mock_client,
                                        tmp_path) -> None:

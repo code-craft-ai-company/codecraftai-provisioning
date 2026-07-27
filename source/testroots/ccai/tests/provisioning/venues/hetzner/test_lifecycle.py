@@ -12,6 +12,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+from .factories import (create_client, create_dns_client, create_vpn_control_plane)
+
+
 import os
 
 import pytest
@@ -50,6 +55,7 @@ def _provisioner(*, venue, credential, location_config, client, spec,
     return rtnval
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_plan_all_create_on_empty_venue(venue, credential, location_config,
                                         client, aspects) -> None:
     """
@@ -67,6 +73,7 @@ def test_plan_all_create_on_empty_venue(venue, credential, location_config,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_apply_creates_resources(venue, credential, location_config,
                                  client, aspects) -> None:
     """
@@ -86,6 +93,7 @@ def test_apply_creates_resources(venue, credential, location_config,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_replan_after_apply_is_all_skip(venue, credential, location_config,
                                         client, aspects) -> None:
     """
@@ -103,6 +111,7 @@ def test_replan_after_apply_is_all_skip(venue, credential, location_config,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_reapply_makes_no_mutating_calls(venue, credential,
                                          location_config, client,
                                          aspects) -> None:
@@ -120,6 +129,8 @@ def test_reapply_makes_no_mutating_calls(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
+@testbase.attach.parameter(create_vpn_control_plane, identifier="vpn_control_plane")
 def test_apply_renders_vpn_user_data(venue, credential, location_config,
                                      client, aspects,
                                      vpn_control_plane) -> None:
@@ -142,6 +153,8 @@ def test_apply_renders_vpn_user_data(venue, credential, location_config,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
+@testbase.attach.parameter(create_dns_client, identifier="dns_client")
 def test_apply_dns_records(venue, credential, location_config, client,
                            dns_client, aspects) -> None:
     """
@@ -158,6 +171,7 @@ def test_apply_dns_records(venue, credential, location_config, client,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_inventory_lists_owned_resources(venue, credential,
                                          location_config, client,
                                          aspects) -> None:
@@ -177,6 +191,7 @@ def test_inventory_lists_owned_resources(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_inventory_persist_writes_json(venue, credential, location_config,
                                        client, aspects, tmp_path) -> None:
     """
@@ -197,6 +212,7 @@ def test_inventory_persist_writes_json(venue, credential, location_config,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_plan_emits_inplace_update_for_volume_grow(venue, credential,
                                                    location_config,
                                                    client,
@@ -225,6 +241,7 @@ def test_plan_emits_inplace_update_for_volume_grow(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_apply_realizes_volume_grow_in_place(venue, credential,
                                              location_config, client,
                                              aspects) -> None:
@@ -256,6 +273,7 @@ def test_apply_realizes_volume_grow_in_place(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_volume_grow_preserves_the_attachment_record(venue, credential,
                                                      location_config, client,
                                                      aspects) -> None:
@@ -290,6 +308,7 @@ def test_volume_grow_preserves_the_attachment_record(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_reapply_after_volume_grow_is_skip(venue, credential,
                                            location_config, client,
                                            aspects) -> None:
@@ -318,6 +337,7 @@ def test_reapply_after_volume_grow_is_skip(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_volume_shrink_is_refused(venue, credential, location_config,
                                   client, aspects) -> None:
     """
@@ -344,6 +364,7 @@ def test_volume_shrink_is_refused(venue, credential, location_config,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_destroy_requires_confirm(venue, credential, location_config,
                                   client, aspects) -> None:
     """
@@ -359,6 +380,7 @@ def test_destroy_requires_confirm(venue, credential, location_config,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_destroy_removes_resources(venue, credential, location_config,
                                    client, confirm_aspects) -> None:
     """
@@ -375,6 +397,7 @@ def test_destroy_removes_resources(venue, credential, location_config,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_destroy_calls_vpn_delete_device(venue, credential,
                                          location_config, client,
                                          confirm_aspects) -> None:

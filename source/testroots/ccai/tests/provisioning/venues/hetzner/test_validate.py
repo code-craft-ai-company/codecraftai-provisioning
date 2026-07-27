@@ -11,6 +11,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+from .factories import create_client
+
+
 import pytest
 
 from ccai.credentials.basecredential import BaseCredential
@@ -37,6 +42,7 @@ from ccai.provisioning.venues.hetzner.hetznerspec import HetznerSpec
 from ._specfactory import basic_spec
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_validate_happy_path(venue, credential, location_config, client,
                              aspects) -> None:
     """
@@ -51,6 +57,7 @@ def test_validate_happy_path(venue, credential, location_config, client,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_validate_rejects_non_hetzner_credential(venue, location_config,
                                                  client, aspects) -> None:
     """
@@ -66,6 +73,7 @@ def test_validate_rejects_non_hetzner_credential(venue, location_config,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_validate_rejects_object_bucket(venue, credential,
                                         location_config, client,
                                         aspects) -> None:
@@ -83,6 +91,7 @@ def test_validate_rejects_object_bucket(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_validate_rejects_interconnect(venue, credential, location_config,
                                        client, aspects) -> None:
     """
@@ -105,6 +114,7 @@ def test_validate_rejects_interconnect(venue, credential, location_config,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_validate_rejects_shared_filesystem(venue, credential,
                                             location_config, client,
                                             aspects) -> None:
@@ -123,6 +133,7 @@ def test_validate_rejects_shared_filesystem(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_validate_rejects_unknown_image_family(venue, credential,
                                                location_config, client,
                                                aspects) -> None:
@@ -146,6 +157,7 @@ def test_validate_rejects_unknown_image_family(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_validate_rejects_unknown_server_type(venue, credential,
                                               location_config, client,
                                               aspects) -> None:
@@ -166,6 +178,7 @@ def test_validate_rejects_unknown_server_type(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_validate_none_spec_is_ok(venue, credential, location_config,
                                   client, aspects) -> None:
     """
@@ -179,6 +192,7 @@ def test_validate_none_spec_is_ok(venue, credential, location_config,
     return
 
 
+@testbase.attach.parameter(create_client, identifier="client")
 def test_validate_defaults_aspects_when_omitted(venue, credential,
                                                 location_config,
                                                 client) -> None:

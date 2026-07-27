@@ -12,6 +12,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+from .factories import create_nebius_client
+
+
 import pytest
 
 from ccai.provisioning.model.cloud.cloudinterconnect import (
@@ -39,6 +44,7 @@ from ccai.provisioning.venues.nebius.nebiuserrors import (
 from ._specfactory import basic_spec, gpu_cluster_spec
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_validate_happy_path(client, venue, aspects) -> None:
     """
         A clean spec validates successfully.
@@ -51,6 +57,7 @@ def test_validate_happy_path(client, venue, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_validate_gpu_cluster_spec(client, venue, aspects) -> None:
     """
         A GPU-cluster spec with an IB-eligible platform validates.
@@ -63,6 +70,7 @@ def test_validate_gpu_cluster_spec(client, venue, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_validate_rejects_load_balancer(client, venue, aspects) -> None:
     """
         CloudLoadBalancer is rejected at validate-time.
@@ -79,6 +87,7 @@ def test_validate_rejects_load_balancer(client, venue, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_validate_rejects_object_bucket(client, venue, aspects) -> None:
     """
         CloudObjectBucket is rejected — v1 client has no object storage.
@@ -93,6 +102,7 @@ def test_validate_rejects_object_bucket(client, venue, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_validate_rejects_shared_fs_without_existing_id(client, venue,
                                                         aspects) -> None:
     """
@@ -113,6 +123,7 @@ def test_validate_rejects_shared_fs_without_existing_id(client, venue,
     return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_validate_rejects_uncontained_subnet(client, venue, aspects) -> None:
     """
         A subnet CIDR not contained in its network CIDR is rejected.
@@ -130,6 +141,7 @@ def test_validate_rejects_uncontained_subnet(client, venue, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_validate_rejects_ib_on_non_eligible_platform(client, venue,
                                                       aspects) -> None:
     """
@@ -149,6 +161,7 @@ def test_validate_rejects_ib_on_non_eligible_platform(client, venue,
     return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_validate_rejects_unknown_accelerator(client, venue,
                                               aspects) -> None:
     """

@@ -12,7 +12,6 @@ from .factories import (
     create_vultr_venue,
     create_vultr_aspects,
     create_vultr_confirm_aspects,
-    create_vultr_fake_vultr,
     create_vultr_provisioner_factory,
 )
 
@@ -20,5 +19,4 @@ testbase.originate.parameter(create_vultr_credential, identifier="credential")
 testbase.originate.parameter(create_vultr_venue, identifier="venue")
 testbase.originate.parameter(create_vultr_aspects, identifier="aspects")
 testbase.originate.parameter(create_vultr_confirm_aspects, identifier="confirm_aspects")
-testbase.originate.parameter(create_vultr_fake_vultr, identifier="fake_vultr")
 testbase.originate.parameter(create_vultr_provisioner_factory, identifier="provisioner_factory")

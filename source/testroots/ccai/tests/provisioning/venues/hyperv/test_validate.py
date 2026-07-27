@@ -11,6 +11,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+from .factories import create_hyperv_client
+
+
 import pytest
 
 from ccai.provisioning.venues.hyperv.hverrors import HvValidationError
@@ -38,6 +43,7 @@ def _provisioner(*, venue, client, host_config, spec):
     return rtnval
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_validate_happy_path(venue, client, host_config, aspects):
     """
         A well-formed spec validates with ok=True.
@@ -53,6 +59,7 @@ def test_validate_happy_path(venue, client, host_config, aspects):
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_validate_none_spec_is_ok(venue, client, host_config, aspects):
     """
         A provisioner with no spec validates trivially.
@@ -66,6 +73,7 @@ def test_validate_none_spec_is_ok(venue, client, host_config, aspects):
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_validate_rejects_object_bucket(venue, client, host_config, aspects):
     """
         A CloudObjectBucket is rejected at validate time.
@@ -81,6 +89,7 @@ def test_validate_rejects_object_bucket(venue, client, host_config, aspects):
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_validate_rejects_load_balancer(venue, client, host_config,
                                         aspects):
     """
@@ -97,6 +106,7 @@ def test_validate_rejects_load_balancer(venue, client, host_config,
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_validate_warns_on_dns_record(venue, client, host_config, aspects):
     """
         A CloudDnsRecord produces a warning, not an error.
@@ -112,6 +122,7 @@ def test_validate_warns_on_dns_record(venue, client, host_config, aspects):
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_validate_rejects_unknown_image_family(venue, client, host_config,
                                                aspects):
     """
@@ -130,6 +141,7 @@ def test_validate_rejects_unknown_image_family(venue, client, host_config,
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_validate_rejects_unknown_size(venue, client, host_config, aspects):
     """
         An instance with an unmappable size hint is rejected.
@@ -147,6 +159,7 @@ def test_validate_rejects_unknown_size(venue, client, host_config, aspects):
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_validate_aspects_default_substituted(venue, client, host_config):
     """
         validate accepts an omitted aspects argument.

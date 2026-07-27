@@ -11,6 +11,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+from .factories import create_gcp_make_provisioner
+
+
 import pytest
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
@@ -33,6 +38,7 @@ from ccai.provisioning.venues.google.googlecloudprovisioner import (
 from ._specfactory import basic_spec, gpu_compact_spec, tpu_spec
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_plan_then_apply_creates_resources(make_provisioner,
                                            aspects) -> None:
     """
@@ -51,6 +57,7 @@ def test_plan_then_apply_creates_resources(make_provisioner,
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_apply_idempotent(make_provisioner, aspects) -> None:
     """
         Re-applying produces only SKIPs; a re-plan is all-SKIP.
@@ -75,6 +82,7 @@ def test_apply_idempotent(make_provisioner, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_apply_idempotence_property(make_provisioner, aspects) -> None:
     """
         apply ∘ apply yields the same inventory (no new mutating calls).
@@ -93,6 +101,7 @@ def test_apply_idempotence_property(make_provisioner, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_apply_with_vpn_join_injects_user_data(make_provisioner,
                                                aspects) -> None:
     """
@@ -115,6 +124,7 @@ def test_apply_with_vpn_join_injects_user_data(make_provisioner,
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_destroy_requires_confirm(make_provisioner, aspects) -> None:
     """
         destroy without aspects.confirm=True raises.
@@ -126,6 +136,7 @@ def test_destroy_requires_confirm(make_provisioner, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_destroy_is_inverse_of_apply(make_provisioner, aspects,
                                      confirm_aspects) -> None:
     """
@@ -143,6 +154,7 @@ def test_destroy_is_inverse_of_apply(make_provisioner, aspects,
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_gpu_sku_resolution(make_provisioner, aspects) -> None:
     """
         H100_SXM resolves to ``a3-highgpu-8g`` as the machine type.
@@ -161,6 +173,7 @@ def test_gpu_sku_resolution(make_provisioner, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_compact_placement_grouping(make_provisioner, aspects) -> None:
     """
         N instances sharing a compact group produce one ResourcePolicy and
@@ -183,6 +196,7 @@ def test_compact_placement_grouping(make_provisioner, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_tpu_branch_creates_node(make_provisioner, aspects) -> None:
     """
         A TPU spec provisions a TPU node, not a Compute Engine instance.
@@ -197,6 +211,7 @@ def test_tpu_branch_creates_node(make_provisioner, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_tpu_branch_isolation(make_provisioner, aspects) -> None:
     """
         TPU spec produces zero Compute Engine instance calls; GPU spec
@@ -216,6 +231,7 @@ def test_tpu_branch_isolation(make_provisioner, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_tpu_in_inventory(make_provisioner, aspects) -> None:
     """
         A provisioned TPU node appears in inventory with kind 'tpu'.
@@ -229,6 +245,7 @@ def test_tpu_in_inventory(make_provisioner, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_preemption_fail_uses_standard(make_provisioner, aspects) -> None:
     """
         PreemptionPolicy.FAIL produces a STANDARD (non-spot) instance.
@@ -243,6 +260,7 @@ def test_preemption_fail_uses_standard(make_provisioner, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_preemption_reacquire_uses_spot(make_provisioner, aspects) -> None:
     """
         PreemptionPolicy.REACQUIRE produces a SPOT preemptible instance.
@@ -281,6 +299,7 @@ class _RecordingVPN:
         return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_destroy_calls_vpn_delete_device(make_provisioner, aspects,
                                          confirm_aspects) -> None:
     """
@@ -300,6 +319,7 @@ def test_destroy_calls_vpn_delete_device(make_provisioner, aspects,
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_plan_emits_delete_for_owned_orphan(make_provisioner, venue,
                                             credential, region_config,
                                             aspects) -> None:

@@ -12,6 +12,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+from .factories import create_nebius_client
+
+
 from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
@@ -45,6 +50,7 @@ class _RecordingControlPlane:
         return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_plan_reports_creates_first_run(client, venue, aspects) -> None:
     """
         The first plan reports CREATE actions for every resource.
@@ -58,6 +64,7 @@ def test_plan_reports_creates_first_run(client, venue, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_apply_creates_resources(client, venue, aspects) -> None:
     """
         Apply produces network, subnet, sg, keypair, instance, volume
@@ -73,6 +80,7 @@ def test_apply_creates_resources(client, venue, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_replan_after_apply_is_all_skips(client, venue, aspects) -> None:
     """
         After an apply, a fresh plan reports no CREATE/UPDATE actions.
@@ -94,6 +102,7 @@ def test_replan_after_apply_is_all_skips(client, venue, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_apply_then_apply_is_idempotent(client, venue, aspects) -> None:
     """
         A second apply creates nothing and skips everything from the first.
@@ -114,6 +123,7 @@ def test_apply_then_apply_is_idempotent(client, venue, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_apply_with_vpn_renders_user_data(client, venue, aspects) -> None:
     """
         An instance carrying vpn_join receives a cloud-init user-data
@@ -134,6 +144,7 @@ def test_apply_with_vpn_renders_user_data(client, venue, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_destroy_reverses_apply(client, venue, aspects,
                                 confirm_aspects) -> None:
     """
@@ -155,6 +166,7 @@ def test_destroy_reverses_apply(client, venue, aspects,
     return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_destroy_calls_control_plane_delete_device(client, venue, aspects,
                                                    confirm_aspects) -> None:
     """
@@ -175,6 +187,7 @@ def test_destroy_calls_control_plane_delete_device(client, venue, aspects,
     return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_inventory_lists_run_resources(client, venue, aspects) -> None:
     """
         Inventory enumerates the run-id-labelled resources.
@@ -191,6 +204,7 @@ def test_inventory_lists_run_resources(client, venue, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_gpu_cluster_grouping(client, venue, aspects) -> None:
     """
         Two instances sharing an IB interconnect group land in one GPU
@@ -208,6 +222,7 @@ def test_gpu_cluster_grouping(client, venue, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_gpu_sku_resolution(client, venue, aspects) -> None:
     """
         A GPU instance resolves the H100_SXM accelerator to its Nebius SKU.
@@ -223,6 +238,7 @@ def test_gpu_sku_resolution(client, venue, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_nebius_client, identifier="client")
 def test_shared_fs_attach(client, venue, aspects) -> None:
     """
         A shared filesystem is attached (not provisioned) during apply.

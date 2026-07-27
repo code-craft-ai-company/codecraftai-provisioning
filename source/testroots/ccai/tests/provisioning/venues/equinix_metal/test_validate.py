@@ -12,6 +12,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+from .factories import create_equinix_metal_mock_client
+
+
 import pytest
 
 from ccai.provisioning.model.cloud.cloudinterconnect import (
@@ -53,6 +58,7 @@ def _provisioner(*, venue, credential, project_config, spec, mock_client):
     return rtnval
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_validate_happy_path(venue, credential, project_config,
                              mock_client) -> None:
     """
@@ -68,6 +74,7 @@ def test_validate_happy_path(venue, credential, project_config,
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_validate_rejects_object_bucket(venue, credential, project_config,
                                         mock_client) -> None:
     """
@@ -85,6 +92,7 @@ def test_validate_rejects_object_bucket(venue, credential, project_config,
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_validate_rejects_interconnect(venue, credential, project_config,
                                        mock_client) -> None:
     """
@@ -103,6 +111,7 @@ def test_validate_rejects_interconnect(venue, credential, project_config,
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_validate_rejects_load_balancer(venue, credential, project_config,
                                         mock_client) -> None:
     """
@@ -122,6 +131,7 @@ def test_validate_rejects_load_balancer(venue, credential, project_config,
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_validate_rejects_shared_filesystem(venue, credential,
                                             project_config,
                                             mock_client) -> None:
@@ -142,6 +152,7 @@ def test_validate_rejects_shared_filesystem(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_validate_rejects_block_volume_without_existing_id(
         venue, credential, project_config, mock_client) -> None:
     """
@@ -162,6 +173,7 @@ def test_validate_rejects_block_volume_without_existing_id(
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_validate_rejects_unknown_plan(venue, credential, project_config,
                                        mock_client) -> None:
     """
@@ -178,6 +190,7 @@ def test_validate_rejects_unknown_plan(venue, credential, project_config,
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_validate_security_group_is_warning_not_error(
         venue, credential, project_config, mock_client) -> None:
     """

@@ -11,6 +11,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+from .factories import create_linode_mock_client
+
+
 import pytest
 
 from ccai.provisioning.model.cloud.cloudinterconnect import (
@@ -40,6 +45,7 @@ def _provisioner(*, venue, credential, region_config, spec, mock_client):
     return rtnval
 
 
+@testbase.attach.parameter(create_linode_mock_client, identifier="mock_client")
 def test_validate_happy(venue, credential, region_config, aspects,
                         mock_client) -> None:
     """
@@ -54,6 +60,7 @@ def test_validate_happy(venue, credential, region_config, aspects,
     return
 
 
+@testbase.attach.parameter(create_linode_mock_client, identifier="mock_client")
 def test_validate_rejects_unknown_region(venue, credential, region_config,
                                          aspects, mock_client) -> None:
     """
@@ -68,6 +75,7 @@ def test_validate_rejects_unknown_region(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_linode_mock_client, identifier="mock_client")
 def test_validate_rejects_interconnect(venue, credential, region_config,
                                        aspects, mock_client) -> None:
     """
@@ -85,6 +93,7 @@ def test_validate_rejects_interconnect(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_linode_mock_client, identifier="mock_client")
 def test_validate_rejects_shared_fs(venue, credential, region_config,
                                     aspects, mock_client) -> None:
     """
@@ -100,6 +109,7 @@ def test_validate_rejects_shared_fs(venue, credential, region_config,
     return
 
 
+@testbase.attach.parameter(create_linode_mock_client, identifier="mock_client")
 def test_validate_rejects_unknown_image(venue, credential, region_config,
                                         aspects, mock_client) -> None:
     """

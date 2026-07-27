@@ -13,7 +13,6 @@ from .factories import (
     create_gcp_venue,
     create_gcp_aspects,
     create_gcp_confirm_aspects,
-    create_gcp_make_provisioner,
 )
 
 testbase.originate.parameter(create_gcp_credential, identifier="credential")
@@ -21,4 +20,3 @@ testbase.originate.parameter(create_gcp_region_config, identifier="region_config
 testbase.originate.parameter(create_gcp_venue, identifier="venue")
 testbase.originate.parameter(create_gcp_aspects, identifier="aspects")
 testbase.originate.parameter(create_gcp_confirm_aspects, identifier="confirm_aspects")
-testbase.originate.parameter(create_gcp_make_provisioner, identifier="make_provisioner")

@@ -12,6 +12,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+from .factories import (create_hyperv_client, create_hyperv_vpn_control_plane)
+
+
 import pytest
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
@@ -44,6 +49,7 @@ def _provisioner(*, venue, client, host_config, spec, vpn_control_plane=None):
     return rtnval
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_plan_all_create_on_empty_host(venue, client, host_config, aspects):
     """
         Against an empty host every planned action is CREATE.
@@ -61,6 +67,7 @@ def test_plan_all_create_on_empty_host(venue, client, host_config, aspects):
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_plan_re_plan_after_apply_is_all_skip(venue, client, host_config,
                                               aspects):
     """
@@ -80,6 +87,7 @@ def test_plan_re_plan_after_apply_is_all_skip(venue, client, host_config,
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_plan_detects_hardware_drift(venue, client, host_config, aspects):
     """
         A VM whose processor count drifts yields an UPDATE action.
@@ -99,6 +107,7 @@ def test_plan_detects_hardware_drift(venue, client, host_config, aspects):
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_apply_creates_switch_vm_and_starts(venue, client, host_config,
                                             aspects):
     """
@@ -119,6 +128,7 @@ def test_apply_creates_switch_vm_and_starts(venue, client, host_config,
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_apply_realises_hardware_drift_in_place(venue, client, host_config,
                                                 confirm_aspects):
     """
@@ -147,6 +157,7 @@ def test_apply_realises_hardware_drift_in_place(venue, client, host_config,
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_replan_after_resize_emits_skip(venue, client, host_config,
                                         confirm_aspects):
     """
@@ -173,6 +184,7 @@ def test_replan_after_resize_emits_skip(venue, client, host_config,
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_unconfirmed_resize_requires_confirm(venue, client, host_config,
                                              aspects):
     """
@@ -193,6 +205,7 @@ def test_unconfirmed_resize_requires_confirm(venue, client, host_config,
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_apply_encodes_run_id_into_notes(venue, client, host_config,
                                          aspects):
     """
@@ -210,6 +223,7 @@ def test_apply_encodes_run_id_into_notes(venue, client, host_config,
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_apply_with_volume_attaches_disk(venue, client, host_config,
                                          aspects):
     """
@@ -225,6 +239,8 @@ def test_apply_with_volume_attaches_disk(venue, client, host_config,
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
+@testbase.attach.parameter(create_hyperv_vpn_control_plane, identifier="vpn_control_plane")
 def test_apply_with_vpn_join_mounts_iso(venue, client, host_config,
                                         aspects, vpn_control_plane):
     """
@@ -242,6 +258,7 @@ def test_apply_with_vpn_join_mounts_iso(venue, client, host_config,
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_inventory_lists_run_owned_vms(venue, client, host_config, aspects):
     """
         inventory enumerates run-id-owned VMs after apply.
@@ -259,6 +276,7 @@ def test_inventory_lists_run_owned_vms(venue, client, host_config, aspects):
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_inventory_ignores_foreign_vms(venue, client, host_config, aspects):
     """
         inventory does not report VMs that are not run-owned.
@@ -277,6 +295,7 @@ def test_inventory_ignores_foreign_vms(venue, client, host_config, aspects):
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_destroy_requires_confirm(venue, client, host_config, aspects):
     """
         destroy without confirm raises before any teardown.
@@ -293,6 +312,7 @@ def test_destroy_requires_confirm(venue, client, host_config, aspects):
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_destroy_removes_run_owned_resources(venue, client, host_config,
                                              aspects, confirm_aspects):
     """
@@ -312,6 +332,8 @@ def test_destroy_removes_run_owned_resources(venue, client, host_config,
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
+@testbase.attach.parameter(create_hyperv_vpn_control_plane, identifier="vpn_control_plane")
 def test_destroy_invokes_vpn_cleanup(venue, client, host_config, aspects,
                                      confirm_aspects, vpn_control_plane):
     """
@@ -339,6 +361,7 @@ def test_destroy_invokes_vpn_cleanup(venue, client, host_config, aspects,
     return
 
 
+@testbase.attach.parameter(create_hyperv_client, identifier="client")
 def test_persist_inventory_writes_json(tmp_path, venue, client,
                                        host_config, aspects):
     """

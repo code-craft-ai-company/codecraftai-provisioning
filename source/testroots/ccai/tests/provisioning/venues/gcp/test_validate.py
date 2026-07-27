@@ -11,6 +11,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+from .factories import create_gcp_make_provisioner
+
+
 import pytest
 
 from ccai.credentials.basecredential import BaseCredential
@@ -32,6 +37,7 @@ from ccai.provisioning.venues.google.googlecloudprovisioner import (
 from ._specfactory import basic_spec, tpu_spec
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_validate_happy_path(make_provisioner, aspects) -> None:
     """
         A clean spec validates successfully.
@@ -57,6 +63,7 @@ def test_validate_rejects_non_gcp_credential(venue, region_config,
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_validate_rejects_efa(make_provisioner, aspects) -> None:
     """
         Interconnect kind=EFA is rejected as AWS-only.
@@ -71,6 +78,7 @@ def test_validate_rejects_efa(make_provisioner, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_validate_rejects_infiniband(make_provisioner, aspects) -> None:
     """
         INFINIBAND_NDR is rejected with compact-placement guidance.
@@ -86,6 +94,7 @@ def test_validate_rejects_infiniband(make_provisioner, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_validate_rejects_weka_shared_fs(make_provisioner, aspects) -> None:
     """
         Shared filesystem kind=WEKA is rejected with substitution guidance.
@@ -102,6 +111,7 @@ def test_validate_rejects_weka_shared_fs(make_provisioner, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_validate_lustre_maps_to_parallelstore(make_provisioner,
                                                aspects) -> None:
     """
@@ -118,6 +128,7 @@ def test_validate_lustre_maps_to_parallelstore(make_provisioner,
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_validate_lustre_requires_existing_id(make_provisioner,
                                               aspects) -> None:
     """
@@ -134,6 +145,7 @@ def test_validate_lustre_requires_existing_id(make_provisioner,
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_validate_gpu_resolves(make_provisioner, aspects) -> None:
     """
         H100_SXM resolves on GCP via the catalog.
@@ -147,6 +159,7 @@ def test_validate_gpu_resolves(make_provisioner, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_validate_gpu_size_conflict(make_provisioner, aspects) -> None:
     """
         An explicit size that disagrees with the resolved SKU is rejected.
@@ -160,6 +173,7 @@ def test_validate_gpu_size_conflict(make_provisioner, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_validate_tpu_requires_model(make_provisioner, aspects) -> None:
     """
         A TPU spec must resolve its accelerator model on GCP.
@@ -171,6 +185,7 @@ def test_validate_tpu_requires_model(make_provisioner, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_validate_compact_placement_zone_unsupported(make_provisioner,
                                                      aspects) -> None:
     """
@@ -192,6 +207,7 @@ def test_validate_compact_placement_zone_unsupported(make_provisioner,
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_validate_subnet_containment(make_provisioner, aspects) -> None:
     """
         Subnet CIDRs must be contained in their network CIDR.
@@ -207,6 +223,7 @@ def test_validate_subnet_containment(make_provisioner, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")
 def test_validate_rejects_load_balancer(make_provisioner, aspects) -> None:
     """
         Load balancers are deferred to v1.5 and rejected at validate.

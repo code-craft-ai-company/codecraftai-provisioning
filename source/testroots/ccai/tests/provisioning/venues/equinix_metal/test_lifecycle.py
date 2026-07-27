@@ -12,6 +12,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+from .factories import create_equinix_metal_mock_client
+
+
 import pytest
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
@@ -38,6 +43,7 @@ def _provisioner(*, venue, credential, project_config, spec, mock_client,
     return rtnval
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_plan_then_apply_creates_resources(venue, credential,
                                            project_config, mock_client,
                                            aspects) -> None:
@@ -59,6 +65,7 @@ def test_plan_then_apply_creates_resources(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_replan_after_apply_is_all_skip(venue, credential, project_config,
                                         mock_client, aspects) -> None:
     """
@@ -81,6 +88,7 @@ def test_replan_after_apply_is_all_skip(venue, credential, project_config,
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_apply_idempotent_skips_on_reapply(venue, credential,
                                            project_config, mock_client,
                                            aspects) -> None:
@@ -104,6 +112,7 @@ def test_apply_idempotent_skips_on_reapply(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_apply_with_vpn_join_injects_userdata(venue, credential,
                                               project_config, mock_client,
                                               aspects) -> None:
@@ -127,6 +136,7 @@ def test_apply_with_vpn_join_injects_userdata(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_device_uses_resolved_plan_and_os_slug(venue, credential,
                                                project_config, mock_client,
                                                aspects) -> None:
@@ -151,6 +161,7 @@ def test_device_uses_resolved_plan_and_os_slug(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_inventory_lists_owned_resources(venue, credential, project_config,
                                          mock_client, aspects) -> None:
     """
@@ -168,6 +179,7 @@ def test_inventory_lists_owned_resources(venue, credential, project_config,
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_destroy_requires_confirm(venue, credential, project_config,
                                   mock_client, aspects) -> None:
     """
@@ -184,6 +196,7 @@ def test_destroy_requires_confirm(venue, credential, project_config,
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_destroy_reverses_apply(venue, credential, project_config,
                                 mock_client, aspects,
                                 confirm_aspects) -> None:
@@ -224,6 +237,7 @@ class _RecordingVPN:
         return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_destroy_calls_vpn_delete_device(venue, credential, project_config,
                                          mock_client, aspects,
                                          confirm_aspects) -> None:
@@ -246,6 +260,7 @@ def test_destroy_calls_vpn_delete_device(venue, credential, project_config,
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_plan_emits_inplace_update_for_tag_drift(venue, credential,
                                                  project_config,
                                                  mock_client,
@@ -276,6 +291,7 @@ def test_plan_emits_inplace_update_for_tag_drift(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_apply_realizes_tag_drift_in_place(venue, credential,
                                            project_config, mock_client,
                                            aspects) -> None:
@@ -315,6 +331,7 @@ def test_apply_realizes_tag_drift_in_place(venue, credential,
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_reapply_after_tag_drift_is_skip(venue, credential, project_config,
                                          mock_client, aspects) -> None:
     """
@@ -344,6 +361,7 @@ def test_reapply_after_tag_drift_is_skip(venue, credential, project_config,
     return
 
 
+@testbase.attach.parameter(create_equinix_metal_mock_client, identifier="mock_client")
 def test_default_aspects_substituted_when_omitted(venue, credential,
                                                   project_config,
                                                   mock_client) -> None:

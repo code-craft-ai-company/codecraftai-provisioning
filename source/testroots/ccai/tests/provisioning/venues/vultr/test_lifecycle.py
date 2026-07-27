@@ -11,6 +11,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+from .factories import create_vultr_fake_vultr
+
+
 import base64
 
 import pytest
@@ -48,6 +53,7 @@ class _RecordingVPN:
         return
 
 
+@testbase.attach.parameter(create_vultr_fake_vultr, identifier="fake_vultr")
 def test_plan_then_apply_creates_resources(fake_vultr, provisioner_factory,
                                            aspects) -> None:
     """
@@ -68,6 +74,7 @@ def test_plan_then_apply_creates_resources(fake_vultr, provisioner_factory,
     return
 
 
+@testbase.attach.parameter(create_vultr_fake_vultr, identifier="fake_vultr")
 def test_apply_idempotent(fake_vultr, provisioner_factory, aspects) -> None:
     """
         Re-applying produces only SKIPs for the read-tracked resources.
@@ -90,6 +97,7 @@ def test_apply_idempotent(fake_vultr, provisioner_factory, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_vultr_fake_vultr, identifier="fake_vultr")
 def test_apply_with_vpn_join_injects_user_data(fake_vultr,
                                                provisioner_factory,
                                                aspects) -> None:
@@ -114,6 +122,7 @@ def test_apply_with_vpn_join_injects_user_data(fake_vultr,
     return
 
 
+@testbase.attach.parameter(create_vultr_fake_vultr, identifier="fake_vultr")
 def test_destroy_requires_confirm(fake_vultr, provisioner_factory,
                                   aspects) -> None:
     """
@@ -128,6 +137,7 @@ def test_destroy_requires_confirm(fake_vultr, provisioner_factory,
     return
 
 
+@testbase.attach.parameter(create_vultr_fake_vultr, identifier="fake_vultr")
 def test_destroy_reverses_apply(fake_vultr, provisioner_factory, aspects,
                                 confirm_aspects) -> None:
     """
@@ -147,6 +157,7 @@ def test_destroy_reverses_apply(fake_vultr, provisioner_factory, aspects,
     return
 
 
+@testbase.attach.parameter(create_vultr_fake_vultr, identifier="fake_vultr")
 def test_destroy_calls_vpn_delete_device(fake_vultr, provisioner_factory,
                                          aspects, confirm_aspects) -> None:
     """
@@ -167,6 +178,7 @@ def test_destroy_calls_vpn_delete_device(fake_vultr, provisioner_factory,
     return
 
 
+@testbase.attach.parameter(create_vultr_fake_vultr, identifier="fake_vultr")
 def test_inventory_persists_to_output(fake_vultr, provisioner_factory,
                                       aspects) -> None:
     """
@@ -186,6 +198,7 @@ def test_inventory_persists_to_output(fake_vultr, provisioner_factory,
     return
 
 
+@testbase.attach.parameter(create_vultr_fake_vultr, identifier="fake_vultr")
 @given(extra_runs=st.integers(min_value=1, max_value=3), constraints={"max_examples": 6})
 def test_apply_compose_apply_idempotence(fake_vultr, provisioner_factory,
                                          aspects, extra_runs) -> None:

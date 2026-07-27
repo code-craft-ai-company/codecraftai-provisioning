@@ -14,7 +14,6 @@ from .factories import (
     create_linode_venue,
     create_linode_aspects,
     create_linode_confirm_aspects,
-    create_linode_mock_client,
 )
 
 testbase.originate.parameter(create_linode_credential, identifier="credential")
@@ -22,7 +21,6 @@ testbase.originate.parameter(create_linode_region_config, identifier="region_con
 testbase.originate.parameter(create_linode_venue, identifier="venue")
 testbase.originate.parameter(create_linode_aspects, identifier="aspects")
 testbase.originate.parameter(create_linode_confirm_aspects, identifier="confirm_aspects")
-testbase.originate.parameter(create_linode_mock_client, identifier="mock_client")
 
 # Stands in for pytest tmp_path.
 testbase.originate.parameter(create_temporary_directory,

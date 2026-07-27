@@ -11,6 +11,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+from .factories import create_vultr_fake_vultr
+
+
 import pytest
 
 from ccai.testbase.properties import given
@@ -29,6 +34,7 @@ from ccai.provisioning.venues.vultr.vultrerrors import (
 from ._specfactory import basic_spec
 
 
+@testbase.attach.parameter(create_vultr_fake_vultr, identifier="fake_vultr")
 def test_validate_happy_path(fake_vultr, provisioner_factory, aspects) -> None:
     """
         A baseline spec validates cleanly.
@@ -41,6 +47,7 @@ def test_validate_happy_path(fake_vultr, provisioner_factory, aspects) -> None:
     return
 
 
+@testbase.attach.parameter(create_vultr_fake_vultr, identifier="fake_vultr")
 def test_validate_rejects_unresolvable_region(fake_vultr,
                                               provisioner_factory,
                                               aspects) -> None:
