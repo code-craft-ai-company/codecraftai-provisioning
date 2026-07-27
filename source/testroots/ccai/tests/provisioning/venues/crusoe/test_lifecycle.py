@@ -11,9 +11,7 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import sys
 
-from pathlib import Path
 
 import pytest
 
@@ -50,11 +48,10 @@ from ccai.provisioning.venues.crusoe.crusoeerrors import (
     CrusoeValidationError
 )
 
-sys.path.insert(0, str(Path(__file__).parent))
 
 from _mockclient import MockCrusoeClient  # noqa: E402
 from _specfactory import basic_spec  # noqa: E402
-from conftest import make_provisioner, _Aspects  # noqa: E402
+from .factories import make_provisioner, _Aspects
 
 
 # ----------------------------------------------------------------------

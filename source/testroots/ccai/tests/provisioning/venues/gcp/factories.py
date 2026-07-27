@@ -1,5 +1,5 @@
 """
-    .. module:: conftest
+    .. module:: factories
     :platform: Darwin, Linux, Unix, Windows
     :synopsis: Shared fixtures for GCP venue tests.
 
@@ -111,3 +111,30 @@ def create_gcp_make_provisioner(venue, credential, region_config, constraints=No
         fakes = install_fakes(provisioner=provisioner)
         return provisioner, fakes
     yield _factory
+
+
+def install_fakes(*, provisioner: GoogleCloudProvisioner) -> dict:
+    """
+        Install in-memory fake clients into a provisioner's session factory.
+
+        Not a resource factory: it mutates a provisioner the caller already
+        holds rather than producing a resource of its own.
+
+        :param provisioner: The GoogleCloudProvisioner to wire fakes into.
+
+        :returns: A dict of the installed fake client objects.
+    """
+    compute = build_fake_compute()
+    tpu = FakeTpuClient()
+    storage = FakeStorageClient()
+    dns = FakeDnsClient()
+
+    factory = provisioner.session_factory
+    factory.set_client(service_name=SERVICE_COMPUTE, client=compute)
+    factory.set_client(service_name=SERVICE_TPU, client=tpu)
+    factory.set_client(service_name=SERVICE_STORAGE, client=storage)
+    factory.set_client(service_name=SERVICE_DNS, client=dns)
+
+    rtnval = {"compute": compute, "tpu": tpu, "storage": storage,
+              "dns": dns}
+    return rtnval

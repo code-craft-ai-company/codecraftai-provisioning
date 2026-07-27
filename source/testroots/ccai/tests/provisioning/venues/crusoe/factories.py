@@ -1,5 +1,5 @@
 """
-    .. module:: conftest
+    .. module:: factories
     :platform: Darwin, Linux, Unix, Windows
     :synopsis: Shared pytest fixtures for the Crusoe venue tests.
 
@@ -10,10 +10,6 @@ __author__ = "Myron Walker"
 __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
-
-import sys
-
-from pathlib import Path
 
 from collections.abc import Generator
 
@@ -28,9 +24,8 @@ from ccai.provisioning.venues.crusoe.crusoeprojectconfig import (
     CrusoeProjectConfig
 )
 
-sys.path.insert(0, str(Path(__file__).parent))
 
-from _mockclient import MockCrusoeClient  # noqa: E402
+from ._mockclient import MockCrusoeClient
 
 
 class _Aspects:
@@ -102,3 +97,42 @@ def create_crusoe_project_config(constraints=None) -> Generator[CrusoeProjectCon
     """
     rtnval = CrusoeProjectConfig(project_id="proj-1", location="us-east1-a")
     yield rtnval
+
+
+class _Aspects:
+    """
+        Minimal aspects stand-in carrying runid and confirm.
+    """
+
+    def __init__(self, *, runid: str = "run-1",
+                 confirm: bool = False) -> None:
+        """
+            :param runid: The provisioning run identifier.
+            :param confirm: Whether destroy is confirmed.
+        """
+        self.runid = runid
+        self.confirm = confirm
+        return
+
+
+def make_provisioner(*, venue: CloudVenue, client: MockCrusoeClient,
+                     project_config: CrusoeProjectConfig, spec=None,
+                     vpn_control_plane=None) -> CrusoeCloudProvisioner:
+    """
+        Build a CrusoeCloudProvisioner bound to the mock client.
+
+        Not a resource factory: the tests call it directly with a spec they
+        build per case, so there is nothing for the injector to resolve.
+
+        :param venue: The CloudVenue.
+        :param client: The MockCrusoeClient.
+        :param project_config: The CrusoeProjectConfig.
+        :param spec: Optional CrusoeSpec.
+        :param vpn_control_plane: Optional VPN control plane.
+
+        :returns: A CrusoeCloudProvisioner.
+    """
+    rtnval = CrusoeCloudProvisioner(venue=venue, client=client,
+                                    project_config=project_config, spec=spec,
+                                    vpn_control_plane=vpn_control_plane)
+    return rtnval
