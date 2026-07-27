@@ -11,7 +11,9 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from collections.abc import Generator
+
+from ccai import testbase
 
 from ccai.credentials.digitaloceanapitokencredential import (
     DigitalOceanApiTokenCredential
@@ -29,9 +31,8 @@ from ccai.provisioning.venues.digitalocean.doregionconfig import (
 
 from ._mockclient import MockDigitalOceanRawClient
 
-
-@pytest.fixture
-def credential() -> DigitalOceanApiTokenCredential:
+@testbase.register.resource_factory()
+def create_digitalocean_credential(constraints=None) -> Generator[DigitalOceanApiTokenCredential, None, None]:
     """
         Return a deterministic DigitalOceanApiTokenCredential.
     """
@@ -44,11 +45,11 @@ def credential() -> DigitalOceanApiTokenCredential:
         spaces_access_key="DO00TESTACCESSKEY",
         spaces_secret_key="test-spaces-secret",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def region_config() -> DoRegionConfig:
+@testbase.register.resource_factory()
+def create_digitalocean_region_config(constraints=None) -> Generator[DoRegionConfig, None, None]:
     """
         Return a deterministic DoRegionConfig.
     """
@@ -56,11 +57,11 @@ def region_config() -> DoRegionConfig:
         region="nyc3", spaces_region="nyc3",
         default_tags={"ccai:component": "test"},
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def venue() -> CloudVenue:
+@testbase.register.resource_factory()
+def create_digitalocean_venue(constraints=None) -> Generator[CloudVenue, None, None]:
     """
         Return a CloudVenue for tests.
     """
@@ -68,20 +69,20 @@ def venue() -> CloudVenue:
         name="do-test", provider="digitalocean",
         region="nyc3", credential="do-test",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def raw_client() -> MockDigitalOceanRawClient:
+@testbase.register.resource_factory()
+def create_digitalocean_raw_client(constraints=None) -> Generator[MockDigitalOceanRawClient, None, None]:
     """
         Return a fresh in-memory mock pydo client.
     """
     rtnval = MockDigitalOceanRawClient()
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def do_client(credential, raw_client) -> DigitalOceanClient:
+@testbase.register.resource_factory()
+def create_digitalocean_do_client(credential, raw_client, constraints=None) -> Generator[DigitalOceanClient, None, None]:
     """
         Return a DigitalOceanClient wrapping the mock clients.
 
@@ -91,24 +92,24 @@ def do_client(credential, raw_client) -> DigitalOceanClient:
     """
     rtnval = DigitalOceanClient(credential=credential, raw_client=raw_client,
                                 spaces_client=raw_client.spaces)
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_digitalocean_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Return a ProvisioningAspects bundle for tests.
     """
     rtnval = ProvisioningAspects(runid="dotestrun01", verify_timeout=30.0,
                                  verify_interval=0.05)
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def confirm_aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_digitalocean_confirm_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Aspects with confirm=True for destroy.
     """
     rtnval = ProvisioningAspects(runid="dotestrun01", confirm=True,
                                  verify_timeout=30.0, verify_interval=0.05)
-    return rtnval
+    yield rtnval

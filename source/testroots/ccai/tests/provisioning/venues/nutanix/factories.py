@@ -1,7 +1,7 @@
 """
     .. module:: conftest
     :platform: Darwin, Linux, Unix, Windows
-    :synopsis: Shared fixtures for the XCP-ng venue tests.
+    :synopsis: Shared fixtures for Nutanix venue tests.
 
     .. moduleauthor:: Myron Walker <myron.walker@gmail.com>
 """
@@ -11,40 +11,41 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from collections.abc import Generator
+
+from ccai import testbase
 
 from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
 from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
 
-
-@pytest.fixture
-def venue() -> CloudVenue:
+@testbase.register.resource_factory()
+def create_nutanix_venue(constraints=None) -> Generator[CloudVenue, None, None]:
     """
-        Return a CloudVenue for the XCP-ng venue tests.
+        Return a CloudVenue for the Nutanix venue tests.
     """
-    rtnval = CloudVenue(name="xcpng-test", provider="xcpng",
-                        endpoint="https://xen-master.lab",
-                        region="homelab", credential="xen-cred")
-    return rtnval
+    rtnval = CloudVenue(name="nutanix-test", provider="nutanix",
+                        endpoint="https://prism.example.com:9440",
+                        region="homelab", credential="ntx-test")
+    yield rtnval
 
 
-@pytest.fixture
-def aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_nutanix_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Return a ProvisioningAspects bundle for tests.
     """
     rtnval = ProvisioningAspects(runid="testrun01", verify_timeout=30.0,
                                  verify_interval=0.05)
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def confirm_aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_nutanix_confirm_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Return ProvisioningAspects with confirm=True for destroy.
     """
     rtnval = ProvisioningAspects(runid="testrun01", confirm=True,
                                  verify_timeout=30.0, verify_interval=0.05)
-    return rtnval
+    yield rtnval

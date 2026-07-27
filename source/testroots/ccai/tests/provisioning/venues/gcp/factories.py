@@ -11,7 +11,10 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from collections.abc import Generator
+from typing import Any
+
+from ccai import testbase
 
 from ccai.credentials.gcpserviceaccountkeycredential import (
     GcpServiceAccountKeyCredential
@@ -32,9 +35,8 @@ from ._mockgcp import (
     build_fake_compute, FakeTpuClient, FakeStorageClient, FakeDnsClient
 )
 
-
-@pytest.fixture
-def credential() -> GcpServiceAccountKeyCredential:
+@testbase.register.resource_factory()
+def create_gcp_credential(constraints=None) -> Generator[GcpServiceAccountKeyCredential, None, None]:
     """
         Return a deterministic GcpServiceAccountKeyCredential.
     """
@@ -46,11 +48,11 @@ def credential() -> GcpServiceAccountKeyCredential:
         private_key="-----BEGIN PRIVATE KEY-----\nFAKE\n"
                     "-----END PRIVATE KEY-----\n",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def region_config() -> GcpRegionConfig:
+@testbase.register.resource_factory()
+def create_gcp_region_config(constraints=None) -> Generator[GcpRegionConfig, None, None]:
     """
         Return a deterministic GcpRegionConfig.
     """
@@ -59,11 +61,11 @@ def region_config() -> GcpRegionConfig:
         zone="us-central1-a",
         default_tags={"ccai:component": "test"},
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def venue() -> CloudVenue:
+@testbase.register.resource_factory()
+def create_gcp_venue(constraints=None) -> Generator[CloudVenue, None, None]:
     """
         Return a CloudVenue for tests.
     """
@@ -72,55 +74,31 @@ def venue() -> CloudVenue:
         account="codecraftai-test",
         region="us-central1", credential="gcp-test",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_gcp_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Return a ProvisioningAspects bundle for tests.
     """
     rtnval = ProvisioningAspects(runid="testrun01", verify_timeout=30.0,
                                  verify_interval=0.05)
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def confirm_aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_gcp_confirm_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Aspects with confirm=True for destroy.
     """
     rtnval = ProvisioningAspects(runid="testrun01", confirm=True,
                                  verify_timeout=30.0, verify_interval=0.05)
-    return rtnval
+    yield rtnval
 
 
-def install_fakes(*, provisioner: GoogleCloudProvisioner) -> dict:
-    """
-        Install in-memory fake clients into a provisioner's session factory.
-
-        :param provisioner: The GoogleCloudProvisioner to wire fakes into.
-
-        :returns: A dict of the installed fake client objects.
-    """
-    compute = build_fake_compute()
-    tpu = FakeTpuClient()
-    storage = FakeStorageClient()
-    dns = FakeDnsClient()
-
-    factory = provisioner.session_factory
-    factory.set_client(service_name=SERVICE_COMPUTE, client=compute)
-    factory.set_client(service_name=SERVICE_TPU, client=tpu)
-    factory.set_client(service_name=SERVICE_STORAGE, client=storage)
-    factory.set_client(service_name=SERVICE_DNS, client=dns)
-
-    rtnval = {"compute": compute, "tpu": tpu, "storage": storage,
-              "dns": dns}
-    return rtnval
-
-
-@pytest.fixture
-def make_provisioner(venue, credential, region_config):
+@testbase.register.resource_factory()
+def create_gcp_make_provisioner(venue, credential, region_config, constraints=None) -> Generator[Any, None, None]:
     """
         Return a factory that builds a wired GoogleCloudProvisioner.
     """
@@ -132,4 +110,4 @@ def make_provisioner(venue, credential, region_config):
         )
         fakes = install_fakes(provisioner=provisioner)
         return provisioner, fakes
-    return _factory
+    yield _factory

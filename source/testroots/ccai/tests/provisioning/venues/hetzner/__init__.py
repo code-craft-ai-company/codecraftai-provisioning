@@ -3,6 +3,7 @@
 """
 
 from ccai import testbase
+from ccai.testbase.factories import create_temporary_directory
 
 from .factories import (
     create_credential,
@@ -26,3 +27,7 @@ testbase.originate.parameter(create_confirm_aspects, identifier="confirm_aspects
 testbase.originate.parameter(create_client, identifier="client")
 testbase.originate.parameter(create_dns_client, identifier="dns_client")
 testbase.originate.parameter(create_vpn_control_plane, identifier="vpn_control_plane")
+
+# Stands in for pytest tmp_path.
+testbase.originate.parameter(create_temporary_directory,
+                             identifier="tmp_path")

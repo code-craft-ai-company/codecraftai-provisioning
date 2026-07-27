@@ -11,7 +11,9 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from collections.abc import Generator
+
+from ccai import testbase
 
 from ccai.credentials.linodeapitokencredential import (
     LinodeApiTokenCredential
@@ -26,9 +28,8 @@ from ccai.provisioning.venues.linode.linoderegionconfig import (
 
 from ._mocklinodeclient import MockLinodeClient
 
-
-@pytest.fixture
-def credential() -> LinodeApiTokenCredential:
+@testbase.register.resource_factory()
+def create_linode_credential(constraints=None) -> Generator[LinodeApiTokenCredential, None, None]:
     """
         Return a deterministic LinodeApiTokenCredential.
     """
@@ -36,11 +37,11 @@ def credential() -> LinodeApiTokenCredential:
         identifier="linode-test", categories=["cloud-venue"],
         token="linode-token-value",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def region_config() -> LinodeRegionConfig:
+@testbase.register.resource_factory()
+def create_linode_region_config(constraints=None) -> Generator[LinodeRegionConfig, None, None]:
     """
         Return a deterministic LinodeRegionConfig.
     """
@@ -48,11 +49,11 @@ def region_config() -> LinodeRegionConfig:
         region="us-east", object_storage_cluster="us-east-1",
         default_tags={"ccai:component": "test"},
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def venue() -> CloudVenue:
+@testbase.register.resource_factory()
+def create_linode_venue(constraints=None) -> Generator[CloudVenue, None, None]:
     """
         Return a CloudVenue for tests.
     """
@@ -60,33 +61,33 @@ def venue() -> CloudVenue:
         name="linode-test", provider="linode",
         region="us-east", credential="linode-test",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_linode_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Return a ProvisioningAspects bundle for tests.
     """
     rtnval = ProvisioningAspects(runid="testrun01", verify_timeout=30.0,
                                  verify_interval=0.05)
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def confirm_aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_linode_confirm_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Aspects with confirm=True for destroy.
     """
     rtnval = ProvisioningAspects(runid="testrun01", confirm=True,
                                  verify_timeout=30.0, verify_interval=0.05)
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def mock_client() -> MockLinodeClient:
+@testbase.register.resource_factory()
+def create_linode_mock_client(constraints=None) -> Generator[MockLinodeClient, None, None]:
     """
         Return a fresh MockLinodeClient.
     """
     rtnval = MockLinodeClient()
-    return rtnval
+    yield rtnval

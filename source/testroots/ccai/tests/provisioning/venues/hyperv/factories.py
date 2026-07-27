@@ -13,7 +13,9 @@ __credits__ = []
 
 from typing import Any, Dict, List
 
-import pytest
+from collections.abc import Generator
+
+from ccai import testbase
 
 from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
@@ -99,9 +101,8 @@ class FakeVpnControlPlane:
         self.deleted_devices.append(device_id)
         return
 
-
-@pytest.fixture
-def venue() -> CloudVenue:
+@testbase.register.resource_factory()
+def create_hyperv_venue(constraints=None) -> Generator[CloudVenue, None, None]:
     """
         Return a CloudVenue for the Hyper-V venue tests.
 
@@ -110,44 +111,44 @@ def venue() -> CloudVenue:
     rtnval = CloudVenue(name="hyperv-test", provider="hyperv",
                         endpoint="winrm://hv-host:5985",
                         region="lab", credential="hv-cred")
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def host_config() -> HvHostConfig:
+@testbase.register.resource_factory()
+def create_hyperv_host_config(constraints=None) -> Generator[HvHostConfig, None, None]:
     """
         Return an HvHostConfig for the Hyper-V venue tests.
 
         :returns: An HvHostConfig instance.
     """
     rtnval = HvHostConfig(host="hv-host")
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def client() -> MockHypervClient:
+@testbase.register.resource_factory()
+def create_hyperv_client(constraints=None) -> Generator[MockHypervClient, None, None]:
     """
         Return a fresh in-memory MockHypervClient.
 
         :returns: A MockHypervClient instance.
     """
     rtnval = MockHypervClient()
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def vpn_control_plane() -> FakeVpnControlPlane:
+@testbase.register.resource_factory()
+def create_hyperv_vpn_control_plane(constraints=None) -> Generator[FakeVpnControlPlane, None, None]:
     """
         Return a FakeVpnControlPlane for VPN-join tests.
 
         :returns: A FakeVpnControlPlane instance.
     """
     rtnval = FakeVpnControlPlane()
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_hyperv_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Return a ProvisioningAspects bundle for tests.
 
@@ -155,11 +156,11 @@ def aspects() -> ProvisioningAspects:
     """
     rtnval = ProvisioningAspects(runid="hvrun01", verify_timeout=30.0,
                                  verify_interval=0.05)
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def confirm_aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_hyperv_confirm_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Return ProvisioningAspects with confirm=True for destroy.
 
@@ -167,4 +168,4 @@ def confirm_aspects() -> ProvisioningAspects:
     """
     rtnval = ProvisioningAspects(runid="hvrun01", confirm=True,
                                  verify_timeout=30.0, verify_interval=0.05)
-    return rtnval
+    yield rtnval

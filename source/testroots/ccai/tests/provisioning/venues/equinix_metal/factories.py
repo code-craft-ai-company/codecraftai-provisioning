@@ -11,7 +11,9 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from collections.abc import Generator
+
+from ccai import testbase
 
 from ccai.credentials.equinixmetalapitokencredential import (
     EquinixMetalApiTokenCredential
@@ -26,9 +28,8 @@ from ccai.provisioning.venues.equinix_metal.metalprojectconfig import (
 
 from ._mockmetalclient import MockMetalClient
 
-
-@pytest.fixture
-def credential() -> EquinixMetalApiTokenCredential:
+@testbase.register.resource_factory()
+def create_equinix_metal_credential(constraints=None) -> Generator[EquinixMetalApiTokenCredential, None, None]:
     """
         Return a deterministic EquinixMetalApiTokenCredential.
     """
@@ -36,11 +37,11 @@ def credential() -> EquinixMetalApiTokenCredential:
         identifier="equinix-test", categories=["cloud-venue"],
         token="metal-test-token",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def project_config() -> MetalProjectConfig:
+@testbase.register.resource_factory()
+def create_equinix_metal_project_config(constraints=None) -> Generator[MetalProjectConfig, None, None]:
     """
         Return a deterministic MetalProjectConfig.
     """
@@ -48,11 +49,11 @@ def project_config() -> MetalProjectConfig:
         project_id="proj-test", metro="sv",
         default_tags={"ccai:component": "test"},
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def venue() -> CloudVenue:
+@testbase.register.resource_factory()
+def create_equinix_metal_venue(constraints=None) -> Generator[CloudVenue, None, None]:
     """
         Return a CloudVenue for tests.
     """
@@ -60,33 +61,33 @@ def venue() -> CloudVenue:
         name="metal-test", provider="equinix-metal",
         account="proj-test", region="sv", credential="equinix-test",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_equinix_metal_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Return a ProvisioningAspects bundle for tests.
     """
     rtnval = ProvisioningAspects(runid="testrun01", verify_timeout=5.0,
                                  verify_interval=0.01)
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def confirm_aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_equinix_metal_confirm_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Aspects with confirm=True for destroy.
     """
     rtnval = ProvisioningAspects(runid="testrun01", confirm=True,
                                  verify_timeout=5.0, verify_interval=0.01)
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def mock_client() -> MockMetalClient:
+@testbase.register.resource_factory()
+def create_equinix_metal_mock_client(constraints=None) -> Generator[MockMetalClient, None, None]:
     """
         Return a fresh deterministic MockMetalClient.
     """
     rtnval = MockMetalClient(project_id="proj-test")
-    return rtnval
+    yield rtnval

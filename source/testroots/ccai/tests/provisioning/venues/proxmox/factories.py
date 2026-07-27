@@ -11,16 +11,17 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from collections.abc import Generator
+
+from ccai import testbase
 
 from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
 from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
 
-
-@pytest.fixture
-def venue() -> CloudVenue:
+@testbase.register.resource_factory()
+def create_proxmox_venue(constraints=None) -> Generator[CloudVenue, None, None]:
     """
         Return a CloudVenue for the Proxmox venue tests.
 
@@ -29,11 +30,11 @@ def venue() -> CloudVenue:
     rtnval = CloudVenue(name="proxmox-test", provider="proxmox",
                         endpoint="https://pve.test:8006",
                         region="local", credential="pve-test")
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_proxmox_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Return a ProvisioningAspects bundle for tests.
 
@@ -41,11 +42,11 @@ def aspects() -> ProvisioningAspects:
     """
     rtnval = ProvisioningAspects(runid="testrun01", verify_timeout=30.0,
                                  verify_interval=0.05)
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def confirm_aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_proxmox_confirm_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Return ProvisioningAspects with confirm=True for destroy.
 
@@ -53,4 +54,4 @@ def confirm_aspects() -> ProvisioningAspects:
     """
     rtnval = ProvisioningAspects(runid="testrun01", confirm=True,
                                  verify_timeout=30.0, verify_interval=0.05)
-    return rtnval
+    yield rtnval

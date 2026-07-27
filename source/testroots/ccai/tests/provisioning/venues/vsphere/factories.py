@@ -11,7 +11,9 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from collections.abc import Generator
+
+from ccai import testbase
 
 from ccai.credentials.vspherecredential import VSphereCredential
 from ccai.provisioning.aspects.provisioningaspects import (
@@ -22,9 +24,8 @@ from ccai.provisioning.venues.vsphere.vspherevenueconfig import (
     VSphereVenueConfig
 )
 
-
-@pytest.fixture
-def credential() -> VSphereCredential:
+@testbase.register.resource_factory()
+def create_vsphere_credential(constraints=None) -> Generator[VSphereCredential, None, None]:
     """
         Return a deterministic VSphereCredential.
     """
@@ -32,11 +33,11 @@ def credential() -> VSphereCredential:
         identifier="vsphere-test", categories=["vm-venue", "vsphere-basic"],
         username="administrator@vsphere.local", password="secret-value",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def venue() -> CloudVenue:
+@testbase.register.resource_factory()
+def create_vsphere_venue(constraints=None) -> Generator[CloudVenue, None, None]:
     """
         Return a CloudVenue for tests.
     """
@@ -45,11 +46,11 @@ def venue() -> CloudVenue:
         endpoint="https://vcenter.lab", region="homelab",
         credential="vsphere-test",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def config() -> VSphereVenueConfig:
+@testbase.register.resource_factory()
+def create_vsphere_config(constraints=None) -> Generator[VSphereVenueConfig, None, None]:
     """
         Return a VSphereVenueConfig with a content library and VLAN mapping.
     """
@@ -62,24 +63,24 @@ def config() -> VSphereVenueConfig:
         subnet_vlan_ids={"pg-a": 1020},
         default_tags={"ccai:component": "test"},
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_vsphere_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Return a ProvisioningAspects bundle for tests.
     """
     rtnval = ProvisioningAspects(runid="vsrun01", verify_timeout=30.0,
                                  verify_interval=0.05)
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def confirm_aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_vsphere_confirm_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Aspects with confirm=True for destroy.
     """
     rtnval = ProvisioningAspects(runid="vsrun01", confirm=True,
                                  verify_timeout=30.0, verify_interval=0.05)
-    return rtnval
+    yield rtnval

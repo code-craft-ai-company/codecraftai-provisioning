@@ -11,7 +11,9 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from collections.abc import Generator
+
+from ccai import testbase
 
 from ccai.credentials.oraclecloudapikeycredential import (
     OracleCloudApiKeyCredential
@@ -29,9 +31,8 @@ _FAKE_PRIVATE_KEY = (
     "-----END PRIVATE KEY-----\n"
 )
 
-
-@pytest.fixture
-def credential() -> OracleCloudApiKeyCredential:
+@testbase.register.resource_factory()
+def create_oracle_credential(constraints=None) -> Generator[OracleCloudApiKeyCredential, None, None]:
     """
         Return a deterministic OracleCloudApiKeyCredential.
     """
@@ -42,11 +43,11 @@ def credential() -> OracleCloudApiKeyCredential:
         private_key=_FAKE_PRIVATE_KEY,
         fingerprint="aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def region_config() -> OciRegionConfig:
+@testbase.register.resource_factory()
+def create_oracle_region_config(constraints=None) -> Generator[OciRegionConfig, None, None]:
     """
         Return a deterministic OciRegionConfig.
     """
@@ -56,11 +57,11 @@ def region_config() -> OciRegionConfig:
         availability_domain="Uocm:US-ASHBURN-AD-1",
         default_tags={"ccai_component": "test"},
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def venue() -> CloudVenue:
+@testbase.register.resource_factory()
+def create_oracle_venue(constraints=None) -> Generator[CloudVenue, None, None]:
     """
         Return a CloudVenue for the Oracle tests.
     """
@@ -69,24 +70,24 @@ def venue() -> CloudVenue:
         account="test-tenancy",
         region="us-ashburn-1", credential="oci-test",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_oracle_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Return a ProvisioningAspects bundle for tests.
     """
     rtnval = ProvisioningAspects(runid="testrun01", verify_timeout=30.0,
                                  verify_interval=0.05)
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def confirm_aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_oracle_confirm_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Aspects with confirm=True for destroy.
     """
     rtnval = ProvisioningAspects(runid="testrun01", confirm=True,
                                  verify_timeout=30.0, verify_interval=0.05)
-    return rtnval
+    yield rtnval

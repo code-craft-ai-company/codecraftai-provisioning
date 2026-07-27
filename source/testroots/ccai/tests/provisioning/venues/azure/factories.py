@@ -11,7 +11,9 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from collections.abc import Generator
+
+from ccai import testbase
 
 from ccai.credentials.azureserviceprincipalcredential import (
     AzureServicePrincipalCredential
@@ -29,9 +31,8 @@ from ccai.provisioning.venues.azure.azuresessionfactory import (
 
 from ._fakeazure import FakeAzureWorld
 
-
-@pytest.fixture
-def credential() -> AzureServicePrincipalCredential:
+@testbase.register.resource_factory()
+def create_azure_credential(constraints=None) -> Generator[AzureServicePrincipalCredential, None, None]:
     """
         Return a deterministic AzureServicePrincipalCredential.
     """
@@ -40,11 +41,11 @@ def credential() -> AzureServicePrincipalCredential:
         tenant_id="tenant-abc", client_id="client-abc",
         client_secret="secret-value",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def region_config() -> AzureRegionConfig:
+@testbase.register.resource_factory()
+def create_azure_region_config(constraints=None) -> Generator[AzureRegionConfig, None, None]:
     """
         Return a deterministic AzureRegionConfig.
     """
@@ -53,11 +54,11 @@ def region_config() -> AzureRegionConfig:
         resource_group="rg-testrun01",
         default_tags={"ccai:component": "test"},
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def venue() -> CloudVenue:
+@testbase.register.resource_factory()
+def create_azure_venue(constraints=None) -> Generator[CloudVenue, None, None]:
     """
         Return a CloudVenue for tests.
     """
@@ -66,21 +67,21 @@ def venue() -> CloudVenue:
         account="sub-test-0001",
         region="eastus", credential="azure-test",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def world() -> FakeAzureWorld:
+@testbase.register.resource_factory()
+def create_azure_world(constraints=None) -> Generator[FakeAzureWorld, None, None]:
     """
         Return a fresh in-memory FakeAzureWorld.
     """
     rtnval = FakeAzureWorld(location="eastus")
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def session_factory(credential, region_config,
-                    world) -> AzureSessionFactory:
+@testbase.register.resource_factory()
+def create_azure_session_factory(credential, region_config,
+                    world, constraints=None) -> Generator[AzureSessionFactory, None, None]:
     """
         Return an AzureSessionFactory wired to the fake azure-mgmt clients.
     """
@@ -94,24 +95,24 @@ def session_factory(credential, region_config,
         dns=world.dns_client(),
     )
     rtnval = factory
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_azure_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Return a ProvisioningAspects bundle for tests.
     """
     rtnval = ProvisioningAspects(runid="testrun01", verify_timeout=30.0,
                                  verify_interval=0.05)
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def confirm_aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_azure_confirm_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Aspects with confirm=True for destroy.
     """
     rtnval = ProvisioningAspects(runid="testrun01", confirm=True,
                                  verify_timeout=30.0, verify_interval=0.05)
-    return rtnval
+    yield rtnval
