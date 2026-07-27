@@ -47,10 +47,20 @@ There are no `conftest.py` files; testbase does not read pytest conftest files, 
 fixtures placed there are invisible to the runner. Test resources are declared as
 testbase factories instead — see Resource Lifespan below.
 
-`pytest` is still imported in the test modules for `pytest.raises` as an
-exception-assertion helper, because testbase has no context-manager equivalent
-(`expect_exception` marks a whole test, not a single statement). That is the one
-remaining pytest dependency and it is on the way out; do not add new pytest usage.
+There is no `pytest` dependency. Use `testbase.raises` as the exception-assertion
+context manager, and raise `ccai.errors.exceptions.SkipError` to skip a test —
+`pytest.skip` raises an exception testbase does not recognise and reports as an
+error.
+
+```python
+    with testbase.raises(SchemaSemanticError) as caught:
+        validate(spec=spec)
+
+    assert "inst-a" in str(caught.exception)
+```
+
+`expect_exception` is the other option, but it marks a whole test as expected to
+raise rather than scoping the expectation to one statement.
 
 Run the suite with the `testbase` command. Both `--root` at the `ccai` namespace
 directory and the `PYTHONPATH` are required:
