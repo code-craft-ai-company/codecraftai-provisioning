@@ -34,6 +34,7 @@ codecraftai-credentials = { git = "https://github.com/automationmojo/codecraftai
 codecraftai-restclient-base = { git = "https://github.com/automationmojo/codecraftai-restclient-base.git", branch = "main" }
 codecraftai-configuration = { git = "https://github.com/automationmojo/codecraftai-configuration.git", branch = "main" }
 codecraftai-landscaping = { git = "https://github.com/automationmojo/codecraftai-landscaping.git", branch = "main" }
+codecraftai-testbase = { git = "https://github.com/automationmojo/codecraftai-testbase.git", branch = "main" }
 codecraftai-restclient-vsphere = { git = "https://github.com/automationmojo/codecraftai-restclient-vsphere.git", branch = "main" }
 codecraftai-restclient-coreweave = { git = "https://github.com/automationmojo/codecraftai-restclient-coreweave.git", branch = "main" }
 codecraftai-restclient-lambdalabs = { git = "https://github.com/automationmojo/codecraftai-restclient-lambdalabs.git", branch = "main" }
