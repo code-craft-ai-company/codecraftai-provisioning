@@ -11,7 +11,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.testbase.properties import given
 from ccai.testbase.properties import strategies as st
@@ -63,7 +64,7 @@ def test_to_aws_rejects_oversize_value() -> None:
         Tag values longer than 256 chars are rejected at translate time.
     """
     big_value = "x" * (AWS_TAG_VALUE_MAX + 1)
-    with pytest.raises(AwsValidationError):
+    with testbase.raises(AwsValidationError):
         to_aws(neutral_tags={"k": big_value})
     return
 

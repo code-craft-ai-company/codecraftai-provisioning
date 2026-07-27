@@ -11,7 +11,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.provisioning.model.cloud.cloudimage import CloudImage
 from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
@@ -66,7 +67,7 @@ def test_validate_rejects_bucket_without_objects(venue, aspects):
         A CloudObjectBucket is rejected when Objects is not configured.
     """
     provisioner = _provisioner(venue=venue, spec=bucket_lb_dns_spec())
-    with pytest.raises(NtxValidationError):
+    with testbase.raises(NtxValidationError):
         provisioner.validate(aspects=aspects)
 
 
@@ -91,7 +92,7 @@ def test_validate_rejects_load_balancer(venue, aspects):
     spec = bucket_lb_dns_spec()
     provisioner = _provisioner(venue=venue, spec=spec,
                                objects_configured=True)
-    with pytest.raises(NtxValidationError):
+    with testbase.raises(NtxValidationError):
         provisioner.validate(aspects=aspects)
 
 
@@ -110,7 +111,7 @@ def test_validate_rejects_interconnect(venue, aspects):
     spec = NutanixSpec(networks=[make_network()], subnets=[make_subnet()],
                        keypairs=[make_keypair()], instances=[instance])
     provisioner = _provisioner(venue=venue, spec=spec)
-    with pytest.raises(NtxValidationError):
+    with testbase.raises(NtxValidationError):
         provisioner.validate(aspects=aspects)
 
 
@@ -126,7 +127,7 @@ def test_validate_rejects_unresolvable_image(venue, aspects):
     spec = NutanixSpec(networks=[make_network()], subnets=[make_subnet()],
                        keypairs=[make_keypair()], instances=[instance])
     provisioner = _provisioner(venue=venue, spec=spec)
-    with pytest.raises(NtxValidationError):
+    with testbase.raises(NtxValidationError):
         provisioner.validate(aspects=aspects)
 
 
@@ -142,7 +143,7 @@ def test_validate_rejects_unsized_instance(venue, aspects):
     spec = NutanixSpec(networks=[make_network()], subnets=[make_subnet()],
                        keypairs=[make_keypair()], instances=[instance])
     provisioner = _provisioner(venue=venue, spec=spec)
-    with pytest.raises(NtxValidationError):
+    with testbase.raises(NtxValidationError):
         provisioner.validate(aspects=aspects)
 
 
@@ -155,7 +156,7 @@ def test_validate_rejects_managed_shared_fs(venue, aspects):
                        keypairs=[make_keypair()],
                        shared_filesystems=[sfs])
     provisioner = _provisioner(venue=venue, spec=spec)
-    with pytest.raises(NtxValidationError):
+    with testbase.raises(NtxValidationError):
         provisioner.validate(aspects=aspects)
 
 

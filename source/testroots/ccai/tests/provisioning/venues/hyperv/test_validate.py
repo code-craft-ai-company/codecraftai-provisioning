@@ -16,8 +16,6 @@ from ccai import testbase
 from .factories import create_hyperv_client
 
 
-import pytest
-
 from ccai.provisioning.venues.hyperv.hverrors import HvValidationError
 from ccai.provisioning.venues.hyperv.hypervcloudprovisioner import (
     HypervCloudProvisioner
@@ -82,7 +80,7 @@ def test_validate_rejects_object_bucket(venue, client, host_config, aspects):
     provisioner = _provisioner(venue=venue, client=client,
                                host_config=host_config, spec=spec)
 
-    with pytest.raises(HvValidationError) as excinfo:
+    with testbase.raises(HvValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
 
     assert "object storage" in str(excinfo.value)
@@ -99,7 +97,7 @@ def test_validate_rejects_load_balancer(venue, client, host_config,
     provisioner = _provisioner(venue=venue, client=client,
                                host_config=host_config, spec=spec)
 
-    with pytest.raises(HvValidationError) as excinfo:
+    with testbase.raises(HvValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
 
     assert "load balancer" in str(excinfo.value)
@@ -134,7 +132,7 @@ def test_validate_rejects_unknown_image_family(venue, client, host_config,
     provisioner = _provisioner(venue=venue, client=client,
                                host_config=host_config, spec=spec)
 
-    with pytest.raises(HvValidationError) as excinfo:
+    with testbase.raises(HvValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
 
     assert "Image not resolvable" in str(excinfo.value)
@@ -152,7 +150,7 @@ def test_validate_rejects_unknown_size(venue, client, host_config, aspects):
     provisioner = _provisioner(venue=venue, client=client,
                                host_config=host_config, spec=spec)
 
-    with pytest.raises(HvValidationError) as excinfo:
+    with testbase.raises(HvValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
 
     assert "Size not resolvable" in str(excinfo.value)

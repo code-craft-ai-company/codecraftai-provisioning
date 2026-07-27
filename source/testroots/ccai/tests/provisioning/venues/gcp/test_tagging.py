@@ -11,7 +11,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.testbase.properties import given
 from ccai.testbase.properties import strategies as st
@@ -82,7 +83,7 @@ def test_to_labels_rejects_non_string_value() -> None:
     """
         A non-string tag value is rejected.
     """
-    with pytest.raises(GcpValidationError):
+    with testbase.raises(GcpValidationError):
         to_labels(neutral_tags={"k": 123})
     return
 

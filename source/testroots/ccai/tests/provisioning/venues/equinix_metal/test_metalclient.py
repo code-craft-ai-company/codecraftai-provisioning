@@ -23,7 +23,6 @@ import json
 
 from typing import Any, Dict, List, Optional
 
-import pytest
 
 from ccai.provisioning.venues.equinix_metal.metalclient import MetalClient
 from ccai.provisioning.venues.equinix_metal.metalerrors import (
@@ -143,7 +142,7 @@ def test_client_exposes_its_project_id():
     ("tok-abc", ""),
 ])
 def test_client_refuses_empty_credentials(token, project):
-    with pytest.raises(MetalConflictError):
+    with testbase.raises(MetalConflictError):
         MetalClient(api_token=token, project_id=project,
                     session=_FakeSession())
     return
@@ -161,7 +160,7 @@ def test_error_reason_comes_from_the_errors_array():
                       payload={"errors": ["plan unavailable",
                                           "metro invalid"]}))
 
-    with pytest.raises(MetalApiRequestError) as caught:
+    with testbase.raises(MetalApiRequestError) as caught:
         client.get_device(device_id="dev-1")
 
     assert caught.value.status == 422
@@ -176,7 +175,7 @@ def test_error_reason_comes_from_a_single_error_field():
                       status_code=404, reason="Not Found",
                       payload={"error": "Not found"}))
 
-    with pytest.raises(MetalApiRequestError) as caught:
+    with testbase.raises(MetalApiRequestError) as caught:
         client.get_device(device_id="dev-1")
 
     assert caught.value.reason == "Not found"
@@ -190,7 +189,7 @@ def test_error_falls_back_to_the_http_reason():
                                          reason="Server Error",
                                          text="upstream failure"))
 
-    with pytest.raises(MetalApiRequestError) as caught:
+    with testbase.raises(MetalApiRequestError) as caught:
         client.get_device(device_id="dev-1")
 
     assert caught.value.reason == "Server Error"

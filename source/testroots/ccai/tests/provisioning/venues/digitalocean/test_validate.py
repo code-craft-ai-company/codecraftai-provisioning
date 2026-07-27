@@ -16,8 +16,6 @@ from ccai import testbase
 from .factories import (create_digitalocean_do_client, create_digitalocean_raw_client)
 
 
-import pytest
-
 from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
@@ -83,7 +81,7 @@ def test_validate_rejects_unsupported_shared_fs_kinds(
         venue=venue, credential=credential, region_config=region_config,
         do_client=do_client, spec=spec,
     )
-    with pytest.raises(DoValidationError) as excinfo:
+    with testbase.raises(DoValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "shared-FS" in str(excinfo.value)
     return
@@ -105,7 +103,7 @@ def test_validate_rejects_interconnect_requests(
         venue=venue, credential=credential, region_config=region_config,
         do_client=do_client, spec=spec,
     )
-    with pytest.raises(DoValidationError) as excinfo:
+    with testbase.raises(DoValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "interconnect" in str(excinfo.value)
     return
@@ -147,7 +145,7 @@ def test_validate_rejects_unknown_region(
         venue=venue, credential=credential, region_config=region_config,
         do_client=do_client, spec=spec,
     )
-    with pytest.raises(DoValidationError):
+    with testbase.raises(DoValidationError):
         provisioner.validate(aspects=aspects)
     return
 
@@ -170,6 +168,6 @@ def test_validate_rejects_unmapped_gpu(
         venue=venue, credential=credential, region_config=region_config,
         do_client=do_client, spec=spec,
     )
-    with pytest.raises(DoValidationError):
+    with testbase.raises(DoValidationError):
         provisioner.validate(aspects=aspects)
     return

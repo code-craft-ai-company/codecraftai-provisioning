@@ -12,13 +12,15 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+
 from base64 import b64decode
 
 from ccai.provisioning.venues.nutanix.nutanixcloudprovisioner import (
     NutanixCloudProvisioner
 )
 
-import pytest
 
 from ccai.provisioning.venues.nutanix.ntxerrors import (
     ConfirmationRequiredError
@@ -205,7 +207,7 @@ def test_unconfirmed_resize_raises_confirmation_required(venue, aspects):
 
     drifted = _provisioner(venue=venue, spec=resized_spec(size="large"),
                            client=client)
-    with pytest.raises(ConfirmationRequiredError):
+    with testbase.raises(ConfirmationRequiredError):
         drifted.apply(aspects=aspects)
 
     assert client.update_vm_calls == 0

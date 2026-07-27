@@ -1,5 +1,5 @@
 """
-    .. module:: conftest
+    .. module:: factories
     :platform: Darwin, Linux, Unix, Windows
     :synopsis: Pytest collection-scope marker for the RunPod venue tests.
         Its presence gives this directory its own collection rootdir so the

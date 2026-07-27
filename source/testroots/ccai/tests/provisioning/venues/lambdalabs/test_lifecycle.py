@@ -12,10 +12,12 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+
 import json
 import os
 
-import pytest
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
@@ -187,7 +189,7 @@ def test_destroy_requires_confirm(venue, credential, aspects, tmp_path):
                                spec=basic_spec(), client=client,
                                output_root=str(tmp_path))
     provisioner.apply(aspects=aspects)
-    with pytest.raises(SchemaSemanticError):
+    with testbase.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     assert len(client.list_instances(aspects=aspects)) == 1
     return

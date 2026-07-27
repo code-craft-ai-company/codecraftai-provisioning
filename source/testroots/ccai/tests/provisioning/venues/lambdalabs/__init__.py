@@ -1,7 +1,7 @@
 """
     Originates the lambdalabs venue test factories into this scope.
 
-    Replaces conftest.py: testbase does not read pytest conftest
+    testbase does not read pytest conftest
     files, so those fixtures were invisible to its runner.
 """
 
@@ -20,6 +20,6 @@ testbase.originate.parameter(create_lambdalabs_venue, identifier="venue")
 testbase.originate.parameter(create_lambdalabs_aspects, identifier="aspects")
 testbase.originate.parameter(create_lambdalabs_confirm_aspects, identifier="confirm_aspects")
 
-# Stands in for pytest tmp_path.
+# A fresh temporary directory per test.
 testbase.originate.parameter(create_temporary_directory,
                              identifier="tmp_path")

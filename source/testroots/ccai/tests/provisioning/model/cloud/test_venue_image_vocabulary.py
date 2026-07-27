@@ -13,7 +13,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.provisioning.model.cloud.cloudimage import CloudImage
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
@@ -76,7 +77,7 @@ def test_azure_rejects_unsupported_family() -> None:
     # AlmaLinux is a canonical family the azure resolver does not serve.
     image = CloudImage(family="almalinux", version="9",
                        architecture="x86_64")
-    with pytest.raises(SchemaSemanticError) as excinfo:
+    with testbase.raises(SchemaSemanticError) as excinfo:
         resolver.resolve(image=image)
     assert "almalinux" in str(excinfo.value)
     assert "azure" in str(excinfo.value)
@@ -103,7 +104,7 @@ def test_digitalocean_accepts_rocky_alias() -> None:
 def test_digitalocean_rejects_unsupported_family() -> None:
     resolver = DoResolver()
     # Windows Server is a canonical family DigitalOcean droplets cannot run.
-    with pytest.raises(SchemaSemanticError) as excinfo:
+    with testbase.raises(SchemaSemanticError) as excinfo:
         resolver.image_to_slug(family="windows-server", version="2022",
                                architecture="x86_64")
     assert "windows-server" in str(excinfo.value)
@@ -116,7 +117,7 @@ def test_aws_rejects_unsupported_family() -> None:
     # Windows Server is a canonical family this AWS resolver does not serve.
     image = CloudImage(family="windows-server", version="2022",
                        architecture="x86_64")
-    with pytest.raises(SchemaSemanticError) as excinfo:
+    with testbase.raises(SchemaSemanticError) as excinfo:
         resolver.resolve(image=image)
     assert "windows-server" in str(excinfo.value)
     assert "aws" in str(excinfo.value)
@@ -130,11 +131,14 @@ def test_aws_accepts_canonical_family() -> None:
     # The fake catalog resolves nothing, so a supported family reaches the
     # catalog-miss path rather than the unsupported-family rejection.
     from ccai.provisioning.venues.aws.awserrors import AwsValidationError
-    with pytest.raises(AwsValidationError):
+    with testbase.raises(AwsValidationError):
         resolver.resolve(image=image)
     return
 
 
-if __name__ == "__main__":
-    import sys
-    sys.exit(pytest.main([__file__, "-q"]))
+# Run with the testbase runner, which these tests require for resource
+# injection and property strategies:
+#
+#   PYTHONPATH="$PWD/source/packages:$PWD/source/testroots" \
+#     testbase testing run --root source/testroots/ccai \
+#       --includes=ccai.tests.provisioning --output=./.output

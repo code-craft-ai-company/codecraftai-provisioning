@@ -19,7 +19,6 @@ from .factories import (create_azure_session_factory, create_azure_world)
 
 import base64
 
-import pytest
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
@@ -250,7 +249,7 @@ def test_destroy_requires_confirm(venue, credential, region_config,
                                region_config=region_config,
                                session_factory=session_factory, spec=spec)
     provisioner.apply(aspects=aspects)
-    with pytest.raises(SchemaSemanticError):
+    with testbase.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     return
 

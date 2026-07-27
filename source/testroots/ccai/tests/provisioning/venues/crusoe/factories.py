@@ -1,7 +1,7 @@
 """
     .. module:: factories
     :platform: Darwin, Linux, Unix, Windows
-    :synopsis: Shared pytest fixtures for the Crusoe venue tests.
+    :synopsis: Test resource factories for the Crusoe venue tests.
 
     .. moduleauthor:: Myron Walker <myron.walker@gmail.com>
 """

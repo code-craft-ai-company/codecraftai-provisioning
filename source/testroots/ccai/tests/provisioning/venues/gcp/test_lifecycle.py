@@ -16,8 +16,6 @@ from ccai import testbase
 from .factories import create_gcp_make_provisioner
 
 
-import pytest
-
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 from ccai.interfaces.cloudacceleratorspec import (
@@ -131,7 +129,7 @@ def test_destroy_requires_confirm(make_provisioner, aspects) -> None:
     """
     provisioner, _ = make_provisioner(spec=basic_spec())
     provisioner.apply(aspects=aspects)
-    with pytest.raises(SchemaSemanticError):
+    with testbase.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     return
 

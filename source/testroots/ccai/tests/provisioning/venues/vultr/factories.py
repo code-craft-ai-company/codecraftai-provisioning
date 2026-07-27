@@ -1,5 +1,5 @@
 """
-    .. module:: conftest
+    .. module:: factories
     :platform: Darwin, Linux, Unix, Windows
     :synopsis: Shared fixtures for Vultr venue tests.
 

@@ -17,8 +17,6 @@ from ccai import testbase
 from .factories import (create_azure_session_factory, create_azure_world)
 
 
-import pytest
-
 from ccai.credentials.basecredential import BaseCredential
 from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
@@ -81,7 +79,7 @@ def test_validate_rejects_non_azure_credential(venue, region_config,
         venue=venue, credential=bogus, region_config=region_config,
         spec=spec, session_factory=session_factory,
     )
-    with pytest.raises(AzureValidationError):
+    with testbase.raises(AzureValidationError):
         provisioner.validate(aspects=aspects)
     return
 
@@ -100,7 +98,7 @@ def test_validate_rejects_efa(venue, credential, region_config,
     provisioner = _provisioner(venue=venue, credential=credential,
                                region_config=region_config,
                                session_factory=session_factory, spec=spec)
-    with pytest.raises(AzureValidationError) as excinfo:
+    with testbase.raises(AzureValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "InfiniBand" in str(excinfo.value)
     return
@@ -119,7 +117,7 @@ def test_validate_rejects_oci_rdma(venue, credential, region_config,
     provisioner = _provisioner(venue=venue, credential=credential,
                                region_config=region_config,
                                session_factory=session_factory, spec=spec)
-    with pytest.raises(AzureValidationError):
+    with testbase.raises(AzureValidationError):
         provisioner.validate(aspects=aspects)
     return
 
@@ -138,7 +136,7 @@ def test_validate_rejects_weka_shared_fs(venue, credential, region_config,
     provisioner = _provisioner(venue=venue, credential=credential,
                                region_config=region_config,
                                session_factory=session_factory, spec=spec)
-    with pytest.raises(AzureValidationError) as excinfo:
+    with testbase.raises(AzureValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "Lustre" in str(excinfo.value)
     return
@@ -159,7 +157,7 @@ def test_validate_lustre_requires_existing_id(venue, credential,
     provisioner = _provisioner(venue=venue, credential=credential,
                                region_config=region_config,
                                session_factory=session_factory, spec=spec)
-    with pytest.raises(AzureValidationError) as excinfo:
+    with testbase.raises(AzureValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "attach-only" in str(excinfo.value)
     return
@@ -198,7 +196,7 @@ def test_validate_accelerator_size_conflict(venue, credential,
     provisioner = _provisioner(venue=venue, credential=credential,
                                region_config=region_config,
                                session_factory=session_factory, spec=spec)
-    with pytest.raises(AzureValidationError):
+    with testbase.raises(AzureValidationError):
         provisioner.validate(aspects=aspects)
     return
 
@@ -220,7 +218,7 @@ def test_validate_infiniband_requires_capable_sku(venue, credential,
     provisioner = _provisioner(venue=venue, credential=credential,
                                region_config=region_config,
                                session_factory=session_factory, spec=spec)
-    with pytest.raises(AzureValidationError) as excinfo:
+    with testbase.raises(AzureValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "InfiniBand-capable" in str(excinfo.value)
     return
@@ -263,7 +261,7 @@ def test_validate_subnet_containment(venue, credential, region_config,
     provisioner = _provisioner(venue=venue, credential=credential,
                                region_config=region_config,
                                session_factory=session_factory, spec=spec)
-    with pytest.raises(AzureValidationError) as excinfo:
+    with testbase.raises(AzureValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "contained" in str(excinfo.value)
     return

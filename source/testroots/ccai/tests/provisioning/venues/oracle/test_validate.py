@@ -12,7 +12,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.credentials.basecredential import BaseCredential
 from ccai.interfaces.cloudacceleratorspec import (
@@ -58,7 +59,7 @@ def test_validate_rejects_non_oracle_credential(venue, region_config,
         venue=venue, credential=bogus, region_config=region_config,
         spec=spec,
     )
-    with pytest.raises(OciValidationError):
+    with testbase.raises(OciValidationError):
         provisioner.validate(aspects=aspects)
     return
 
@@ -76,7 +77,7 @@ def test_validate_rejects_efa_interconnect(venue, credential, region_config,
         venue=venue, credential=credential, region_config=region_config,
         spec=spec,
     )
-    with pytest.raises(OciValidationError) as excinfo:
+    with testbase.raises(OciValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "OCI_RDMA" in str(excinfo.value)
     return
@@ -96,7 +97,7 @@ def test_validate_rejects_infiniband_interconnect(venue, credential,
         venue=venue, credential=credential, region_config=region_config,
         spec=spec,
     )
-    with pytest.raises(OciValidationError) as excinfo:
+    with testbase.raises(OciValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "OCI_RDMA" in str(excinfo.value)
     return
@@ -115,7 +116,7 @@ def test_validate_rejects_weka_shared_fs(venue, credential, region_config,
         venue=venue, credential=credential, region_config=region_config,
         spec=spec,
     )
-    with pytest.raises(OciValidationError) as excinfo:
+    with testbase.raises(OciValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "VENUE_NATIVE" in str(excinfo.value)
     return
@@ -134,7 +135,7 @@ def test_validate_rejects_lustre_without_existing_id(venue, credential,
         venue=venue, credential=credential, region_config=region_config,
         spec=spec,
     )
-    with pytest.raises(OciValidationError) as excinfo:
+    with testbase.raises(OciValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "existing_id" in str(excinfo.value)
     return
@@ -155,7 +156,7 @@ def test_validate_rdma_requires_bm_gpu_shape(venue, credential,
         venue=venue, credential=credential, region_config=region_config,
         spec=spec,
     )
-    with pytest.raises(OciValidationError) as excinfo:
+    with testbase.raises(OciValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "BM.GPU" in str(excinfo.value)
     return
@@ -191,7 +192,7 @@ def test_validate_accelerator_size_conflict(venue, credential,
         venue=venue, credential=credential, region_config=region_config,
         spec=spec,
     )
-    with pytest.raises(OciValidationError):
+    with testbase.raises(OciValidationError):
         provisioner.validate(aspects=aspects)
     return
 
@@ -210,7 +211,7 @@ def test_validate_subnet_containment(venue, credential, region_config,
         venue=venue, credential=credential, region_config=region_config,
         spec=spec,
     )
-    with pytest.raises(OciValidationError) as excinfo:
+    with testbase.raises(OciValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "contained" in str(excinfo.value)
     return

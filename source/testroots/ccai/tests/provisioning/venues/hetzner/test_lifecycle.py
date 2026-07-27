@@ -19,7 +19,6 @@ from .factories import (create_client, create_dns_client, create_vpn_control_pla
 
 import os
 
-import pytest
 
 from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
@@ -356,9 +355,9 @@ def test_volume_shrink_is_refused(venue, credential, location_config,
     provisioner = _provisioner(venue=venue, credential=credential,
                                location_config=location_config,
                                client=client, spec=shrunk)
-    with pytest.raises(HetznerValidationError):
+    with testbase.raises(HetznerValidationError):
         provisioner.plan(aspects=aspects)
-    with pytest.raises(HetznerValidationError):
+    with testbase.raises(HetznerValidationError):
         provisioner.apply(aspects=aspects)
     assert client.resize_calls == 0
     return
@@ -375,7 +374,7 @@ def test_destroy_requires_confirm(venue, credential, location_config,
                                location_config=location_config,
                                client=client, spec=spec)
     provisioner.apply(aspects=aspects)
-    with pytest.raises(SchemaSemanticError):
+    with testbase.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     return
 

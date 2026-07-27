@@ -12,7 +12,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
@@ -162,7 +163,7 @@ def test_destroy_requires_confirm(venue, credential, config,
     provisioner = _provisioner(venue=venue, credential=credential,
                                config=config, spec=spec)
     provisioner.apply(aspects=aspects)
-    with pytest.raises(SchemaSemanticError):
+    with testbase.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     return
 
@@ -273,7 +274,7 @@ def test_datastore_capacity_failure(venue, credential, config,
                          datastore_free_gb=1.0)
     provisioner = _provisioner(venue=venue, credential=credential,
                                config=config, spec=spec, ops=ops)
-    with pytest.raises(VsCapacityError):
+    with testbase.raises(VsCapacityError):
         provisioner.apply(aspects=aspects)
     return
 

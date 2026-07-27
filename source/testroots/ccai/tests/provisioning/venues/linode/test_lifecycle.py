@@ -18,7 +18,6 @@ from .factories import create_linode_mock_client
 
 import base64
 
-import pytest
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
@@ -265,7 +264,7 @@ def test_unconfirmed_resize_raises_semantic_error(venue, credential,
                            region_config=region_config,
                            spec=basic_spec(instance_size="large"),
                            mock_client=mock_client)
-    with pytest.raises(SchemaSemanticError):
+    with testbase.raises(SchemaSemanticError):
         drifted.apply(aspects=aspects)
 
     assert mock_client.resize_calls == 0
@@ -283,7 +282,7 @@ def test_destroy_requires_confirm(venue, credential, region_config,
                                region_config=region_config, spec=spec,
                                mock_client=mock_client)
     provisioner.apply(aspects=aspects)
-    with pytest.raises(SchemaSemanticError):
+    with testbase.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     return
 

@@ -13,7 +13,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.testbase.properties import given
 from ccai.testbase.properties import strategies as st
@@ -133,5 +134,5 @@ def test_task_poll_honours_timeout_aspect():
     handle = NutanixTaskHandle(task_uuid="never-completes", client=client)
     aspects = AspectsNutanix(completion_timeout=0.2,
                              completion_interval=0.02)
-    with pytest.raises(TimeoutError):
+    with testbase.raises(TimeoutError):
         handle.wait(aspects=aspects)

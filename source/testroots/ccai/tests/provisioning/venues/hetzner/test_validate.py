@@ -16,8 +16,6 @@ from ccai import testbase
 from .factories import create_client
 
 
-import pytest
-
 from ccai.credentials.basecredential import BaseCredential
 from ccai.provisioning.model.cloud.cloudimage import CloudImage
 from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
@@ -68,7 +66,7 @@ def test_validate_rejects_non_hetzner_credential(venue, location_config,
     provisioner = HetznerCloudProvisioner(
         venue=venue, credential=bogus, location_config=location_config,
         spec=spec, client=client)
-    with pytest.raises(HetznerValidationError):
+    with testbase.raises(HetznerValidationError):
         provisioner.validate(aspects=aspects)
     return
 
@@ -85,7 +83,7 @@ def test_validate_rejects_object_bucket(venue, credential,
     provisioner = HetznerCloudProvisioner(
         venue=venue, credential=credential,
         location_config=location_config, spec=spec, client=client)
-    with pytest.raises(HetznerValidationError) as excinfo:
+    with testbase.raises(HetznerValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "object-storage" in str(excinfo.value)
     return
@@ -108,7 +106,7 @@ def test_validate_rejects_interconnect(venue, credential, location_config,
     provisioner = HetznerCloudProvisioner(
         venue=venue, credential=credential,
         location_config=location_config, spec=spec, client=client)
-    with pytest.raises(HetznerValidationError) as excinfo:
+    with testbase.raises(HetznerValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "interconnect" in str(excinfo.value)
     return
@@ -127,7 +125,7 @@ def test_validate_rejects_shared_filesystem(venue, credential,
     provisioner = HetznerCloudProvisioner(
         venue=venue, credential=credential,
         location_config=location_config, spec=spec, client=client)
-    with pytest.raises(HetznerValidationError) as excinfo:
+    with testbase.raises(HetznerValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "shared" in str(excinfo.value).lower()
     return
@@ -150,7 +148,7 @@ def test_validate_rejects_unknown_image_family(venue, credential,
     provisioner = HetznerCloudProvisioner(
         venue=venue, credential=credential,
         location_config=location_config, spec=spec, client=client)
-    with pytest.raises(SchemaSemanticError) as excinfo:
+    with testbase.raises(SchemaSemanticError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "windows-server" in str(excinfo.value)
     assert "hetzner" in str(excinfo.value)
@@ -173,7 +171,7 @@ def test_validate_rejects_unknown_server_type(venue, credential,
     provisioner = HetznerCloudProvisioner(
         venue=venue, credential=credential,
         location_config=location_config, spec=spec, client=client)
-    with pytest.raises(HetznerValidationError):
+    with testbase.raises(HetznerValidationError):
         provisioner.validate(aspects=aspects)
     return
 

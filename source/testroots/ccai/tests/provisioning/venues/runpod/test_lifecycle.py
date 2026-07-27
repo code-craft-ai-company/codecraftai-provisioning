@@ -12,7 +12,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
@@ -54,7 +55,7 @@ def test_validate_rejects_object_bucket():
     """
     provisioner = make_provisioner(
         spec=make_spec(jobs=[make_gpu_job()], buckets=[object()]))
-    with pytest.raises(RpValidationError):
+    with testbase.raises(RpValidationError):
         provisioner.validate()
 
 
@@ -64,7 +65,7 @@ def test_validate_rejects_load_balancer():
     """
     provisioner = make_provisioner(
         spec=make_spec(jobs=[make_gpu_job()], load_balancers=[object()]))
-    with pytest.raises(RpValidationError):
+    with testbase.raises(RpValidationError):
         provisioner.validate()
 
 
@@ -74,7 +75,7 @@ def test_validate_rejects_dns_record():
     """
     provisioner = make_provisioner(
         spec=make_spec(jobs=[make_gpu_job()], dns_records=[object()]))
-    with pytest.raises(RpValidationError):
+    with testbase.raises(RpValidationError):
         provisioner.validate()
 
 
@@ -89,7 +90,7 @@ def test_validate_rejects_non_none_interconnect():
     provisioner = make_provisioner(
         spec=make_spec(jobs=[make_gpu_job()],
                        interconnects=[_Interconnect()]))
-    with pytest.raises(RpValidationError):
+    with testbase.raises(RpValidationError):
         provisioner.validate()
 
 
@@ -118,7 +119,7 @@ def test_validate_rejects_unmappable_gpu():
                                      count=1, memory_gb=32)
     job = WorkloadJob(name="t", image="i:1", accelerators=[bad_accel])
     provisioner = make_provisioner(spec=make_spec(jobs=[job]))
-    with pytest.raises(RpValidationError):
+    with testbase.raises(RpValidationError):
         provisioner.validate()
 
 
@@ -132,7 +133,7 @@ def test_validate_secure_capacity_unavailable():
                     secure_data_centers=[], community_data_centers=["EU-1"])])
     provisioner = make_provisioner(spec=make_spec(jobs=[make_gpu_job()]),
                                    runpod_client=client)
-    with pytest.raises(RpCapacityError):
+    with testbase.raises(RpCapacityError):
         provisioner.validate()
 
 
@@ -241,7 +242,7 @@ def test_apply_update_without_confirm_raises():
                       gpu_type_id="NVIDIA A40")
     client = MockRunpodClient(pods=[drifted])
     provisioner = make_provisioner(spec=spec, runpod_client=client)
-    with pytest.raises(ConfirmationRequiredError):
+    with testbase.raises(ConfirmationRequiredError):
         provisioner.apply(aspects=_Aspects())
 
 
@@ -298,7 +299,7 @@ def test_destroy_without_confirm_raises():
 
     spec = make_spec(jobs=[make_gpu_job()])
     provisioner = make_provisioner(spec=spec)
-    with pytest.raises(ConfirmationRequiredError):
+    with testbase.raises(ConfirmationRequiredError):
         provisioner.destroy(aspects=_Aspects())
 
 
@@ -309,7 +310,7 @@ def test_destroy_defaults_to_confirm_false():
     """
     spec = make_spec(jobs=[make_gpu_job()])
     provisioner = make_provisioner(spec=spec)
-    with pytest.raises(ConfirmationRequiredError):
+    with testbase.raises(ConfirmationRequiredError):
         provisioner.destroy()
 
 

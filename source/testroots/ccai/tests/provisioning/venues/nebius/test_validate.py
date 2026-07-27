@@ -17,8 +17,6 @@ from ccai import testbase
 from .factories import create_nebius_client
 
 
-import pytest
-
 from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
@@ -81,7 +79,7 @@ def test_validate_rejects_load_balancer(client, venue, aspects) -> None:
                                              listeners=[])]
     provisioner = NebiusCloudProvisioner(venue=venue, client=client,
                                          spec=spec)
-    with pytest.raises(NebiusValidationError) as excinfo:
+    with testbase.raises(NebiusValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "LoadBalancer" in str(excinfo.value)
     return
@@ -96,7 +94,7 @@ def test_validate_rejects_object_bucket(client, venue, aspects) -> None:
     spec.buckets = [CloudObjectBucket(name="bkt-a", region="eu-north1")]
     provisioner = NebiusCloudProvisioner(venue=venue, client=client,
                                          spec=spec)
-    with pytest.raises(NebiusValidationError) as excinfo:
+    with testbase.raises(NebiusValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "Object Storage" in str(excinfo.value)
     return
@@ -117,7 +115,7 @@ def test_validate_rejects_shared_fs_without_existing_id(client, venue,
     ]
     provisioner = NebiusCloudProvisioner(venue=venue, client=client,
                                          spec=spec)
-    with pytest.raises(NebiusValidationError) as excinfo:
+    with testbase.raises(NebiusValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "existing_id" in str(excinfo.value)
     return
@@ -135,7 +133,7 @@ def test_validate_rejects_uncontained_subnet(client, venue, aspects) -> None:
     )
     provisioner = NebiusCloudProvisioner(venue=venue, client=client,
                                          spec=spec)
-    with pytest.raises(NebiusValidationError) as excinfo:
+    with testbase.raises(NebiusValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "contained" in str(excinfo.value)
     return
@@ -155,7 +153,7 @@ def test_validate_rejects_ib_on_non_eligible_platform(client, venue,
     )
     provisioner = NebiusCloudProvisioner(venue=venue, client=client,
                                          spec=spec)
-    with pytest.raises(NebiusValidationError) as excinfo:
+    with testbase.raises(NebiusValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "IB-eligible" in str(excinfo.value)
     return
@@ -173,6 +171,6 @@ def test_validate_rejects_unknown_accelerator(client, venue,
     spec = basic_spec(instance_size="gpu", accelerators=[accel])
     provisioner = NebiusCloudProvisioner(venue=venue, client=client,
                                          spec=spec)
-    with pytest.raises(NebiusValidationError):
+    with testbase.raises(NebiusValidationError):
         provisioner.validate(aspects=aspects)
     return

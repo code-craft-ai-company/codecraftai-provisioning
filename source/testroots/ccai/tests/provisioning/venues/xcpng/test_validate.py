@@ -11,7 +11,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.provisioning.venues.xcpng.xcpngcloudprovisioner import (
     XcpngCloudProvisioner
@@ -65,7 +66,7 @@ def test_validate_rejects_object_bucket_and_load_balancer(venue, aspects):
         Object buckets and load balancers are validate-errors.
     """
     provisioner = _provisioner(venue=venue, spec=bucket_lb_spec())
-    with pytest.raises(XenValidationError) as excinfo:
+    with testbase.raises(XenValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     message = str(excinfo.value)
     assert "data-bucket" in message
@@ -78,7 +79,7 @@ def test_validate_rejects_hpc_interconnect(venue, aspects):
         A non-NONE HPC interconnect is a validate-error.
     """
     provisioner = _provisioner(venue=venue, spec=interconnect_spec())
-    with pytest.raises(XenValidationError) as excinfo:
+    with testbase.raises(XenValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "INFINIBAND_NDR" in str(excinfo.value)
     return
@@ -92,7 +93,7 @@ def test_validate_rejects_efa_and_oci_rdma_interconnect(venue, aspects):
     for kind in ("EFA", "OCI_RDMA"):
         provisioner = _provisioner(venue=venue,
                                    spec=interconnect_spec(kind=kind))
-        with pytest.raises(XenValidationError) as excinfo:
+        with testbase.raises(XenValidationError) as excinfo:
             provisioner.validate(aspects=aspects)
         assert kind in str(excinfo.value)
     return
@@ -106,7 +107,7 @@ def test_validate_rejects_unresolvable_size(venue, aspects):
     instance = make_instance(name="bad-size", size="ginormous")
     spec = XcpngSpec(instances=[instance])
     provisioner = _provisioner(venue=venue, spec=spec)
-    with pytest.raises(XenValidationError) as excinfo:
+    with testbase.raises(XenValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "bad-size" in str(excinfo.value)
     return

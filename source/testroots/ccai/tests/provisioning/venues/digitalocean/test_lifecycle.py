@@ -16,8 +16,6 @@ from ccai import testbase
 from .factories import (create_digitalocean_do_client, create_digitalocean_raw_client)
 
 
-import pytest
-
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 from ccai.testbase.properties import given
@@ -157,7 +155,7 @@ def test_destroy_requires_confirm(venue, credential, region_config,
         do_client=do_client, spec=spec,
     )
     provisioner.apply(aspects=aspects)
-    with pytest.raises(SchemaSemanticError):
+    with testbase.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     return
 

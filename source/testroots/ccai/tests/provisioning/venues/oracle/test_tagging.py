@@ -11,7 +11,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.testbase.properties import given
 from ccai.testbase.properties import strategies as st
@@ -62,7 +63,7 @@ def test_to_freeform_rejects_oversize_value() -> None:
         Tag values longer than 256 chars are rejected at translate time.
     """
     big_value = "x" * (OCI_TAG_VALUE_MAX + 1)
-    with pytest.raises(OciValidationError):
+    with testbase.raises(OciValidationError):
         to_freeform(neutral_tags={"k": big_value})
     return
 
@@ -71,7 +72,7 @@ def test_to_freeform_rejects_non_string_value() -> None:
     """
         A non-string tag value is rejected at translate time.
     """
-    with pytest.raises(OciValidationError):
+    with testbase.raises(OciValidationError):
         to_freeform(neutral_tags={"k": 123})
     return
 

@@ -18,7 +18,6 @@ from .factories import create_vultr_fake_vultr
 
 import base64
 
-import pytest
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
@@ -132,7 +131,7 @@ def test_destroy_requires_confirm(fake_vultr, provisioner_factory,
     spec = basic_spec()
     provisioner = provisioner_factory(client=client, spec=spec)
     provisioner.apply(aspects=aspects)
-    with pytest.raises(SchemaSemanticError):
+    with testbase.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     return
 

@@ -11,7 +11,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
@@ -66,7 +67,7 @@ def test_validate_rejects_object_bucket(venue, credential, config) -> None:
     spec.buckets.append(CloudObjectBucket(name="bkt-a", region="homelab"))
     provisioner = _provisioner(venue=venue, credential=credential,
                                config=config, spec=spec)
-    with pytest.raises(VsValidationError) as excinfo:
+    with testbase.raises(VsValidationError) as excinfo:
         provisioner.validate(aspects=None)
     assert "object-storage" in str(excinfo.value)
     return
@@ -82,7 +83,7 @@ def test_validate_rejects_interconnect(venue, credential, config) -> None:
     )
     provisioner = _provisioner(venue=venue, credential=credential,
                                config=config, spec=spec)
-    with pytest.raises(VsValidationError) as excinfo:
+    with testbase.raises(VsValidationError) as excinfo:
         provisioner.validate(aspects=None)
     assert "interconnect" in str(excinfo.value)
     return
@@ -97,7 +98,7 @@ def test_validate_rejects_lb_without_nsx(venue, credential, config) -> None:
                                                  scheme="internal"))
     provisioner = _provisioner(venue=venue, credential=credential,
                                config=config, spec=spec)
-    with pytest.raises(VsValidationError) as excinfo:
+    with testbase.raises(VsValidationError) as excinfo:
         provisioner.validate(aspects=None)
     assert "NSX" in str(excinfo.value)
     return
@@ -129,6 +130,6 @@ def test_validate_rejects_unknown_size(venue, credential, config) -> None:
     spec = basic_spec(instance_size="gigantic")
     provisioner = _provisioner(venue=venue, credential=credential,
                                config=config, spec=spec)
-    with pytest.raises(VsValidationError):
+    with testbase.raises(VsValidationError):
         provisioner.validate(aspects=None)
     return

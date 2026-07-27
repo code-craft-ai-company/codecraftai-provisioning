@@ -12,7 +12,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
@@ -53,7 +54,7 @@ def test_validate_rejects_unresolvable_accelerator():
                                                  gpu_model="A100_SXM")])
     provisioner = make_provisioner(spec=make_spec(jobs=[make_gpu_job()]),
                                    coreweave_client=cw)
-    with pytest.raises(CwValidationError):
+    with testbase.raises(CwValidationError):
         provisioner.validate()
     return
 
@@ -64,7 +65,7 @@ def test_validate_rejects_slurm_without_sunk():
     """
     provisioner = make_provisioner(spec=make_spec(jobs=[make_gpu_job()]),
                                    venue=make_slurm_venue())
-    with pytest.raises(CwValidationError):
+    with testbase.raises(CwValidationError):
         provisioner.validate()
     return
 
@@ -194,7 +195,7 @@ def test_destroy_removes_workloads():
     provisioner.apply()
     provisioner.destroy(aspects=_Confirm())
 
-    with pytest.raises(KeyError):
+    with testbase.raises(KeyError):
         kube.jobs.get(name="trainer")
     return
 
@@ -209,7 +210,7 @@ def test_destroy_without_confirm_raises():
     class _NoConfirm:
         confirm = False
 
-    with pytest.raises(ConfirmationRequiredError):
+    with testbase.raises(ConfirmationRequiredError):
         provisioner.destroy(aspects=_NoConfirm())
     return
 
@@ -222,7 +223,7 @@ def test_destroy_defaults_to_confirm_false():
     provisioner = make_provisioner(spec=make_spec(jobs=[make_gpu_job()]))
     provisioner.apply()
 
-    with pytest.raises(ConfirmationRequiredError):
+    with testbase.raises(ConfirmationRequiredError):
         provisioner.destroy()
     return
 
@@ -300,7 +301,7 @@ def test_destroy_sunk_tears_down_the_bundle():
     provisioner.destroy(aspects=_Confirm())
 
     for primitive, name in seeded:
-        with pytest.raises(KeyError):
+        with testbase.raises(KeyError):
             primitive.get(name=name, namespace="default")
     return
 

@@ -11,7 +11,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.credentials.basecredential import BaseCredential
 from ccai.interfaces.cloudacceleratorspec import (
@@ -58,7 +59,7 @@ def test_validate_rejects_non_aws_credential(venue, region_config,
         venue=venue, credential=bogus, region_config=region_config,
         spec=spec,
     )
-    with pytest.raises(AwsValidationError):
+    with testbase.raises(AwsValidationError):
         provisioner.validate(aspects=aspects)
     return
 
@@ -76,7 +77,7 @@ def test_validate_rejects_infiniband(venue, credential, region_config,
         venue=venue, credential=credential, region_config=region_config,
         spec=spec,
     )
-    with pytest.raises(AwsValidationError) as excinfo:
+    with testbase.raises(AwsValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "EFA" in str(excinfo.value)
     return
@@ -95,7 +96,7 @@ def test_validate_rejects_weka_shared_fs(venue, credential, region_config,
         venue=venue, credential=credential, region_config=region_config,
         spec=spec,
     )
-    with pytest.raises(AwsValidationError) as excinfo:
+    with testbase.raises(AwsValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "LUSTRE" in str(excinfo.value)
     return
@@ -130,7 +131,7 @@ def test_validate_accelerator_size_conflict(venue, credential, region_config,
         venue=venue, credential=credential, region_config=region_config,
         spec=spec,
     )
-    with pytest.raises(AwsValidationError):
+    with testbase.raises(AwsValidationError):
         provisioner.validate(aspects=aspects)
     return
 
@@ -149,7 +150,7 @@ def test_validate_efa_requires_capable_family(venue, credential,
         venue=venue, credential=credential, region_config=region_config,
         spec=spec,
     )
-    with pytest.raises(AwsValidationError) as excinfo:
+    with testbase.raises(AwsValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "EFA" in str(excinfo.value)
     return
@@ -169,7 +170,7 @@ def test_validate_subnet_containment(venue, credential, region_config,
         venue=venue, credential=credential, region_config=region_config,
         spec=spec,
     )
-    with pytest.raises(AwsValidationError) as excinfo:
+    with testbase.raises(AwsValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "contained" in str(excinfo.value)
     return

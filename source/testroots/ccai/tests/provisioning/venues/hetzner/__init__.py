@@ -26,6 +26,6 @@ testbase.originate.parameter(create_venue, identifier="venue")
 testbase.originate.parameter(create_aspects, identifier="aspects")
 testbase.originate.parameter(create_confirm_aspects, identifier="confirm_aspects")
 
-# Stands in for pytest tmp_path.
+# A fresh temporary directory per test.
 testbase.originate.parameter(create_temporary_directory,
                              identifier="tmp_path")

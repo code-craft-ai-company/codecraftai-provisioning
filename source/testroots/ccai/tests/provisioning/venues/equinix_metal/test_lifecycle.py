@@ -17,8 +17,6 @@ from ccai import testbase
 from .factories import create_equinix_metal_mock_client
 
 
-import pytest
-
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 from ccai.provisioning.model.cloud.plannedactionintent import (
@@ -191,7 +189,7 @@ def test_destroy_requires_confirm(venue, credential, project_config,
         spec=spec, mock_client=mock_client,
     )
     provisioner.apply(aspects=aspects)
-    with pytest.raises(SchemaSemanticError):
+    with testbase.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     return
 

@@ -11,7 +11,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
@@ -66,7 +67,7 @@ def test_validate_rejects_bucket_lb_dns(venue, credential, aspects):
     """
     provisioner = _provisioner(venue=venue, credential=credential,
                                spec=bucket_lb_dns_spec())
-    with pytest.raises(LlValidationError) as excinfo:
+    with testbase.raises(LlValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     message = str(excinfo.value)
     assert "data-bucket" in message
@@ -100,7 +101,7 @@ def test_validate_rejects_unknown_accelerator(venue, credential, aspects):
     instance = make_instance(accelerators=[accel])
     spec = LambdalabsSpec(instances=[instance])
     provisioner = _provisioner(venue=venue, credential=credential, spec=spec)
-    with pytest.raises(LlValidationError):
+    with testbase.raises(LlValidationError):
         provisioner.validate(aspects=aspects)
     return
 
@@ -127,6 +128,6 @@ def test_validate_rejects_instance_without_region(venue, credential,
     instance.subnet = ""
     spec = LambdalabsSpec(instances=[instance])
     provisioner = _provisioner(venue=venue, credential=credential, spec=spec)
-    with pytest.raises(LlValidationError):
+    with testbase.raises(LlValidationError):
         provisioner.validate(aspects=aspects)
     return

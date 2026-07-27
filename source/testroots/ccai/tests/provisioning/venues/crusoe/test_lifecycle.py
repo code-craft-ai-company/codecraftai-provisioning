@@ -14,10 +14,6 @@ __credits__ = []
 from ccai import testbase
 
 
-
-
-import pytest
-
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 from ccai.testbase.properties import given
@@ -85,7 +81,7 @@ def test_validate_rejects_bucket(crusoe_venue, mock_client, project_config,
     spec.buckets.append(CloudObjectBucket(name="b1", region="us-east1"))
     prov = make_provisioner(venue=crusoe_venue, client=mock_client,
                             project_config=project_config, spec=spec)
-    with pytest.raises(CrusoeValidationError):
+    with testbase.raises(CrusoeValidationError):
         prov.validate(aspects=crusoe_aspects)
     return
 
@@ -102,7 +98,7 @@ def test_validate_rejects_load_balancer(crusoe_venue, mock_client,
                                                  scheme="internal"))
     prov = make_provisioner(venue=crusoe_venue, client=mock_client,
                             project_config=project_config, spec=spec)
-    with pytest.raises(CrusoeValidationError):
+    with testbase.raises(CrusoeValidationError):
         prov.validate(aspects=crusoe_aspects)
     return
 
@@ -119,7 +115,7 @@ def test_validate_rejects_unsupported_fs(crusoe_venue, mock_client,
         CloudSharedFilesystem(name="fs1", kind="WEKA", size_tb=10))
     prov = make_provisioner(venue=crusoe_venue, client=mock_client,
                             project_config=project_config, spec=spec)
-    with pytest.raises(CrusoeValidationError):
+    with testbase.raises(CrusoeValidationError):
         prov.validate(aspects=crusoe_aspects)
     return
 
@@ -135,7 +131,7 @@ def test_validate_rejects_native_fs_without_existing_id(
         CloudSharedFilesystem(name="fs1", kind="VENUE_NATIVE", size_tb=10))
     prov = make_provisioner(venue=crusoe_venue, client=mock_client,
                             project_config=project_config, spec=spec)
-    with pytest.raises(CrusoeValidationError):
+    with testbase.raises(CrusoeValidationError):
         prov.validate(aspects=crusoe_aspects)
     return
 
@@ -152,7 +148,7 @@ def test_validate_rejects_ib_on_non_ib_instance(crusoe_venue, mock_client,
     spec = basic_spec(interconnect=interconnect, instance_size="c1.small")
     prov = make_provisioner(venue=crusoe_venue, client=mock_client,
                             project_config=project_config, spec=spec)
-    with pytest.raises(CrusoeValidationError):
+    with testbase.raises(CrusoeValidationError):
         prov.validate(aspects=crusoe_aspects)
     return
 
@@ -348,7 +344,7 @@ def test_destroy_requires_confirm(crusoe_venue, mock_client, project_config,
     prov = make_provisioner(venue=crusoe_venue, client=mock_client,
                             project_config=project_config, spec=spec)
     prov.apply(aspects=crusoe_aspects)
-    with pytest.raises(SchemaSemanticError):
+    with testbase.raises(SchemaSemanticError):
         prov.destroy(aspects=crusoe_aspects)
     return
 

@@ -11,7 +11,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.provisioning.model.cloud.cloudimage import CloudImage
 from ccai.provisioning.model.cloud.cloudinterconnect import (
@@ -66,7 +67,7 @@ def test_validate_rejects_bucket_lb_dns(venue, aspects):
         Object buckets, load balancers, and DNS records are errors.
     """
     provisioner = _provisioner(venue=venue, spec=bucket_lb_dns_spec())
-    with pytest.raises(LvValidationError) as excinfo:
+    with testbase.raises(LvValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     message = str(excinfo.value)
     assert "data-bucket" in message
@@ -87,7 +88,7 @@ def test_validate_rejects_interconnect(venue, aspects):
     spec = LibvirtSpec(networks=[make_network()],
                        keypairs=[make_keypair()], instances=[instance])
     provisioner = _provisioner(venue=venue, spec=spec)
-    with pytest.raises(LvValidationError):
+    with testbase.raises(LvValidationError):
         provisioner.validate(aspects=aspects)
     return
 
@@ -102,7 +103,7 @@ def test_validate_rejects_unmanaged_shared_filesystem(venue, aspects):
                        instances=[make_instance()],
                        shared_filesystems=[sfs])
     provisioner = _provisioner(venue=venue, spec=spec)
-    with pytest.raises(LvValidationError) as excinfo:
+    with testbase.raises(LvValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "scratch" in str(excinfo.value)
     return
@@ -119,7 +120,7 @@ def test_validate_rejects_unknown_image(venue, aspects):
     spec = LibvirtSpec(networks=[make_network()],
                        keypairs=[make_keypair()], instances=[instance])
     provisioner = _provisioner(venue=venue, spec=spec)
-    with pytest.raises(LvValidationError) as excinfo:
+    with testbase.raises(LvValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "rhel/9" in str(excinfo.value)
     return

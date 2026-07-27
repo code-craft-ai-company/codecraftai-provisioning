@@ -1,7 +1,7 @@
 """
     Originates the vultr venue test factories into this scope.
 
-    Replaces conftest.py: testbase does not read pytest conftest
+    testbase does not read pytest conftest
     files, so those fixtures were invisible to its runner.
 """
 

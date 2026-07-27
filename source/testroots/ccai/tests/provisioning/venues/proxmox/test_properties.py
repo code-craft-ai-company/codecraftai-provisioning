@@ -13,6 +13,9 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+
 import tempfile
 
 from ccai.testbase.properties import given
@@ -173,7 +176,6 @@ def test_validate_rejects_unsupported_kinds(venue, aspects):
         Object buckets and load balancers both surface in a single
         validate-error message.
     """
-    import pytest
 
     from ._specfactory import bucket_lb_dns_spec
     from ccai.provisioning.venues.proxmox.pveerrors import (
@@ -185,7 +187,7 @@ def test_validate_rejects_unsupported_kinds(venue, aspects):
         client=MockProxmoxClient(), spec=bucket_lb_dns_spec(),
         resolver=make_resolver(),
     )
-    with pytest.raises(PveValidationError) as excinfo:
+    with testbase.raises(PveValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     message = str(excinfo.value)
     assert "data-bucket" in message

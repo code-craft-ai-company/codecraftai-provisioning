@@ -11,7 +11,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.testbase.properties import given
 from ccai.testbase.properties import strategies as st
@@ -38,7 +39,7 @@ def test_to_vs_rejects_non_string_value() -> None:
     """
         A non-string tag value is rejected.
     """
-    with pytest.raises(VsValidationError):
+    with testbase.raises(VsValidationError):
         to_vs(neutral_tags={"a": 1})
     return
 

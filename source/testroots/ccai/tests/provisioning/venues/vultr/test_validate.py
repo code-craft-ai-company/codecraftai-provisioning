@@ -16,8 +16,6 @@ from ccai import testbase
 from .factories import create_vultr_fake_vultr
 
 
-import pytest
-
 from ccai.testbase.properties import given
 from ccai.testbase.properties import strategies as st
 
@@ -60,7 +58,7 @@ def test_validate_rejects_unresolvable_region(fake_vultr,
     spec = basic_spec()
     spec.networks[0].region = "not-a-real-region"
     provisioner = provisioner_factory(client=client, spec=spec)
-    with pytest.raises(VultrValidationError) as excinfo:
+    with testbase.raises(VultrValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "region" in str(excinfo.value).lower()
     return
@@ -101,7 +99,7 @@ def test_validate_rejects_interconnect(kind) -> None:
         provisioner = VultrCloudProvisioner(venue=venue,
                                             credential=credential,
                                             spec=spec, client=client)
-        with pytest.raises(VultrValidationError):
+        with testbase.raises(VultrValidationError):
             provisioner.validate(aspects=None)
     return
 
@@ -141,6 +139,6 @@ def test_validate_rejects_shared_fs(kind) -> None:
         provisioner = VultrCloudProvisioner(venue=venue,
                                             credential=credential,
                                             spec=spec, client=client)
-        with pytest.raises(VultrValidationError):
+        with testbase.raises(VultrValidationError):
             provisioner.validate(aspects=None)
     return

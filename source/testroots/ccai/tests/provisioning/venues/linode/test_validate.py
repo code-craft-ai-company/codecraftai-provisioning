@@ -16,8 +16,6 @@ from ccai import testbase
 from .factories import create_linode_mock_client
 
 
-import pytest
-
 from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
@@ -70,7 +68,7 @@ def test_validate_rejects_unknown_region(venue, credential, region_config,
     provisioner = _provisioner(venue=venue, credential=credential,
                                region_config=region_config, spec=spec,
                                mock_client=mock_client)
-    with pytest.raises(LinodeValidationError):
+    with testbase.raises(LinodeValidationError):
         provisioner.validate(aspects=aspects)
     return
 
@@ -88,7 +86,7 @@ def test_validate_rejects_interconnect(venue, credential, region_config,
     provisioner = _provisioner(venue=venue, credential=credential,
                                region_config=region_config, spec=spec,
                                mock_client=mock_client)
-    with pytest.raises(LinodeValidationError):
+    with testbase.raises(LinodeValidationError):
         provisioner.validate(aspects=aspects)
     return
 
@@ -104,7 +102,7 @@ def test_validate_rejects_shared_fs(venue, credential, region_config,
     provisioner = _provisioner(venue=venue, credential=credential,
                                region_config=region_config, spec=spec,
                                mock_client=mock_client)
-    with pytest.raises(LinodeValidationError):
+    with testbase.raises(LinodeValidationError):
         provisioner.validate(aspects=aspects)
     return
 
@@ -131,7 +129,7 @@ def test_validate_rejects_unknown_image(venue, credential, region_config,
     provisioner = _provisioner(venue=venue, credential=credential,
                                region_config=region_config, spec=spec,
                                mock_client=mock_client)
-    with pytest.raises(SchemaSemanticError) as excinfo:
+    with testbase.raises(SchemaSemanticError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "windows-server" in str(excinfo.value)
     assert "linode" in str(excinfo.value)

@@ -12,10 +12,12 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+
 import json
 import os
 
-import pytest
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
@@ -222,7 +224,7 @@ def test_unconfirmed_drifted_apply_requires_confirm(venue, aspects,
 
     drifted = _provisioner(venue=venue, spec=resized_spec(size="large"),
                            client=client, output_root=str(tmp_path))
-    with pytest.raises(ConfirmationRequiredError):
+    with testbase.raises(ConfirmationRequiredError):
         drifted.apply(aspects=aspects)
 
     assert client.destroy_vm_calls == 0
@@ -258,7 +260,7 @@ def test_destroy_requires_confirm(venue, aspects, tmp_path):
     provisioner = _provisioner(venue=venue, spec=basic_spec(),
                                client=client, output_root=str(tmp_path))
     provisioner.apply(aspects=aspects)
-    with pytest.raises(SchemaSemanticError):
+    with testbase.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     assert len(client.all_vms()) == 1
     return

@@ -17,8 +17,6 @@ from ccai import testbase
 from .factories import (create_hyperv_client, create_hyperv_vpn_control_plane)
 
 
-import pytest
-
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 from ccai.provisioning.venues.hyperv.hypervcloudprovisioner import (
@@ -198,7 +196,7 @@ def test_unconfirmed_resize_requires_confirm(venue, client, host_config,
     provisioner = _provisioner(venue=venue, client=client,
                                host_config=host_config, spec=spec)
 
-    with pytest.raises(ConfirmationRequiredError):
+    with testbase.raises(ConfirmationRequiredError):
         provisioner.apply(aspects=aspects)
 
     assert client.calls["set_vm_processor"] == 0
@@ -305,7 +303,7 @@ def test_destroy_requires_confirm(venue, client, host_config, aspects):
                                host_config=host_config, spec=spec)
     provisioner.apply(aspects=aspects)
 
-    with pytest.raises(SchemaSemanticError):
+    with testbase.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
 
     assert "vm-app" in client.vms_state

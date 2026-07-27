@@ -11,7 +11,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.provisioning.model.cloud.cloudimage import CloudImage
 from ccai.provisioning.model.cloud.cloudinterconnect import (
@@ -64,7 +65,7 @@ def test_validate_rejects_bucket_lb(venue, aspects):
         Object buckets and load balancers surface as validate-errors.
     """
     provisioner = _provisioner(venue=venue, spec=bucket_lb_dns_spec())
-    with pytest.raises(PveValidationError) as excinfo:
+    with testbase.raises(PveValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     message = str(excinfo.value)
     assert "data-bucket" in message
@@ -107,7 +108,7 @@ def test_validate_rejects_interconnect(venue, aspects):
     spec = ProxmoxSpec(networks=[make_network()],
                        keypairs=[make_keypair()], instances=[instance])
     provisioner = _provisioner(venue=venue, spec=spec)
-    with pytest.raises(PveValidationError):
+    with testbase.raises(PveValidationError):
         provisioner.validate(aspects=aspects)
     return
 
@@ -123,7 +124,7 @@ def test_validate_rejects_unmanaged_shared_filesystem(venue, aspects):
                        instances=[make_instance()],
                        shared_filesystems=[sfs])
     provisioner = _provisioner(venue=venue, spec=spec)
-    with pytest.raises(PveValidationError) as excinfo:
+    with testbase.raises(PveValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "scratch" in str(excinfo.value)
     return
@@ -140,7 +141,7 @@ def test_validate_rejects_unknown_image(venue, aspects):
     spec = ProxmoxSpec(networks=[make_network()],
                        keypairs=[make_keypair()], instances=[instance])
     provisioner = _provisioner(venue=venue, spec=spec)
-    with pytest.raises(PveValidationError) as excinfo:
+    with testbase.raises(PveValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "rhel/9" in str(excinfo.value)
     return
@@ -154,7 +155,7 @@ def test_validate_rejects_unknown_size(venue, aspects):
     spec = ProxmoxSpec(networks=[make_network()],
                        keypairs=[make_keypair()], instances=[instance])
     provisioner = _provisioner(venue=venue, spec=spec)
-    with pytest.raises(PveValidationError) as excinfo:
+    with testbase.raises(PveValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "ginormous" in str(excinfo.value)
     return

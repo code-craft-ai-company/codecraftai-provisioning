@@ -1,7 +1,7 @@
 """
     Originates the crusoe venue test factories into this scope.
 
-    Replaces conftest.py: testbase does not read pytest conftest
+    testbase does not read pytest conftest
     files, so those fixtures were invisible to its runner.
 """
 
@@ -20,6 +20,6 @@ testbase.originate.parameter(create_crusoe_crusoe_confirm_aspects, identifier="c
 testbase.originate.parameter(create_crusoe_crusoe_venue, identifier="crusoe_venue")
 testbase.originate.parameter(create_crusoe_project_config, identifier="project_config")
 
-# Stands in for pytest tmp_path.
+# A fresh temporary directory per test.
 testbase.originate.parameter(create_temporary_directory,
                              identifier="tmp_path")

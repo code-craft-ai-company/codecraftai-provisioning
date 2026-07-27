@@ -17,7 +17,6 @@ import re
 
 from typing import Dict, List
 
-import pytest
 
 from ccai.testbase.properties import given
 from ccai.testbase.properties import strategies as st

@@ -16,8 +16,6 @@ from ccai import testbase
 from .factories import create_gcp_make_provisioner
 
 
-import pytest
-
 from ccai.credentials.basecredential import BaseCredential
 from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
@@ -58,7 +56,7 @@ def test_validate_rejects_non_gcp_credential(venue, region_config,
         venue=venue, credential=bogus, region_config=region_config,
         spec=basic_spec(),
     )
-    with pytest.raises(GcpValidationError):
+    with testbase.raises(GcpValidationError):
         provisioner.validate(aspects=aspects)
     return
 
@@ -72,7 +70,7 @@ def test_validate_rejects_efa(make_provisioner, aspects) -> None:
         interconnect=CloudInterconnect(kind="EFA", bandwidth_gbps=400),
     )
     provisioner, _ = make_provisioner(spec=spec)
-    with pytest.raises(GcpValidationError) as excinfo:
+    with testbase.raises(GcpValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "EFA is AWS-only" in str(excinfo.value)
     return
@@ -88,7 +86,7 @@ def test_validate_rejects_infiniband(make_provisioner, aspects) -> None:
                                        bandwidth_gbps=400),
     )
     provisioner, _ = make_provisioner(spec=spec)
-    with pytest.raises(GcpValidationError) as excinfo:
+    with testbase.raises(GcpValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "compact placement" in str(excinfo.value)
     return
@@ -105,7 +103,7 @@ def test_validate_rejects_weka_shared_fs(make_provisioner, aspects) -> None:
                               existing_id="fs-existing")
     ]
     provisioner, _ = make_provisioner(spec=spec)
-    with pytest.raises(GcpValidationError) as excinfo:
+    with testbase.raises(GcpValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "Parallelstore" in str(excinfo.value)
     return
@@ -139,7 +137,7 @@ def test_validate_lustre_requires_existing_id(make_provisioner,
         CloudSharedFilesystem(name="lus1", kind="LUSTRE", size_tb=4)
     ]
     provisioner, _ = make_provisioner(spec=spec)
-    with pytest.raises(GcpValidationError) as excinfo:
+    with testbase.raises(GcpValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "attach-only" in str(excinfo.value)
     return
@@ -168,7 +166,7 @@ def test_validate_gpu_size_conflict(make_provisioner, aspects) -> None:
                                  interconnect="NVSWITCH", memory_gb=80)
     spec = basic_spec(instance_size="e2-standard-2", accelerators=[accel])
     provisioner, _ = make_provisioner(spec=spec)
-    with pytest.raises(GcpValidationError):
+    with testbase.raises(GcpValidationError):
         provisioner.validate(aspects=aspects)
     return
 
@@ -201,7 +199,7 @@ def test_validate_compact_placement_zone_unsupported(make_provisioner,
                                   cidr="10.0.1.0/24",
                                   zone="europe-west9-a")
     provisioner, _ = make_provisioner(spec=spec)
-    with pytest.raises(GcpValidationError) as excinfo:
+    with testbase.raises(GcpValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "compact placement" in str(excinfo.value)
     return
@@ -217,7 +215,7 @@ def test_validate_subnet_containment(make_provisioner, aspects) -> None:
                                   cidr="192.168.1.0/24",
                                   zone="us-central1-a")
     provisioner, _ = make_provisioner(spec=spec)
-    with pytest.raises(GcpValidationError) as excinfo:
+    with testbase.raises(GcpValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "contained" in str(excinfo.value)
     return
@@ -236,7 +234,7 @@ def test_validate_rejects_load_balancer(make_provisioner, aspects) -> None:
         CloudLoadBalancer(name="lb-a", scheme="internal")
     ]
     provisioner, _ = make_provisioner(spec=spec)
-    with pytest.raises(GcpValidationError) as excinfo:
+    with testbase.raises(GcpValidationError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "v1.5" in str(excinfo.value)
     return

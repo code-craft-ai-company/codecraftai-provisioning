@@ -11,7 +11,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
+
 
 from ccai.provisioning.venues.equinix_metal.metalerrors import (
     MetalValidationError
@@ -53,7 +54,7 @@ def test_to_metal_rejects_non_string_value() -> None:
     """
         A non-string tag value is rejected at encode time.
     """
-    with pytest.raises(MetalValidationError):
+    with testbase.raises(MetalValidationError):
         MetalTagTranslator.to_metal(neutral_tags={"a": 1})
     return
 
@@ -62,7 +63,7 @@ def test_to_metal_rejects_equals_in_key() -> None:
     """
         A key containing '=' is rejected — it would corrupt the round trip.
     """
-    with pytest.raises(MetalValidationError):
+    with testbase.raises(MetalValidationError):
         MetalTagTranslator.to_metal(neutral_tags={"a=b": "1"})
     return
 

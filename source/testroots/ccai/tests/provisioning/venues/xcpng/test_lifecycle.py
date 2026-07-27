@@ -12,12 +12,14 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from ccai import testbase
+
+
 import base64
 
 from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
-import pytest
 
 from ccai.provisioning.venues.xcpng.xcpngcloudprovisioner import (
     XcpngCloudProvisioner
@@ -159,7 +161,7 @@ def test_unconfirmed_drifted_apply_requires_confirm(venue, aspects):
 
     drifted = _provisioner(venue=venue, spec=resized_spec(size="large"),
                            client=client)
-    with pytest.raises(ConfirmationRequiredError):
+    with testbase.raises(ConfirmationRequiredError):
         drifted.apply(aspects=aspects)
 
     assert len(client.vms) == 1
@@ -239,14 +241,13 @@ def test_destroy_without_confirm_raises(venue, aspects):
     """
         Destroy without aspects.confirm raises before any teardown.
     """
-    import pytest
 
     from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
     client = MockXenClient()
     provisioner = _provisioner(venue=venue, spec=basic_spec(), client=client)
     provisioner.apply(aspects=aspects)
-    with pytest.raises(SchemaSemanticError):
+    with testbase.raises(SchemaSemanticError):
         provisioner.destroy(aspects=aspects)
     assert len(client.vms) == 1
     return

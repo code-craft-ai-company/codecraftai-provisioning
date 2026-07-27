@@ -17,8 +17,6 @@ from ccai import testbase
 from .factories import create_equinix_metal_mock_client
 
 
-import pytest
-
 from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
@@ -86,7 +84,7 @@ def test_validate_rejects_object_bucket(venue, credential, project_config,
         venue=venue, credential=credential, project_config=project_config,
         spec=spec, mock_client=mock_client,
     )
-    with pytest.raises(MetalValidationError) as excinfo:
+    with testbase.raises(MetalValidationError) as excinfo:
         provisioner.validate(aspects=None)
     assert "object storage" in str(excinfo.value)
     return
@@ -105,7 +103,7 @@ def test_validate_rejects_interconnect(venue, credential, project_config,
         venue=venue, credential=credential, project_config=project_config,
         spec=spec, mock_client=mock_client,
     )
-    with pytest.raises(MetalValidationError) as excinfo:
+    with testbase.raises(MetalValidationError) as excinfo:
         provisioner.validate(aspects=None)
     assert "RDMA" in str(excinfo.value)
     return
@@ -125,7 +123,7 @@ def test_validate_rejects_load_balancer(venue, credential, project_config,
         venue=venue, credential=credential, project_config=project_config,
         spec=spec, mock_client=mock_client,
     )
-    with pytest.raises(MetalValidationError) as excinfo:
+    with testbase.raises(MetalValidationError) as excinfo:
         provisioner.validate(aspects=None)
     assert "load balancer" in str(excinfo.value)
     return
@@ -146,7 +144,7 @@ def test_validate_rejects_shared_filesystem(venue, credential,
         venue=venue, credential=credential, project_config=project_config,
         spec=spec, mock_client=mock_client,
     )
-    with pytest.raises(MetalValidationError) as excinfo:
+    with testbase.raises(MetalValidationError) as excinfo:
         provisioner.validate(aspects=None)
     assert "shared filesystem" in str(excinfo.value)
     return
@@ -167,7 +165,7 @@ def test_validate_rejects_block_volume_without_existing_id(
         venue=venue, credential=credential, project_config=project_config,
         spec=spec, mock_client=mock_client,
     )
-    with pytest.raises(MetalValidationError) as excinfo:
+    with testbase.raises(MetalValidationError) as excinfo:
         provisioner.validate(aspects=None)
     assert "block storage" in str(excinfo.value)
     return
@@ -184,7 +182,7 @@ def test_validate_rejects_unknown_plan(venue, credential, project_config,
         venue=venue, credential=credential, project_config=project_config,
         spec=spec, mock_client=mock_client,
     )
-    with pytest.raises(MetalValidationError) as excinfo:
+    with testbase.raises(MetalValidationError) as excinfo:
         provisioner.validate(aspects=None)
     assert "Plan does not resolve" in str(excinfo.value)
     return
