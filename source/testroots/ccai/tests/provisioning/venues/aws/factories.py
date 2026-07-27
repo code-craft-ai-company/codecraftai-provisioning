@@ -13,7 +13,10 @@ __credits__ = []
 
 import os
 
-import pytest
+from collections.abc import Generator
+from typing import Any
+
+from ccai import testbase
 
 from ccai.credentials.awsaccesskeycredential import AwsAccessKeyCredential
 from ccai.provisioning.aspects.provisioningaspects import (
@@ -22,9 +25,8 @@ from ccai.provisioning.aspects.provisioningaspects import (
 from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
 from ccai.provisioning.venues.aws.awsregionconfig import AwsRegionConfig
 
-
-@pytest.fixture(autouse=True)
-def _aws_env():
+@testbase.register.resource_factory()
+def create_aws__aws_env(constraints=None) -> Generator[Any, None, None]:
     """
         Force a deterministic moto environment for each test.
     """
@@ -47,8 +49,8 @@ def _aws_env():
             os.environ[key] = value
 
 
-@pytest.fixture
-def credential() -> AwsAccessKeyCredential:
+@testbase.register.resource_factory()
+def create_aws_credential(constraints=None) -> Generator[AwsAccessKeyCredential, None, None]:
     """
         Return a deterministic AwsAccessKeyCredential.
     """
@@ -56,11 +58,11 @@ def credential() -> AwsAccessKeyCredential:
         identifier="aws-test", categories=["aws-access-key"],
         keyid="AKIATEST", secret="secret-value",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def region_config() -> AwsRegionConfig:
+@testbase.register.resource_factory()
+def create_aws_region_config(constraints=None) -> Generator[AwsRegionConfig, None, None]:
     """
         Return a deterministic AwsRegionConfig.
     """
@@ -68,11 +70,11 @@ def region_config() -> AwsRegionConfig:
         region="us-east-1", availability_zone="us-east-1a",
         default_tags={"ccai:component": "test"},
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def venue() -> CloudVenue:
+@testbase.register.resource_factory()
+def create_aws_venue(constraints=None) -> Generator[CloudVenue, None, None]:
     """
         Return a CloudVenue for tests.
     """
@@ -81,24 +83,24 @@ def venue() -> CloudVenue:
         account="test-account",
         region="us-east-1", credential="aws-test",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_aws_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Return a ProvisioningAspects bundle for tests.
     """
     rtnval = ProvisioningAspects(runid="testrun01", verify_timeout=30.0,
                                  verify_interval=0.05)
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def confirm_aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_aws_confirm_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Aspects with confirm=True for destroy.
     """
     rtnval = ProvisioningAspects(runid="testrun01", confirm=True,
                                  verify_timeout=30.0, verify_interval=0.05)
-    return rtnval
+    yield rtnval

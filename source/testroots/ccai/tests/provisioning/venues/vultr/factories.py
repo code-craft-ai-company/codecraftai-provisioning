@@ -11,7 +11,10 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from collections.abc import Generator
+from typing import Any
+
+from ccai import testbase
 
 import requests_mock as requests_mock_lib
 
@@ -27,9 +30,8 @@ from ccai.provisioning.venues.vultr.vultrcloudprovisioner import (
 
 from ._fakevultr import FakeVultrApi
 
-
-@pytest.fixture
-def credential() -> VultrApiKeyCredential:
+@testbase.register.resource_factory()
+def create_vultr_credential(constraints=None) -> Generator[VultrApiKeyCredential, None, None]:
     """
         Return a deterministic VultrApiKeyCredential.
     """
@@ -37,11 +39,11 @@ def credential() -> VultrApiKeyCredential:
         identifier="vultr-test", categories=["cloud-venue"],
         token="test-api-key",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def venue() -> CloudVenue:
+@testbase.register.resource_factory()
+def create_vultr_venue(constraints=None) -> Generator[CloudVenue, None, None]:
     """
         Return a CloudVenue for tests.
     """
@@ -49,31 +51,31 @@ def venue() -> CloudVenue:
         name="vultr-test", provider="vultr",
         region="ewr", credential="vultr-test",
     )
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_vultr_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Return a ProvisioningAspects bundle for tests.
     """
     rtnval = ProvisioningAspects(runid="testrun01", verify_timeout=30.0,
                                  verify_interval=0.05)
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def confirm_aspects() -> ProvisioningAspects:
+@testbase.register.resource_factory()
+def create_vultr_confirm_aspects(constraints=None) -> Generator[ProvisioningAspects, None, None]:
     """
         Aspects with confirm=True for destroy.
     """
     rtnval = ProvisioningAspects(runid="testrun01", confirm=True,
                                  verify_timeout=30.0, verify_interval=0.05)
-    return rtnval
+    yield rtnval
 
 
-@pytest.fixture
-def fake_vultr():
+@testbase.register.resource_factory()
+def create_vultr_fake_vultr(constraints=None) -> Generator[Any, None, None]:
     """
         Yield a (FakeVultrApi, VultrClient) bound through requests-mock.
     """
@@ -85,8 +87,8 @@ def fake_vultr():
         yield fake, client
 
 
-@pytest.fixture
-def provisioner_factory(venue, credential):
+@testbase.register.resource_factory()
+def create_vultr_provisioner_factory(venue, credential, constraints=None) -> Generator[Any, None, None]:
     """
         Return a factory building a VultrCloudProvisioner bound to a client.
     """
@@ -98,4 +100,4 @@ def provisioner_factory(venue, credential):
         )
         return rtnval
 
-    return _make
+    yield _make
