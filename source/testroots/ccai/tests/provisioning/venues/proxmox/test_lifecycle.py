@@ -31,8 +31,8 @@ from ccai.provisioning.venues.proxmox.pveerrors import (
     ConfirmationRequiredError
 )
 
-from ._mockclient import MockProxmoxClient, RecordingVpnControlPlane
-from ._specfactory import basic_spec, make_credential, make_resolver, \
+from ccai.tests.provisioning.venues.proxmox._mockclient import MockProxmoxClient, RecordingVpnControlPlane
+from ccai.tests.provisioning.venues.proxmox._specfactory import basic_spec, make_credential, make_resolver, \
     resized_spec, volume_spec
 
 

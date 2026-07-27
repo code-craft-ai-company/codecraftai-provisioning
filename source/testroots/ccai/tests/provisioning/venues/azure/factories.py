@@ -29,7 +29,7 @@ from ccai.provisioning.venues.azure.azuresessionfactory import (
     AzureSessionFactory
 )
 
-from ._fakeazure import FakeAzureWorld
+from ccai.tests.provisioning.venues.azure._fakeazure import FakeAzureWorld
 
 @testbase.register.resource_factory()
 def create_azure_credential(constraints=None) -> Generator[AzureServicePrincipalCredential, None, None]:

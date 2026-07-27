@@ -13,7 +13,7 @@ __credits__ = []
 
 from ccai import testbase
 
-from .factories import create_vultr_fake_vultr
+from ccai.tests.provisioning.venues.vultr.factories import create_vultr_fake_vultr
 
 
 import base64
@@ -28,7 +28,7 @@ from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
 
-from ._specfactory import basic_spec
+from ccai.tests.provisioning.venues.vultr._specfactory import basic_spec
 
 
 class _RecordingVPN:

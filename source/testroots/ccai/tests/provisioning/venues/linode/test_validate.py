@@ -13,7 +13,7 @@ __credits__ = []
 
 from ccai import testbase
 
-from .factories import create_linode_mock_client
+from ccai.tests.provisioning.venues.linode.factories import create_linode_mock_client
 
 
 from ccai.provisioning.model.cloud.cloudinterconnect import (
@@ -29,7 +29,7 @@ from ccai.provisioning.venues.linode.linodeerrors import (
     LinodeValidationError
 )
 
-from ._specfactory import basic_spec
+from ccai.tests.provisioning.venues.linode._specfactory import basic_spec
 
 
 def _provisioner(*, venue, credential, region_config, spec, mock_client):

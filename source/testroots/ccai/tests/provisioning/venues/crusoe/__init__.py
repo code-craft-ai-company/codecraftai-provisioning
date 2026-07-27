@@ -8,7 +8,7 @@
 from ccai import testbase
 from ccai.testbase.factories import create_temporary_directory
 
-from .factories import (
+from ccai.tests.provisioning.venues.crusoe.factories import (
     create_crusoe_crusoe_aspects,
     create_crusoe_crusoe_confirm_aspects,
     create_crusoe_crusoe_venue,

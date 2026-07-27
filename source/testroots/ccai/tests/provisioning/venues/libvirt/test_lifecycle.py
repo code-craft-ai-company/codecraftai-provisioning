@@ -28,8 +28,8 @@ from ccai.provisioning.venues.libvirt.lverrors import (
     ConfirmationRequiredError
 )
 
-from ._mockclient import MockLibvirtClient, RecordingVpnControlPlane
-from ._specfactory import (
+from ccai.tests.provisioning.venues.libvirt._mockclient import MockLibvirtClient, RecordingVpnControlPlane
+from ccai.tests.provisioning.venues.libvirt._specfactory import (
     BASE_IMAGE_VOLUME, basic_spec, make_config, resized_spec, volume_spec
 )
 

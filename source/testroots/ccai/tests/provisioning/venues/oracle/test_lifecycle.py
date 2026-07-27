@@ -38,8 +38,8 @@ from ccai.provisioning.venues.oracle.oraclecloudprovisioner import (
     OracleCloudProvisioner
 )
 
-from ._ocifakes import install_fakes
-from ._specfactory import basic_spec, rdma_spec
+from ccai.tests.provisioning.venues.oracle._ocifakes import install_fakes
+from ccai.tests.provisioning.venues.oracle._specfactory import basic_spec, rdma_spec
 
 
 def _new_provisioner(*, venue, credential, region_config, spec,

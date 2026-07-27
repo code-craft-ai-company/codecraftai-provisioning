@@ -27,7 +27,7 @@ from ccai.provisioning.venues.coreweave.cwlabeltranslator import (
 from ccai.provisioning.venues.coreweave.cwsunkrenderer import CwSunkRenderer
 from ccai.provisioning.venues.coreweave.cwvpnsidecar import CwVpnSidecar
 
-from .testsupport import (
+from ccai.tests.provisioning.venues.coreweave.testsupport import (
     MockKubernetesClient, make_gpu_job, make_provisioner, make_spec
 )
 

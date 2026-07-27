@@ -5,7 +5,7 @@
 from ccai import testbase
 from ccai.testbase.factories import create_temporary_directory
 
-from .factories import (
+from ccai.tests.provisioning.venues.hetzner.factories import (
     create_credential,
     create_location_config,
     create_venue,

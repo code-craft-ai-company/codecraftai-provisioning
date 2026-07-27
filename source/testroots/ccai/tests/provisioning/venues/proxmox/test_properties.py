@@ -36,8 +36,8 @@ from ccai.provisioning.venues.proxmox.pvetagtranslator import (
     PveTagTranslator
 )
 
-from ._mockclient import MockProxmoxClient, RecordingVpnControlPlane
-from ._specfactory import (
+from ccai.tests.provisioning.venues.proxmox._mockclient import MockProxmoxClient, RecordingVpnControlPlane
+from ccai.tests.provisioning.venues.proxmox._specfactory import (
     basic_spec, make_credential, make_instance, make_keypair,
     make_network, make_resolver
 )
@@ -177,7 +177,7 @@ def test_validate_rejects_unsupported_kinds(venue, aspects):
         validate-error message.
     """
 
-    from ._specfactory import bucket_lb_dns_spec
+    from ccai.tests.provisioning.venues.proxmox._specfactory import bucket_lb_dns_spec
     from ccai.provisioning.venues.proxmox.pveerrors import (
         PveValidationError
     )

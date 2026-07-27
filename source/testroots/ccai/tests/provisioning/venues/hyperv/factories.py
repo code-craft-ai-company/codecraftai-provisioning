@@ -23,7 +23,7 @@ from ccai.provisioning.aspects.provisioningaspects import (
 from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
 from ccai.provisioning.venues.hyperv.hvhostconfig import HvHostConfig
 
-from ._mockclient import (
+from ccai.tests.provisioning.venues.hyperv._mockclient import (
     MockHypervClient
 )
 

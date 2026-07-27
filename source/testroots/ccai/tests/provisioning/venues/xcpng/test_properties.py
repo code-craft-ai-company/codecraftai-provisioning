@@ -30,8 +30,8 @@ from ccai.provisioning.venues.xcpng.xcpngspec import XcpngSpec
 
 from ccai.interop.xen.model.xenvm import XenVm
 
-from ._mockclient import MockXenClient, RecordingVpnControlPlane
-from ._specfactory import make_instance, make_network
+from ccai.tests.provisioning.venues.xcpng._mockclient import MockXenClient, RecordingVpnControlPlane
+from ccai.tests.provisioning.venues.xcpng._specfactory import make_instance, make_network
 
 
 def _venue() -> CloudVenue:
@@ -66,7 +66,7 @@ def test_property_apply_is_idempotent(repeat_count, with_vpn,
     vpn = RecordingVpnControlPlane()
     volumes = []
     if with_volume is True:
-        from ._specfactory import make_volume
+        from ccai.tests.provisioning.venues.xcpng._specfactory import make_volume
         volumes = [make_volume()]
     spec = XcpngSpec(networks=[make_network()],
                      instances=[make_instance(with_vpn=with_vpn)],
@@ -97,7 +97,7 @@ def test_property_destroy_inverts_apply(with_vpn, with_volume) -> None:
     vpn = RecordingVpnControlPlane()
     volumes = []
     if with_volume is True:
-        from ._specfactory import make_volume
+        from ccai.tests.provisioning.venues.xcpng._specfactory import make_volume
         volumes = [make_volume()]
     spec = XcpngSpec(networks=[make_network()],
                      instances=[make_instance(with_vpn=with_vpn)],

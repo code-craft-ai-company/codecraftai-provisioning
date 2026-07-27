@@ -20,8 +20,8 @@ from ccai.provisioning.venues.xcpng.xcpngcloudprovisioner import (
 from ccai.provisioning.venues.xcpng.xenerrors import XenValidationError
 from ccai.provisioning.venues.xcpng.xcpngspec import XcpngSpec
 
-from ._mockclient import MockXenClient
-from ._specfactory import (
+from ccai.tests.provisioning.venues.xcpng._mockclient import MockXenClient
+from ccai.tests.provisioning.venues.xcpng._specfactory import (
     basic_spec, bucket_lb_spec, dns_record_spec, interconnect_spec,
     make_instance
 )

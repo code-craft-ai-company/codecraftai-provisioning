@@ -8,7 +8,7 @@
 from ccai import testbase
 from ccai.testbase.factories import create_temporary_directory
 
-from .factories import (
+from ccai.tests.provisioning.venues.lambdalabs.factories import (
     create_lambdalabs_credential,
     create_lambdalabs_venue,
     create_lambdalabs_aspects,

@@ -14,7 +14,7 @@ __credits__ = []
 
 from ccai import testbase
 
-from .factories import (create_azure_session_factory, create_azure_world)
+from ccai.tests.provisioning.venues.azure.factories import (create_azure_session_factory, create_azure_world)
 
 
 import base64
@@ -43,8 +43,8 @@ from ccai.provisioning.venues.azure.azuresessionfactory import (
 )
 from ccai.provisioning.venues.azure.azurespec import AzureSpec
 
-from ._fakeazure import FakeAzureWorld
-from ._specfactory import basic_spec, ib_instance
+from ccai.tests.provisioning.venues.azure._fakeazure import FakeAzureWorld
+from ccai.tests.provisioning.venues.azure._specfactory import basic_spec, ib_instance
 
 
 def _provisioner(*, venue, credential, region_config, session_factory,
@@ -508,7 +508,7 @@ def test_destroy_preserves_foreign_resource_group(venue, credential,
     provisioner.apply(aspects=aspects)
 
     # Inject a foreign (un-owned) resource into the group.
-    from ._fakeazure import FakeResource
+    from ccai.tests.provisioning.venues.azure._fakeazure import FakeResource
     world.vnets["rg-testrun01/foreign-vnet"] = FakeResource(
         name="foreign-vnet", location="eastus",
         id="/fake/eastus/foreign-vnet", tags={"owner": "someone-else"},

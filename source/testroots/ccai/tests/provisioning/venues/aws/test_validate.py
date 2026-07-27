@@ -30,7 +30,7 @@ from ccai.provisioning.venues.aws.awscloudprovisioner import (
 from ccai.provisioning.venues.aws.awserrors import AwsValidationError
 from ccai.provisioning.venues.aws.awsspec import AwsSpec
 
-from ._specfactory import basic_spec
+from ccai.tests.provisioning.venues.aws._specfactory import basic_spec
 
 
 def test_validate_happy_path(venue, credential, region_config,

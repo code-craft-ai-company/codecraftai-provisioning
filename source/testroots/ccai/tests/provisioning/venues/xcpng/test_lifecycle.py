@@ -31,8 +31,8 @@ from ccai.provisioning.venues.xcpng.xenerrors import (
     ConfirmationRequiredError
 )
 
-from ._mockclient import MockXenClient, RecordingVpnControlPlane
-from ._specfactory import basic_spec, resized_spec
+from ccai.tests.provisioning.venues.xcpng._mockclient import MockXenClient, RecordingVpnControlPlane
+from ccai.tests.provisioning.venues.xcpng._specfactory import basic_spec, resized_spec
 
 
 def _provisioner(*, venue, spec, client=None, vpn=None):

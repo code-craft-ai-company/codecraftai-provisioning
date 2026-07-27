@@ -14,7 +14,7 @@ __credits__ = []
 
 from ccai import testbase
 
-from .factories import (create_azure_session_factory, create_azure_world)
+from ccai.tests.provisioning.venues.azure.factories import (create_azure_session_factory, create_azure_world)
 
 
 from ccai.credentials.basecredential import BaseCredential
@@ -34,7 +34,7 @@ from ccai.provisioning.venues.azure.azureerrors import (
     AzureValidationError
 )
 
-from ._specfactory import basic_spec
+from ccai.tests.provisioning.venues.azure._specfactory import basic_spec
 
 
 def _provisioner(*, venue, credential, region_config, session_factory,

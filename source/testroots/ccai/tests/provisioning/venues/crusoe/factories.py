@@ -25,7 +25,7 @@ from ccai.provisioning.venues.crusoe.crusoeprojectconfig import (
 )
 
 
-from ._mockclient import MockCrusoeClient
+from ccai.tests.provisioning.venues.crusoe._mockclient import MockCrusoeClient
 
 
 class _Aspects:

@@ -26,8 +26,8 @@ from ccai.provisioning.venues.nutanix.ntxerrors import (
     ConfirmationRequiredError
 )
 
-from ._mockclient import MockNutanixClient, RecordingVpnControlPlane
-from ._specfactory import (
+from ccai.tests.provisioning.venues.nutanix._mockclient import MockNutanixClient, RecordingVpnControlPlane
+from ccai.tests.provisioning.venues.nutanix._specfactory import (
     basic_spec, make_config, resized_spec, volume_spec
 )
 

@@ -30,8 +30,8 @@ from ccai.provisioning.venues.libvirt.libvirtcloudprovisioner import (
 from ccai.provisioning.venues.libvirt.libvirtspec import LibvirtSpec
 from ccai.provisioning.venues.libvirt.lverrors import LvValidationError
 
-from ._mockclient import MockLibvirtClient
-from ._specfactory import (
+from ccai.tests.provisioning.venues.libvirt._mockclient import MockLibvirtClient
+from ccai.tests.provisioning.venues.libvirt._specfactory import (
     basic_spec, bucket_lb_dns_spec, make_config, make_instance,
     make_keypair, make_network
 )

@@ -35,8 +35,8 @@ from ccai.provisioning.venues.nutanix.ntxcategorytranslator import (
     NtxCategoryTranslator
 )
 
-from ._mockclient import MockNutanixClient
-from ._specfactory import basic_spec, make_config
+from ccai.tests.provisioning.venues.nutanix._mockclient import MockNutanixClient
+from ccai.tests.provisioning.venues.nutanix._specfactory import basic_spec, make_config
 
 
 def _venue() -> CloudVenue:

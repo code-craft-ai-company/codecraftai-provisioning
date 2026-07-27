@@ -7,7 +7,7 @@
 
 from ccai import testbase
 
-from .factories import (
+from ccai.tests.provisioning.venues.equinix_metal.factories import (
     create_equinix_metal_credential,
     create_equinix_metal_project_config,
     create_equinix_metal_venue,

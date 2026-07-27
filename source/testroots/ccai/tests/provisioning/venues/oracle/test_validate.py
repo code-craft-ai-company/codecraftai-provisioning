@@ -30,7 +30,7 @@ from ccai.provisioning.venues.oracle.oraclecloudprovisioner import (
     OracleCloudProvisioner
 )
 
-from ._specfactory import basic_spec
+from ccai.tests.provisioning.venues.oracle._specfactory import basic_spec
 
 
 def test_validate_happy_path(venue, credential, region_config,

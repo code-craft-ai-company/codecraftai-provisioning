@@ -26,7 +26,7 @@ from ccai.provisioning.venues.linode.linoderegionconfig import (
     LinodeRegionConfig
 )
 
-from ._mocklinodeclient import MockLinodeClient
+from ccai.tests.provisioning.venues.linode._mocklinodeclient import MockLinodeClient
 
 @testbase.register.resource_factory()
 def create_linode_credential(constraints=None) -> Generator[LinodeApiTokenCredential, None, None]:

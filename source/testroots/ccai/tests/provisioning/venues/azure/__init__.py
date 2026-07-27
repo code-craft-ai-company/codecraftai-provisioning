@@ -7,7 +7,7 @@
 
 from ccai import testbase
 
-from .factories import (
+from ccai.tests.provisioning.venues.azure.factories import (
     create_azure_credential,
     create_azure_region_config,
     create_azure_venue,

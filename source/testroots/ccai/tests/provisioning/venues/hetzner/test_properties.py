@@ -32,8 +32,8 @@ from ccai.provisioning.venues.hetzner.hetznerlocationconfig import (
     HetznerLocationConfig
 )
 
-from ._mockclient import MockHetznerClient
-from ._specfactory import basic_spec
+from ccai.tests.provisioning.venues.hetzner._mockclient import MockHetznerClient
+from ccai.tests.provisioning.venues.hetzner._specfactory import basic_spec
 
 
 def _build_provisioner(*, client: MockHetznerClient, with_vpn: bool

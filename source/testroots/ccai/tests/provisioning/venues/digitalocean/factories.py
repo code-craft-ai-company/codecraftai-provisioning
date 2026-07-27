@@ -29,7 +29,7 @@ from ccai.provisioning.venues.digitalocean.doregionconfig import (
     DoRegionConfig
 )
 
-from ._mockclient import MockDigitalOceanRawClient
+from ccai.tests.provisioning.venues.digitalocean._mockclient import MockDigitalOceanRawClient
 
 @testbase.register.resource_factory()
 def create_digitalocean_credential(constraints=None) -> Generator[DigitalOceanApiTokenCredential, None, None]:

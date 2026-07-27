@@ -13,7 +13,7 @@ __credits__ = []
 
 from ccai import testbase
 
-from .factories import (create_digitalocean_do_client, create_digitalocean_raw_client)
+from ccai.tests.provisioning.venues.digitalocean.factories import (create_digitalocean_do_client, create_digitalocean_raw_client)
 
 
 from ccai.provisioning.model.cloud.cloudinterconnect import (
@@ -32,7 +32,7 @@ from ccai.provisioning.venues.digitalocean.doerrors import (
     DoValidationError
 )
 
-from ._specfactory import basic_spec
+from ccai.tests.provisioning.venues.digitalocean._specfactory import basic_spec
 
 
 def _provisioner(*, venue, credential, region_config, do_client, spec):

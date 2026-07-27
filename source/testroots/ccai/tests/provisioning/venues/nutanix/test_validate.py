@@ -28,8 +28,8 @@ from ccai.provisioning.venues.nutanix.nutanixcloudprovisioner import (
 from ccai.provisioning.venues.nutanix.nutanixspec import NutanixSpec
 from ccai.provisioning.venues.nutanix.ntxerrors import NtxValidationError
 
-from ._mockclient import MockNutanixClient
-from ._specfactory import (
+from ccai.tests.provisioning.venues.nutanix._mockclient import MockNutanixClient
+from ccai.tests.provisioning.venues.nutanix._specfactory import (
     basic_spec, bucket_lb_dns_spec, make_config, make_keypair,
     make_network, make_subnet
 )

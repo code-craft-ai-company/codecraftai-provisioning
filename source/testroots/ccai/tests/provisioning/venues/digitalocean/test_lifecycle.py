@@ -13,7 +13,7 @@ __credits__ = []
 
 from ccai import testbase
 
-from .factories import (create_digitalocean_do_client, create_digitalocean_raw_client)
+from ccai.tests.provisioning.venues.digitalocean.factories import (create_digitalocean_do_client, create_digitalocean_raw_client)
 
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
@@ -34,8 +34,8 @@ from ccai.provisioning.venues.digitalocean.doclient import (
     DigitalOceanClient
 )
 
-from ._mockclient import MockDigitalOceanRawClient
-from ._specfactory import basic_spec
+from ccai.tests.provisioning.venues.digitalocean._mockclient import MockDigitalOceanRawClient
+from ccai.tests.provisioning.venues.digitalocean._specfactory import basic_spec
 
 
 def _provisioner(*, venue, credential, region_config, do_client, spec,

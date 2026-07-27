@@ -14,7 +14,7 @@ __credits__ = []
 
 from ccai import testbase
 
-from .factories import create_nebius_client
+from ccai.tests.provisioning.venues.nebius.factories import create_nebius_client
 
 
 from ccai.provisioning.model.cloud.plannedactionintent import (
@@ -24,7 +24,7 @@ from ccai.provisioning.venues.nebius.nebiuscloudprovisioner import (
     NebiusCloudProvisioner
 )
 
-from ._specfactory import basic_spec, gpu_cluster_spec
+from ccai.tests.provisioning.venues.nebius._specfactory import basic_spec, gpu_cluster_spec
 
 
 class _RecordingControlPlane:

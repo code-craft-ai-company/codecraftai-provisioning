@@ -13,7 +13,7 @@ __credits__ = []
 
 from ccai import testbase
 
-from .factories import create_gcp_make_provisioner
+from ccai.tests.provisioning.venues.gcp.factories import create_gcp_make_provisioner
 
 
 from ccai.credentials.basecredential import BaseCredential
@@ -32,7 +32,7 @@ from ccai.provisioning.venues.google.googlecloudprovisioner import (
     GoogleCloudProvisioner
 )
 
-from ._specfactory import basic_spec, tpu_spec
+from ccai.tests.provisioning.venues.gcp._specfactory import basic_spec, tpu_spec
 
 
 @testbase.attach.parameter(create_gcp_make_provisioner, identifier="make_provisioner")

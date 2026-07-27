@@ -26,7 +26,7 @@ from ccai.provisioning.venues.equinix_metal.metalprojectconfig import (
     MetalProjectConfig
 )
 
-from ._mockmetalclient import MockMetalClient
+from ccai.tests.provisioning.venues.equinix_metal._mockmetalclient import MockMetalClient
 
 @testbase.register.resource_factory()
 def create_equinix_metal_credential(constraints=None) -> Generator[EquinixMetalApiTokenCredential, None, None]:

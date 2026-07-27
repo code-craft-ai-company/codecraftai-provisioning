@@ -7,7 +7,7 @@
 
 from ccai import testbase
 
-from .factories import (
+from ccai.tests.provisioning.venues.oracle.factories import (
     create_oracle_credential,
     create_oracle_region_config,
     create_oracle_venue,

@@ -48,9 +48,9 @@ from ccai.provisioning.venues.crusoe.crusoeerrors import (
 )
 
 
-from ._mockclient import MockCrusoeClient
-from ._specfactory import basic_spec
-from .factories import (_Aspects, create_crusoe_mock_client, make_provisioner)
+from ccai.tests.provisioning.venues.crusoe._mockclient import MockCrusoeClient
+from ccai.tests.provisioning.venues.crusoe._specfactory import basic_spec
+from ccai.tests.provisioning.venues.crusoe.factories import (_Aspects, create_crusoe_mock_client, make_provisioner)
 
 
 # ----------------------------------------------------------------------

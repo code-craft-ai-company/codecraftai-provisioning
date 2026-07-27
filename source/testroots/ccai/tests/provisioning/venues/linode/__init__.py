@@ -8,7 +8,7 @@
 from ccai import testbase
 from ccai.testbase.factories import create_temporary_directory
 
-from .factories import (
+from ccai.tests.provisioning.venues.linode.factories import (
     create_linode_credential,
     create_linode_region_config,
     create_linode_venue,

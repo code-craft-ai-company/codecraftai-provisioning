@@ -27,8 +27,8 @@ from ccai.provisioning.venues.nebius.nebiuslabeltranslator import (
     NebiusLabelTranslator
 )
 
-from ._mockclient import MockNebiusClient
-from ._specfactory import basic_spec, gpu_cluster_spec
+from ccai.tests.provisioning.venues.nebius._mockclient import MockNebiusClient
+from ccai.tests.provisioning.venues.nebius._specfactory import basic_spec, gpu_cluster_spec
 
 
 def _venue() -> CloudVenue:

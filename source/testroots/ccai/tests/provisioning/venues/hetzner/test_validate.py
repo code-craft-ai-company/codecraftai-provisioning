@@ -13,7 +13,7 @@ __credits__ = []
 
 from ccai import testbase
 
-from .factories import create_client
+from ccai.tests.provisioning.venues.hetzner.factories import create_client
 
 
 from ccai.credentials.basecredential import BaseCredential
@@ -37,7 +37,7 @@ from ccai.provisioning.venues.hetzner.hetznererrors import (
 )
 from ccai.provisioning.venues.hetzner.hetznerspec import HetznerSpec
 
-from ._specfactory import basic_spec
+from ccai.tests.provisioning.venues.hetzner._specfactory import basic_spec
 
 
 @testbase.attach.parameter(create_client, identifier="client")

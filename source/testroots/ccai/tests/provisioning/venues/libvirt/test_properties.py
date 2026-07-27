@@ -37,8 +37,8 @@ from ccai.provisioning.venues.libvirt.lvseedisobuilder import (
     LvSeedIsoBuilder
 )
 
-from ._mockclient import MockLibvirtClient
-from ._specfactory import (
+from ccai.tests.provisioning.venues.libvirt._mockclient import MockLibvirtClient
+from ccai.tests.provisioning.venues.libvirt._specfactory import (
     BASE_IMAGE_VOLUME, basic_spec, make_config, make_instance,
     make_keypair, make_network
 )
@@ -189,7 +189,7 @@ def test_validate_rejects_unsupported_kinds(venue, aspects):
         validate-error message.
     """
 
-    from ._specfactory import bucket_lb_dns_spec
+    from ccai.tests.provisioning.venues.libvirt._specfactory import bucket_lb_dns_spec
     from ccai.provisioning.venues.libvirt.lverrors import (
         LvValidationError
     )

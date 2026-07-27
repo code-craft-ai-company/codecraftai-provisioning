@@ -7,7 +7,7 @@
 
 from ccai import testbase
 
-from .factories import (
+from ccai.tests.provisioning.venues.vsphere.factories import (
     create_vsphere_credential,
     create_vsphere_venue,
     create_vsphere_config,

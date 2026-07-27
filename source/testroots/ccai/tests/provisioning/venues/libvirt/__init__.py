@@ -8,7 +8,7 @@
 from ccai import testbase
 from ccai.testbase.factories import create_temporary_directory
 
-from .factories import (
+from ccai.tests.provisioning.venues.libvirt.factories import (
     create_libvirt_venue,
     create_libvirt_aspects,
     create_libvirt_confirm_aspects,

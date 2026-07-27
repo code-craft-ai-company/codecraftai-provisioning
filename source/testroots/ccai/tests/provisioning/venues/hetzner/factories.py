@@ -26,7 +26,7 @@ from ccai.provisioning.venues.hetzner.hetznerlocationconfig import (
     HetznerLocationConfig
 )
 
-from ._mockclient import MockDnsClient, MockHetznerClient, MockVpnControlPlane
+from ccai.tests.provisioning.venues.hetzner._mockclient import MockDnsClient, MockHetznerClient, MockVpnControlPlane
 
 @testbase.register.resource_factory()
 def create_credential(constraints=None) -> Generator[HetznerApiTokenCredential, None, None]:

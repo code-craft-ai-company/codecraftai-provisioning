@@ -32,8 +32,8 @@ from ccai.provisioning.venues.equinix_metal.metaltagtranslator import (
     MetalTagTranslator
 )
 
-from ._mockmetalclient import MockMetalClient
-from ._specfactory import basic_spec
+from ccai.tests.provisioning.venues.equinix_metal._mockmetalclient import MockMetalClient
+from ccai.tests.provisioning.venues.equinix_metal._specfactory import basic_spec
 
 
 def _fresh_provisioner(*, with_vpn: bool = False

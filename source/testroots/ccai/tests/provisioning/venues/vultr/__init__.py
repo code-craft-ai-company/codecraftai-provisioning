@@ -7,7 +7,7 @@
 
 from ccai import testbase
 
-from .factories import (
+from ccai.tests.provisioning.venues.vultr.factories import (
     create_vultr_credential,
     create_vultr_venue,
     create_vultr_aspects,

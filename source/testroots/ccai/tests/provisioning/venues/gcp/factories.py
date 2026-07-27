@@ -31,7 +31,7 @@ from ccai.provisioning.venues.google.googlecloudprovisioner import (
     GoogleCloudProvisioner
 )
 
-from ._mockgcp import (
+from ccai.tests.provisioning.venues.gcp._mockgcp import (
     build_fake_compute, FakeTpuClient, FakeStorageClient, FakeDnsClient
 )
 

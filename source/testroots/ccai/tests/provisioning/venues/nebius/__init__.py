@@ -7,7 +7,7 @@
 
 from ccai import testbase
 
-from .factories import (
+from ccai.tests.provisioning.venues.nebius.factories import (
     create_nebius_venue,
     create_nebius_aspects,
     create_nebius_confirm_aspects,

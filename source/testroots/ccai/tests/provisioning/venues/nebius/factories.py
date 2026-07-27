@@ -20,7 +20,7 @@ from ccai.provisioning.aspects.provisioningaspects import (
 )
 from ccai.provisioning.model.cloud.cloudvenue import CloudVenue
 
-from ._mockclient import MockNebiusClient
+from ccai.tests.provisioning.venues.nebius._mockclient import MockNebiusClient
 
 @testbase.register.resource_factory()
 def create_nebius_client(constraints=None) -> Generator[MockNebiusClient, None, None]:

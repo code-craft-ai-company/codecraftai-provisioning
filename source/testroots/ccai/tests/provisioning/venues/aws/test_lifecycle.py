@@ -35,8 +35,8 @@ from ccai.provisioning.venues.aws.awscloudprovisioner import (
 )
 from ccai.provisioning.venues.aws.awsspec import AwsSpec
 
-from ._fakeaws import FakeAwsSessionFactory
-from ._specfactory import basic_spec
+from ccai.tests.provisioning.venues.aws._fakeaws import FakeAwsSessionFactory
+from ccai.tests.provisioning.venues.aws._specfactory import basic_spec
 
 
 def _new_provisioner(*, venue, credential, region_config, spec,

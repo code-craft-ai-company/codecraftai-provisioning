@@ -8,7 +8,7 @@
 from ccai import testbase
 from ccai.testbase.factories import create_temporary_directory
 
-from .factories import (
+from ccai.tests.provisioning.venues.nutanix.factories import (
     create_nutanix_venue,
     create_nutanix_aspects,
     create_nutanix_confirm_aspects,

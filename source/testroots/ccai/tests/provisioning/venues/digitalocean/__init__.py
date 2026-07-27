@@ -8,7 +8,7 @@
 from ccai import testbase
 from ccai.testbase.factories import create_temporary_directory
 
-from .factories import (
+from ccai.tests.provisioning.venues.digitalocean.factories import (
     create_digitalocean_credential,
     create_digitalocean_region_config,
     create_digitalocean_venue,

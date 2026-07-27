@@ -13,7 +13,7 @@ __credits__ = []
 
 from ccai import testbase
 
-from .factories import create_vultr_fake_vultr
+from ccai.tests.provisioning.venues.vultr.factories import create_vultr_fake_vultr
 
 
 from ccai.testbase.properties import given
@@ -29,7 +29,7 @@ from ccai.provisioning.venues.vultr.vultrerrors import (
     VultrValidationError
 )
 
-from ._specfactory import basic_spec
+from ccai.tests.provisioning.venues.vultr._specfactory import basic_spec
 
 
 @testbase.attach.parameter(create_vultr_fake_vultr, identifier="fake_vultr")
@@ -81,7 +81,7 @@ def test_validate_rejects_interconnect(kind) -> None:
         VultrCloudProvisioner
     )
 
-    from ._fakevultr import FakeVultrApi
+    from ccai.tests.provisioning.venues.vultr._fakevultr import FakeVultrApi
 
     interconnect = CloudInterconnect(kind=kind, bandwidth_gbps=200)
     spec = basic_spec(interconnect=interconnect)
@@ -121,7 +121,7 @@ def test_validate_rejects_shared_fs(kind) -> None:
         VultrCloudProvisioner
     )
 
-    from ._fakevultr import FakeVultrApi
+    from ccai.tests.provisioning.venues.vultr._fakevultr import FakeVultrApi
 
     sfs = CloudSharedFilesystem(name="fs-a", kind=kind, size_tb=10)
     spec = basic_spec(shared_filesystems=[sfs])

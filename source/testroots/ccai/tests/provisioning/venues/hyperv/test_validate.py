@@ -13,7 +13,7 @@ __credits__ = []
 
 from ccai import testbase
 
-from .factories import create_hyperv_client
+from ccai.tests.provisioning.venues.hyperv.factories import create_hyperv_client
 
 
 from ccai.provisioning.venues.hyperv.hverrors import HvValidationError
@@ -22,7 +22,7 @@ from ccai.provisioning.venues.hyperv.hypervcloudprovisioner import (
 )
 from ccai.provisioning.venues.hyperv.hypervspec import HypervSpec
 
-from . import _specfactory
+from ccai.tests.provisioning.venues.hyperv import _specfactory
 
 
 def _provisioner(*, venue, client, host_config, spec):

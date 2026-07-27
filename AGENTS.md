@@ -94,10 +94,17 @@ Each venue under `source/testroots/ccai/tests/provisioning/venues/<venue>/` hold
   the result and reports `'X' object is not iterable`.
 * `__init__.py` — the venue's scope originations.
 * `_mockclient.py` / `_specfactory.py` — test doubles and spec builders, imported
-  **relatively** (`from ._mockclient import ...`). An absolute import only worked
-  under pytest, which put the venue directory on `sys.path`; under testbase these
-  are a real package and an absolute import fails the whole module, silently
-  removing its tests from discovery rather than failing them.
+  by their **full package path**, per this repository's rule against relative
+  imports:
+
+  ```python
+      from ccai.tests.provisioning.venues.aws._specfactory import basic_spec
+  ```
+
+  A bare `from _specfactory import ...` is not the same thing and does not work.
+  It only ever resolved because pytest put the venue directory on `sys.path`;
+  under testbase these are a real package, so it fails the whole module and
+  silently removes its tests from discovery rather than failing them.
 
 Factory function names are venue-prefixed (`create_hetzner_credential`, not
 `create_credential`) because `register.resource_factory()` keys its registry by

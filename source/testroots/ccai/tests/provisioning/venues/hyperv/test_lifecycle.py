@@ -14,7 +14,7 @@ __credits__ = []
 
 from ccai import testbase
 
-from .factories import (create_hyperv_client, create_hyperv_vpn_control_plane)
+from ccai.tests.provisioning.venues.hyperv.factories import (create_hyperv_client, create_hyperv_vpn_control_plane)
 
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
@@ -26,7 +26,7 @@ from ccai.provisioning.venues.hyperv.hverrors import (
     ConfirmationRequiredError
 )
 
-from . import _specfactory
+from ccai.tests.provisioning.venues.hyperv import _specfactory
 
 
 def _provisioner(*, venue, client, host_config, spec, vpn_control_plane=None):

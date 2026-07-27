@@ -8,7 +8,7 @@
 from ccai import testbase
 from ccai.testbase.factories import create_temporary_directory
 
-from .factories import (
+from ccai.tests.provisioning.venues.hyperv.factories import (
     create_hyperv_venue,
     create_hyperv_host_config,
     create_hyperv_aspects,

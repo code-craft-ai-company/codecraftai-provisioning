@@ -26,10 +26,10 @@ from ccai.provisioning.venues.lambdalabs.lambdalabscloudprovisioner import (
 )
 from ccai.provisioning.venues.lambdalabs.llsidecartag import LlSidecarTag
 
-from ._mockclient import (
+from ccai.tests.provisioning.venues.lambdalabs._mockclient import (
     MockLambdalabsClient, RecordingVpnControlPlane
 )
-from ._specfactory import (
+from ccai.tests.provisioning.venues.lambdalabs._specfactory import (
     basic_spec, cluster_spec
 )
 

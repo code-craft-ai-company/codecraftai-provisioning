@@ -14,7 +14,7 @@ __credits__ = []
 
 from ccai import testbase
 
-from .factories import (create_client, create_dns_client, create_vpn_control_plane)
+from ccai.tests.provisioning.venues.hetzner.factories import (create_client, create_dns_client, create_vpn_control_plane)
 
 
 import os
@@ -37,8 +37,8 @@ from ccai.provisioning.venues.hetzner.hetznerinventory import (
     HetznerInventory
 )
 
-from ._mockclient import MockVpnControlPlane
-from ._specfactory import basic_spec
+from ccai.tests.provisioning.venues.hetzner._mockclient import MockVpnControlPlane
+from ccai.tests.provisioning.venues.hetzner._specfactory import basic_spec
 
 
 def _provisioner(*, venue, credential, location_config, client, spec,

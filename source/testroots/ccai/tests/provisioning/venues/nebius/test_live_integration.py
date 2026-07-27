@@ -30,7 +30,7 @@ from ccai.provisioning.venues.nebius.nebiuscloudprovisioner import (
     NebiusCloudProvisioner
 )
 
-from ._specfactory import basic_spec
+from ccai.tests.provisioning.venues.nebius._specfactory import basic_spec
 
 
 _RUN_LIVE = os.environ.get("RUN_LIVE_NEBIUS", "0") == "1"

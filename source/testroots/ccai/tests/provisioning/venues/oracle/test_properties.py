@@ -28,8 +28,8 @@ from ccai.provisioning.venues.oracle.oraclecloudprovisioner import (
     OracleCloudProvisioner
 )
 
-from ._ocifakes import install_fakes
-from ._specfactory import basic_spec
+from ccai.tests.provisioning.venues.oracle._ocifakes import install_fakes
+from ccai.tests.provisioning.venues.oracle._specfactory import basic_spec
 
 
 _FAKE_KEY = "-----BEGIN PRIVATE KEY-----\nMIIB-fake\n-----END PRIVATE KEY-----\n"

@@ -7,7 +7,7 @@
 
 from ccai import testbase
 
-from .factories import (
+from ccai.tests.provisioning.venues.aws.factories import (
     create_aws__aws_env,
     create_aws_credential,
     create_aws_region_config,

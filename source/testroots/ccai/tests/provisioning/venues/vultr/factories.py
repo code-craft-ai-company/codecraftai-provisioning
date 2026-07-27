@@ -28,7 +28,7 @@ from ccai.provisioning.venues.vultr.vultrcloudprovisioner import (
     VultrCloudProvisioner
 )
 
-from ._fakevultr import FakeVultrApi
+from ccai.tests.provisioning.venues.vultr._fakevultr import FakeVultrApi
 
 @testbase.register.resource_factory()
 def create_vultr_credential(constraints=None) -> Generator[VultrApiKeyCredential, None, None]:

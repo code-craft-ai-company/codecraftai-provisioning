@@ -27,8 +27,8 @@ from ccai.provisioning.venues.proxmox.proxmoxcloudprovisioner import (
 from ccai.provisioning.venues.proxmox.proxmoxspec import ProxmoxSpec
 from ccai.provisioning.venues.proxmox.pveerrors import PveValidationError
 
-from ._mockclient import MockProxmoxClient
-from ._specfactory import (
+from ccai.tests.provisioning.venues.proxmox._mockclient import MockProxmoxClient
+from ccai.tests.provisioning.venues.proxmox._specfactory import (
     basic_spec, bucket_lb_dns_spec, make_credential, make_instance,
     make_keypair, make_network, make_resolver
 )

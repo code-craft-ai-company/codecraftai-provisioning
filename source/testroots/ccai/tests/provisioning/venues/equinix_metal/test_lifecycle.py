@@ -14,7 +14,7 @@ __credits__ = []
 
 from ccai import testbase
 
-from .factories import create_equinix_metal_mock_client
+from ccai.tests.provisioning.venues.equinix_metal.factories import create_equinix_metal_mock_client
 
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
@@ -26,7 +26,7 @@ from ccai.provisioning.venues.equinix_metal.equinixmetalcloudprovisioner import 
     EquinixMetalCloudProvisioner
 )
 
-from ._specfactory import basic_spec
+from ccai.tests.provisioning.venues.equinix_metal._specfactory import basic_spec
 
 
 def _provisioner(*, venue, credential, project_config, spec, mock_client,

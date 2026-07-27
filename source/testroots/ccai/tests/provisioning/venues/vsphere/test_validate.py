@@ -31,8 +31,8 @@ from ccai.provisioning.venues.vsphere.vspherevenueconfig import (
     VSphereVenueConfig
 )
 
-from ._mockvsphere import MockVSphereOps
-from ._specfactory import basic_spec
+from ccai.tests.provisioning.venues.vsphere._mockvsphere import MockVSphereOps
+from ccai.tests.provisioning.venues.vsphere._specfactory import basic_spec
 
 
 def _provisioner(*, venue, credential, config, spec):

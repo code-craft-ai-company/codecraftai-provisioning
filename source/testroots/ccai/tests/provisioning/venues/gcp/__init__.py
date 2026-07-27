@@ -7,7 +7,7 @@
 
 from ccai import testbase
 
-from .factories import (
+from ccai.tests.provisioning.venues.gcp.factories import (
     create_gcp_credential,
     create_gcp_region_config,
     create_gcp_venue,

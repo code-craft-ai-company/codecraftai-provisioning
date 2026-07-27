@@ -7,7 +7,7 @@
 
 from ccai import testbase
 
-from .factories import (
+from ccai.tests.provisioning.venues.xcpng.factories import (
     create_xcpng_venue,
     create_xcpng_aspects,
     create_xcpng_confirm_aspects,
