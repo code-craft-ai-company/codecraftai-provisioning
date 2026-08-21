@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "codecraftai-provisioning"
 description = "Code Craft AI - Provisioning Package"
-version = "0.0.1"
+version = "1.0.0"
 authors = [
     "Myron Walker <myron.walker@gmail.com>"
 ]
@@ -28,28 +28,28 @@ include = [
 python = ">=3.10,<4.0"
 pyyaml = "^6.0.2"
 requests = "^2.32.5"
-codecraftai-errors = { git = "https://github.com/code-craft-ai-company/codecraftai-errors.git", branch = "main" }
-codecraftai-interfaces = { git = "https://github.com/code-craft-ai-company/codecraftai-interfaces.git", branch = "main" }
-codecraftai-credentials = { git = "https://github.com/code-craft-ai-company/codecraftai-credentials.git", branch = "main" }
-codecraftai-restclient-base = { git = "https://github.com/code-craft-ai-company/codecraftai-restclient-base.git", branch = "main" }
-codecraftai-configuration = { git = "https://github.com/code-craft-ai-company/codecraftai-configuration.git", branch = "main" }
-codecraftai-landscaping = { git = "https://github.com/code-craft-ai-company/codecraftai-landscaping.git", branch = "main" }
-codecraftai-testbase = { git = "https://github.com/code-craft-ai-company/codecraftai-testbase.git", branch = "main" }
-codecraftai-restclient-vsphere = { git = "https://github.com/code-craft-ai-company/codecraftai-restclient-vsphere.git", branch = "main" }
-codecraftai-restclient-coreweave = { git = "https://github.com/code-craft-ai-company/codecraftai-restclient-coreweave.git", branch = "main" }
-codecraftai-restclient-lambdalabs = { git = "https://github.com/code-craft-ai-company/codecraftai-restclient-lambdalabs.git", branch = "main" }
-codecraftai-restclient-crusoe = { git = "https://github.com/code-craft-ai-company/codecraftai-restclient-crusoe.git", branch = "main" }
-codecraftai-restclient-nebius = { git = "https://github.com/code-craft-ai-company/codecraftai-restclient-nebius.git", branch = "main" }
-codecraftai-restclient-runpod = { git = "https://github.com/code-craft-ai-company/codecraftai-restclient-runpod.git", branch = "main" }
-codecraftai-restclient-oracle = { git = "https://github.com/code-craft-ai-company/codecraftai-restclient-oracle.git", branch = "main" }
-codecraftai-restclient-proxmox = { git = "https://github.com/code-craft-ai-company/codecraftai-restclient-proxmox.git", branch = "main" }
-codecraftai-restclient-aws = { git = "https://github.com/code-craft-ai-company/codecraftai-restclient-aws.git", branch = "main" }
-codecraftai-restclient-azure = { git = "https://github.com/code-craft-ai-company/codecraftai-restclient-azure.git", branch = "main" }
-codecraftai-restclient-digitalocean = { git = "https://github.com/code-craft-ai-company/codecraftai-restclient-digitalocean.git", branch = "main" }
-codecraftai-restclient-google = { git = "https://github.com/code-craft-ai-company/codecraftai-restclient-google.git", branch = "main" }
-codecraftai-restclient-hetzner = { git = "https://github.com/code-craft-ai-company/codecraftai-restclient-hetzner.git", branch = "main" }
-codecraftai-restclient-linode = { git = "https://github.com/code-craft-ai-company/codecraftai-restclient-linode.git", branch = "main" }
-codecraftai-restclient-nutanix = { git = "https://github.com/code-craft-ai-company/codecraftai-restclient-nutanix.git", branch = "main" }
+codecraftai-errors = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-interfaces = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-credentials = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-restclient-base = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-configuration = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-landscaping = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-testbase = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-restclient-vsphere = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-restclient-coreweave = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-restclient-lambdalabs = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-restclient-crusoe = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-restclient-nebius = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-restclient-runpod = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-restclient-oracle = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-restclient-proxmox = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-restclient-aws = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-restclient-azure = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-restclient-digitalocean = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-restclient-google = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-restclient-hetzner = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-restclient-linode = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-restclient-nutanix = { version = "<2.0.0", source = "codecraftai" }
 
 # Hypervisor interop bindings are execution-time backends only. They pull
 # heavyweight, platform-specific native deps (e.g. ``interop-libvirt`` ->
@@ -63,10 +63,10 @@ codecraftai-restclient-nutanix = { git = "https://github.com/code-craft-ai-compa
 optional = true
 
 [tool.poetry.group.hypervisors.dependencies]
-codecraftai-interop-kubernetes = { git = "https://github.com/code-craft-ai-company/codecraftai-interop-kubernetes.git", branch = "main" }
-codecraftai-interop-libvirt = { git = "https://github.com/code-craft-ai-company/codecraftai-interop-libvirt.git", branch = "main" }
-codecraftai-interop-xen = { git = "https://github.com/code-craft-ai-company/codecraftai-interop-xen.git", branch = "main" }
-codecraftai-interop-hyperv = { git = "https://github.com/code-craft-ai-company/codecraftai-interop-hyperv.git", branch = "main" }
+codecraftai-interop-kubernetes = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-interop-libvirt = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-interop-xen = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-interop-hyperv = { version = "<2.0.0", source = "codecraftai" }
 
 [tool.poetry.group.cloud-sdks]
 optional = true
@@ -74,11 +74,17 @@ optional = true
 [tool.poetry.group.cloud-sdks.dependencies]
 
 [tool.poetry.group.dev.dependencies]
-codecraftai-testbase = { git = "https://github.com/code-craft-ai-company/codecraftai-testbase.git", branch = "main" }
+codecraftai-testbase = { version = "<2.0.0", source = "codecraftai" }
 pytest = ">=8,<10"
 requests-mock = "^1.12"
 
 [tool.poetry.group.dbio.dependencies]
+
+
+[[tool.poetry.source]]
+name = "codecraftai"
+url = "https://code-craft.ai/licensed-repository/simple/"
+priority = "supplemental"
 
 [build-system]
 requires = ["poetry-core"]
