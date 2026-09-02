@@ -30,6 +30,7 @@ from ccai.provisioning.model.cloud.cloudinterconnect import CloudInterconnect
 from ccai.interfaces.sharedfsmountspec import SharedFsMountSpec
 from ccai.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
 from ccai.interfaces.vpnjoinspec import VPNJoinSpec
+from ccai.interfaces.pythonenvspec import PythonEnvironmentSpec
 
 
 _TRAINING_FABRIC_KINDS = (
@@ -46,8 +47,8 @@ class CloudInstance(SchemaObject):
         Venue-neutral compute instance descriptor.
 
         Carries everything any venue needs to bring up a single host, including
-        optional accelerator, interconnect, shared-fs, VPN-join, and preemption
-        policy slots.  Cross-resource validation (subnet exists, accelerator
+        optional accelerator, interconnect, shared-fs, VPN-join, Python
+        environment, and preemption policy slots.  Cross-resource validation (subnet exists, accelerator
         supported on venue) runs in the lifecycle validate stage.
     """
 
@@ -62,6 +63,7 @@ class CloudInstance(SchemaObject):
     public_ip = Field(bool, required=False, default=False)
     tags = Field(dict, required=False, default=None)
     vpn_join = Field(VPNJoinSpec, required=False, default=None)
+    python_environments = Field(list, required=False, default=None)
     accelerators = Field(list, required=False, default=None)
     interconnect = Field(CloudInterconnect, required=False, default=None)
     placement_group = Field(str, required=False, default=None)
@@ -77,6 +79,7 @@ class CloudInstance(SchemaObject):
                  public_ip: bool = False,
                  tags: Optional[Dict[str, str]] = None,
                  vpn_join: Optional[VPNJoinSpec] = None,
+                 python_environments: Optional[List[PythonEnvironmentSpec]] = None,
                  accelerators: Optional[List[CloudAcceleratorSpec]] = None,
                  interconnect: Optional[CloudInterconnect] = None,
                  placement_group: Optional[str] = None,
@@ -101,6 +104,9 @@ class CloudInstance(SchemaObject):
             :param public_ip: Whether to attach a public IP.
             :param tags: Optional flat dict of tag key/value pairs.
             :param vpn_join: Optional VPNJoinSpec for control-plane VPN.
+            :param python_environments: Optional list of
+                                        PythonEnvironmentSpec deployed on
+                                        first boot via cloud-init.
             :param accelerators: Optional list of CloudAcceleratorSpec.
             :param interconnect: Optional CloudInterconnect.
             :param placement_group: Optional placement group identifier.
@@ -125,6 +131,24 @@ class CloudInstance(SchemaObject):
         effective_tags = tags if tags is not None else {}
         effective_accelerators = accelerators if accelerators is not None else None
         effective_shared_fs_mounts = shared_fs_mounts if shared_fs_mounts is not None else None
+
+        effective_python_environments: Optional[List[PythonEnvironmentSpec]] = None
+        if python_environments is not None:
+            effective_python_environments = []
+            seen_env_paths: List[str] = []
+            for entry in python_environments:
+                if not isinstance(entry, PythonEnvironmentSpec):
+                    raise SchemaValidationError(
+                        "python_environments entries must be "
+                        "PythonEnvironmentSpec instances."
+                    )
+                if entry.path in seen_env_paths:
+                    raise SchemaSemanticError(
+                        "CloudInstance {!r} declares the Python environment "
+                        "path {!r} more than once.".format(name, entry.path)
+                    )
+                seen_env_paths.append(entry.path)
+                effective_python_environments.append(entry)
 
         if isinstance(preemption_policy, PreemptionPolicy):
             policy_value = preemption_policy.value
@@ -183,6 +207,7 @@ class CloudInstance(SchemaObject):
                          keypair=keypair, user_data_script=user_data_script,
                          public_ip=public_ip, tags=effective_tags,
                          vpn_join=vpn_join,
+                         python_environments=effective_python_environments,
                          accelerators=effective_accelerators,
                          interconnect=interconnect,
                          placement_group=placement_group,
@@ -195,8 +220,9 @@ class CloudInstance(SchemaObject):
         """
             Construct a CloudInstance from a serialised payload.
 
-            Promotes nested image / vpn_join / accelerators / interconnect /
-            shared_fs_mounts dicts to their typed classes.
+            Promotes nested image / vpn_join / python_environments /
+            accelerators / interconnect / shared_fs_mounts dicts to their
+            typed classes.
 
             :param data: Serialised payload.
 
@@ -218,6 +244,16 @@ class CloudInstance(SchemaObject):
                 promoted_vpn = vpn_payload
             else:
                 promoted_vpn = VPNJoinSpec.from_dict(vpn_payload)
+
+        env_payload = data.get("python_environments", None)
+        promoted_envs: Optional[List[PythonEnvironmentSpec]] = None
+        if env_payload is not None:
+            promoted_envs = []
+            for entry in env_payload:
+                if isinstance(entry, PythonEnvironmentSpec):
+                    promoted_envs.append(entry)
+                else:
+                    promoted_envs.append(PythonEnvironmentSpec.from_dict(entry))
 
         accel_payload = data.get("accelerators", None)
         promoted_accels: Optional[List[CloudAcceleratorSpec]] = None
@@ -256,6 +292,7 @@ class CloudInstance(SchemaObject):
             public_ip=data.get("public_ip", False),
             tags=data.get("tags", None),
             vpn_join=promoted_vpn,
+            python_environments=promoted_envs,
             accelerators=promoted_accels,
             interconnect=promoted_ic,
             placement_group=data.get("placement_group", None),

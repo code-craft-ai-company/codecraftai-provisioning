@@ -127,11 +127,19 @@ this by emitting NO additional hostname registration step (per §3 plan asymmetr
 
 ```
 source/packages/ccai/provisioning/cloudinit/
-├── vpncloudinitrenderer.py        # render_cloud_init
-├── azurecserenderer.py            # render_azure_cse
-├── vsphereguestcustomizationrenderer.py
+├── vpncloudinitrenderer.py        # render_cloud_init, render_azure_cse,
+│                                  # render_vsphere_guest_customization
+├── pythonenvcloudinitrenderer.py  # render_python_env_cloud_init (python-env-bootstrap)
+├── cloudinitmerge.py              # merge_cloud_init_fragments
+├── bootstraprenderer.py           # render_instance_cloud_init / render_instance_user_data
 └── secretquoting.py               # shared quoting helpers
 ```
+
+The VPN renderer was the only fragment producer when this spec was written;
+`bootstraprenderer` now composes it with the Python-environment fragment (see
+[python-env-bootstrap](../python-env-bootstrap/design.md)).  Venues SHOULD call
+`render_instance_user_data` rather than `render_cloud_init` directly so new
+fragments reach every venue without per-venue edits.
 
 ---
 
@@ -139,6 +147,8 @@ source/packages/ccai/provisioning/cloudinit/
 
 - [vpn-join-spec](../vpn-join-spec/design.md) — defines `VPNJoinSpec` and the
   renderer contract.
+- [python-env-bootstrap](../python-env-bootstrap/design.md) — the Python
+  virtual-environment fragment merged alongside this one.
 - [provisioning-engine-pipeline](../provisioning-engine-pipeline/design.md) —
   invokes the renderer during `BOOTSTRAP_VPN`.
 - `codecraftai-credentials/specs/tailscale-credentials` — auth-key source.
