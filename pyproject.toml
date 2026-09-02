@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "codecraftai-provisioning"
 description = "Code Craft AI - Provisioning Package"
-version = "1.0.0"
+version = "1.0.1"
 authors = [
     "Myron Walker <myron.walker@gmail.com>"
 ]
@@ -28,8 +28,7 @@ include = [
 python = ">=3.10,<4.0"
 pyyaml = "^6.0.2"
 requests = "^2.32.5"
-codecraftai-errors = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-interfaces = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-foundations = { version = "<2.0.0", source = "codecraftai" }
 codecraftai-credentials = { version = "<2.0.0", source = "codecraftai" }
 codecraftai-restclient-base = { version = "<2.0.0", source = "codecraftai" }
 codecraftai-configuration = { version = "<2.0.0", source = "codecraftai" }
