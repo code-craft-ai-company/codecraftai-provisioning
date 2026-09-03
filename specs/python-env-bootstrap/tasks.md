@@ -51,7 +51,12 @@ Checked items (`[x]`) are implemented and covered by tests.
   minted at render time into the `0400` pip.conf
 - [ ] 14. Property tests (hypothesis) for YAML validity and quoting round-trips,
   matching `test_property_cloud_init.py`
-- [ ] 15. Azure CSE / vSphere wrappers for the Python fragment (the VPN renderer
-  has them; the composer currently produces cloud-init only)
+- [x] 15. Linux payload shapes beyond plain user-data are covered by the venue
+  migration (vSphere guest-customisation userData, Hyper-V NoCloud ISO,
+  libvirt seed ISO, Proxmox snippet, Nutanix base64).  Windows shapes (Azure
+  CSE PowerShell, vSphere runOnceCommands, Hyper-V SetupComplete) remain out
+  of scope by design: cloudbase-init has no `write_files` + bash `runcmd`
+  model, and the sysman `WindowsPythonEnvironmentManager` converges Windows
+  hosts after boot.
 - [ ] 16. Live verification on a stock image without `python3-venv` (needs a
   fresh cloud host or container)
