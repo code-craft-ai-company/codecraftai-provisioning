@@ -19,6 +19,7 @@ from ccai.credentials.apitokencredential import ApiTokenCredential
 from ccai.credentials.basiccredential import BasicCredential
 from ccai.credentials.personalapitokencredential import PersonalApiTokenCredential
 from ccai.credentials.secrettokencredential import SecretTokenCredential
+from ccai.errors.exceptions import ConfigurationError
 from ccai.interfaces.pythonenvspec import PythonEnvironmentSpec
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
@@ -66,9 +67,12 @@ def resolve_index_credential(*, spec: PythonEnvironmentSpec,
             "PythonEnvironmentSpec {!r} names no index_credential.".format(spec.path)
         )
 
+    # ``ConfigurationError`` (what ``CredentialManager.lookup_credential``
+    # raises for an unknown key) derives from ``BaseException``, so it is
+    # named explicitly; a bare ``except Exception`` would let it escape.
     try:
         credential = credential_lookup(reference)
-    except Exception as ex:
+    except (Exception, ConfigurationError) as ex:
         err_msg_lines = ["Could not resolve the index credential for a Python environment."]
         err_msg_lines.append("PATH: {}".format(spec.path))
         err_msg_lines.append("INDEX_CREDENTIAL: {}".format(reference))
