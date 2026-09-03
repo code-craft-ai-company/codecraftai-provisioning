@@ -199,6 +199,20 @@ class CredentialResolverTests(unittest.TestCase):
         self.assertIsInstance(resolved, TwingateServiceAccountCredential)
         return
 
+    def test_credential_manager_missing_key_raises_semantic_error(self) -> None:
+        # CredentialManager raises ConfigurationError (a BaseException
+        # subclass) for an unknown key; the resolver must translate it.
+        from ccai.credentials.credentialmanager import CredentialManager
+        manager = CredentialManager()
+        spec = VPNJoinSpec(provider="tailscale",
+                           control_plane_credential="ts:missing",
+                           hostname_template="{name}")
+        with self.assertRaises(SchemaSemanticError) as caught:
+            resolve_control_plane_credential(
+                spec=spec, credential_lookup=manager.lookup_credential)
+        self.assertIn("ts:missing", str(caught.exception))
+        return
+
     def test_missing_credential_raises_semantic_error(self) -> None:
         spec = VPNJoinSpec(provider="tailscale",
                            control_plane_credential="absent",
