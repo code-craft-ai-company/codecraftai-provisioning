@@ -28,7 +28,9 @@ from ccai.interfaces.cloudacceleratorspec import (
 from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.provisioning.model.cloud.acceleratornotofferederror import (
+    AcceleratorNotOfferedOnVenueError
+)
 from ccai.provisioning.venues.lambdalabs.llerrors import LlValidationError
 
 
@@ -136,10 +138,14 @@ class LlResolver:
                 "LlResolver requires a non-None CloudAcceleratorSpec."
             )
 
+        # Only the venue-capability finding is reclassified.  A
+        # SchemaSemanticError (accelerator not in the catalog at all) is
+        # deliberately NOT caught: it halts rather than becoming a catchable
+        # LlValidationError.
         try:
             slug = self._catalog.resolve(neutral_name=accel_spec.model,
                                          venue=VENUE_NAME)
-        except SchemaSemanticError as xcpt:
+        except AcceleratorNotOfferedOnVenueError as xcpt:
             err_msg_lines = [
                 "Accelerator has no Lambda Labs SKU."
             ]

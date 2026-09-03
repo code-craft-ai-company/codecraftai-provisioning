@@ -21,6 +21,9 @@ from ccai.testbase.properties import strategies as st
 from ccai.errors.exceptions import ConfigurationError
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.provisioning.model.cloud.acceleratornotofferederror import (
+    AcceleratorNotOfferedOnVenueError
+)
 from ccai.provisioning.model.cloud.cloudacceleratorcatalog import (
     CloudAcceleratorCatalog, default_accelerator_catalog,
     reset_default_accelerator_catalog
@@ -65,9 +68,43 @@ class CatalogLoaderTests(unittest.TestCase):
             self._catalog.resolve(neutral_name="DOES_NOT_EXIST", venue="aws")
         return
 
-    def test_resolve_unsupported_venue_raises(self) -> None:
-        with self.assertRaises(SchemaSemanticError):
+    def test_resolve_unsupported_venue_raises_a_validation_finding(self) -> None:
+        # A catalogued accelerator the venue does not offer is a finding about
+        # a spec/venue pairing, not API misuse, so it is an ordinary
+        # ValueError a venue validator may aggregate into its report.
+        with self.assertRaises(AcceleratorNotOfferedOnVenueError):
             self._catalog.resolve(neutral_name="TPU_V5P", venue="aws")
+        return
+
+    def test_unsupported_venue_error_is_catchable(self) -> None:
+        caught = None
+        try:
+            self._catalog.resolve(neutral_name="TPU_V5P", venue="aws")
+        except Exception as xcpt:
+            caught = xcpt
+        self.assertIsInstance(caught, AcceleratorNotOfferedOnVenueError)
+        self.assertIsInstance(caught, ValueError)
+        return
+
+    def test_unknown_name_is_not_catchable_as_exception(self) -> None:
+        # An accelerator that is not in the catalog at all means the spec
+        # carries information the run cannot rely on.  It must pass straight
+        # through an ordinary handler and halt.
+        swallowed = False
+        try:
+            try:
+                self._catalog.resolve(neutral_name="DOES_NOT_EXIST", venue="aws")
+            except Exception:
+                swallowed = True
+        except SchemaSemanticError:
+            pass
+        self.assertFalse(swallowed)
+        return
+
+    def test_the_two_conditions_do_not_share_a_type(self) -> None:
+        self.assertFalse(
+            issubclass(AcceleratorNotOfferedOnVenueError, SchemaSemanticError)
+        )
         return
 
     def test_supported_venues_returns_all_listed_venues(self) -> None:

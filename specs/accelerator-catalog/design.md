@@ -137,9 +137,19 @@ distribution data.
 
 1. Look up the entry by `neutral_name`; raise `SchemaSemanticError` if missing,
    listing all known neutral names.
-2. Look up `venue` in `entry.venue_skus`; raise `SchemaSemanticError` if absent,
-   listing the supporting venues from `supported_venues()`.
+2. Look up `venue` in `entry.venue_skus`; raise `AcceleratorNotOfferedOnVenueError`
+   if absent, listing the supporting venues from `supported_venues()`.
 3. Return the SKU string.
+
+The two failures are deliberately different types, and must stay that way:
+
+| Condition | Type | Base | Why |
+|---|---|---|---|
+| `neutral_name` is not in the catalog at all | `SchemaSemanticError` | `BaseException` | The spec names an accelerator that does not exist. That is information the run cannot rely on, so it passes through every `except Exception` and halts. |
+| `neutral_name` is catalogued but the venue publishes no SKU | `AcceleratorNotOfferedOnVenueError` | `SchemaValidationError` (a `ValueError`) | The caller asked a well-formed question and the answer is "this venue does not offer it". That is a validation finding about a spec/venue pairing, so a venue's `validate` may catch it and report it alongside the spec's other findings. |
+
+Collapsing these back into one type would force venue validators to choose between
+aggregating findings and letting a genuinely unusable spec halt the run.
 
 `neutral_name(venue, sku)`:
 
@@ -184,7 +194,10 @@ singleton is built once under a module-level lock; thereafter readers do not loc
   - **Injectivity:** per venue, the reverse map is bijective on its domain.
   - **Round-trip:** `neutral_name(resolve(...)) == neutral_name` for every
     `(entry, venue)`.
-  - **Unknown rejection:** for any synthesised `(neutral_name, venue)` outside the
-    catalog support set, `resolve` raises `SchemaSemanticError` (and only that type).
+  - **Unknown rejection:** for any synthesised `neutral_name` outside the catalog,
+    `resolve` raises `SchemaSemanticError` (and only that type).
+  - **Venue-capability rejection:** for a catalogued `neutral_name` and a venue that
+    does not publish a SKU for it, `resolve` raises
+    `AcceleratorNotOfferedOnVenueError`, which is catchable as a `ValueError`.
 - Generators use `hypothesis.strategies.sampled_from(catalog.entries())` for the
   positive direction and `text()` for the negative direction.

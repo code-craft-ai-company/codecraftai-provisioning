@@ -34,7 +34,9 @@ from ccai.provisioning.model.cloud.provisioningresult import (
     ProvisioningResult
 )
 from ccai.provisioning.model.cloud.validationresult import ValidationResult
-from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.provisioning.model.cloud.acceleratornotofferederror import (
+    AcceleratorNotOfferedOnVenueError
+)
 from ccai.provisioning.venues.vpncleanup import delete_vpn_device
 
 from ccai.provisioning.venues.aws.awsboto3sessionfactory import (
@@ -322,7 +324,11 @@ class AwsCloudProvisioner(CloudProvisioner):
                     sku = self._catalog.resolve(
                         neutral_name=first.model, venue=self.VENUE_NAME
                     )
-                except SchemaSemanticError as xcpt:
+                # Only the venue-capability finding is aggregated here.  A
+                # SchemaSemanticError from the catalog means the spec named an
+                # accelerator that does not exist at all; that is information the
+                # run cannot rely on, so it is deliberately NOT caught and halts.
+                except AcceleratorNotOfferedOnVenueError as xcpt:
                     errors.append({
                         "resource": instance.name,
                         "error": "Accelerator not on AWS: {}".format(xcpt),

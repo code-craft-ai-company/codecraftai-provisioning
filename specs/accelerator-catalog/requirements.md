@@ -62,7 +62,12 @@ neutral names to venue SKUs.
 2. WHEN `resolve` is called with a `neutral_name` not in the catalog THE SYSTEM SHALL
    raise `SchemaSemanticError`.
 3. WHEN `resolve` is called with a `venue` that does not list support for that
-   neutral name THE SYSTEM SHALL raise `SchemaSemanticError`.
+   neutral name THE SYSTEM SHALL raise `AcceleratorNotOfferedOnVenueError`, which
+   derives from `SchemaValidationError` (an ordinary `ValueError`) so that a venue
+   validator may aggregate it into its findings.  THE SYSTEM SHALL NOT raise
+   `SchemaSemanticError` for this condition: that type derives from `BaseException`
+   in order to halt a run, and is reserved for requirement 2 (a neutral name that is
+   not in the catalog at all).
 4. THE SYSTEM SHALL be safe to call concurrently from multiple threads after load.
 
 ---

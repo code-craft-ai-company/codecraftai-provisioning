@@ -29,6 +29,7 @@ from ccai.provisioning.model.cloud.cloudobjectbucket import (
 from ccai.interfaces.cloudsharedfilesystem import (
     CloudSharedFilesystem
 )
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
@@ -160,10 +161,17 @@ def test_validate_rejects_ib_on_non_eligible_platform(client, venue,
 
 
 @testbase.attach.parameter(create_nebius_client, identifier="client")
-def test_validate_rejects_unknown_accelerator(client, venue,
-                                              aspects) -> None:
+def test_validate_halts_on_accelerator_absent_from_the_catalog(client, venue,
+                                                              aspects) -> None:
     """
-        An accelerator model not in the catalog is rejected.
+        An accelerator model that is not in the catalog at all halts the run.
+
+        This is not a findings-list entry: the spec names hardware that does
+        not exist, so the run was started from information it cannot rely on.
+        The catalog raises SchemaSemanticError for that condition and the
+        venue must NOT downgrade it into a catchable NebiusValidationError.
+        (A catalogued accelerator that this venue merely does not offer is the
+        other case, and is reported through NebiusValidationError as usual.)
     """
     accel = CloudAcceleratorSpec(kind="GPU", model="NOT_A_REAL_GPU",
                                  count=8, interconnect="NVSWITCH",
@@ -171,6 +179,21 @@ def test_validate_rejects_unknown_accelerator(client, venue,
     spec = basic_spec(instance_size="gpu", accelerators=[accel])
     provisioner = NebiusCloudProvisioner(venue=venue, client=client,
                                          spec=spec)
-    with testbase.raises(NebiusValidationError):
-        provisioner.validate(aspects=aspects)
+
+    swallowed = False
+    halted = False
+    try:
+        try:
+            provisioner.validate(aspects=aspects)
+        except Exception:
+            swallowed = True
+    except SchemaSemanticError:
+        halted = True
+
+    assert halted is True, (
+        "An accelerator absent from the catalog must halt validate()"
+    )
+    assert swallowed is False, (
+        "SchemaSemanticError must pass through an ordinary except Exception"
+    )
     return

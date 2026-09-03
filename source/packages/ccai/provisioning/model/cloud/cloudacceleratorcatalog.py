@@ -22,6 +22,9 @@ from ccai.errors.exceptions import ConfigurationError
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.interfaces.schemavalidationerror import SchemaValidationError
+from ccai.provisioning.model.cloud.acceleratornotofferederror import (
+    AcceleratorNotOfferedOnVenueError
+)
 from ccai.provisioning.model.cloud.cloudacceleratorcatalogentry import (
     CloudAcceleratorCatalogEntry
 )
@@ -235,7 +238,16 @@ class CloudAcceleratorCatalog:
             :param venue: Provisioning venue name.
 
             :returns: The venue-side SKU string.
-            :raises: SchemaSemanticError
+
+            :raises: SchemaSemanticError when ``neutral_name`` is not in the
+                     catalog at all -- the caller is working from information
+                     the code cannot rely on, so the run must halt rather
+                     than continue under false pretences.
+            :raises: AcceleratorNotOfferedOnVenueError when the accelerator IS
+                     catalogued but the venue publishes no SKU for it.  That
+                     is an ordinary validation finding about a spec/venue
+                     pairing, so a venue validator may catch it and report it
+                     alongside the spec's other findings.
         """
         entry = self._by_name.get(neutral_name, None)
         if entry is None:
@@ -245,6 +257,8 @@ class CloudAcceleratorCatalog:
                 "KNOWN: {}".format(", ".join(sorted(self._by_name.keys())))
             )
             err_msg = os.linesep.join(err_msg_lines)
+            # Not in the catalog at all: the spec names something that does
+            # not exist, so halt instead of folding it into a findings list.
             raise SchemaSemanticError(err_msg)
 
         sku = entry.venue_skus.get(venue, None)
@@ -260,7 +274,10 @@ class CloudAcceleratorCatalog:
                 )
             )
             err_msg = os.linesep.join(err_msg_lines)
-            raise SchemaSemanticError(err_msg)
+            # A real accelerator the venue simply does not offer: a validation
+            # finding, deliberately an ordinary ValueError so a venue
+            # validator can aggregate it into its report.
+            raise AcceleratorNotOfferedOnVenueError(err_msg)
 
         return sku
 

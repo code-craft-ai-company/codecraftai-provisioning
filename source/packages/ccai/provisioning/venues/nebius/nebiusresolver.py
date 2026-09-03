@@ -28,7 +28,9 @@ from ccai.interfaces.cloudacceleratorspec import (
 from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
-from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.provisioning.model.cloud.acceleratornotofferederror import (
+    AcceleratorNotOfferedOnVenueError
+)
 from ccai.provisioning.venues.nebius.nebiuserrors import (
     NebiusValidationError
 )
@@ -121,10 +123,14 @@ class NebiusResolver:
 
         if len(effective_accelerators) > 0:
             first = effective_accelerators[0]
+            # Only the venue-capability finding is reclassified.  A
+            # SchemaSemanticError (accelerator not in the catalog at all) is
+            # deliberately NOT caught: it halts rather than becoming a
+            # catchable NebiusValidationError.
             try:
                 sku = self._catalog.resolve(neutral_name=first.model,
                                             venue=self.VENUE_NAME)
-            except SchemaSemanticError as xcpt:
+            except AcceleratorNotOfferedOnVenueError as xcpt:
                 err_msg_lines = [
                     "Accelerator is not available on the Nebius venue."
                 ]

@@ -43,7 +43,9 @@ from ccai.provisioning.model.cloud.provisioningresult import (
     ProvisioningResult
 )
 from ccai.provisioning.model.cloud.validationresult import ValidationResult
-from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.provisioning.model.cloud.acceleratornotofferederror import (
+    AcceleratorNotOfferedOnVenueError
+)
 
 from ccai.provisioning.venues.crusoe.crusoeerrors import (
     ConfirmationRequiredError, CrusoeValidationError
@@ -234,17 +236,15 @@ class CrusoeCloudProvisioner(CloudProvisioner):
 
             :returns: ``None``.
         """
-        # Image family must resolve to a Crusoe alias.
-        try:
-            self._resolver.image_to_alias(
-                family=instance.image.family,
-                version=instance.image.version,
-                arch=instance.image.architecture)
-        except SchemaSemanticError as xcpt:
-            errors.append({
-                "resource": instance.name,
-                "error": "Image not resolvable on Crusoe: {}".format(xcpt),
-            })
+        # Image family must resolve to a Crusoe alias.  An unresolvable
+        # family raises SchemaSemanticError, which is deliberately NOT caught:
+        # every other venue lets that condition halt the run, and a spec
+        # naming a family the venue cannot serve is information the run
+        # cannot rely on.
+        self._resolver.image_to_alias(
+            family=instance.image.family,
+            version=instance.image.version,
+            arch=instance.image.architecture)
 
         # Resolve the instance type.
         resolved_type: Optional[str] = None
@@ -253,7 +253,11 @@ class CrusoeCloudProvisioner(CloudProvisioner):
                 size_hint=instance.size,
                 accelerators=instance.accelerators,
                 interconnect=instance.interconnect)
-        except SchemaSemanticError as xcpt:
+        # Only the venue-capability finding is aggregated here.  A
+        # SchemaSemanticError from the catalog means the spec named an
+        # accelerator that does not exist at all; that is information the
+        # run cannot rely on, so it is deliberately NOT caught and halts.
+        except AcceleratorNotOfferedOnVenueError as xcpt:
             errors.append({
                 "resource": instance.name,
                 "error": "Instance type not resolvable on Crusoe: {}".format(

@@ -39,7 +39,9 @@ from ccai.provisioning.model.cloud.provisioningresult import (
     ProvisioningResult
 )
 from ccai.provisioning.model.cloud.validationresult import ValidationResult
-from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.provisioning.model.cloud.acceleratornotofferederror import (
+    AcceleratorNotOfferedOnVenueError
+)
 from ccai.provisioning.venues.vpncleanup import delete_vpn_device
 
 from ccai.provisioning.venues.google.gcperrors import GcpValidationError
@@ -372,7 +374,11 @@ class GoogleCloudProvisioner(CloudProvisioner):
                         neutral_name=first.model, venue=self.VENUE_NAME
                     )
                     resolved_type = sku
-                except SchemaSemanticError as xcpt:
+                # Only the venue-capability finding is aggregated here.  A
+                # SchemaSemanticError from the catalog means the spec named an
+                # accelerator that does not exist at all; that is information the
+                # run cannot rely on, so it is deliberately NOT caught and halts.
+                except AcceleratorNotOfferedOnVenueError as xcpt:
                     errors.append({
                         "resource": instance.name,
                         "error": "Accelerator not on GCP: {}".format(xcpt),
