@@ -19,9 +19,10 @@ from typing import Any, List, Optional
 
 import yaml
 
-from ccai.provisioning.cloudinit.vpncloudinitrenderer import (
-    render_cloud_init
+from ccai.provisioning.cloudinit.bootstraprenderer import (
+    render_instance_cloud_init
 )
+from ccai.provisioning.cloudinit.cloudinitmerge import merge_cloud_init_fragments
 from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
 from ccai.provisioning.model.cloud.cloudkeypair import CloudKeyPair
 
@@ -150,20 +151,21 @@ class PveCloudInitRenderer:
             document["ssh_authorized_keys"] = ssh_keys
         document["hostname"] = rendered_hostname
 
-        vpn_join = instance.vpn_join
-        if vpn_join is not None:
-            vpn_doc = render_cloud_init(
-                spec=vpn_join, authkey=authkey,
-                rendered_hostname=rendered_hostname,
-                image_family=instance.image.family,
-            )
-            for key, value in vpn_doc.items():
-                document[key] = value
+        # The shared composer folds VPN join, Python environments and the
+        # raw user_data_script (as a trailing ``sh -c`` runcmd entry) into
+        # one fragment.  It returns None when only a raw script is
+        # declared, in which case the script is appended here as before.
+        fragment = render_instance_cloud_init(
+            instance=instance, authkey=authkey,
+            rendered_hostname=rendered_hostname,
+        )
+        if fragment is not None:
+            document = merge_cloud_init_fragments(document, fragment)
 
         has_user_payload = False
         if len(ssh_keys) > 0:
             has_user_payload = True
-        if vpn_join is not None:
+        if fragment is not None:
             has_user_payload = True
         if instance.user_data_script is not None:
             if len(instance.user_data_script) > 0:
@@ -173,7 +175,7 @@ class PveCloudInitRenderer:
             rtnval: Optional[str] = None
             return rtnval
 
-        if instance.user_data_script is not None:
+        if fragment is None and instance.user_data_script is not None:
             if len(instance.user_data_script) > 0:
                 document["runcmd"] = document.get("runcmd", [])
                 document["runcmd"].append(

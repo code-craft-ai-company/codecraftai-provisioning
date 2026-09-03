@@ -19,9 +19,10 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 
-from ccai.provisioning.cloudinit.vpncloudinitrenderer import (
-    render_cloud_init
+from ccai.provisioning.cloudinit.bootstraprenderer import (
+    render_instance_cloud_init
 )
+from ccai.provisioning.cloudinit.cloudinitmerge import merge_cloud_init_fragments
 from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
 
 
@@ -114,14 +115,15 @@ class LvSeedIsoBuilder:
         if len(authorized_keys) > 0:
             document["ssh_authorized_keys"] = authorized_keys
 
-        if instance.vpn_join is not None:
-            cloud_init_doc = render_cloud_init(
-                spec=instance.vpn_join, authkey=authkey,
-                rendered_hostname=rendered_hostname,
-                image_family=instance.image.family,
-            )
-            document["write_files"] = cloud_init_doc["write_files"]
-            document["runcmd"] = cloud_init_doc["runcmd"]
+        # The shared composer folds VPN join, Python environments and the
+        # raw user_data_script (as a trailing runcmd entry) into one
+        # fragment; None means the instance declares no bootstrap content.
+        fragment = render_instance_cloud_init(
+            instance=instance, authkey=authkey,
+            rendered_hostname=rendered_hostname,
+        )
+        if fragment is not None:
+            document = merge_cloud_init_fragments(document, fragment)
 
         body = yaml.safe_dump(document, default_flow_style=False,
                               sort_keys=True)

@@ -12,12 +12,12 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-from typing import List
+from typing import List, Optional
 
 import yaml
 
-from ccai.provisioning.cloudinit.vpncloudinitrenderer import (
-    render_cloud_init
+from ccai.provisioning.cloudinit.bootstraprenderer import (
+    render_instance_user_data
 )
 from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
 
@@ -43,22 +43,17 @@ class MetalUserDataRenderer:
             :returns: A ``#cloud-config`` YAML body, or the raw user-data
                       script (or "") when no ``vpn_join`` is declared.
         """
-        if instance.vpn_join is None:
-            base_script = instance.user_data_script
-            rtnval = base_script if base_script is not None else ""
-            return rtnval
+        rendered_hostname: Optional[str] = None
+        if instance.vpn_join is not None:
+            rendered_hostname = instance.vpn_join.hostname_template.replace(
+                "{instance_name}", instance.name
+            )
 
-        rendered_hostname = instance.vpn_join.hostname_template.replace(
-            "{instance_name}", instance.name
-        )
-        cloud_init = render_cloud_init(
-            spec=instance.vpn_join,
-            authkey=authkey,
+        # The shared composer folds VPN join, Python environments and the
+        # raw user_data_script into one document.
+        document = render_instance_user_data(
+            instance=instance, authkey=authkey,
             rendered_hostname=rendered_hostname,
-            image_family=instance.image.family,
         )
-
-        body_lines: List[str] = ["#cloud-config"]
-        body_lines.append(yaml.safe_dump(cloud_init, sort_keys=False))
-        rtnval = "\n".join(body_lines)
+        rtnval = document if document is not None else ""
         return rtnval

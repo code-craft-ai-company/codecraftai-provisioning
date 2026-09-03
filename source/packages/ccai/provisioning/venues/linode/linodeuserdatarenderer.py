@@ -18,9 +18,13 @@ from typing import Optional
 
 import yaml
 
+from ccai.provisioning.cloudinit.bootstraprenderer import (
+    render_instance_user_data
+)
 from ccai.provisioning.cloudinit.vpncloudinitrenderer import (
     render_cloud_init
 )
+from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
 from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 
 
@@ -55,6 +59,36 @@ class LinodeUserDataRenderer:
         )
         document = "#cloud-config\n" + yaml.safe_dump(fragment,
                                                       default_flow_style=False)
+        encoded_bytes = base64.b64encode(document.encode("utf-8"))
+        rtnval = encoded_bytes.decode("ascii")
+        return rtnval
+
+    def render_instance(self, *, instance: CloudInstance,
+                        authkey: Optional[str] = None,
+                        rendered_hostname: Optional[str] = None
+                        ) -> Optional[str]:
+        """
+            Render the base64 ``metadata.user_data`` payload for an instance
+            from every bootstrap slot it declares (VPN join, Python
+            environments, raw user-data script) via the shared composer.
+
+            :param instance: The neutral CloudInstance.
+            :param authkey: Minted auth key when ``vpn_join`` is set.
+            :param rendered_hostname: Hostname computed from the host
+                                      template (defaults to the name).
+
+            :returns: A base64-encoded string, or None when the instance
+                      needs no launch metadata.
+            :raises: CloudInitRendererError
+        """
+        document = render_instance_user_data(
+            instance=instance, authkey=authkey,
+            rendered_hostname=rendered_hostname,
+        )
+        if document is None:
+            rtnval: Optional[str] = None
+            return rtnval
+
         encoded_bytes = base64.b64encode(document.encode("utf-8"))
         rtnval = encoded_bytes.decode("ascii")
         return rtnval

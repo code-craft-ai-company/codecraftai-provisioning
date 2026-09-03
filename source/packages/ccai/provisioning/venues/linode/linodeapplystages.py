@@ -266,10 +266,10 @@ class LinodeApplyStages:
                     if key_material is not None:
                         authorized_keys.append(key_material)
 
-            metadata_user_data: Optional[str] = None
             vpn_device_id: Optional[str] = None
+            authkey = ""
+            rendered_hostname: Optional[str] = None
             if inst.vpn_join is not None:
-                authkey = ""
                 if self._vpn_control_plane is not None:
                     authkey = getattr(self._vpn_control_plane,
                                       "minted_authkey", "") or ""
@@ -278,15 +278,12 @@ class LinodeApplyStages:
                 rendered_hostname = inst.vpn_join.hostname_template.format(
                     instance_name=inst.name
                 )
-                metadata_user_data = self._user_data_renderer.render(
-                    spec=inst.vpn_join, authkey=authkey,
-                    rendered_hostname=rendered_hostname,
-                    image_family=inst.image.family,
-                )
-            elif inst.user_data_script is not None:
-                metadata_user_data = self._user_data_renderer.render_raw(
-                    user_data_script=inst.user_data_script
-                )
+            # One call covers VPN join, Python environments and the raw
+            # user-data script through the shared composer.
+            metadata_user_data = self._user_data_renderer.render_instance(
+                instance=inst, authkey=authkey,
+                rendered_hostname=rendered_hostname,
+            )
 
             tags = self._translator.owner_tags(
                 run_id=run_id, resource_name=inst.name,

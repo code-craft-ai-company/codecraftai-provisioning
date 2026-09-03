@@ -18,8 +18,8 @@ from typing import Dict, Optional
 
 import yaml
 
-from ccai.provisioning.cloudinit.vpncloudinitrenderer import (
-    render_cloud_init
+from ccai.provisioning.cloudinit.bootstraprenderer import (
+    render_instance_user_data
 )
 from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
 
@@ -87,21 +87,12 @@ class XenCloudInitRenderer:
 
             :returns: The user-data string, or None when none is needed.
         """
-        if vpn_join is not None:
-            image_family = spec_vm.image.family
-            cloud_init_doc = render_cloud_init(
-                spec=vpn_join, authkey=authkey,
-                rendered_hostname=rendered_hostname,
-                image_family=image_family)
-            body = yaml.safe_dump(cloud_init_doc,
-                                  default_flow_style=False, sort_keys=True)
-            rtnval = "#cloud-config\n" + body
-            return rtnval
-
-        script = spec_vm.user_data_script
-        if script is not None and len(script) > 0:
-            rtnval = script
-            return rtnval
-
-        rtnval = None
+        # The shared composer folds VPN join, Python environments and the
+        # raw user_data_script into one document; a raw script alone
+        # passes through verbatim.  ``vpn_join`` is read from ``spec_vm``
+        # by the composer; the explicit parameter is kept for callers.
+        rtnval = render_instance_user_data(
+            instance=spec_vm, authkey=authkey,
+            rendered_hostname=rendered_hostname,
+        )
         return rtnval

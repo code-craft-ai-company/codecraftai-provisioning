@@ -22,7 +22,12 @@ import yaml
 from ccai.provisioning.cloudinit.vpncloudinitrenderer import (
     render_azure_cse, render_cloud_init
 )
+from ccai.interfaces.pythonenvspec import PythonEnvironmentSpec
 from ccai.interfaces.vpnjoinspec import VPNJoinSpec
+from ccai.provisioning.cloudinit.cloudinitmerge import merge_cloud_init_fragments
+from ccai.provisioning.cloudinit.pythonenvcloudinitrenderer import (
+    render_python_env_cloud_init
+)
 
 
 class HvCloudInitPayload:
@@ -72,7 +77,9 @@ class HvCloudInitRenderer:
                   network_config: Optional[Dict[str, Any]] = None,
                   vpn_join: Optional[VPNJoinSpec] = None,
                   vpn_authkey: str = "",
-                  rendered_hostname: str = "") -> HvCloudInitPayload:
+                  rendered_hostname: str = "",
+                  python_environments: Optional[List[PythonEnvironmentSpec]] = None
+                  ) -> HvCloudInitPayload:
         """
             Build a NoCloud config-drive ISO payload for a Linux guest.
 
@@ -86,6 +93,9 @@ class HvCloudInitRenderer:
             :param vpn_join: Optional VPNJoinSpec folded into user-data.
             :param vpn_authkey: Minted VPN auth key / connector token.
             :param rendered_hostname: Hostname rendered for the guest.
+            :param python_environments: Optional PythonEnvironmentSpec list
+                deployed on first boot (prerequisite ``packages`` plus a
+                bootstrap script per environment).
 
             :returns: An HvCloudInitPayload carrying the ISO member files.
         """
@@ -110,6 +120,13 @@ class HvCloudInitRenderer:
             write_files.extend(vpn_fragment.get("write_files", []))
             runcmd.extend(vpn_fragment.get("runcmd", []))
 
+        python_fragment: Optional[Dict[str, Any]] = None
+        if python_environments is not None and len(python_environments) > 0:
+            python_fragment = render_python_env_cloud_init(
+                specs=python_environments, image_family=image_family)
+            write_files.extend(python_fragment.get("write_files", []))
+            runcmd.extend(python_fragment.get("runcmd", []))
+
         if user_data is not None and len(user_data) > 0:
             runcmd.append(["sh", "-c", user_data])
 
@@ -117,6 +134,12 @@ class HvCloudInitRenderer:
             cloud_config["write_files"] = write_files
         if len(runcmd) > 0:
             cloud_config["runcmd"] = runcmd
+        if python_fragment is not None:
+            # Interpreter prerequisites ride along as cloud-init ``packages``.
+            cloud_config = merge_cloud_init_fragments(
+                cloud_config,
+                {"package_update": python_fragment["package_update"],
+                 "packages": python_fragment["packages"]})
 
         user_data_doc = "#cloud-config\n" + yaml.safe_dump(
             cloud_config, sort_keys=True, default_flow_style=False)

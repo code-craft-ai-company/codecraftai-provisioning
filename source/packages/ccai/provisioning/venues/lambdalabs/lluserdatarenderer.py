@@ -16,8 +16,8 @@ from typing import Optional
 
 import yaml
 
-from ccai.provisioning.cloudinit.vpncloudinitrenderer import (
-    render_cloud_init
+from ccai.provisioning.cloudinit.bootstraprenderer import (
+    render_instance_user_data
 )
 from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
 
@@ -27,7 +27,7 @@ class LlUserDataRenderer:
         Renders the Lambda Labs launch ``user_data`` payload.
 
         When a :class:`CloudInstance` carries a ``vpn_join`` spec the
-        renderer delegates to the M6 :func:`render_cloud_init` to produce
+        renderer delegates to the M6 :func:`render_instance_user_data` to produce
         the cloud-init document, then serialises it to a ``#cloud-config``
         YAML string suitable for the Lambda Labs launch request.  When the
         instance carries only a raw ``user_data_script`` that script is
@@ -46,23 +46,11 @@ class LlUserDataRenderer:
             :returns: The ``user_data`` string, or ``None`` when the
                 instance needs no launch metadata.
         """
-        vpn_join = instance.vpn_join
-        if vpn_join is not None:
-            image_family = instance.image.family
-            cloud_init_doc = render_cloud_init(
-                spec=vpn_join, authkey=authkey,
-                rendered_hostname=rendered_hostname,
-                image_family=image_family,
-            )
-            body = yaml.safe_dump(cloud_init_doc, default_flow_style=False,
-                                  sort_keys=True)
-            rtnval = "#cloud-config\n" + body
-            return rtnval
-
-        script = instance.user_data_script
-        if script is not None and len(script) > 0:
-            rtnval = script
-            return rtnval
-
-        rtnval = None
+        # The shared composer folds VPN join, Python environments and the
+        # raw user_data_script into one document; a raw script alone
+        # passes through verbatim.
+        rtnval = render_instance_user_data(
+            instance=instance, authkey=authkey,
+            rendered_hostname=rendered_hostname,
+        )
         return rtnval

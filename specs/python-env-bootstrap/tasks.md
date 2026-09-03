@@ -35,10 +35,18 @@ Checked items (`[x]`) are implemented and covered by tests.
 
 ## Follow-ups
 
-- [ ] 12. Migrate the venue user-data renderers (20 call sites of
-  `render_cloud_init`) to `render_instance_user_data` so every venue ships the
-  Python fragment; until then only venues that adopt the composer honour
-  `python_environments`
+- [x] 12. Migrate the venue user-data renderers to the shared composer so every
+  venue ships the Python fragment (2026-09-02): crusoe, digitalocean,
+  equinix_metal, hetzner, lambdalabs, nebius, vultr, xcpng, aws, google, oracle,
+  azure (Linux custom_data) via `render_instance_user_data`; libvirt, nutanix,
+  proxmox via `render_instance_cloud_init` + `merge_cloud_init_fragments`;
+  linode via a new `render_instance` method used by the apply stage; vsphere
+  (Linux userData) and hyperv `build_iso` (new `python_environments`
+  parameter) merge `render_python_env_cloud_init` directly because they
+  own venue-specific payload shapes.  Windows paths (azure CSE, hyperv
+  SetupComplete, vsphere runOnceCommands) are unchanged.  Covered by
+  `render/test_venue_python_env_wiring.py` (15 tests) and the full
+  testbase venue suite (532/533 before and after).
 - [ ] 13. Credentialed private index: `index_credential` naming a vault entry,
   minted at render time into the `0400` pip.conf
 - [ ] 14. Property tests (hypothesis) for YAML validity and quoting round-trips,

@@ -16,8 +16,8 @@ from typing import Any, Dict, Optional
 
 import yaml
 
-from ccai.provisioning.cloudinit.vpncloudinitrenderer import (
-    render_cloud_init
+from ccai.provisioning.cloudinit.bootstraprenderer import (
+    render_instance_user_data
 )
 from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
 from ccai.provisioning.model.vpn.hostnametemplate import render_hostname
@@ -28,7 +28,7 @@ class NebiusUserDataRenderer:
         Renderer for the Nebius instance ``metadata["user-data"]`` slot.
 
         When an instance carries a ``vpn_join`` spec, the M6
-        :func:`render_cloud_init` helper produces the cloud-init dict; this
+        :func:`render_instance_user_data` helper produces the cloud-init dict; this
         renderer serialises it to a ``#cloud-config`` document and returns it
         for placement into the Nebius launch metadata.
     """
@@ -45,29 +45,18 @@ class NebiusUserDataRenderer:
                 the instance declares neither a raw user-data script nor a
                 VPN join spec.
         """
-        if instance.vpn_join is None:
-            if instance.user_data_script is None:
-                rtnval: Optional[str] = None
-                return rtnval
-            if len(instance.user_data_script) == 0:
-                rtnval = None
-                return rtnval
-            rtnval = instance.user_data_script
-            return rtnval
+        rendered_hostname: Optional[str] = None
+        if instance.vpn_join is not None:
+            context: Dict[str, Any] = {"instance_name": instance.name}
+            rendered_hostname = render_hostname(
+                template=instance.vpn_join.hostname_template, context=context,
+            )
 
-        context: Dict[str, Any] = {"instance_name": instance.name}
-        rendered_hostname = render_hostname(
-            template=instance.vpn_join.hostname_template, context=context,
-        )
-
-        cloud_init_doc = render_cloud_init(
-            spec=instance.vpn_join, authkey=authkey,
+        # The shared composer folds VPN join, Python environments and the
+        # raw user_data_script into one document; a raw script alone
+        # passes through verbatim.
+        rtnval = render_instance_user_data(
+            instance=instance, authkey=authkey,
             rendered_hostname=rendered_hostname,
-            image_family=instance.image.family,
         )
-
-        document = "#cloud-config\n" + yaml.safe_dump(
-            cloud_init_doc, default_flow_style=False, sort_keys=True,
-        )
-        rtnval = document
         return rtnval

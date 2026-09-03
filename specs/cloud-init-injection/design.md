@@ -137,9 +137,11 @@ source/packages/ccai/provisioning/cloudinit/
 
 The VPN renderer was the only fragment producer when this spec was written;
 `bootstraprenderer` now composes it with the Python-environment fragment (see
-[python-env-bootstrap](../python-env-bootstrap/design.md)).  Venues SHOULD call
-`render_instance_user_data` rather than `render_cloud_init` directly so new
-fragments reach every venue without per-venue edits.
+[python-env-bootstrap](../python-env-bootstrap/design.md)).  Every Linux venue path now
+calls the composer (`render_instance_user_data` / `render_instance_cloud_init`)
+or merges `render_python_env_cloud_init` where it owns a venue-specific payload
+shape (vsphere guest customisation, Hyper-V NoCloud ISO); `render_cloud_init`
+is only called directly by the composer and by the Windows wrappers.
 
 ---
 

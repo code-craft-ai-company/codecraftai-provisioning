@@ -16,8 +16,8 @@ from typing import Optional
 
 import yaml
 
-from ccai.provisioning.cloudinit.vpncloudinitrenderer import (
-    render_cloud_init
+from ccai.provisioning.cloudinit.bootstraprenderer import (
+    render_instance_user_data
 )
 from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
 
@@ -27,7 +27,7 @@ class CrusoeUserDataRenderer:
         Builds the ``user_data`` payload supplied on a Crusoe instance launch.
 
         When the instance carries a ``vpn_join`` spec the renderer folds the
-        M6 cloud-init snippet (``render_cloud_init``) into a ``#cloud-config``
+        M6 cloud-init snippet (``render_instance_user_data``) into a ``#cloud-config``
         document; otherwise it passes through any raw ``user_data_script``.
     """
 
@@ -43,25 +43,17 @@ class CrusoeUserDataRenderer:
             :returns: The user-data string, or ``None`` when neither a VPN
                 join nor a raw user-data script is present.
         """
+        rendered_hostname: Optional[str] = None
         if instance.vpn_join is not None:
-            effective_authkey = authkey if authkey is not None else ""
-            image_family = instance.image.family
             rendered_hostname = self._rendered_hostname(instance=instance)
 
-            cloud_init = render_cloud_init(spec=instance.vpn_join,
-                                           authkey=effective_authkey,
-                                           rendered_hostname=rendered_hostname,
-                                           image_family=image_family)
-            document = "#cloud-config\n" + yaml.safe_dump(
-                cloud_init, default_flow_style=False, sort_keys=True)
-            rtnval: Optional[str] = document
-            return rtnval
-
-        if instance.user_data_script is not None:
-            rtnval = instance.user_data_script
-            return rtnval
-
-        rtnval = None
+        # The shared composer folds every bootstrap slot the instance
+        # declares (VPN join, Python environments, raw user_data_script)
+        # into one document, or passes the raw script through verbatim.
+        rtnval = render_instance_user_data(
+            instance=instance, authkey=authkey,
+            rendered_hostname=rendered_hostname,
+        )
         return rtnval
 
     def _rendered_hostname(self, *, instance: CloudInstance) -> str:

@@ -335,7 +335,8 @@ class HvApplyStages:
             instance_name=inst.name, image_family=inst.image.family,
             ssh_keys=ssh_keys, user_data=inst.user_data_script,
             vpn_join=inst.vpn_join, vpn_authkey=authkey,
-            rendered_hostname=rendered_hostname)
+            rendered_hostname=rendered_hostname,
+            python_environments=inst.python_environments)
 
         iso_path = self._resolver._join(root=self._host_config.iso_root,
                                         leaf="{}-cidata.iso".format(

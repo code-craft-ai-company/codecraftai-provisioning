@@ -43,9 +43,10 @@ The design reuses three existing seams rather than inventing new ones:
 ```
 
 `bootstraprenderer` is the single place that knows which instance slots yield
-cloud-init fragments and in what order.  Venues that still branch on
-`instance.vpn_join` themselves keep working; migrating them to
-`render_instance_user_data` is the documented follow-up.
+cloud-init fragments and in what order.  Every Linux venue path routes through
+it; the two venues that own a richer payload shape (vsphere guest
+customisation, Hyper-V NoCloud ISO) merge the Python fragment directly and are
+listed in `tasks.md`.
 
 ---
 

@@ -16,8 +16,8 @@ from typing import Optional
 
 import yaml
 
-from ccai.provisioning.cloudinit.vpncloudinitrenderer import (
-    render_cloud_init
+from ccai.provisioning.cloudinit.bootstraprenderer import (
+    render_instance_user_data
 )
 from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
 
@@ -28,7 +28,7 @@ class DoUserDataRenderer:
         Droplet at create time.
 
         When the owning :class:`CloudInstance` carries a ``vpn_join`` spec the
-        renderer delegates to the shared M6 :func:`render_cloud_init` so the
+        renderer delegates to the shared M6 :func:`render_instance_user_data` so the
         Tailscale / Twingate bootstrap is identical to every other venue.
     """
 
@@ -49,32 +49,18 @@ class DoUserDataRenderer:
             :returns: The cloud-init ``user_data`` string (empty when there
                       is neither a raw script nor a vpn_join spec).
         """
-        if instance.vpn_join is None:
-            base_script = instance.user_data_script
-            if base_script is None:
-                rtnval = ""
-                return rtnval
-            rtnval = base_script
-            return rtnval
+        rendered_hostname: Optional[str] = None
+        if instance.vpn_join is not None:
+            rendered_hostname = instance.vpn_join.hostname_template.replace(
+                "{instance_name}", instance.name
+            )
 
-        effective_authkey = authkey if authkey is not None else ""
-        rendered_hostname = instance.vpn_join.hostname_template.replace(
-            "{instance_name}", instance.name
-        )
-        cloud_init = render_cloud_init(
-            spec=instance.vpn_join,
-            authkey=effective_authkey,
+        # The shared composer folds VPN join, Python environments and the
+        # raw user_data_script (as a trailing runcmd entry) into one
+        # document; a raw script alone passes through verbatim.
+        document = render_instance_user_data(
+            instance=instance, authkey=authkey,
             rendered_hostname=rendered_hostname,
-            image_family=instance.image.family,
         )
-
-        body_lines = ["#cloud-config"]
-        body_lines.append(yaml.safe_dump(cloud_init, sort_keys=False))
-
-        raw_script = instance.user_data_script
-        if raw_script is not None and len(raw_script) > 0:
-            body_lines.append("# --- user_data_script ---")
-            body_lines.append(raw_script)
-
-        rtnval = "\n".join(body_lines)
+        rtnval = document if document is not None else ""
         return rtnval

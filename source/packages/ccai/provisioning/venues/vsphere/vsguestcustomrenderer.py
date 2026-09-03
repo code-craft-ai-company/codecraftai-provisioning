@@ -19,6 +19,10 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 
+from ccai.provisioning.cloudinit.cloudinitmerge import merge_cloud_init_fragments
+from ccai.provisioning.cloudinit.pythonenvcloudinitrenderer import (
+    render_python_env_cloud_init
+)
 from ccai.provisioning.cloudinit.vpncloudinitrenderer import (
     SUPPORTED_WINDOWS_FAMILIES, render_vsphere_guest_customization
 )
@@ -141,6 +145,16 @@ class VsGuestCustomRenderer:
 
         if guest_os_family == "linux":
             cloud_init = payload.get("userData", {})
+            # Python environments are a Linux-only first-boot fragment;
+            # merge it ahead of the raw script so the script can rely on
+            # the environments existing.
+            python_environments = instance.python_environments
+            if python_environments is not None and len(python_environments) > 0:
+                python_fragment = render_python_env_cloud_init(
+                    specs=python_environments, image_family=image_family,
+                )
+                cloud_init = merge_cloud_init_fragments(cloud_init, python_fragment)
+                payload["userData"] = cloud_init
             if instance.user_data_script is not None and len(instance.user_data_script) > 0:
                 extra_runcmd = cloud_init.get("runcmd", None)
                 if extra_runcmd is None:
