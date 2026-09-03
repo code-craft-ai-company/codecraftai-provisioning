@@ -13,7 +13,6 @@ __credits__ = []
 
 import json
 import re
-import unittest
 
 from ccai.testbase.properties import given
 from ccai.testbase.properties import strategies as st
@@ -64,104 +63,104 @@ def _tailscale_spec_strategy() -> st.SearchStrategy:
     return rtnval
 
 
-class CloudInitYamlValidityProperty(unittest.TestCase):
+# These are module-level functions on purpose.  The testbase sequencer
+# collects module-level ``test_*`` and drives ``@given`` from the metadata the
+# decorator records; a @given-decorated TestCase *method* is never given its
+# generated arguments, so it cannot run.
 
-    @given(spec=_tailscale_spec_strategy(),
-           authkey=_authkey_st,
-           hostname=_hostname_st,
-           family=st.sampled_from(_LINUX_FAMILIES), constraints={"max_examples": 30})
-    def test_render_round_trips_through_yaml(self, spec, authkey,
-                                             hostname, family) -> None:
-        doc = render_cloud_init(spec=spec, authkey=authkey,
-                                rendered_hostname=hostname,
-                                image_family=family)
-        text = yaml.safe_dump(doc)
-        parsed = yaml.safe_load(text)
-        self.assertIn("write_files", parsed)
-        self.assertIn("runcmd", parsed)
-        return
+_COMMON = dict(spec=_tailscale_spec_strategy(), authkey=_authkey_st,
+               hostname=_hostname_st, family=st.sampled_from(_LINUX_FAMILIES))
 
 
-class AuthkeyAppearsOnceProperty(unittest.TestCase):
+@given(constraints={"max_examples": 30}, **_COMMON)
+def test_render_round_trips_through_yaml(spec, authkey, hostname, family) -> None:
+    """
+        The rendered document survives a YAML dump and parse with its
+        structural keys intact.
+    """
+    doc = render_cloud_init(spec=spec, authkey=authkey,
+                            rendered_hostname=hostname,
+                            image_family=family)
 
-    @given(spec=_tailscale_spec_strategy(),
-           authkey=_authkey_st,
-           hostname=_hostname_st,
-           family=st.sampled_from(_LINUX_FAMILIES), constraints={"max_examples": 30})
-    def test_authkey_is_only_inside_write_files(self, spec, authkey,
-                                                hostname, family) -> None:
-        doc = render_cloud_init(spec=spec, authkey=authkey,
-                                rendered_hostname=hostname,
-                                image_family=family)
-        # The authkey must appear exactly once and only in the write_files
-        # entry for /etc/tailscale/authkey.
-        authkey_file = doc["write_files"][0]
-        self.assertEqual(authkey_file["path"], "/etc/tailscale/authkey")
-        self.assertEqual(authkey_file["content"], authkey)
+    parsed = yaml.safe_load(yaml.safe_dump(doc))
 
-        bringup_content = doc["write_files"][1]["content"]
-        self.assertNotIn(authkey, bringup_content)
-        for entry in doc["runcmd"]:
-            self.assertNotIn(authkey, json.dumps(entry))
-        return
+    assert "write_files" in parsed
+    assert "runcmd" in parsed
+    return
 
 
-class AuthkeyQuotedInShellProperty(unittest.TestCase):
+@given(constraints={"max_examples": 30}, **_COMMON)
+def test_authkey_is_only_inside_write_files(spec, authkey, hostname,
+                                            family) -> None:
+    """
+        The auth key appears only in the root-only key file -- never in the
+        bring-up script and never in runcmd, where it would reach cloud-init's
+        logs and the process table.
+    """
+    doc = render_cloud_init(spec=spec, authkey=authkey,
+                            rendered_hostname=hostname,
+                            image_family=family)
 
-    @given(spec=_tailscale_spec_strategy(),
-           authkey=_authkey_st,
-           hostname=_hostname_st,
-           family=st.sampled_from(_LINUX_FAMILIES), constraints={"max_examples": 30})
-    def test_tailscale_up_authkey_uses_quoted_var(self, spec, authkey,
-                                                  hostname, family) -> None:
-        doc = render_cloud_init(spec=spec, authkey=authkey,
-                                rendered_hostname=hostname,
-                                image_family=family)
-        bringup_content = doc["write_files"][1]["content"]
-        # Confirm the auth-key is referenced via the quoted shell variable.
-        matched = re.search(r'--auth-key=("\$\{AUTHKEY\}"|\'\$\{AUTHKEY\}\')',
-                            bringup_content)
-        self.assertIsNotNone(matched)
-        return
+    authkey_file = doc["write_files"][0]
+    assert authkey_file["path"] == "/etc/tailscale/authkey"
+    assert authkey_file["content"] == authkey
 
-
-class DeterminismProperty(unittest.TestCase):
-
-    @given(spec=_tailscale_spec_strategy(),
-           authkey=_authkey_st,
-           hostname=_hostname_st,
-           family=st.sampled_from(_LINUX_FAMILIES), constraints={"max_examples": 20})
-    def test_same_inputs_produce_byte_identical_output(self, spec, authkey,
-                                                       hostname,
-                                                       family) -> None:
-        first = yaml.safe_dump(render_cloud_init(
-            spec=spec, authkey=authkey, rendered_hostname=hostname,
-            image_family=family,
-        ), sort_keys=True)
-        second = yaml.safe_dump(render_cloud_init(
-            spec=spec, authkey=authkey, rendered_hostname=hostname,
-            image_family=family,
-        ), sort_keys=True)
-        self.assertEqual(first, second)
-        return
+    bringup_content = doc["write_files"][1]["content"]
+    assert authkey not in bringup_content
+    for entry in doc["runcmd"]:
+        assert authkey not in json.dumps(entry)
+    return
 
 
-class AzureCseJsonValidityProperty(unittest.TestCase):
+@given(constraints={"max_examples": 30}, **_COMMON)
+def test_tailscale_up_authkey_uses_quoted_var(spec, authkey, hostname,
+                                              family) -> None:
+    """
+        The bring-up script reaches the auth key through a quoted shell
+        variable rather than interpolating it.
+    """
+    doc = render_cloud_init(spec=spec, authkey=authkey,
+                            rendered_hostname=hostname,
+                            image_family=family)
 
-    @given(spec=_tailscale_spec_strategy(),
-           authkey=_authkey_st,
-           hostname=_hostname_st,
-           family=st.sampled_from(_LINUX_FAMILIES), constraints={"max_examples": 20})
-    def test_azure_cse_json_roundtrip(self, spec, authkey, hostname,
-                                      family) -> None:
-        doc = render_azure_cse(spec=spec, authkey=authkey,
-                               rendered_hostname=hostname,
-                               image_family=family)
-        text = json.dumps(doc)
-        parsed = json.loads(text)
-        self.assertIn("settings", parsed)
-        return
+    bringup_content = doc["write_files"][1]["content"]
+
+    matched = re.search(r'--auth-key=("\$\{AUTHKEY\}"|\'\$\{AUTHKEY\}\')',
+                        bringup_content)
+    assert matched is not None
+    return
 
 
-if __name__ == "__main__":
-    unittest.main()
+@given(constraints={"max_examples": 20}, **_COMMON)
+def test_same_inputs_produce_byte_identical_output(spec, authkey, hostname,
+                                                   family) -> None:
+    """
+        Rendering is deterministic, so an unchanged spec does not churn
+        user-data and force a needless instance replacement.
+    """
+    first = yaml.safe_dump(render_cloud_init(
+        spec=spec, authkey=authkey, rendered_hostname=hostname,
+        image_family=family,
+    ), sort_keys=True)
+    second = yaml.safe_dump(render_cloud_init(
+        spec=spec, authkey=authkey, rendered_hostname=hostname,
+        image_family=family,
+    ), sort_keys=True)
+
+    assert first == second
+    return
+
+
+@given(constraints={"max_examples": 20}, **_COMMON)
+def test_azure_cse_json_roundtrip(spec, authkey, hostname, family) -> None:
+    """
+        The Azure custom-script-extension payload survives a JSON round trip.
+    """
+    doc = render_azure_cse(spec=spec, authkey=authkey,
+                           rendered_hostname=hostname,
+                           image_family=family)
+
+    parsed = json.loads(json.dumps(doc))
+
+    assert "settings" in parsed
+    return

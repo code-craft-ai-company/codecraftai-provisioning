@@ -54,8 +54,18 @@ Checked items (`[x]`) are implemented and covered by tests.
   parameter with ambient fallback and hard failure on an unresolved
   reference.  Tests: `render/test_index_credentials.py`,
   `engine/test_bootstrap_secrets_binding.py`, foundations spec tests.
-- [ ] 14. Property tests (hypothesis) for YAML validity and quoting round-trips,
-  matching `test_property_cloud_init.py`
+- [x] 14. Property tests for YAML validity and quoting round-trips (2026-09-03):
+  `render/test_property_python_env_cloud_init.py` -- fragment and script survive
+  a YAML round trip byte-for-byte, every package specifier stays one shell word,
+  path and owner parse back exactly, one runcmd per spec with unique write paths,
+  a slug collision is refused rather than merged, and a resolved index secret
+  never reaches the script or runcmd.  Verified by mutation (dropping the shell
+  quoting and leaking the secret are both caught).
+  While matching `test_property_cloud_init.py` its five VPN properties were found
+  dead: `@given` on a `unittest.TestCase` method never receives its generated
+  arguments, and the testbase sequencer collects only module-level `test_*`, so
+  they had never run.  Converted to module-level functions; they pass and a
+  mutation unquoting `--auth-key` is caught.
 - [x] 15. Linux payload shapes beyond plain user-data are covered by the venue
   migration (vSphere guest-customisation userData, Hyper-V NoCloud ISO,
   libvirt seed ISO, Proxmox snippet, Nutanix base64).  Windows shapes (Azure
@@ -65,3 +75,14 @@ Checked items (`[x]`) are implemented and covered by tests.
   hosts after boot.
 - [ ] 16. Live verification on a stock image without `python3-venv` (needs a
   fresh cloud host or container)
+- [ ] 17. 316 tests in this repo are written as `unittest.TestCase` methods and
+  are never executed.  The merge gate runs only `testbase testing run --root
+  ./source/testroots/ccai --includes=ccai.tests`, and the sequencer collects
+  module-level `test_*` functions only, so `--includes=ccai.tests.provisioning
+  .render` reported "empty test set" before item 14 converted two files.
+  Uncollected as of 2026-09-03: `render` 81, `engine` 24, `model` 208
+  (`venues` is unaffected -- 525 of its 528 are already module-level).
+  Running the `render` package under plain `unittest` also shows pre-existing
+  errors, so some of these are stale as well as unrun.  Deciding between
+  converting them and teaching the sequencer to collect `TestCase` methods is
+  a repo-wide call, not part of the python-env work.
