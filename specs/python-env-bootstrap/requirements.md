@@ -107,7 +107,41 @@ the specs into a cloud-init fragment I can merge into `user_data`.
 
 ---
 
-### Requirement 4: Merge and Compose
+### Requirement 4: Credentialed Private Index
+
+**User Story:** As a spec author, I want to install from a private index by
+naming a vault credential, without any secret appearing in the spec, the
+venue code, the runcmd, or the cloud-init log.
+
+#### Acceptance Criteria
+
+1. `resolve_index_credential(spec, credential_lookup)` SHALL resolve
+   `spec.index_credential` through the caller-supplied lookup and map
+   `BasicCredential` → (username, password), `PersonalApiTokenCredential` →
+   (username, token), `ApiTokenCredential` / `SecretTokenCredential` →
+   (`__token__`, token); any other class, `None`, or a raising lookup SHALL
+   raise `SchemaSemanticError`.
+2. `collect_bootstrap_secrets(instances, credential_lookup)` SHALL resolve each
+   distinct reference once into a `BootstrapSecrets`.
+3. `ProvisioningEngine` SHALL accept `credential_lookup`; LOAD_VALIDATE SHALL
+   resolve every named `index_credential` (raising `SchemaSemanticError` when
+   one is named and no lookup is configured), and `apply` SHALL bind the
+   resolved `BootstrapSecrets` (via `bind_bootstrap_secrets`) around every
+   apply stage and clear it afterwards. Dry-run applies SHALL bind nothing.
+4. `render_python_env_cloud_init` and the composer SHALL accept an optional
+   `secrets` argument and otherwise read `current_bootstrap_secrets()`; a spec
+   naming a credential that neither resolves SHALL raise
+   `CloudInitRendererError` rather than render an unauthenticated URL.
+5. The credential SHALL be embedded as percent-encoded URL userinfo into
+   `index_url` and into `extra_index_urls` entries on the same host, only
+   inside the `0400` pip configuration; it SHALL appear nowhere else in the
+   rendered document.
+6. `IndexCredential` and `BootstrapSecrets` SHALL never expose the secret
+   through `repr`.
+
+---
+
+### Requirement 5: Merge and Compose
 
 #### Acceptance Criteria
 

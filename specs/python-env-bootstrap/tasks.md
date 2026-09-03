@@ -47,8 +47,13 @@ Checked items (`[x]`) are implemented and covered by tests.
   SetupComplete, vsphere runOnceCommands) are unchanged.  Covered by
   `render/test_venue_python_env_wiring.py` (15 tests) and the full
   testbase venue suite (532/533 before and after).
-- [ ] 13. Credentialed private index: `index_credential` naming a vault entry,
-  minted at render time into the `0400` pip.conf
+- [x] 13. Credentialed private index (2026-09-02): `index_credential` on the
+  spec; `bootstrapsecrets.py` (container + contextvar binding);
+  `indexcredentialresolver.py`; engine `credential_lookup` with resolution at
+  LOAD_VALIDATE and binding around apply; renderer / composer `secrets`
+  parameter with ambient fallback and hard failure on an unresolved
+  reference.  Tests: `render/test_index_credentials.py`,
+  `engine/test_bootstrap_secrets_binding.py`, foundations spec tests.
 - [ ] 14. Property tests (hypothesis) for YAML validity and quoting round-trips,
   matching `test_property_cloud_init.py`
 - [x] 15. Linux payload shapes beyond plain user-data are covered by the venue

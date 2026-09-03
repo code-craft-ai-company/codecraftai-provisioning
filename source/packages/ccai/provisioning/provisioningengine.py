@@ -35,10 +35,11 @@ import logging
 import os
 import uuid
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import yaml
 
+from ccai.interfaces.pythonenvspec import PythonEnvironmentSpec
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.interfaces.schemavalidationerror import SchemaValidationError
 from ccai.provisioning.model.cloud.cloudprovisioner import CloudProvisioner
@@ -52,6 +53,12 @@ from ccai.provisioning.model.cloud.provisionedresource import (
 )
 from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
+)
+from ccai.provisioning.cloudinit.bootstrapsecrets import (
+    BootstrapSecrets, bind_bootstrap_secrets
+)
+from ccai.provisioning.model.pythonenv.indexcredentialresolver import (
+    collect_bootstrap_secrets
 )
 from ccai.provisioning.cloudprovisionerregistry import (
     CloudProvisionerRegistry
@@ -80,6 +87,18 @@ from ccai.provisioning.preemption.preemptionhandler import (
 logger = logging.getLogger(__name__)
 
 
+class _EnvironmentHolder:
+    """
+        Minimal stand-in for a CloudInstance that only carries the
+        ``python_environments`` slot, used when a spec entry is too thin to
+        promote to a full CloudInstance.
+    """
+
+    def __init__(self, *, python_environments: List[PythonEnvironmentSpec]) -> None:
+        self.python_environments: List[PythonEnvironmentSpec] = python_environments
+        return
+
+
 class ProvisioningEngine:
     """
         Eight-stage venue-agnostic provisioning pipeline driver.
@@ -92,7 +111,9 @@ class ProvisioningEngine:
                  registry: CloudProvisionerRegistry,
                  runid: Optional[str] = None,
                  state_store: Optional[ProvisioningStateStore] = None,
-                 control_planes: Optional[Dict[str, Any]] = None) -> None:
+                 control_planes: Optional[Dict[str, Any]] = None,
+                 credential_lookup: Optional[Callable[[str], Any]] = None
+                 ) -> None:
         """
             Construct a ProvisioningEngine.
 
@@ -103,6 +124,16 @@ class ProvisioningEngine:
                                 persistence; the engine omits persistence
                                 when None.
             :param control_planes: Optional VPN control-plane registry.
+            :param credential_lookup: Optional callable mapping a
+                                      credential-vault reference to a
+                                      credential object (typically
+                                      ``CredentialManager.lookup_credential``).
+                                      Required only when a Python environment
+                                      names an ``index_credential``; the
+                                      engine resolves every such reference
+                                      once at LOAD_VALIDATE and binds the
+                                      result for the apply stages so venue
+                                      renderers never touch the vault.
         """
         if spec is None:
             raise SchemaValidationError("spec must not be None.")
@@ -118,6 +149,8 @@ class ProvisioningEngine:
         self._control_planes: Dict[str, Any] = (
             control_planes if control_planes is not None else {}
         )
+        self._credential_lookup: Optional[Callable[[str], Any]] = credential_lookup
+        self._bootstrap_secrets: Optional[BootstrapSecrets] = None
 
         self._dependency_graph: DependencyGraph = build_dependency_graph(
             spec=spec
@@ -186,7 +219,8 @@ class ProvisioningEngine:
                        registry: CloudProvisionerRegistry,
                        runid: Optional[str] = None,
                        state_store: Optional[ProvisioningStateStore] = None,
-                       control_planes: Optional[Dict[str, Any]] = None
+                       control_planes: Optional[Dict[str, Any]] = None,
+                       credential_lookup: Optional[Callable[[str], Any]] = None
                        ) -> "ProvisioningEngine":
         """
             Construct an engine from a YAML spec file.
@@ -196,6 +230,7 @@ class ProvisioningEngine:
             :param runid: Optional runid override.
             :param state_store: Optional state store.
             :param control_planes: Optional VPN control planes.
+            :param credential_lookup: Optional credential-vault lookup.
 
             :returns: A configured ProvisioningEngine.
         """
@@ -203,7 +238,8 @@ class ProvisioningEngine:
             data = yaml.safe_load(fh)
         rtnval = cls(spec=data, registry=registry, runid=runid,
                      state_store=state_store,
-                     control_planes=control_planes)
+                     control_planes=control_planes,
+                     credential_lookup=credential_lookup)
         return rtnval
 
     def validate(self, *, aspects: ProvisioningAspects) -> None:
@@ -214,10 +250,68 @@ class ProvisioningEngine:
             :raises: SchemaSemanticError
         """
         self._log_stage(stage=PipelineStage.LOAD_VALIDATE, event="enter")
+        self._resolve_bootstrap_secrets()
         for venue_name, provisioner in self._registry.items():
             provisioner.validate(aspects=aspects)
         self._log_stage(stage=PipelineStage.LOAD_VALIDATE, event="exit")
         return
+
+    def _resolve_bootstrap_secrets(self) -> BootstrapSecrets:
+        """
+            Resolve every ``index_credential`` named by the spec's Python
+            environments through the configured lookup, once per run.
+
+            :returns: The resolved :class:`BootstrapSecrets` (empty when
+                      nothing names a credential).
+
+            :raises: SchemaSemanticError when a credential is named but no
+                     lookup was configured, or a reference does not resolve
+                     to an index-capable credential.
+        """
+        if self._bootstrap_secrets is not None:
+            rtnval = self._bootstrap_secrets
+            return rtnval
+
+        holders: List[Any] = []
+        for entry in self._spec.get("instances", []):
+            if isinstance(entry, CloudInstance):
+                holders.append(entry)
+                continue
+            if not isinstance(entry, dict):
+                continue
+            payload = entry.get("python_environments", None)
+            if payload is None:
+                continue
+            environments: List[PythonEnvironmentSpec] = []
+            for item in payload:
+                if isinstance(item, PythonEnvironmentSpec):
+                    environments.append(item)
+                else:
+                    environments.append(PythonEnvironmentSpec.from_dict(item))
+            holders.append(_EnvironmentHolder(python_environments=environments))
+
+        named = [
+            spec.index_credential
+            for holder in holders
+            for spec in (holder.python_environments or [])
+            if spec.index_credential is not None
+        ]
+        if len(named) > 0 and self._credential_lookup is None:
+            err_msg_lines = ["Python environments name an index_credential but the "
+                             "engine has no credential_lookup configured."]
+            err_msg_lines.append("INDEX_CREDENTIALS: {}".format(sorted(set(named))))
+            err_msg = os.linesep.join(err_msg_lines)
+            raise SchemaSemanticError(err_msg)
+
+        if len(named) == 0:
+            secrets = BootstrapSecrets()
+        else:
+            secrets = collect_bootstrap_secrets(
+                instances=holders, credential_lookup=self._credential_lookup,
+            )
+        self._bootstrap_secrets = secrets
+        rtnval = secrets
+        return rtnval
 
     def plan(self, *,
              aspects: ProvisioningAspects) -> MultiVenueProvisioningPlan:
@@ -272,12 +366,16 @@ class ProvisioningEngine:
             if aspects.runid is None:
                 aspects.runid = self._runid
 
-        self._stage_apply_networking(aspects=aspects)
-        self._stage_apply_compute(aspects=aspects)
-        self._stage_apply_dns_storage_lb(aspects=aspects)
-        self._stage_bootstrap_vpn(aspects=aspects)
-        self._stage_verify(aspects=aspects)
-        self._stage_emit_landscape_inventory(aspects=aspects)
+        # Secrets resolved at LOAD_VALIDATE are bound for every apply
+        # stage so venue renderers can read them without any plumbing.
+        secrets = self._resolve_bootstrap_secrets()
+        with bind_bootstrap_secrets(secrets):
+            self._stage_apply_networking(aspects=aspects)
+            self._stage_apply_compute(aspects=aspects)
+            self._stage_apply_dns_storage_lb(aspects=aspects)
+            self._stage_bootstrap_vpn(aspects=aspects)
+            self._stage_verify(aspects=aspects)
+            self._stage_emit_landscape_inventory(aspects=aspects)
 
         if self._state_store is not None:
             self._persist_state()

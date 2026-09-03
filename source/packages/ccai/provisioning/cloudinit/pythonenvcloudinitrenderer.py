@@ -24,7 +24,11 @@
     :func:`quote_for_shell`; index URLs are written to a root-only
     ``pip.conf`` and referenced through ``PIP_CONFIG_FILE`` rather than
     placed on a command line, so the world-readable cloud-init log never
-    carries them.
+    carries them.  A private index declared through
+    ``PythonEnvironmentSpec.index_credential`` is resolved by the engine
+    into a :class:`BootstrapSecrets` container and embedded as URL
+    userinfo inside that same ``0400`` file — never in the script, never
+    in ``runcmd``.
 
     Windows image families are rejected: cloud-init on Windows (cloudbase-
     init) does not share the ``write_files`` / ``runcmd`` model this
@@ -39,11 +43,15 @@ __credits__ = []
 
 import os
 
-from typing import Any, Dict, List, Sequence
+from typing import Any, Dict, List, Optional, Sequence
+from urllib.parse import quote, urlsplit, urlunsplit
 
 from ccai.interfaces.pythonenvspec import PythonEnvironmentSpec
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
+from ccai.provisioning.cloudinit.bootstrapsecrets import (
+    BootstrapSecrets, IndexCredential, current_bootstrap_secrets
+)
 from ccai.provisioning.cloudinit.cloudinitrenderererror import (
     CloudInitRendererError
 )
@@ -173,13 +181,76 @@ def pip_config_path(*, spec: PythonEnvironmentSpec) -> str:
     return rtnval
 
 
-def render_pip_config(*, spec: PythonEnvironmentSpec) -> str:
+def embed_index_credential(*, url: str, credential: IndexCredential) -> str:
+    """
+        Return ``url`` with the credential embedded as percent-encoded
+        HTTP basic-auth userinfo (``https://user:secret@host/path``).
+
+        :param url: A credential-free index URL.
+        :param credential: The credential to embed.
+
+        :returns: The credentialed URL.
+    """
+    parts = urlsplit(url)
+    userinfo = "{}:{}".format(quote(credential.username, safe=""),
+                              quote(credential.secret, safe=""))
+    host_port = parts.hostname or ""
+    if parts.port is not None:
+        host_port = "{}:{}".format(host_port, parts.port)
+    netloc = "{}@{}".format(userinfo, host_port)
+    rtnval = urlunsplit((parts.scheme, netloc, parts.path, parts.query, parts.fragment))
+    return rtnval
+
+
+def _resolve_index_credential(*, spec: PythonEnvironmentSpec,
+                              secrets: Optional[BootstrapSecrets]
+                              ) -> Optional[IndexCredential]:
+    """
+        Find the credential a spec names in the explicit or ambient
+        :class:`BootstrapSecrets`.
+
+        :param spec: The environment spec.
+        :param secrets: Explicit container, or ``None`` to use the one
+                        bound by the engine for the current apply.
+
+        :returns: The credential, or ``None`` when the spec names none.
+
+        :raises: CloudInitRendererError when the spec names a credential
+                 that no container resolves — the renderer never silently
+                 emits an unauthenticated URL for a private index.
+    """
+    if spec.index_credential is None:
+        rtnval: Optional[IndexCredential] = None
+        return rtnval
+
+    effective = secrets if secrets is not None else current_bootstrap_secrets()
+    credential = effective.credential_for(spec=spec) if effective is not None else None
+    if credential is None:
+        err_msg_lines = ["Python environment names an index_credential that was not "
+                         "resolved for this run."]
+        err_msg_lines.append("PATH: {}".format(spec.path))
+        err_msg_lines.append("INDEX_CREDENTIAL: {}".format(spec.index_credential))
+        err_msg_lines.append("HINT: construct the ProvisioningEngine with "
+                             "credential_lookup=... so LOAD_VALIDATE resolves it.")
+        err_msg = os.linesep.join(err_msg_lines)
+        raise CloudInitRendererError(err_msg)
+
+    rtnval = credential
+    return rtnval
+
+
+def render_pip_config(*, spec: PythonEnvironmentSpec,
+                      credential: Optional[IndexCredential] = None) -> str:
     """
         Render the ``pip.conf`` body for a spec's index configuration.
 
         Multi-value keys use pip's newline-plus-indent continuation form.
+        When ``credential`` is given it is embedded into ``index_url`` and
+        into every ``extra_index_urls`` entry on the same host; other hosts
+        are left credential-free.
 
         :param spec: The environment spec.
+        :param credential: Optional resolved index credential.
 
         :returns: The INI text (empty when the spec has no index
                   configuration).
@@ -188,13 +259,24 @@ def render_pip_config(*, spec: PythonEnvironmentSpec) -> str:
         rtnval = ""
         return rtnval
 
+    index_host: Optional[str] = None
+    if spec.index_url is not None:
+        index_host = urlsplit(spec.index_url).hostname
+
+    def _maybe_credentialed(url: str) -> str:
+        if credential is None:
+            return url
+        if urlsplit(url).hostname != index_host:
+            return url
+        return embed_index_credential(url=url, credential=credential)
+
     lines: List[str] = ["[global]"]
     if spec.index_url is not None:
-        lines.append("index-url = {}".format(spec.index_url))
+        lines.append("index-url = {}".format(_maybe_credentialed(spec.index_url)))
     if spec.extra_index_urls is not None and len(spec.extra_index_urls) > 0:
         lines.append("extra-index-url =")
         for url in spec.extra_index_urls:
-            lines.append("    {}".format(url))
+            lines.append("    {}".format(_maybe_credentialed(url)))
     if spec.trusted_hosts is not None and len(spec.trusted_hosts) > 0:
         lines.append("trusted-host =")
         for host in spec.trusted_hosts:
@@ -276,12 +358,17 @@ def render_bootstrap_script(*, spec: PythonEnvironmentSpec) -> str:
 
 
 def render_python_env_cloud_init(*, specs: Sequence[PythonEnvironmentSpec],
-                                 image_family: str) -> Dict[str, Any]:
+                                 image_family: str,
+                                 secrets: Optional[BootstrapSecrets] = None
+                                 ) -> Dict[str, Any]:
     """
         Render the cloud-init fragment deploying every spec on first boot.
 
         :param specs: The environment specs (at least one).
         :param image_family: Image family token or alias.
+        :param secrets: Optional resolved :class:`BootstrapSecrets`; when
+                        ``None`` the container bound by the engine for the
+                        current apply is used.
 
         :returns: A dict with ``package_update``, ``packages``,
                   ``write_files`` and ``runcmd`` keys, suitable for
@@ -297,11 +384,12 @@ def render_python_env_cloud_init(*, specs: Sequence[PythonEnvironmentSpec],
 
     for spec in specs:
         if spec.has_index_configuration:
+            credential = _resolve_index_credential(spec=spec, secrets=secrets)
             write_files.append({
                 "path": pip_config_path(spec=spec),
                 "owner": "root:root",
                 "permissions": "0400",
-                "content": render_pip_config(spec=spec),
+                "content": render_pip_config(spec=spec, credential=credential),
             })
         script_path = bootstrap_script_path(spec=spec)
         write_files.append({
@@ -325,6 +413,7 @@ __all__ = [
     "BOOTSTRAP_DIRECTORY",
     "PREREQUISITE_PACKAGES_BY_FAMILY",
     "bootstrap_script_path",
+    "embed_index_credential",
     "pip_config_path",
     "render_bootstrap_script",
     "render_pip_config",

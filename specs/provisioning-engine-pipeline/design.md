@@ -1,5 +1,13 @@
 # Design
 
+> **Bootstrap secrets (2026-09-02).**  `ProvisioningEngine` accepts an
+> optional `credential_lookup`.  LOAD_VALIDATE resolves every
+> `PythonEnvironmentSpec.index_credential` named in the spec into a
+> `BootstrapSecrets` container (raising `SchemaSemanticError` when one is
+> named and no lookup is configured); `apply` binds that container with
+> `bind_bootstrap_secrets` around every apply stage so venue renderers read
+> it ambiently.  See [python-env-bootstrap](../python-env-bootstrap/design.md).
+
 ## Overview
 
 The provisioning engine pipeline is the venue-agnostic conductor that runs every

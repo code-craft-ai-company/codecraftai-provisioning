@@ -110,14 +110,36 @@ cheaper and more correct idempotency check.
 
 ## Secret Handling
 
-`PythonEnvironmentSpec` refuses credentials by construction: `index_url` is
-validated as a whitespace-free URL but is documented as credential-free, and no
-field accepts a token.  Even so, index URLs are written to a root-only `0400`
-pip configuration and referenced through `PIP_CONFIG_FILE`, so they never
-appear in `runcmd` or in the world-readable cloud-init log.  A credentialed
-private index is a planned extension that will name a credential-vault entry
-the way `VPNJoinSpec.control_plane_credential` does, mint at render time, and
-land the token in that same `0400` file.
+`PythonEnvironmentSpec` refuses credentials by construction: the URL fields
+reject embedded userinfo, and no field accepts a token.  A private index is
+declared by naming a vault entry in `index_credential`, and the secret flows
+through one seam:
+
+```
+   spec.index_credential ("pypi:internal")
+            │  LOAD_VALIDATE: ProvisioningEngine._resolve_bootstrap_secrets
+            │  → collect_bootstrap_secrets(instances, credential_lookup)
+            │  → resolve_index_credential: BasicCredential / token classes
+            ▼
+   BootstrapSecrets{index_credentials: {"pypi:internal": IndexCredential}}
+            │  apply(): with bind_bootstrap_secrets(secrets): <all stages>
+            ▼
+   contextvar  ──►  render_python_env_cloud_init(..., secrets=None)
+                    → current_bootstrap_secrets().credential_for(spec)
+                    → render_pip_config(spec, credential)
+                    → "index-url = https://svc:s3cret@host/simple"   (0400 file only)
+```
+
+The engine resolves once, so no venue provisioner touches the vault and no
+venue signature changed; the renderer reads the ambient container unless a
+caller passes one explicitly (tests, or a future coordinator).  The
+`ContextVar` binding is per-thread and per-task, so concurrent engines in one
+process cannot see each other's secrets.  A spec that names a credential the
+run did not resolve is a hard `CloudInitRendererError` — the renderer never
+downgrades to an unauthenticated URL.  Credentials are embedded only on
+`index_url` and on `extra_index_urls` entries sharing its host, as
+percent-encoded userinfo inside the `0400` pip configuration; `repr` of the
+secret types is redacted so no log line or exception can carry a token.
 
 ---
 
@@ -141,7 +163,10 @@ codecraftai-provisioning/source/packages/ccai/provisioning/
 ├── cloudinit/
 │   ├── pythonenvcloudinitrenderer.py      # render_python_env_cloud_init, script + pip.conf renderers
 │   ├── cloudinitmerge.py                  # merge_cloud_init_fragments
-│   └── bootstraprenderer.py               # render_instance_cloud_init / render_instance_user_data
+│   ├── bootstraprenderer.py               # render_instance_cloud_init / render_instance_user_data
+│   └── bootstrapsecrets.py                # IndexCredential, BootstrapSecrets, bind/current
+├── model/pythonenv/indexcredentialresolver.py   # resolve_index_credential, collect_bootstrap_secrets
+├── provisioningengine.py                  # credential_lookup, _resolve_bootstrap_secrets, apply binding
 └── model/cloud/cloudinstance.py           # + python_environments slot
 
 codecraftai-foundations/source/tests/ccai_tests/interfaces/test_pythonenvspec.py

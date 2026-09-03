@@ -24,6 +24,7 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 
+from ccai.provisioning.cloudinit.bootstrapsecrets import BootstrapSecrets
 from ccai.provisioning.cloudinit.cloudinitmerge import merge_cloud_init_fragments
 from ccai.provisioning.cloudinit.pythonenvcloudinitrenderer import (
     render_python_env_cloud_init
@@ -37,7 +38,8 @@ CLOUD_CONFIG_HEADER = "#cloud-config"
 
 def render_instance_cloud_init(*, instance: CloudInstance,
                                authkey: Optional[str] = None,
-                               rendered_hostname: Optional[str] = None
+                               rendered_hostname: Optional[str] = None,
+                               secrets: Optional[BootstrapSecrets] = None
                                ) -> Optional[Dict[str, Any]]:
     """
         Render and merge every cloud-init fragment the instance declares.
@@ -52,6 +54,9 @@ def render_instance_cloud_init(*, instance: CloudInstance,
                         set (an empty string is substituted otherwise).
         :param rendered_hostname: Hostname rendered from the join spec
                                   template; defaults to the instance name.
+        :param secrets: Optional resolved :class:`BootstrapSecrets`; when
+                        ``None`` the container bound by the engine for the
+                        current apply is used.
 
         :returns: The merged fragment, or ``None`` when the instance
                   declares no bootstrap content at all.
@@ -75,6 +80,7 @@ def render_instance_cloud_init(*, instance: CloudInstance,
         fragments.append(render_python_env_cloud_init(
             specs=python_environments,
             image_family=instance.image.family,
+            secrets=secrets,
         ))
 
     raw_script = instance.user_data_script
@@ -94,7 +100,8 @@ def render_instance_cloud_init(*, instance: CloudInstance,
 
 def render_instance_user_data(*, instance: CloudInstance,
                               authkey: Optional[str] = None,
-                              rendered_hostname: Optional[str] = None
+                              rendered_hostname: Optional[str] = None,
+                              secrets: Optional[BootstrapSecrets] = None
                               ) -> Optional[str]:
     """
         Render the complete ``#cloud-config`` document for an instance.
@@ -102,6 +109,7 @@ def render_instance_user_data(*, instance: CloudInstance,
         :param instance: The neutral CloudInstance.
         :param authkey: Minted VPN auth-key when ``vpn_join`` is set.
         :param rendered_hostname: Hostname for the join spec.
+        :param secrets: Optional resolved :class:`BootstrapSecrets`.
 
         :returns: The YAML document with the ``#cloud-config`` header; the
                   raw ``user_data_script`` verbatim when that is the only
@@ -109,6 +117,7 @@ def render_instance_user_data(*, instance: CloudInstance,
     """
     fragment = render_instance_cloud_init(
         instance=instance, authkey=authkey, rendered_hostname=rendered_hostname,
+        secrets=secrets,
     )
     if fragment is None:
         raw_script = instance.user_data_script
