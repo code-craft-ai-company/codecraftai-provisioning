@@ -26,7 +26,8 @@ from ccai.provisioning.cloudinit.vpncloudinitrenderer import (
 )
 
 
-_LINUX_FAMILIES = ("ubuntu", "debian", "rhel", "fedora", "amazonlinux")
+_LINUX_FAMILIES = ("ubuntu", "debian", "rhel", "rocky", "almalinux", "fedora",
+                   "amazon-linux")
 
 _tag_st = st.lists(
     st.text(alphabet=st.characters(blacklist_categories=("Cs",)),

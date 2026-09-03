@@ -35,7 +35,9 @@ cloud-init document fragment for a `VPNJoinSpec`.
    cloud-init document fragment.
 2. THE SYSTEM SHALL produce output that, when serialised with `yaml.safe_dump` and
    merged with any other user-data, is a valid cloud-init document.
-3. WHERE `image_family` is one of `{ubuntu, debian, rhel, fedora, amazonlinux}` THE
+3. WHERE `image_family` resolves (via `normalize_family`, so aliases such as
+   `amazonlinux` are accepted) to a Linux `ImageFamily` member — `ubuntu`, `debian`,
+   `rhel`, `rocky`, `almalinux`, `fedora`, `amazon-linux` — THE
    SYSTEM SHALL prepend the appropriate install snippet only when the daemon is
    not in the image's default package set.
 4. WHEN `spec.provider == "tailscale"` THE SYSTEM SHALL emit a `runcmd` line

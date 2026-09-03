@@ -16,7 +16,9 @@ import os
 from typing import Dict, Optional
 
 from ccai.provisioning.model.cloud.cloudimage import CloudImage
-from ccai.provisioning.model.cloud.imagefamily import normalize_family
+from ccai.provisioning.model.cloud.imagefamily import (
+    ImageFamily, normalize_family
+)
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.venues.aws.awsboto3sessionfactory import (
     AwsBoto3SessionFactory
@@ -198,7 +200,7 @@ class ImageResolver:
             rtnval: Optional[str] = None
             return rtnval
 
-        if family == "amazonlinux":
+        if family == ImageFamily.AMAZON_LINUX.value:
             param = "{}/amzn2-ami-hvm-{}-gp2".format(prefix, arch)
         elif family == "ubuntu":
             param = "{}/{}/stable/current/{}/hvm/ebs-gp2/ami-id".format(

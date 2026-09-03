@@ -102,8 +102,13 @@ class CloudInitRendererError(Exception):
     """Raised when an unsupported image family is requested."""
 
 
-SUPPORTED_LINUX_FAMILIES = {"ubuntu", "debian", "rhel", "fedora", "amazonlinux"}
+# Derived from the model's ImageFamily enum; families are resolved with
+# normalize_family so aliases ("amazonlinux", "rockylinux", "windows") work.
 SUPPORTED_WINDOWS_FAMILIES = {"windows-server"}
+SUPPORTED_LINUX_FAMILIES = {"ubuntu", "debian", "rhel", "rocky", "almalinux",
+                            "fedora", "amazon-linux"}
+
+def is_windows_family(*, image_family: str) -> bool: ...
 ```
 
 ---

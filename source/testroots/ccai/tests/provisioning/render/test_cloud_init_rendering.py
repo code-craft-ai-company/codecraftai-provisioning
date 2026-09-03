@@ -94,6 +94,44 @@ class CloudInitTwingateTests(unittest.TestCase):
 
 class CloudInitImageFamilyTests(unittest.TestCase):
 
+    def test_every_canonical_linux_family_renders(self) -> None:
+        # CloudImage stores canonical ImageFamily tokens; every Linux member
+        # must be accepted (amazon-linux, rocky and almalinux were rejected
+        # before the renderer resolved families through normalize_family).
+        for family in ("ubuntu", "debian", "rhel", "rocky", "almalinux",
+                       "fedora", "amazon-linux"):
+            with self.subTest(family=family):
+                doc = render_cloud_init(spec=_tailscale_spec(),
+                                        authkey="tskey-auth-abc",
+                                        rendered_hostname="web-01",
+                                        image_family=family)
+                self.assertIn("runcmd", doc)
+        return
+
+    def test_family_aliases_are_accepted(self) -> None:
+        for alias in ("amazonlinux", "amzn", "rockylinux", "redhat", "alma"):
+            with self.subTest(alias=alias):
+                doc = render_cloud_init(spec=_tailscale_spec(),
+                                        authkey="tskey-auth-abc",
+                                        rendered_hostname="web-01",
+                                        image_family=alias)
+                self.assertIn("runcmd", doc)
+        return
+
+    def test_windows_aliases_select_the_windows_branches(self) -> None:
+        for alias in ("windows-server", "windows", "windows_server"):
+            with self.subTest(alias=alias):
+                cse = render_azure_cse(spec=_tailscale_spec(),
+                                       authkey="tskey-auth-abc",
+                                       rendered_hostname="web-01",
+                                       image_family=alias)
+                self.assertIn("powershell", cse["protectedSettings"]["commandToExecute"])
+                guest = render_vsphere_guest_customization(
+                    spec=_tailscale_spec(), authkey="tskey-auth-abc",
+                    rendered_hostname="web-01", image_family=alias)
+                self.assertIn("runOnceCommands", guest)
+        return
+
     def test_unsupported_family_raises(self) -> None:
         with self.assertRaises(CloudInitRendererError):
             render_cloud_init(spec=_tailscale_spec(), authkey="x",

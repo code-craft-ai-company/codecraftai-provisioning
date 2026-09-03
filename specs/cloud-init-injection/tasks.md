@@ -52,3 +52,12 @@
 
 - [x] 28. Document the §8 single-renderer commitment in module docstring
 - [x] 29. Cross-link `vpn-join-spec` and venue provisioner specs
+
+## Fixes
+
+- [x] 30. Family tokens resolved through `normalize_family` (2026-09-02): the
+  renderer kept its own set (`amazonlinux`, no `rocky` / `almalinux`) while
+  `CloudImage.family` stores canonical tokens, so Amazon Linux, Rocky and
+  AlmaLinux instances were rejected at render time. `SUPPORTED_*_FAMILIES`
+  now derive from `ImageFamily`; `is_windows_family` is exported for
+  venues (vSphere) that branch on guest OS.

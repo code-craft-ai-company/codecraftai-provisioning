@@ -15,6 +15,7 @@ import os
 
 from typing import Any, Dict, List
 
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 from ccai.provisioning.cloudinit.cloudinitrenderererror import (
     CloudInitRendererError
@@ -22,33 +23,60 @@ from ccai.provisioning.cloudinit.cloudinitrenderererror import (
 from ccai.provisioning.cloudinit.secretquoting import (
     quote_for_shell, write_authkey_file_block
 )
+from ccai.provisioning.model.cloud.imagefamily import (
+    ImageFamily, normalize_family
+)
 
 
-SUPPORTED_LINUX_FAMILIES = frozenset({
-    "ubuntu", "debian", "rhel", "fedora", "amazonlinux"
-})
-SUPPORTED_WINDOWS_FAMILIES = frozenset({"windows-server"})
+# The family vocabulary is owned by ``ImageFamily``; venues hand the
+# renderer ``CloudImage.family``, which is always a canonical token
+# (``amazon-linux``, not ``amazonlinux``).  Aliases are still accepted
+# because ``normalize_family`` resolves them.  Every Linux member is
+# supported: the Tailscale and Twingate install scripts detect the
+# distribution themselves.
+SUPPORTED_WINDOWS_FAMILIES = frozenset({ImageFamily.WINDOWS_SERVER.value})
+SUPPORTED_LINUX_FAMILIES = frozenset(
+    member.value for member in ImageFamily
+    if member.value not in SUPPORTED_WINDOWS_FAMILIES
+)
 
 
-def _validate_image_family(*, image_family: str) -> None:
+def _validate_image_family(*, image_family: str) -> ImageFamily:
     """
-        Reject unsupported image families.
+        Resolve the image family onto its canonical member, rejecting
+        unknown values.
 
-        :param image_family: The image family.
+        :param image_family: Canonical token or alias.
+
+        :returns: The canonical ImageFamily member.
 
         :raises: CloudInitRendererError
     """
-    if image_family in SUPPORTED_LINUX_FAMILIES:
-        return
-    if image_family in SUPPORTED_WINDOWS_FAMILIES:
-        return
+    try:
+        rtnval = normalize_family(value=image_family)
+    except SchemaSemanticError:
+        supported = sorted(SUPPORTED_LINUX_FAMILIES | SUPPORTED_WINDOWS_FAMILIES)
+        err_msg_lines = ["Unsupported image_family for cloud-init renderer."]
+        err_msg_lines.append("SUPPORTED: {}".format(", ".join(supported)))
+        err_msg_lines.append("ACTUAL: {!r}".format(image_family))
+        err_msg = os.linesep.join(err_msg_lines)
+        raise CloudInitRendererError(err_msg) from None
+    return rtnval
 
-    supported = sorted(SUPPORTED_LINUX_FAMILIES | SUPPORTED_WINDOWS_FAMILIES)
-    err_msg_lines = ["Unsupported image_family for cloud-init renderer."]
-    err_msg_lines.append("SUPPORTED: {}".format(", ".join(supported)))
-    err_msg_lines.append("ACTUAL: {!r}".format(image_family))
-    err_msg = os.linesep.join(err_msg_lines)
-    raise CloudInitRendererError(err_msg)
+
+def is_windows_family(*, image_family: str) -> bool:
+    """
+        Whether a family token or alias denotes a Windows guest.
+
+        :param image_family: Canonical token or alias.
+
+        :returns: True for ``windows-server`` and its aliases.
+
+        :raises: CloudInitRendererError
+    """
+    family = _validate_image_family(image_family=image_family)
+    rtnval = family == ImageFamily.WINDOWS_SERVER
+    return rtnval
 
 
 def _install_command_for(*, image_family: str, provider: str) -> List[Any]:
@@ -65,7 +93,8 @@ def _install_command_for(*, image_family: str, provider: str) -> List[Any]:
                   "curl -fsSL https://tailscale.com/install.sh | sh"]
         return rtnval
 
-    if image_family in {"ubuntu", "debian"}:
+    family = _validate_image_family(image_family=image_family)
+    if family in (ImageFamily.UBUNTU, ImageFamily.DEBIAN):
         cmd = (
             "curl -fsSL "
             "https://binaries.twingate.com/connector/setup.sh "
@@ -238,9 +267,9 @@ def render_azure_cse(*, spec: VPNJoinSpec, authkey: str,
         :returns: A dict with ``settings`` and ``protectedSettings`` keys.
         :raises: CloudInitRendererError
     """
-    _validate_image_family(image_family=image_family)
+    family = _validate_image_family(image_family=image_family)
 
-    if image_family in SUPPORTED_WINDOWS_FAMILIES:
+    if family == ImageFamily.WINDOWS_SERVER:
         host_quoted = rendered_hostname.replace("'", "''")
         tags = list(spec.advertise_tags) if spec.advertise_tags is not None else []
         tag_arg = ",".join(tags).replace("'", "''")
@@ -329,9 +358,9 @@ def render_vsphere_guest_customization(*, spec: VPNJoinSpec, authkey: str,
                   (Windows).
         :raises: CloudInitRendererError
     """
-    _validate_image_family(image_family=image_family)
+    family = _validate_image_family(image_family=image_family)
 
-    if image_family in SUPPORTED_WINDOWS_FAMILIES:
+    if family == ImageFamily.WINDOWS_SERVER:
         cse = render_azure_cse(spec=spec, authkey=authkey,
                                rendered_hostname=rendered_hostname,
                                image_family=image_family)

@@ -24,7 +24,7 @@ from ccai.provisioning.cloudinit.pythonenvcloudinitrenderer import (
     render_python_env_cloud_init
 )
 from ccai.provisioning.cloudinit.vpncloudinitrenderer import (
-    SUPPORTED_WINDOWS_FAMILIES, render_vsphere_guest_customization
+    is_windows_family, render_vsphere_guest_customization
 )
 from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
 
@@ -65,7 +65,7 @@ def _guest_os_family_for(*, image_family: str) -> str:
 
         :returns: ``windows`` or ``linux``.
     """
-    if image_family in SUPPORTED_WINDOWS_FAMILIES:
+    if is_windows_family(image_family=image_family):
         rtnval = "windows"
         return rtnval
     rtnval = "linux"
