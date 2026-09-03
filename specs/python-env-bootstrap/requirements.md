@@ -119,8 +119,11 @@ venue code, the runcmd, or the cloud-init log.
    `spec.index_credential` through the caller-supplied lookup and map
    `BasicCredential` → (username, password), `PersonalApiTokenCredential` →
    (username, token), `ApiTokenCredential` / `SecretTokenCredential` →
-   (`__token__`, token); any other class, `None`, or a raising lookup SHALL
-   raise `SchemaSemanticError`.
+   (`__token__`, token); any other class, `None`, or an ordinary lookup error
+   SHALL raise `SchemaSemanticError`. A `ConfigurationError` raised by the
+   lookup (a missing vault entry) SHALL propagate unchanged: it derives from
+   `BaseException` by design so that a run started with wrong configuration
+   terminates past any ordinary handler.
 2. `collect_bootstrap_secrets(instances, credential_lookup)` SHALL resolve each
    distinct reference once into a `BootstrapSecrets`.
 3. `ProvisioningEngine` SHALL accept `credential_lookup`; LOAD_VALIDATE SHALL

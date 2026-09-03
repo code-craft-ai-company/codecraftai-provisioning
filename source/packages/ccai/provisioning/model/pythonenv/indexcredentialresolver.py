@@ -19,7 +19,6 @@ from ccai.credentials.apitokencredential import ApiTokenCredential
 from ccai.credentials.basiccredential import BasicCredential
 from ccai.credentials.personalapitokencredential import PersonalApiTokenCredential
 from ccai.credentials.secrettokencredential import SecretTokenCredential
-from ccai.errors.exceptions import ConfigurationError
 from ccai.interfaces.pythonenvspec import PythonEnvironmentSpec
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
@@ -54,12 +53,14 @@ def resolve_index_credential(*, spec: PythonEnvironmentSpec,
 
         :param spec: The spec naming the credential.
         :param credential_lookup: Maps a reference to a credential object;
-                                  raising or returning ``None`` signals an
-                                  unresolved reference.
+                                  returning ``None`` or raising an ordinary
+                                  lookup error signals an unresolved
+                                  reference.  A ``ConfigurationError`` raised
+                                  by the lookup propagates unchanged.
 
         :returns: The :class:`IndexCredential`.
 
-        :raises: SchemaSemanticError
+        :raises: SchemaSemanticError, ConfigurationError (propagated)
     """
     reference = spec.index_credential
     if reference is None:
@@ -67,12 +68,14 @@ def resolve_index_credential(*, spec: PythonEnvironmentSpec,
             "PythonEnvironmentSpec {!r} names no index_credential.".format(spec.path)
         )
 
-    # ``ConfigurationError`` (what ``CredentialManager.lookup_credential``
-    # raises for an unknown key) derives from ``BaseException``, so it is
-    # named explicitly; a bare ``except Exception`` would let it escape.
+    # A ``ConfigurationError`` from the lookup (what ``CredentialManager``
+    # raises for an unknown key) is deliberately NOT caught: it derives from
+    # ``BaseException`` so that a corrupt or wrong configuration terminates
+    # the run past any ordinary handler.  Only ordinary lookup failures are
+    # reclassified as semantic errors.
     try:
         credential = credential_lookup(reference)
-    except (Exception, ConfigurationError) as ex:
+    except (LookupError, ValueError, RuntimeError) as ex:
         err_msg_lines = ["Could not resolve the index credential for a Python environment."]
         err_msg_lines.append("PATH: {}".format(spec.path))
         err_msg_lines.append("INDEX_CREDENTIAL: {}".format(reference))

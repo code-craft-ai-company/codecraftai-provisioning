@@ -21,6 +21,7 @@ from typing import Any, Dict, List, Optional
 import yaml
 
 from ccai.credentials.credentialmanager import CredentialManager
+from ccai.errors.exceptions import ConfigurationError
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 from ccai.provisioning.aspects.provisioningaspects import ProvisioningAspects
@@ -135,9 +136,13 @@ class IndexCredentialIntegrationTests(unittest.TestCase):
                       provisioner.rendered)
         return
 
-    def test_unknown_reference_fails_at_validate_with_manager_detail(self) -> None:
+    def test_unknown_reference_terminates_validate_with_configuration_error(self) -> None:
+        # A missing credential is a configuration error.  It derives from
+        # BaseException by design so that a run started with wrong
+        # information stops past any ordinary handler; the engine must not
+        # translate or swallow it.
         engine, _ = _run("pypi:missing", _manager())
-        with self.assertRaises(SchemaSemanticError) as caught:
+        with self.assertRaises(ConfigurationError) as caught:
             engine.validate(aspects=ProvisioningAspects())
         self.assertIn("pypi:missing", str(caught.exception))
         return
