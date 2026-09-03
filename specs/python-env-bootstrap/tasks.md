@@ -75,14 +75,17 @@ Checked items (`[x]`) are implemented and covered by tests.
   hosts after boot.
 - [ ] 16. Live verification on a stock image without `python3-venv` (needs a
   fresh cloud host or container)
-- [ ] 17. 316 tests in this repo are written as `unittest.TestCase` methods and
-  are never executed.  The merge gate runs only `testbase testing run --root
+- [ ] 17. 174 tests in this repo are written as `unittest.TestCase` methods and
+  never execute.  The merge gate runs only `testbase testing run --root
   ./source/testroots/ccai --includes=ccai.tests`, and the sequencer collects
   module-level `test_*` functions only, so `--includes=ccai.tests.provisioning
-  .render` reported "empty test set" before item 14 converted two files.
-  Uncollected as of 2026-09-03: `render` 81, `engine` 24, `model` 208
-  (`venues` is unaffected -- 525 of its 528 are already module-level).
-  Running the `render` package under plain `unittest` also shows pre-existing
-  errors, so some of these are stale as well as unrun.  Deciding between
-  converting them and teaching the sequencer to collect `TestCase` methods is
-  a repo-wide call, not part of the python-env work.
+  .render` reported "empty test set" before item 14.
+  All of them pass when run under plain `unittest` (174 ran, 0 errors, 0
+  failures on 2026-09-03), so they are unrun rather than rotten; converting
+  them or teaching the sequencer to collect `TestCase` methods is a repo-wide
+  call, not part of the python-env work.
+  The subset that was *also broken* has been fixed: 16 `@given`-decorated
+  `TestCase` methods across six files could never have run under either runner,
+  because the decorator only records strategies for the sequencer and a method
+  never receives its generated arguments.  They are now module-level functions
+  and run in the gate.

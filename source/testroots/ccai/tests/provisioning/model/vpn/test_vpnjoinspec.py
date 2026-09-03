@@ -113,34 +113,6 @@ class HostnameRendererTests(unittest.TestCase):
         return
 
 
-class HostnameRendererPropertyTests(unittest.TestCase):
-
-    @given(st.integers(min_value=2, max_value=20), constraints={"max_examples": 50})
-    def test_property_uniqueness(self, n_contexts) -> None:
-        contexts = [{"index": i} for i in range(n_contexts)]
-        rendered = render_hostnames(template="host-{index}",
-                                    contexts=contexts)
-        self.assertEqual(len(set(rendered)), n_contexts)
-        return
-
-    @given(st.integers(min_value=0, max_value=999), constraints={"max_examples": 50})
-    def test_property_dns_label_compliance(self, index) -> None:
-        rendered = render_hostname(template="host-{index}",
-                                   context={"index": index})
-        self.assertIsNotNone(_DNS_LABEL_RE.match(rendered))
-        return
-
-    @given(st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789",
-                   min_size=1, max_size=10),
-           st.integers(min_value=0, max_value=99), constraints={"max_examples": 50})
-    def test_property_determinism(self, base, index) -> None:
-        template = base + "-{index}"
-        a = render_hostname(template=template, context={"index": index})
-        b = render_hostname(template=template, context={"index": index})
-        self.assertEqual(a, b)
-        return
-
-
 def _tailscale_oauth() -> TailscaleOAuthCredential:
     rtnval = TailscaleOAuthCredential(identifier="ts-oauth",
                                       categories=["tailscale-oauth"],
@@ -248,6 +220,57 @@ class CredentialResolverTests(unittest.TestCase):
                 spec=spec, credential_lookup=lambda ref: vault.get(ref, None)
             )
         return
+
+
+# Module-level on purpose: the testbase sequencer collects module-level
+# ``test_*`` and drives ``@given`` from the metadata the decorator records.
+# A @given-decorated TestCase *method* never receives its generated
+# arguments, so it cannot run at all.
+
+
+@given(n_contexts=st.integers(min_value=2, max_value=20),
+       constraints={"max_examples": 50})
+def test_property_uniqueness(n_contexts) -> None:
+    """
+        Distinct contexts render to distinct hostnames, so no two instances
+        in one plan can collide on a name.
+    """
+    contexts = [{"index": i} for i in range(n_contexts)]
+
+    rendered = render_hostnames(template="host-{index}", contexts=contexts)
+
+    assert len(set(rendered)) == n_contexts
+    return
+
+
+@given(index=st.integers(min_value=0, max_value=999),
+       constraints={"max_examples": 50})
+def test_property_dns_label_compliance(index) -> None:
+    """
+        A rendered hostname is a legal DNS label, so it can be registered
+        as-is.
+    """
+    rendered = render_hostname(template="host-{index}", context={"index": index})
+
+    assert _DNS_LABEL_RE.match(rendered) is not None
+    return
+
+
+@given(base=st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789",
+                    min_size=1, max_size=10),
+       index=st.integers(min_value=0, max_value=99),
+       constraints={"max_examples": 50})
+def test_property_determinism(base, index) -> None:
+    """
+        Rendering is deterministic, so a re-plan does not rename hosts.
+    """
+    template = base + "-{index}"
+
+    first = render_hostname(template=template, context={"index": index})
+    second = render_hostname(template=template, context={"index": index})
+
+    assert first == second
+    return
 
 
 if __name__ == "__main__":

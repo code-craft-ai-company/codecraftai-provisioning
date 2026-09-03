@@ -40,7 +40,7 @@ _FAMILIES = ("ubuntu", "debian", "rhel", "rocky", "almalinux", "fedora",
 # carriage-return and NUL, so shell metacharacters, quotes and spaces all
 # reach the renderer and must survive both the shell-quoting pass and the
 # YAML round trip.
-_HOSTILE = "abzAZ09 '\"$`\;|&<>()[]{}*?#!~%^+=,:@./-"
+_HOSTILE = "abzAZ09 '\"$`\\;|&<>()[]{}*?#!~%^+=,:@./-"
 
 _token_st = st.text(alphabet=_HOSTILE, min_size=1, max_size=14)
 _path_st = _token_st.map(lambda tail: "/opt/venvs/" + tail)

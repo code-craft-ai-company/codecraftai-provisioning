@@ -98,36 +98,54 @@ def _valid_spec(draw):
     return rtnval
 
 
-class DependencyGraphProperty(unittest.TestCase):
+# Module-level on purpose: the testbase sequencer collects module-level
+# ``test_*`` and drives ``@given`` from the metadata the decorator records.
+# A @given-decorated TestCase *method* never receives its generated
+# arguments, so it cannot run at all.
 
-    @given(spec=_valid_spec(), constraints={"max_examples": 30})
-    def test_instance_after_its_subnet(self, spec) -> None:
-        graph = build_dependency_graph(spec=spec)
-        order = graph.topological_sort()
-        positions = {node: idx for idx, node in enumerate(order)}
-        for inst in spec["instances"]:
-            inst_pos = positions[("instance", inst["name"])]
-            sub_pos = positions[("subnet", inst["subnet"])]
-            self.assertLess(sub_pos, inst_pos)
-        return
 
-    @given(spec=_valid_spec(), constraints={"max_examples": 30})
-    def test_dns_after_referenced_instance(self, spec) -> None:
-        graph = build_dependency_graph(spec=spec)
-        order = graph.topological_sort()
-        positions = {node: idx for idx, node in enumerate(order)}
-        for rec in spec["dns_records"]:
-            self.assertLess(positions[("instance", rec["instance_ref"])],
-                            positions[("dns", rec["name"])])
-        return
+@given(spec=_valid_spec(), constraints={"max_examples": 30})
+def test_property_instance_after_its_subnet(spec) -> None:
+    """
+        Every instance is ordered after the subnet it sits in.
+    """
+    graph = build_dependency_graph(spec=spec)
+    order = graph.topological_sort()
+    positions = {node: idx for idx, node in enumerate(order)}
 
-    @given(spec=_valid_spec(), constraints={"max_examples": 30})
-    def test_topo_sort_stable(self, spec) -> None:
-        graph_a = build_dependency_graph(spec=spec)
-        graph_b = build_dependency_graph(spec=spec)
-        self.assertEqual(graph_a.topological_sort(),
-                         graph_b.topological_sort())
-        return
+    for inst in spec["instances"]:
+        inst_pos = positions[("instance", inst["name"])]
+        sub_pos = positions[("subnet", inst["subnet"])]
+        assert sub_pos < inst_pos
+    return
+
+
+@given(spec=_valid_spec(), constraints={"max_examples": 30})
+def test_property_dns_after_referenced_instance(spec) -> None:
+    """
+        A DNS record is ordered after the instance it points at.
+    """
+    graph = build_dependency_graph(spec=spec)
+    order = graph.topological_sort()
+    positions = {node: idx for idx, node in enumerate(order)}
+
+    for rec in spec["dns_records"]:
+        assert (positions[("instance", rec["instance_ref"])]
+                < positions[("dns", rec["name"])])
+    return
+
+
+@given(spec=_valid_spec(), constraints={"max_examples": 30})
+def test_property_topo_sort_stable(spec) -> None:
+    """
+        The sort is deterministic for one spec, so a re-plan does not
+        reshuffle the action order.
+    """
+    graph_a = build_dependency_graph(spec=spec)
+    graph_b = build_dependency_graph(spec=spec)
+
+    assert graph_a.topological_sort() == graph_b.topological_sort()
+    return
 
 
 class CyclePropertyTests(unittest.TestCase):

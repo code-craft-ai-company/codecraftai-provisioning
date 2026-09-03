@@ -438,43 +438,6 @@ def sibling_subnets_strategy(draw):
 
 class CloudResourcePropertyTests(unittest.TestCase):
 
-    @given(cidr_in_network_strategy(), constraints={"max_examples": 50})
-    def test_property_subnet_contained_in_network(self, pair) -> None:
-        net_cidr, sub_cidr = pair
-        self.assertTrue(
-            subnet_contained_in_network(subnet_cidr=sub_cidr,
-                                        network_cidr=net_cidr)
-        )
-        return
-
-    @given(sibling_subnets_strategy(), constraints={"max_examples": 50})
-    def test_property_sibling_subnets_no_overlap(self, generated) -> None:
-        _net_cidr, subs = generated
-        for i in range(len(subs)):
-            for j in range(i + 1, len(subs)):
-                self.assertFalse(
-                    cidrs_overlap(cidr_a=subs[i], cidr_b=subs[j])
-                )
-        return
-
-    @given(
-        st.sampled_from(_VALID_PROTOCOLS),
-        st.integers(min_value=0, max_value=65535),
-        st.integers(min_value=0, max_value=65535),
-     constraints={"max_examples": 50})
-    def test_property_ingress_egress_pair_roundtrip(self, protocol, a, b) -> None:
-        lo = min(a, b)
-        hi = max(a, b)
-        ingress = CloudIngressRule(protocol=protocol, from_port=lo, to_port=hi,
-                                   source_cidrs=["10.0.0.0/8"])
-        egress = CloudEgressRule(protocol=protocol, from_port=lo, to_port=hi,
-                                 dest_cidrs=["10.0.0.0/8"])
-        rebuilt_in = CloudIngressRule.from_dict(ingress.to_dict())
-        rebuilt_out = CloudEgressRule.from_dict(egress.to_dict())
-        self.assertEqual(ingress, rebuilt_in)
-        self.assertEqual(egress, rebuilt_out)
-        return
-
     def test_property_resource_profile_dispatch_total(self) -> None:
         # Every CloudResourceKind value must resolve to exactly one class.
         seen = set()
@@ -587,21 +550,6 @@ _MODEL_CLASS_BUILDERS = (
 )
 
 
-class AllModelClassesPropertyTests(unittest.TestCase):
-
-    @given(st.integers(min_value=0, max_value=100000), constraints={"max_examples": 60})
-    def test_property_all_model_classes_roundtrip(self, seed) -> None:
-        # Every cloud model class must satisfy from_dict(to_dict(x)) == x.
-        for model_cls, builder in _MODEL_CLASS_BUILDERS:
-            original = builder(seed)
-            rebuilt = model_cls.from_dict(original.to_dict())
-            self.assertEqual(
-                original, rebuilt,
-                "{} failed round-trip for seed {}".format(
-                    model_cls.__name__, seed
-                )
-            )
-        return
 
 
 class FlatDictTagsTests(unittest.TestCase):
@@ -648,6 +596,74 @@ class RuleProtocolEnumTests(unittest.TestCase):
             CloudIngressRule(protocol="sctp", from_port=22, to_port=22,
                              source_cidrs=["0.0.0.0/0"])
         return
+
+
+# Module-level on purpose: the testbase sequencer collects module-level
+# ``test_*`` and drives ``@given`` from the metadata the decorator records.
+# A @given-decorated TestCase *method* never receives its generated
+# arguments, so it cannot run at all.
+
+
+@given(pair=cidr_in_network_strategy(), constraints={"max_examples": 50})
+def test_property_subnet_contained_in_network(pair) -> None:
+    """
+        A subnet drawn from inside a network is reported as contained.
+    """
+    net_cidr, sub_cidr = pair
+
+    assert subnet_contained_in_network(subnet_cidr=sub_cidr,
+                                       network_cidr=net_cidr)
+    return
+
+
+@given(generated=sibling_subnets_strategy(), constraints={"max_examples": 50})
+def test_property_sibling_subnets_no_overlap(generated) -> None:
+    """
+        Subnets carved as siblings never overlap, so a plan cannot allocate
+        two of them to the same addresses.
+    """
+    _net_cidr, subs = generated
+
+    for i in range(len(subs)):
+        for j in range(i + 1, len(subs)):
+            assert not cidrs_overlap(cidr_a=subs[i], cidr_b=subs[j])
+    return
+
+
+@given(protocol=st.sampled_from(_VALID_PROTOCOLS),
+       a=st.integers(min_value=0, max_value=65535),
+       b=st.integers(min_value=0, max_value=65535),
+       constraints={"max_examples": 50})
+def test_property_ingress_egress_pair_roundtrip(protocol, a, b) -> None:
+    """
+        Firewall rules survive a to_dict/from_dict cycle unchanged.
+    """
+    lo = min(a, b)
+    hi = max(a, b)
+
+    ingress = CloudIngressRule(protocol=protocol, from_port=lo, to_port=hi,
+                               source_cidrs=["10.0.0.0/8"])
+    egress = CloudEgressRule(protocol=protocol, from_port=lo, to_port=hi,
+                             dest_cidrs=["10.0.0.0/8"])
+
+    assert CloudIngressRule.from_dict(ingress.to_dict()) == ingress
+    assert CloudEgressRule.from_dict(egress.to_dict()) == egress
+    return
+
+
+@given(seed=st.integers(min_value=0, max_value=100000),
+       constraints={"max_examples": 60})
+def test_property_all_model_classes_roundtrip(seed) -> None:
+    """
+        Every cloud model class satisfies ``from_dict(to_dict(x)) == x``, so
+        state written by one run is read back identically by the next.
+    """
+    for model_cls, builder in _MODEL_CLASS_BUILDERS:
+        original = builder(seed)
+        rebuilt = model_cls.from_dict(original.to_dict())
+        assert original == rebuilt, \
+            "{} failed round-trip for seed {}".format(model_cls.__name__, seed)
+    return
 
 
 if __name__ == "__main__":

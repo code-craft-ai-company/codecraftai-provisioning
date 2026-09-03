@@ -15,7 +15,7 @@ import os
 import tempfile
 import unittest
 
-from ccai.testbase.properties import given
+from ccai.testbase.properties import assume, given
 from ccai.testbase.properties import strategies as st
 
 from ccai.errors.exceptions import ConfigurationError
@@ -208,17 +208,32 @@ class CatalogPropertyTests(unittest.TestCase):
                 per_venue[key] = entry.token
         return
 
-    @given(st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789-",
-                   min_size=1, max_size=12),
-           st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789-",
-                   min_size=1, max_size=12), constraints={"max_examples": 30})
-    def test_property_unknown_token_returns_none(self, token, venue) -> None:
-        known_tokens = {e.token for e in self._catalog.entries()}
-        if token in known_tokens:
-            return  # generated value happens to match a known token
-        native = self._catalog.resolve(token=token, venue=venue)
-        self.assertIsNone(native)
-        return
+
+
+# Module-level on purpose: the testbase sequencer collects module-level
+# ``test_*`` and drives ``@given`` from the metadata the decorator records.
+# A @given-decorated TestCase *method* never receives its generated
+# arguments, so it cannot run at all.
+
+
+@given(token=st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789-",
+                     min_size=1, max_size=12),
+       venue=st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789-",
+                     min_size=1, max_size=12),
+       constraints={"max_examples": 30})
+def test_property_unknown_token_returns_none(token, venue) -> None:
+    """
+        An unknown size token resolves to None rather than raising -- the
+        caller may legitimately probe for a size a venue does not publish.
+    """
+    reset_default_instance_size_catalog()
+    catalog = default_instance_size_catalog()
+
+    known_tokens = {e.token for e in catalog.entries()}
+    assume(token not in known_tokens)
+
+    assert catalog.resolve(token=token, venue=venue) is None
+    return
 
 
 if __name__ == "__main__":

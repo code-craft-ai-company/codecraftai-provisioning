@@ -15,7 +15,9 @@ import os
 import tempfile
 import unittest
 
-from ccai.testbase.properties import given
+from ccai import testbase
+
+from ccai.testbase.properties import assume, given
 from ccai.testbase.properties import strategies as st
 
 from ccai.errors.exceptions import ConfigurationError
@@ -239,17 +241,33 @@ class CatalogPropertyTests(unittest.TestCase):
                 per_venue[key] = entry.neutral_name
         return
 
-    @given(st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789_",
-                   min_size=1, max_size=12),
-           st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789-",
-                   min_size=1, max_size=12), constraints={"max_examples": 30})
-    def test_property_unknown_rejection(self, neutral_name, venue) -> None:
-        known_names = {e.neutral_name for e in self._catalog.entries()}
-        if neutral_name in known_names:
-            return  # generated value happens to match a known catalog entry
-        with self.assertRaises(SchemaSemanticError):
-            self._catalog.resolve(neutral_name=neutral_name, venue=venue)
-        return
+
+
+# Module-level on purpose: the testbase sequencer collects module-level
+# ``test_*`` and drives ``@given`` from the metadata the decorator records.
+# A @given-decorated TestCase *method* never receives its generated
+# arguments, so it cannot run at all.
+
+
+@given(neutral_name=st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789_",
+                            min_size=1, max_size=12),
+       venue=st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789-",
+                     min_size=1, max_size=12),
+       constraints={"max_examples": 30})
+def test_property_unknown_rejection(neutral_name, venue) -> None:
+    """
+        An accelerator name outside the catalog is a semantic error: the
+        caller named something that does not exist.
+    """
+    reset_default_accelerator_catalog()
+    catalog = default_accelerator_catalog()
+
+    known_names = {e.neutral_name for e in catalog.entries()}
+    assume(neutral_name not in known_names)
+
+    with testbase.raises(SchemaSemanticError):
+        catalog.resolve(neutral_name=neutral_name, venue=venue)
+    return
 
 
 if __name__ == "__main__":
