@@ -19,7 +19,9 @@ from ccai.provisioning.model.cloud.cloudimage import CloudImage
 from ccai.provisioning.model.cloud.imagefamily import (
     ImageFamily, normalize_family
 )
-from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.provisioning.model.cloud.imagefamilynotofferederror import (
+    ImageFamilyNotOfferedOnVenueError
+)
 from ccai.provisioning.venues.aws.awsboto3sessionfactory import (
     AwsBoto3SessionFactory
 )
@@ -98,7 +100,12 @@ class ImageResolver:
             err_msg_lines.append("FAMILY: {}".format(family))
             err_msg_lines.append("SUPPORTED: {}".format(supported))
             err_msg = os.linesep.join(err_msg_lines)
-            raise SchemaSemanticError(err_msg)
+            # The family normalised to a real ImageFamily member that this venue
+            # cannot serve: a validation finding about a spec/venue pairing, so it
+            # is an ordinary ValueError a validator may aggregate.  A family that
+            # does not normalise at all already raised SchemaSemanticError above,
+            # which halts because the spec then names something that does not exist.
+            raise ImageFamilyNotOfferedOnVenueError(err_msg)
 
         ami_id = self._try_describe_images(family=family, version=version,
                                            arch=arch)

@@ -2,8 +2,14 @@
     .. module:: test_venue_image_vocabulary
     :platform: Darwin, Linux, Unix, Windows
     :synopsis: Cross-venue tests proving each image resolver accepts the
-        canonical image-family vocabulary and rejects unsupported families
-        with a consistent SchemaSemanticError.
+        canonical image-family vocabulary and rejects families it cannot
+        serve with a consistent ImageFamilyNotOfferedOnVenueError.
+
+        A family the venue cannot serve is a validation finding (an ordinary
+        ValueError a validator may aggregate).  A family string that does not
+        normalise to any canonical ImageFamily raises SchemaSemanticError from
+        normalize_family instead, which derives from BaseException and halts
+        the run.
 
     .. moduleauthor:: Myron Walker <myron.walker@gmail.com>
 """
@@ -18,6 +24,9 @@ from ccai import testbase
 
 from ccai.provisioning.model.cloud.cloudimage import CloudImage
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.provisioning.model.cloud.imagefamilynotofferederror import (
+    ImageFamilyNotOfferedOnVenueError
+)
 
 from ccai.provisioning.venues.aws.resources.imageresolver import (
     ImageResolver as AwsImageResolver
@@ -77,7 +86,7 @@ def test_azure_rejects_unsupported_family() -> None:
     # AlmaLinux is a canonical family the azure resolver does not serve.
     image = CloudImage(family="almalinux", version="9",
                        architecture="x86_64")
-    with testbase.raises(SchemaSemanticError) as excinfo:
+    with testbase.raises(ImageFamilyNotOfferedOnVenueError) as excinfo:
         resolver.resolve(image=image)
     assert "almalinux" in str(excinfo.value)
     assert "azure" in str(excinfo.value)
@@ -104,7 +113,7 @@ def test_digitalocean_accepts_rocky_alias() -> None:
 def test_digitalocean_rejects_unsupported_family() -> None:
     resolver = DoResolver()
     # Windows Server is a canonical family DigitalOcean droplets cannot run.
-    with testbase.raises(SchemaSemanticError) as excinfo:
+    with testbase.raises(ImageFamilyNotOfferedOnVenueError) as excinfo:
         resolver.image_to_slug(family="windows-server", version="2022",
                                architecture="x86_64")
     assert "windows-server" in str(excinfo.value)
@@ -117,7 +126,7 @@ def test_aws_rejects_unsupported_family() -> None:
     # Windows Server is a canonical family this AWS resolver does not serve.
     image = CloudImage(family="windows-server", version="2022",
                        architecture="x86_64")
-    with testbase.raises(SchemaSemanticError) as excinfo:
+    with testbase.raises(ImageFamilyNotOfferedOnVenueError) as excinfo:
         resolver.resolve(image=image)
     assert "windows-server" in str(excinfo.value)
     assert "aws" in str(excinfo.value)

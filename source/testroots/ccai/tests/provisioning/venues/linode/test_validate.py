@@ -112,11 +112,15 @@ def test_validate_rejects_unknown_image(venue, credential, region_config,
                                         aspects, mock_client) -> None:
     """
         An image family the linode venue cannot serve is rejected with a
-        consistent SchemaSemanticError naming the venue and family.
+        consistent ImageFamilyNotOfferedOnVenueError naming the venue and
+        family -- a validation finding, not the BaseException-rooted
+        SchemaSemanticError reserved for a family that does not exist.
     """
     from ccai.provisioning.model.cloud.cloudimage import CloudImage
     from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
-    from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+    from ccai.provisioning.model.cloud.imagefamilynotofferederror import (
+        ImageFamilyNotOfferedOnVenueError
+    )
 
     spec = basic_spec()
     bad_image = CloudImage(family="windows-server", version="2022",
@@ -129,7 +133,7 @@ def test_validate_rejects_unknown_image(venue, credential, region_config,
     provisioner = _provisioner(venue=venue, credential=credential,
                                region_config=region_config, spec=spec,
                                mock_client=mock_client)
-    with testbase.raises(SchemaSemanticError) as excinfo:
+    with testbase.raises(ImageFamilyNotOfferedOnVenueError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "windows-server" in str(excinfo.value)
     assert "linode" in str(excinfo.value)

@@ -46,6 +46,9 @@ from ccai.provisioning.model.cloud.validationresult import ValidationResult
 from ccai.provisioning.model.cloud.acceleratornotofferederror import (
     AcceleratorNotOfferedOnVenueError
 )
+from ccai.provisioning.model.cloud.imagefamilynotofferederror import (
+    ImageFamilyNotOfferedOnVenueError
+)
 
 from ccai.provisioning.venues.crusoe.crusoeerrors import (
     ConfirmationRequiredError, CrusoeValidationError
@@ -236,15 +239,22 @@ class CrusoeCloudProvisioner(CloudProvisioner):
 
             :returns: ``None``.
         """
-        # Image family must resolve to a Crusoe alias.  An unresolvable
-        # family raises SchemaSemanticError, which is deliberately NOT caught:
-        # every other venue lets that condition halt the run, and a spec
-        # naming a family the venue cannot serve is information the run
-        # cannot rely on.
-        self._resolver.image_to_alias(
-            family=instance.image.family,
-            version=instance.image.version,
-            arch=instance.image.architecture)
+        # Image family must resolve to a Crusoe alias.  Only the
+        # venue-capability finding is aggregated: a family Crusoe does not
+        # serve is reported alongside the spec's other findings, while a
+        # family that does not normalise at all raises SchemaSemanticError
+        # from normalize_family and is deliberately NOT caught -- the spec
+        # then names something that does not exist, so the run halts.
+        try:
+            self._resolver.image_to_alias(
+                family=instance.image.family,
+                version=instance.image.version,
+                arch=instance.image.architecture)
+        except ImageFamilyNotOfferedOnVenueError as xcpt:
+            errors.append({
+                "resource": instance.name,
+                "error": "Image not resolvable on Crusoe: {}".format(xcpt),
+            })
 
         # Resolve the instance type.
         resolved_type: Optional[str] = None

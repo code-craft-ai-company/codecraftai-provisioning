@@ -28,6 +28,9 @@ from ccai.interfaces.cloudacceleratorspec import (
 from ccai.provisioning.model.cloud.cloudinterconnect import CloudInterconnect
 from ccai.provisioning.model.cloud.imagefamily import normalize_family
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.provisioning.model.cloud.imagefamilynotofferederror import (
+    ImageFamilyNotOfferedOnVenueError
+)
 
 
 VENUE_NAME = "crusoe"
@@ -91,7 +94,12 @@ class CrusoeResolver:
             err_msg_lines.append("SUPPORTED: {}".format(
                 ", ".join(sorted(_IMAGE_FAMILY_ALIASES.keys()))))
             err_msg = os.linesep.join(err_msg_lines)
-            raise SchemaSemanticError(err_msg)
+            # The family normalised to a real ImageFamily member that this venue
+            # cannot serve: a validation finding about a spec/venue pairing, so it
+            # is an ordinary ValueError a validator may aggregate.  A family that
+            # does not normalise at all already raised SchemaSemanticError above,
+            # which halts because the spec then names something that does not exist.
+            raise ImageFamilyNotOfferedOnVenueError(err_msg)
 
         rtnval = "{0}-{1}-{2}".format(base, version, arch)
         return rtnval

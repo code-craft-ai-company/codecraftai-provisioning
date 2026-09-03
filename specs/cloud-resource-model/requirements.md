@@ -98,6 +98,18 @@ key material and a desired image, regardless of venue.
 3. THE SYSTEM SHALL expose `CloudImage(family, version, architecture, owner)`.
 4. WHERE a venue resolver receives a `CloudImage` THE SYSTEM SHALL produce a
    venue-specific identifier (AMI id, GCP image family resource, Azure SKU triple).
+5. WHEN `family` does not normalise to a canonical `ImageFamily` member THE SYSTEM
+   SHALL raise `SchemaSemanticError` (from `normalize_family`). That type derives
+   from `BaseException` and halts the run: the spec names something that does not
+   exist, so continuing would proceed on information the run cannot rely on.
+6. WHEN `family` normalises to a canonical member that the venue cannot serve THE
+   SYSTEM SHALL raise `ImageFamilyNotOfferedOnVenueError`, which derives from
+   `NotOfferedOnVenueError` -> `SchemaValidationError` (an ordinary `ValueError`).
+   That is a validation finding about a spec/venue pairing, so a venue validator
+   MAY catch it and report it alongside the spec's other findings. THE SYSTEM SHALL
+   NOT use `SchemaSemanticError` for this condition. The same split applies to the
+   accelerator catalog (`AcceleratorNotOfferedOnVenueError`); see
+   [accelerator-catalog](../accelerator-catalog/design.md).
 
 ---
 

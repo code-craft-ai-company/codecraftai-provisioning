@@ -31,7 +31,11 @@ Every method on `LinodeCloudProvisioner` accepts `aspects: Aspects`.
 2. WHEN the spec contains `CloudInterconnect(kind != NONE)` or
    `CloudSharedFilesystem(kind in {LUSTRE,WEKA,VAST,GPFS,EFS,FILESTORE})` THE
    SYSTEM SHALL report an error.
-3. WHEN an image family is unknown to the resolver THE SYSTEM SHALL fail.
+3. WHEN an image family does not normalise to a canonical `ImageFamily` THE
+   SYSTEM SHALL raise `SchemaSemanticError` (halts the run); WHEN it normalises
+   but this venue cannot serve it THE SYSTEM SHALL raise
+   `ImageFamilyNotOfferedOnVenueError` (an ordinary `ValueError` a validator may
+   aggregate).
 
 ---
 

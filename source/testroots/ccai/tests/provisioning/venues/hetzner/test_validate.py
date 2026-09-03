@@ -20,6 +20,9 @@ from ccai.credentials.basecredential import BaseCredential
 from ccai.provisioning.model.cloud.cloudimage import CloudImage
 from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.provisioning.model.cloud.imagefamilynotofferederror import (
+    ImageFamilyNotOfferedOnVenueError
+)
 from ccai.provisioning.model.cloud.cloudinterconnect import (
     CloudInterconnect
 )
@@ -137,7 +140,14 @@ def test_validate_rejects_unknown_image_family(venue, credential,
                                                aspects) -> None:
     """
         An image family the hetzner venue cannot serve is rejected with a
-        consistent SchemaSemanticError naming the venue and family.
+        consistent ImageFamilyNotOfferedOnVenueError naming the venue and
+        family.
+
+        The family is a real ImageFamily member; hetzner simply publishes no
+        image for it.  That is a validation finding about a spec/venue
+        pairing, so it is an ordinary ValueError a validator may aggregate --
+        not SchemaSemanticError, which is reserved for a family that does not
+        normalise at all and must halt the run.
     """
     spec = basic_spec()
     image = CloudImage(family="windows-server", version="2022",
@@ -148,7 +158,7 @@ def test_validate_rejects_unknown_image_family(venue, credential,
     provisioner = HetznerCloudProvisioner(
         venue=venue, credential=credential,
         location_config=location_config, spec=spec, client=client)
-    with testbase.raises(SchemaSemanticError) as excinfo:
+    with testbase.raises(ImageFamilyNotOfferedOnVenueError) as excinfo:
         provisioner.validate(aspects=aspects)
     assert "windows-server" in str(excinfo.value)
     assert "hetzner" in str(excinfo.value)

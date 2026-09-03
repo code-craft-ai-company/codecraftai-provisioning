@@ -17,7 +17,9 @@ from typing import Dict
 
 from ccai.provisioning.model.cloud.cloudimage import CloudImage
 from ccai.provisioning.model.cloud.imagefamily import normalize_family
-from ccai.interfaces.schemasemanticerror import SchemaSemanticError
+from ccai.provisioning.model.cloud.imagefamilynotofferederror import (
+    ImageFamilyNotOfferedOnVenueError
+)
 from ccai.provisioning.venues.azure.azureerrors import AzureValidationError
 
 
@@ -80,7 +82,12 @@ class ImageResolver:
                 ", ".join(sorted(_FAMILY_PUBLISHER_OFFER.keys()))
             ))
             err_msg = os.linesep.join(err_msg_lines)
-            raise SchemaSemanticError(err_msg)
+            # The family normalised to a real ImageFamily member that this venue
+            # cannot serve: a validation finding about a spec/venue pairing, so it
+            # is an ordinary ValueError a validator may aggregate.  A family that
+            # does not normalise at all already raised SchemaSemanticError above,
+            # which halts because the spec then names something that does not exist.
+            raise ImageFamilyNotOfferedOnVenueError(err_msg)
 
         publisher = publisher_offer["publisher"]
         offer = publisher_offer["offer"]
