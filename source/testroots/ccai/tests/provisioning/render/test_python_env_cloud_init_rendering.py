@@ -18,6 +18,7 @@ import unittest
 import yaml
 
 from ccai.interfaces.pythonenvspec import PythonEnvironmentSpec
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 
 from ccai.provisioning.cloudinit.bootstraprenderer import (
@@ -212,8 +213,10 @@ class FragmentTests(unittest.TestCase):
         self.assertIn("WindowsPythonEnvironmentManager", str(caught.exception))
         return
 
-    def test_unknown_family_rejected(self) -> None:
-        with self.assertRaises(CloudInitRendererError):
+    def test_unknown_family_propagates_semantic_error(self) -> None:
+        # Misuse of the model is a SchemaSemanticError and must not be
+        # downgraded into a catchable renderer error.
+        with self.assertRaises(SchemaSemanticError):
             render_python_env_cloud_init(specs=[_spec()], image_family="plan9")
         return
 

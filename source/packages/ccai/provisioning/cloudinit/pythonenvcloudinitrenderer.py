@@ -47,7 +47,6 @@ from typing import Any, Dict, List, Optional, Sequence
 from urllib.parse import quote, urlsplit, urlunsplit
 
 from ccai.interfaces.pythonenvspec import PythonEnvironmentSpec
-from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 
 from ccai.provisioning.cloudinit.bootstrapsecrets import (
     BootstrapSecrets, IndexCredential, current_bootstrap_secrets
@@ -89,16 +88,16 @@ def _resolve_family(*, image_family: str) -> ImageFamily:
 
         :returns: The ImageFamily member.
 
-        :raises: CloudInitRendererError
+        :raises: SchemaSemanticError (unknown family, propagated),
+                 CloudInitRendererError (known family without a first-boot
+                 bootstrap, e.g. windows-server)
     """
-    try:
-        family = normalize_family(value=image_family)
-    except SchemaSemanticError as serr:
-        err_msg_lines = ["Unsupported image_family for the python-env cloud-init renderer."]
-        err_msg_lines.append("ACTUAL: {!r}".format(image_family))
-        err_msg_lines.append("REASON: {}".format(serr))
-        err_msg = os.linesep.join(err_msg_lines)
-        raise CloudInitRendererError(err_msg) from None
+    # An unknown family is a SchemaSemanticError from normalize_family: the
+    # caller is misusing the model.  It propagates unchanged (semantic
+    # errors derive from BaseException on purpose so misuse stops the run).
+    # Only a *known* family this renderer cannot bootstrap is a renderer
+    # error.
+    family = normalize_family(value=image_family)
 
     if family not in PREREQUISITE_PACKAGES_BY_FAMILY:
         supported = sorted(member.value for member in PREREQUISITE_PACKAGES_BY_FAMILY)

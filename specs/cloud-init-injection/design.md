@@ -176,8 +176,9 @@ is only called directly by the composer and by the Windows wrappers.
 - **Auth-key quoting test** — render with an auth key containing `$`, backticks,
   and quotes; assert the key reaches the daemon intact (simulated by parsing the
   rendered shell with `shlex`).
-- **Image-family rejection test** — unsupported family raises
-  `CloudInitRendererError`.
+- **Image-family rejection test** — an unknown family propagates the model's
+  `SchemaSemanticError` unchanged (never downgraded to `CloudInitRendererError`;
+  semantic errors must stop the run).
 - **Property tests (`hypothesis`) ⊙:**
   - `cloud_init_yaml_validity_property` — for any spec, `yaml.safe_load(render)`
     succeeds.

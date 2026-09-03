@@ -81,8 +81,10 @@ the specs into a cloud-init fragment I can merge into `user_data`.
    Amazon Linux → `python3 python3-pip`; accepting canonical tokens and the
    aliases `normalize_family` knows.
 5. THE SYSTEM SHALL raise `CloudInitRendererError` for `windows-server` (with a
-   hint naming `WindowsPythonEnvironmentManager`), for unknown families, for an
-   empty spec list, for a non-spec entry, and for duplicate paths or slugs.
+   hint naming `WindowsPythonEnvironmentManager`), for an empty spec list, for a
+   non-spec entry, and for duplicate paths or slugs. An unknown family SHALL
+   propagate the model's `SchemaSemanticError` unchanged (misuse of the model
+   must stop the run, never be downgraded into a catchable renderer error).
 6. Rendering SHALL be deterministic: identical inputs produce byte-identical
    YAML.
 

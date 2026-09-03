@@ -15,7 +15,6 @@ import os
 
 from typing import Any, Dict, List
 
-from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 from ccai.provisioning.cloudinit.cloudinitrenderererror import (
     CloudInitRendererError
@@ -43,24 +42,21 @@ SUPPORTED_LINUX_FAMILIES = frozenset(
 
 def _validate_image_family(*, image_family: str) -> ImageFamily:
     """
-        Resolve the image family onto its canonical member, rejecting
-        unknown values.
+        Resolve the image family onto its canonical member.
+
+        An unknown family is a :class:`SchemaSemanticError` from
+        :func:`normalize_family` — the caller is using the model
+        incorrectly — and it propagates unchanged.  Semantic errors derive
+        from ``BaseException`` on purpose so that misuse stops the run
+        rather than being downgraded into a catchable renderer error.
 
         :param image_family: Canonical token or alias.
 
         :returns: The canonical ImageFamily member.
 
-        :raises: CloudInitRendererError
+        :raises: SchemaSemanticError (propagated from ``normalize_family``)
     """
-    try:
-        rtnval = normalize_family(value=image_family)
-    except SchemaSemanticError:
-        supported = sorted(SUPPORTED_LINUX_FAMILIES | SUPPORTED_WINDOWS_FAMILIES)
-        err_msg_lines = ["Unsupported image_family for cloud-init renderer."]
-        err_msg_lines.append("SUPPORTED: {}".format(", ".join(supported)))
-        err_msg_lines.append("ACTUAL: {!r}".format(image_family))
-        err_msg = os.linesep.join(err_msg_lines)
-        raise CloudInitRendererError(err_msg) from None
+    rtnval = normalize_family(value=image_family)
     return rtnval
 
 
@@ -72,7 +68,7 @@ def is_windows_family(*, image_family: str) -> bool:
 
         :returns: True for ``windows-server`` and its aliases.
 
-        :raises: CloudInitRendererError
+        :raises: SchemaSemanticError (unknown family)
     """
     family = _validate_image_family(image_family=image_family)
     rtnval = family == ImageFamily.WINDOWS_SERVER

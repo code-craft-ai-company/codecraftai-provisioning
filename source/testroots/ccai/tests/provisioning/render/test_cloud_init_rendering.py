@@ -17,6 +17,7 @@ import unittest
 
 import yaml
 
+from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 from ccai.provisioning.cloudinit.cloudinitrenderererror import (
     CloudInitRendererError
@@ -132,8 +133,8 @@ class CloudInitImageFamilyTests(unittest.TestCase):
                 self.assertIn("runOnceCommands", guest)
         return
 
-    def test_unsupported_family_raises(self) -> None:
-        with self.assertRaises(CloudInitRendererError):
+    def test_unknown_family_propagates_semantic_error(self) -> None:
+        with self.assertRaises(SchemaSemanticError):
             render_cloud_init(spec=_tailscale_spec(), authkey="x",
                               rendered_hostname="h", image_family="plan9")
         return
