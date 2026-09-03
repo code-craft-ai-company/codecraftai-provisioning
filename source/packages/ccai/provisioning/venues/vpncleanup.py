@@ -49,6 +49,11 @@ def delete_vpn_device(*, vpn_control_plane: Any, device_id: str,
         vpn_control_plane.delete_device(device_id=device_id,
                                         aspects=aspects)
         rtnval = True
+    # SemanticError means an API is being used incorrectly; ConfigurationError
+    # means the run was given information it cannot rely on.  Both must end the
+    # run, so they are caught here ONLY to re-raise them past the best-effort
+    # handler below.  Never swallow or downgrade either: 'best effort' applies
+    # to transport failures, not to a code defect or a bad configuration.
     except (SemanticError, SchemaSemanticError):
         raise
     except Exception as cleanup_error:
@@ -98,6 +103,11 @@ def deregister_devices_by_hostname(*, vpn_control_plane: Any,
 
     try:
         devices = vpn_control_plane.list_devices(aspects=aspects)
+    # SemanticError means an API is being used incorrectly; ConfigurationError
+    # means the run was given information it cannot rely on.  Both must end the
+    # run, so they are caught here ONLY to re-raise them past the best-effort
+    # handler below.  Never swallow or downgrade either: 'best effort' applies
+    # to transport failures, not to a code defect or a bad configuration.
     except (SemanticError, SchemaSemanticError):
         raise
     except Exception as list_error:
