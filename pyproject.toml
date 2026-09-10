@@ -1,17 +1,10 @@
-[tool.poetry]
+[project]
 name = "codecraftai-provisioning"
+version = "1.1.0"
 description = "Code Craft AI - Provisioning Package"
-version = "1.0.1"
-authors = [
-    "Myron Walker <myron.walker@gmail.com>"
-]
 readme = "README.rst"
 license = "LicenseRef-CodeCraftAI-Dual-License"
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: Other/Proprietary License",
-    "Operating System :: POSIX"
-]
+authors = [{name = "Myron Walker", email = "myron.walker@gmail.com"}]
 keywords = [
     "python",
     "automation",
@@ -19,37 +12,36 @@ keywords = [
     "provisioning",
     "cloud"
 ]
-packages = [{include="ccai", from="source/packages"}]
-include = [
-    { path = "source/packages/ccai/provisioning/model/cloud/accelerators.yaml", format = ["sdist", "wheel"] }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: POSIX",
 ]
-
-[tool.poetry.dependencies]
-python = ">=3.10,<4.0"
-pyyaml = "^6.0.2"
-requests = "^2.32.5"
-codecraftai-foundations = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-credentials = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-restclient-base = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-configuration = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-landscaping = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-testbase = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-restclient-vsphere = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-restclient-coreweave = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-restclient-lambdalabs = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-restclient-crusoe = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-restclient-nebius = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-restclient-runpod = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-restclient-oracle = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-restclient-proxmox = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-restclient-aws = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-restclient-azure = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-restclient-digitalocean = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-restclient-google = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-restclient-hetzner = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-restclient-linode = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-restclient-nutanix = { version = "<2.0.0", source = "codecraftai" }
-
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "pyyaml>=6.0.2,<7.0.0",
+    "requests>=2.32.5,<3.0.0",
+    "codecraftai-foundations<2.0.0",
+    "codecraftai-credentials<2.0.0",
+    "codecraftai-restclient-base<2.0.0",
+    "codecraftai-configuration<2.0.0",
+    "codecraftai-landscaping<2.0.0",
+    "codecraftai-testbase<2.0.0",
+    "codecraftai-restclient-vsphere<2.0.0",
+    "codecraftai-restclient-coreweave<2.0.0",
+    "codecraftai-restclient-lambdalabs<2.0.0",
+    "codecraftai-restclient-crusoe<2.0.0",
+    "codecraftai-restclient-nebius<2.0.0",
+    "codecraftai-restclient-runpod<2.0.0",
+    "codecraftai-restclient-oracle<2.0.0",
+    "codecraftai-restclient-proxmox<2.0.0",
+    "codecraftai-restclient-aws<2.0.0",
+    "codecraftai-restclient-azure<2.0.0",
+    "codecraftai-restclient-digitalocean<2.0.0",
+    "codecraftai-restclient-google<2.0.0",
+    "codecraftai-restclient-hetzner<2.0.0",
+    "codecraftai-restclient-linode<2.0.0",
+    "codecraftai-restclient-nutanix<2.0.0",
+]
 # Hypervisor interop bindings are execution-time backends only. They pull
 # heavyweight, platform-specific native deps (e.g. ``interop-libvirt`` ->
 # ``libvirt-python`` needs pkg-config + libvirt headers; ``interop-kubernetes``
@@ -58,32 +50,78 @@ codecraftai-restclient-nutanix = { version = "<2.0.0", source = "codecraftai" }
 # self-contained and never import these, so they are kept in an optional group
 # to avoid dragging native toolchains into pure-model consumers. Install with
 # ``poetry install --with hypervisors`` when a hypervisor venue is needed.
+
+[dependency-groups]
+hypervisors = [
+    "codecraftai-interop-kubernetes<2.0.0",
+    "codecraftai-interop-libvirt<2.0.0",
+    "codecraftai-interop-xen<2.0.0",
+    "codecraftai-interop-hyperv<2.0.0",
+]
+cloud-sdks = []
+dev = [
+    "codecraftai-testbase<2.0.0",
+    "pytest>=8,<10",
+    "requests-mock>=1.12,<2.0.0",
+]
+dbio = []
+
+[tool.poetry]
+packages = [{include="ccai", from="source/packages"}]
+include = [
+    { path = "source/packages/ccai/provisioning/model/cloud/accelerators.yaml", format = ["sdist", "wheel"] }
+]
+
+[tool.poetry.dependencies]
+codecraftai-foundations = {source = "codecraftai"}
+codecraftai-credentials = {source = "codecraftai"}
+codecraftai-restclient-base = {source = "codecraftai"}
+codecraftai-configuration = {source = "codecraftai"}
+codecraftai-landscaping = {source = "codecraftai"}
+codecraftai-testbase = {source = "codecraftai"}
+codecraftai-restclient-vsphere = {source = "codecraftai"}
+codecraftai-restclient-coreweave = {source = "codecraftai"}
+codecraftai-restclient-lambdalabs = {source = "codecraftai"}
+codecraftai-restclient-crusoe = {source = "codecraftai"}
+codecraftai-restclient-nebius = {source = "codecraftai"}
+codecraftai-restclient-runpod = {source = "codecraftai"}
+codecraftai-restclient-oracle = {source = "codecraftai"}
+codecraftai-restclient-proxmox = {source = "codecraftai"}
+codecraftai-restclient-aws = {source = "codecraftai"}
+codecraftai-restclient-azure = {source = "codecraftai"}
+codecraftai-restclient-digitalocean = {source = "codecraftai"}
+codecraftai-restclient-google = {source = "codecraftai"}
+codecraftai-restclient-hetzner = {source = "codecraftai"}
+codecraftai-restclient-linode = {source = "codecraftai"}
+codecraftai-restclient-nutanix = {source = "codecraftai"}
+
 [tool.poetry.group.hypervisors]
 optional = true
 
 [tool.poetry.group.hypervisors.dependencies]
-codecraftai-interop-kubernetes = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-interop-libvirt = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-interop-xen = { version = "<2.0.0", source = "codecraftai" }
-codecraftai-interop-hyperv = { version = "<2.0.0", source = "codecraftai" }
+codecraftai-interop-kubernetes = {source = "codecraftai"}
+codecraftai-interop-libvirt = {source = "codecraftai"}
+codecraftai-interop-xen = {source = "codecraftai"}
+codecraftai-interop-hyperv = {source = "codecraftai"}
 
 [tool.poetry.group.cloud-sdks]
 optional = true
 
-[tool.poetry.group.cloud-sdks.dependencies]
-
 [tool.poetry.group.dev.dependencies]
-codecraftai-testbase = { version = "<2.0.0", source = "codecraftai" }
-pytest = ">=8,<10"
-requests-mock = "^1.12"
-
-[tool.poetry.group.dbio.dependencies]
-
+codecraftai-testbase = {source = "codecraftai"}
 
 [[tool.poetry.source]]
 name = "codecraftai"
 url = "https://code-craft.ai/licensed-repository/simple/"
 priority = "supplemental"
+
+[[tool.uv.index]]
+# Same licensed index as [[tool.poetry.source]]. Listed before PyPI so that
+# codecraftai-* packages (direct and transitive) resolve from it; everything
+# else falls through to PyPI. Credentials: UV_INDEX_CODECRAFTAI_USERNAME /
+# UV_INDEX_CODECRAFTAI_PASSWORD, or `uv auth login`.
+name = "codecraftai"
+url = "https://code-craft.ai/licensed-repository/simple/"
 
 [tool.ruff.lint]
 # Deliberately narrow.  This gate exists for one reason: a bare `except:`
