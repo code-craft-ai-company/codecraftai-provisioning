@@ -17,6 +17,7 @@ from ccai.tests.provisioning.venues.linode.factories import create_linode_mock_c
 
 
 import base64
+import os
 
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
@@ -357,7 +358,10 @@ def test_inventory_persist_writes_file(venue, credential, region_config,
                                  translator=translator)
     path = enumerator.persist(records=records, run_id="testrun01",
                               output_root=str(tmp_path))
-    assert path.endswith("provisioning/testrun01/linode-inventory.json")
-    import os
+    # Compare against a path built with the native separator so the check
+    # holds on Windows, where ``persist`` joins with backslashes.
+    expected = os.path.join(str(tmp_path), "provisioning", "testrun01",
+                            "linode-inventory.json")
+    assert path == expected
     assert os.path.isfile(path)
     return
