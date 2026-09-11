@@ -61,7 +61,6 @@ hypervisors = [
 cloud-sdks = []
 dev = [
     "codecraftai-testbase<2.0.0",
-    "pytest>=8,<10",
     "requests-mock>=1.12,<2.0.0",
 ]
 dbio = []
