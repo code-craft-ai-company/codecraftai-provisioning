@@ -23,9 +23,6 @@ from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
-from ccai.provisioning.model.cloud.cloudinterconnect import (
-    CloudInterconnect
-)
 from ccai.provisioning.model.cloud.clouddnsrecord import CloudDnsRecord
 from ccai.interfaces.cloudsharedfilesystem import (
     CloudSharedFilesystem
@@ -37,6 +34,8 @@ from ccai.provisioning.model.cloud.preemptionpolicy import PreemptionPolicy
 from ccai.provisioning.venues.oracle.oraclecloudprovisioner import (
     OracleCloudProvisioner
 )
+
+from ccai.restclient.oracle.ocierror import ServiceError
 
 from ccai.tests.provisioning.venues.oracle._ocifakes import install_fakes
 from ccai.tests.provisioning.venues.oracle._specfactory import basic_spec, rdma_spec
@@ -356,6 +355,45 @@ def test_shared_fs_lustre_attach(venue, credential, region_config,
     assert fs_resources[0].attributes.get("existing_id", "") == (
         "ocid1.filesystem.oc1..managedlustre"
     )
+    return
+
+
+class _MissingFileStorageClient:
+    """
+        A FileStorageClient double that answers the way OCI does for a file
+        system id that does not resolve.
+    """
+
+    def get_file_system(self, *, file_system_id: str) -> None:
+        """Refuse the lookup with OCI's not-found answer."""
+        raise ServiceError("The OCI request failed.", status=404,
+                           code="NotAuthorizedOrNotFound",
+                           message="file system not found")
+
+
+def test_shared_fs_attach_unknown_existing_id_propagates(venue, credential,
+                                                         region_config,
+                                                         aspects) -> None:
+    """
+        A failure looking up the existing_id file system reaches the caller
+        instead of attaching an id that does not resolve.
+    """
+    spec = basic_spec()
+    spec.shared_filesystems = [CloudSharedFilesystem(
+        name="lustre1", kind="LUSTRE",
+        existing_id="ocid1.filesystem.oc1..missing",
+    )]
+    provisioner, fakes = _new_provisioner(
+        venue=venue, credential=credential, region_config=region_config,
+        spec=spec,
+    )
+    provisioner._session_factory.register_client(
+        service_name="file_storage", client=_MissingFileStorageClient())
+
+    with testbase.raises(ServiceError) as caught:
+        provisioner.apply(aspects=aspects)
+
+    assert caught.exception.code == "NotAuthorizedOrNotFound"
     return
 
 

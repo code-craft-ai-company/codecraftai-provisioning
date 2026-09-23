@@ -12,9 +12,7 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-from typing import Any, Dict, List, Optional
-
-import yaml
+from typing import Optional
 
 from ccai.provisioning.cloudinit.bootstraprenderer import (
     render_instance_user_data

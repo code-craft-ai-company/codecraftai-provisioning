@@ -73,6 +73,8 @@ class MetalDestroyStages:
             try:
                 self._client.delete_device(device_id=device_id)
             except Exception:
+                # Best-effort teardown; a failed delete must not stop the remaining
+                # resources of the run from being torn down.
                 pass
 
         # 2. SSH keys.
@@ -88,6 +90,8 @@ class MetalDestroyStages:
                     ssh_key_id=str(ssh_key.get("id", ""))
                 )
             except Exception:
+                # Best-effort teardown; a failed delete must not stop the remaining
+                # resources of the run from being torn down.
                 pass
 
         # 3. IP reservations.
@@ -100,6 +104,8 @@ class MetalDestroyStages:
                     reservation_id=str(reservation.get("id", ""))
                 )
             except Exception:
+                # Best-effort teardown; a failed delete must not stop the remaining
+                # resources of the run from being torn down.
                 pass
 
         # 4. VLANs.
@@ -110,6 +116,8 @@ class MetalDestroyStages:
             try:
                 self._client.delete_vlan(vlan_id=str(vlan.get("id", "")))
             except Exception:
+                # Best-effort teardown; a failed delete must not stop the remaining
+                # resources of the run from being torn down.
                 pass
 
         rtnval = vpn_records

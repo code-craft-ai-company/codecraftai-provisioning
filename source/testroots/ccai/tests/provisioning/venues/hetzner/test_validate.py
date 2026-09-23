@@ -19,7 +19,6 @@ from ccai.tests.provisioning.venues.hetzner.factories import create_client
 from ccai.credentials.basecredential import BaseCredential
 from ccai.provisioning.model.cloud.cloudimage import CloudImage
 from ccai.provisioning.model.cloud.cloudinstance import CloudInstance
-from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.model.cloud.imagefamilynotofferederror import (
     ImageFamilyNotOfferedOnVenueError
 )
@@ -38,7 +37,6 @@ from ccai.provisioning.venues.hetzner.hetznercloudprovisioner import (
 from ccai.provisioning.venues.hetzner.hetznererrors import (
     HetznerValidationError
 )
-from ccai.provisioning.venues.hetzner.hetznerspec import HetznerSpec
 
 from ccai.tests.provisioning.venues.hetzner._specfactory import basic_spec
 

@@ -195,6 +195,8 @@ class BlockVolumeManager:
                 client.delete_volume(volume_id=volume_id)
                 deleted.append(volume_id)
             except Exception:
+                # Best-effort teardown sweep; a resource that fails to delete is left out
+                # of the returned list and the sweep continues with the remaining resources.
                 pass
         rtnval = deleted
         return rtnval

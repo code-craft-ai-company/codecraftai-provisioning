@@ -124,12 +124,11 @@ class VolumeManager:
                     "droplet_id": attach_droplet_id,
                     "region": region,
                 }
-                try:
-                    self._client.volume_actions.post_by_id(
-                        volume_id=existing.get("id", ""), body=attach_body
-                    )
-                except Exception:
-                    pass
+                # The volume was created a moment ago, so it cannot already be
+                # attached; any failure to attach it is real.
+                self._client.volume_actions.post_by_id(
+                    volume_id=existing.get("id", ""), body=attach_body
+                )
 
         attributes: Dict[str, Any] = {}
         attributes["volume_id"] = existing.get("id", "")
@@ -165,11 +164,15 @@ class VolumeManager:
                         volume_id=volume_id, body=detach_body
                     )
                 except Exception:
+                    # Best-effort detach; the volume may already be detached, and the delete
+                    # below is attempted either way.
                     pass
             try:
                 self._client.volumes.delete(volume_id=volume_id)
                 deleted.append(str(volume_id))
             except Exception:
+                # Best-effort teardown sweep; a resource that fails to delete is left out
+                # of the returned list and the sweep continues with the remaining resources.
                 pass
         rtnval = deleted
         return rtnval

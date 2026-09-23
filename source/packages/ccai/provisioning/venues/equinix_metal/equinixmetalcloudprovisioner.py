@@ -483,6 +483,8 @@ class EquinixMetalCloudProvisioner(CloudProvisioner):
                         device_id=device_id, aspects=aspects
                     )
                 except Exception:
+                    # Best-effort teardown of the VPN control-plane device; a failed delete must
+                    # not stop the remaining devices from being removed.
                     pass
 
         return

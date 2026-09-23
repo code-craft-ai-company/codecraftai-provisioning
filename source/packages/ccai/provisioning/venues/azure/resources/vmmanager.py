@@ -16,8 +16,6 @@ import os
 
 from typing import Any, Dict, List, Optional, Tuple
 
-import yaml
-
 from ccai.provisioning.cloudinit.bootstraprenderer import (
     render_instance_user_data
 )
@@ -374,28 +372,26 @@ class VmManager:
                                  ))
 
         # Windows VPN-join uses a Custom Script Extension applied post-create.
+        # A failure here means the VM never joins the VPN, so it must surface.
         if cse_payload is not None:
-            try:
-                ext_params: Dict[str, Any] = {
-                    "location": location,
-                    "publisher": "Microsoft.Compute",
-                    "type_properties_type": "CustomScriptExtension",
-                    "type_handler_version": "1.10",
-                    "settings": cse_payload.get("settings", {}),
-                    "protected_settings": cse_payload.get(
-                        "protectedSettings", {}
-                    ),
-                }
-                ext_poller = client.virtual_machine_extensions.begin_create_or_update(
-                    resource_group_name=resource_group,
-                    vm_name=desired.name,
-                    vm_extension_name="{}-vpncse".format(desired.name),
-                    extension_parameters=ext_params,
-                )
-                resolve_poller(poller=ext_poller, aspects=aspects,
-                               description="cse {}".format(desired.name))
-            except Exception:
-                pass
+            ext_params: Dict[str, Any] = {
+                "location": location,
+                "publisher": "Microsoft.Compute",
+                "type_properties_type": "CustomScriptExtension",
+                "type_handler_version": "1.10",
+                "settings": cse_payload.get("settings", {}),
+                "protected_settings": cse_payload.get(
+                    "protectedSettings", {}
+                ),
+            }
+            ext_poller = client.virtual_machine_extensions.begin_create_or_update(
+                resource_group_name=resource_group,
+                vm_name=desired.name,
+                vm_extension_name="{}-vpncse".format(desired.name),
+                extension_parameters=ext_params,
+            )
+            resolve_poller(poller=ext_poller, aspects=aspects,
+                           description="cse {}".format(desired.name))
 
         attributes = self._vm_attributes(existing=created)
         attributes["vm_size"] = vm_size
@@ -482,6 +478,8 @@ class VmManager:
                     resource_group_name=resource_group, vm_name=vm_name
                 )
             except Exception:
+                # Best-effort teardown; a failed delete must not stop the remaining
+                # resources of the run from being torn down.
                 pass
 
         rtnval = records

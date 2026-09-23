@@ -13,9 +13,7 @@ __credits__ = []
 
 import base64
 
-from typing import List, Optional
-
-import yaml
+from typing import Optional
 
 from ccai.provisioning.cloudinit.bootstraprenderer import (
     render_instance_user_data

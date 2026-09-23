@@ -57,7 +57,8 @@ def basic_spec(*, with_vpn: bool = False,
                accelerators: Optional[List[CloudAcceleratorSpec]] = None,
                interconnect: Optional[CloudInterconnect] = None,
                placement_group: Optional[str] = None,
-               preemption: PreemptionPolicy = PreemptionPolicy.FAIL
+               preemption: PreemptionPolicy = PreemptionPolicy.FAIL,
+               image: Optional[CloudImage] = None
                ) -> AzureSpec:
     """
         Build a baseline AzureSpec with one VNet + subnet + NSG + keypair +
@@ -69,6 +70,7 @@ def basic_spec(*, with_vpn: bool = False,
         :param interconnect: Optional CloudInterconnect.
         :param placement_group: Optional placement group / interconnect group.
         :param preemption: PreemptionPolicy for the instance.
+        :param image: The instance image; None means Ubuntu 22.04.
 
         :returns: A populated AzureSpec.
     """
@@ -81,8 +83,9 @@ def basic_spec(*, with_vpn: bool = False,
     sg = CloudSecurityGroup(name="nsg-a", network="vnet-a",
                             ingress_rules=[rule])
     keypair = CloudKeyPair(name="kp-a", public_key_material=_SSH_KEY)
-    image = CloudImage(family="ubuntu", version="22.04",
-                       architecture="x86_64")
+    if image is None:
+        image = CloudImage(family="ubuntu", version="22.04",
+                           architecture="x86_64")
 
     vpn_join: Optional[VPNJoinSpec] = None
     if with_vpn is True:

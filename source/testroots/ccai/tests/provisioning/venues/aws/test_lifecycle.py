@@ -90,7 +90,7 @@ def test_apply_idempotent(venue, credential, region_config, aspects) -> None:
         venue=venue, credential=credential, region_config=region_config,
         spec=spec,
     )
-    first = provisioner.apply(aspects=aspects)
+    provisioner.apply(aspects=aspects)
     second = provisioner.apply(aspects=aspects)
 
     # Second apply: all the read-before-create resources are already

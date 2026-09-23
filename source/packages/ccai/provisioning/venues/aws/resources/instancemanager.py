@@ -16,8 +16,6 @@ import os
 
 from typing import Any, Dict, List, Optional, Tuple
 
-import yaml
-
 from ccai.provisioning.cloudinit.bootstraprenderer import (
     render_instance_user_data
 )
@@ -460,6 +458,8 @@ class InstanceManager:
             try:
                 client.terminate_instances(InstanceIds=ids)
             except Exception:
+                # Best-effort teardown; a failed delete must not stop the remaining
+                # resources of the run from being torn down.
                 pass
 
         rtnval = records

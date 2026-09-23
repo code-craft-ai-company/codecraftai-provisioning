@@ -32,6 +32,8 @@ def _delete(*, obj: Any) -> None:
     try:
         deleter()
     except Exception:
+        # Best-effort delete (see docstring); a failed delete must not stop the
+        # remaining resources of the run from being torn down.
         pass
     return
 
@@ -94,6 +96,8 @@ class LinodeDestroyStages:
                 if detach is not None:
                     detach()
             except Exception:
+                # Best-effort detach; the volume may already be detached, and the delete
+                # below is attempted either way.
                 pass
             _delete(obj=volume)
 

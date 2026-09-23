@@ -23,7 +23,6 @@ from ccai.provisioning.venues.hyperv.hverrors import HvValidationError
 
 
 _GIB: int = 1024 * 1024 * 1024
-_MIB: int = 1024 * 1024
 
 
 # Neutral size hint -> (processor_count, memory_startup_bytes, disk_bytes).

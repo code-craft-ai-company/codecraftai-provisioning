@@ -92,16 +92,14 @@ class PvePlanBuilder:
         _ = run_id
 
         live_names: List[str] = []
-        for network in spec.networks:
+        if len(spec.networks) > 0:
             node = self._resolver.default_node
-            if node is None:
-                continue
-            live = self._client.networks.list_node_networks(
-                node_name=node, aspects=aspects
-            )
-            for entry in live:
-                live_names.append(entry.iface)
-            break
+            if node is not None:
+                live = self._client.networks.list_node_networks(
+                    node_name=node, aspects=aspects
+                )
+                for entry in live:
+                    live_names.append(entry.iface)
 
         for network in spec.networks:
             if network.name in live_names:

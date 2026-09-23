@@ -117,9 +117,6 @@ class VenueCapability:
         return rtnval
 
 
-_EMPTY_CAPABILITY_VENUE = "__stub__"
-
-
 def venue_capability(*, venue: str) -> VenueCapability:
     """
         Return the capability descriptor consulted by lifecycle ``validate``.

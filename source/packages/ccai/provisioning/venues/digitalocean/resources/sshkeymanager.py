@@ -168,6 +168,8 @@ class SshKeyManager:
                 self._client.ssh_keys.delete(ssh_key_id=ssh_key_id)
                 deleted.append(str(ssh_key_id))
             except Exception:
+                # Best-effort teardown sweep; a resource that fails to delete is left out
+                # of the returned list and the sweep continues with the remaining resources.
                 pass
         rtnval = deleted
         return rtnval

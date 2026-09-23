@@ -217,10 +217,14 @@ class NetworkManager:
                             InternetGatewayId=igw_id, VpcId=attached_vpc
                         )
                     except Exception:
+                        # Best-effort detach; the internet gateway may already be
+                        # detached, and the delete below is attempted either way.
                         pass
             try:
                 client.delete_internet_gateway(InternetGatewayId=igw_id)
             except Exception:
+                # Best-effort teardown; a failed delete must not stop the remaining
+                # resources of the run from being torn down.
                 pass
 
         vpc_resp = client.describe_vpcs(Filters=owner_only)
@@ -230,6 +234,8 @@ class NetworkManager:
                 client.delete_vpc(VpcId=vpc_id)
                 deleted.append(vpc_id)
             except Exception:
+                # Best-effort teardown sweep; a resource that fails to delete is left out
+                # of the returned list and the sweep continues with the remaining resources.
                 pass
 
         rtnval = deleted

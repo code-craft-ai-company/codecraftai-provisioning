@@ -114,6 +114,8 @@ class DnsManager:
             if pending > 0:
                 changes.create()
         except Exception:
+            # Best-effort teardown of the DNS record; a record that cannot be deleted
+            # must not stop the remaining resources of the run from being torn down.
             pass
         return
 

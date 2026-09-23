@@ -13,6 +13,8 @@ __credits__ = []
 
 from typing import Any, Dict, List, Optional
 
+from ccai.restclient.aws.awserror import ClientError
+
 from ccai.provisioning.model.cloud.cloudsubnet import CloudSubnet
 from ccai.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
@@ -26,6 +28,25 @@ from ccai.provisioning.venues.aws.awsidempotency import (
 from ccai.provisioning.venues.aws.awstagging import (
     base_resource_tags, tag_specifications, from_aws, RESOURCE_NAME_TAG_KEY
 )
+
+
+def _has_subnet_association(*, associations: List[Dict[str, Any]],
+                            subnet_id: str) -> bool:
+    """
+        Report whether a route table's associations include a subnet.
+
+        :param associations: The route table's ``Associations`` entries.
+        :param subnet_id: AWS Subnet id.
+
+        :returns: True when the subnet is associated with the table.
+    """
+    for association in associations:
+        if association.get("SubnetId", "") == subnet_id:
+            rtnval = True
+            return rtnval
+
+    rtnval = False
+    return rtnval
 
 
 class SubnetManager:
@@ -157,9 +178,11 @@ class SubnetManager:
         filters = owner_filters(run_id=run_id, resource_name=rt_name)
         response = client.describe_route_tables(Filters=filters)
         tables = response.get("RouteTables", [])
+        associations: List[Dict[str, Any]] = []
 
         if len(tables) > 0:
             rt_id = tables[0].get("RouteTableId", "")
+            associations = tables[0].get("Associations", [])
         else:
             neutral_tags = base_resource_tags(
                 run_id=run_id, resource_name=rt_name,
@@ -173,20 +196,29 @@ class SubnetManager:
             )
             rt_id = created.get("RouteTable", {}).get("RouteTableId", "")
 
-            try:
-                client.create_route(
-                    RouteTableId=rt_id,
-                    DestinationCidrBlock="0.0.0.0/0",
-                    GatewayId=igw_id,
-                )
-            except Exception:
-                pass
+            # The table was created a moment ago and holds only its local
+            # route, so there is no duplicate to tolerate; any failure is real.
+            client.create_route(
+                RouteTableId=rt_id,
+                DestinationCidrBlock="0.0.0.0/0",
+                GatewayId=igw_id,
+            )
 
         try:
             client.associate_route_table(RouteTableId=rt_id,
                                          SubnetId=subnet_id)
-        except Exception:
-            pass
+        except ClientError as xcpt:
+            # A re-apply finds the subnet already associated with this table
+            # and EC2 answers Resource.AlreadyAssociated.  EC2 gives the same
+            # answer when the subnet belongs to a different table, which would
+            # leave it without the public route, so only an association with
+            # this table is tolerated.  Any other error is real.
+            if xcpt.code != "Resource.AlreadyAssociated":
+                raise
+            already_here = _has_subnet_association(associations=associations,
+                                                   subnet_id=subnet_id)
+            if already_here is False:
+                raise
 
         rtnval = rt_id
         return rtnval
@@ -223,10 +255,14 @@ class SubnetManager:
                             AssociationId=assoc_id
                         )
                     except Exception:
+                        # Best-effort disassociate; the association may already be gone, and the
+                        # route table delete below is attempted either way.
                         pass
             try:
                 client.delete_route_table(RouteTableId=rt_id)
             except Exception:
+                # Best-effort teardown; a failed delete must not stop the remaining
+                # resources of the run from being torn down.
                 pass
 
         subnet_resp = client.describe_subnets(Filters=owner_only)
@@ -236,6 +272,8 @@ class SubnetManager:
                 client.delete_subnet(SubnetId=sub_id)
                 deleted.append(sub_id)
             except Exception:
+                # Best-effort teardown sweep; a resource that fails to delete is left out
+                # of the returned list and the sweep continues with the remaining resources.
                 pass
 
         rtnval = deleted

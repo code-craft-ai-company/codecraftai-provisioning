@@ -21,6 +21,10 @@ from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.testbase.properties import given
 from ccai.testbase.properties import strategies as st
 
+from ccai.restclient.digitalocean.digitaloceanapierror import (
+    DigitalOceanApiRequestError
+)
+
 from ccai.provisioning.aspects.provisioningaspects import (
     ProvisioningAspects
 )
@@ -265,6 +269,41 @@ def test_dns_record_created_and_skipped(venue, credential, region_config,
 
     second = provisioner.apply(aspects=aspects)
     assert "api" in second.skipped
+    return
+
+
+class _RefusingVolumeActions:
+    """
+        A ``volume_actions`` double whose attach the API refuses.
+    """
+
+    def post_by_id(self, *, volume_id: str, body: dict) -> dict:
+        """Refuse the volume action."""
+        raise DigitalOceanApiRequestError(
+            "The DigitalOcean request failed.", status=422,
+            reason="Droplet already has a pending event.")
+
+
+@testbase.attach.parameter(create_digitalocean_do_client, identifier="do_client")
+@testbase.attach.parameter(create_digitalocean_raw_client, identifier="raw_client")
+def test_apply_volume_attach_failure_propagates(venue, credential,
+                                                region_config, raw_client,
+                                                do_client, aspects) -> None:
+    """
+        A failure attaching a newly created volume reaches the caller rather
+        than reporting a volume its droplet never received.
+    """
+    spec = basic_spec()
+    raw_client.volume_actions = _RefusingVolumeActions()
+    provisioner = _provisioner(
+        venue=venue, credential=credential, region_config=region_config,
+        do_client=do_client, spec=spec,
+    )
+
+    with testbase.raises(DigitalOceanApiRequestError) as caught:
+        provisioner.apply(aspects=aspects)
+
+    assert caught.exception.status == 422
     return
 
 

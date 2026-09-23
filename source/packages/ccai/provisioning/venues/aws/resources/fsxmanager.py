@@ -83,19 +83,22 @@ class FsxManager:
             raise AwsValidationError(err_msg)
 
         client = self._fsx()
-        dns_name = ""
-        mount_name = ""
-        try:
-            response = client.describe_file_systems(
-                FileSystemIds=[desired.existing_id]
-            )
-            entries = response.get("FileSystems", [])
-            if len(entries) > 0:
-                dns_name = entries[0].get("DNSName", "")
-                lustre = entries[0].get("LustreConfiguration", {})
-                mount_name = lustre.get("MountName", "")
-        except Exception:
-            pass
+        response = client.describe_file_systems(
+            FileSystemIds=[desired.existing_id]
+        )
+        entries = response.get("FileSystems", [])
+        if len(entries) == 0:
+            err_msg_lines = [
+                "The FSx filesystem named by existing_id was not found."
+            ]
+            err_msg_lines.append("FILESYSTEM: {}".format(desired.name))
+            err_msg_lines.append("EXISTING_ID: {}".format(desired.existing_id))
+            err_msg = os.linesep.join(err_msg_lines)
+            raise AwsValidationError(err_msg)
+
+        dns_name = entries[0].get("DNSName", "")
+        lustre = entries[0].get("LustreConfiguration", {})
+        mount_name = lustre.get("MountName", "")
 
         attributes: Dict[str, Any] = {}
         attributes["existing_id"] = desired.existing_id

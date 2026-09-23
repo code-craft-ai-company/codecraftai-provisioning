@@ -163,7 +163,7 @@ class LlApplyStages:
                 vpn_control_plane=vpn_control_plane, aspects=aspects,
             )
 
-            ssh_key_names = list(inst.security_groups) if False else []
+            ssh_key_names = []
             if inst.keypair is not None:
                 ssh_key_names = [inst.keypair]
 

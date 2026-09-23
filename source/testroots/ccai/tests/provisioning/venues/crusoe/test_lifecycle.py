@@ -19,8 +19,6 @@ from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.testbase.properties import given
 from ccai.testbase.properties import strategies as st
 
-from ccai.errors.exceptions import SemanticError
-
 from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )

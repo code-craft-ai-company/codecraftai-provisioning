@@ -16,8 +16,6 @@ import os
 
 from typing import Any, Dict, List, Optional, Tuple
 
-import yaml
-
 from ccai.provisioning.cloudinit.bootstraprenderer import (
     render_instance_user_data
 )
@@ -469,6 +467,8 @@ class InstanceManager:
                 client.delete(project=project, zone=zone,
                               instance=gcp_name)
             except Exception:
+                # Best-effort teardown; a failed delete must not stop the remaining
+                # resources of the run from being torn down.
                 pass
         rtnval = records
         return rtnval

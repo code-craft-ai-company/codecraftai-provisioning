@@ -122,15 +122,12 @@ class FileStorageManager:
             attributes["existing_id"] = desired.existing_id
             venue_id = desired.existing_id
             client = self._fs()
-            try:
-                response = client.get_file_system(
-                    file_system_id=desired.existing_id
-                )
-                attributes["display_name"] = getattr(
-                    response.data, "display_name", ""
-                )
-            except Exception:
-                pass
+            response = client.get_file_system(
+                file_system_id=desired.existing_id
+            )
+            attributes["display_name"] = getattr(
+                response.data, "display_name", ""
+            )
 
         rtnval = ProvisionedResource(
             kind=self.KIND, name=desired.name, venue_id=venue_id,

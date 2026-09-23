@@ -66,10 +66,14 @@ class VultrDestroyStages:
                     json_body={},
                 )
             except Exception:
+                # Best-effort detach; the block storage volume may already be
+                # detached, and the delete below is attempted either way.
                 pass
             try:
                 self._client.delete(path="/blocks/{}".format(block_id))
             except Exception:
+                # Best-effort teardown; a failed delete must not stop the remaining
+                # resources of the run from being torn down.
                 pass
 
         # 4. Instances — capture VPN device records first.
@@ -88,6 +92,8 @@ class VultrDestroyStages:
                     path="/instances/{}".format(instance_id)
                 )
             except Exception:
+                # Best-effort teardown; a failed delete must not stop the remaining
+                # resources of the run from being torn down.
                 pass
 
         # 5. SSH keys.
@@ -123,6 +129,8 @@ class VultrDestroyStages:
             try:
                 self._client.delete(path="{}/{}".format(path, entry_id))
             except Exception:
+                # Best-effort teardown; a failed delete must not stop the remaining
+                # resources of the run from being torn down.
                 pass
         return
 
@@ -152,5 +160,7 @@ class VultrDestroyStages:
                         )
                     )
                 except Exception:
+                    # Best-effort teardown of the DNS record; a record that cannot be deleted
+                    # must not stop the remaining resources of the run from being torn down.
                     pass
         return

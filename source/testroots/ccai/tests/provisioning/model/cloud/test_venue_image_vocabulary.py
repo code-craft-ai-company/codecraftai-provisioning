@@ -23,7 +23,6 @@ from ccai import testbase
 
 
 from ccai.provisioning.model.cloud.cloudimage import CloudImage
-from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.provisioning.model.cloud.imagefamilynotofferederror import (
     ImageFamilyNotOfferedOnVenueError
 )

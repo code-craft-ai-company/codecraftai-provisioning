@@ -20,9 +20,6 @@ from ccai.tests.provisioning.venues.hetzner.factories import (create_client, cre
 import os
 
 
-from ccai.provisioning.aspects.provisioningaspects import (
-    ProvisioningAspects
-)
 from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )

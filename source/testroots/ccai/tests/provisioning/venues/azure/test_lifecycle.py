@@ -31,6 +31,9 @@ from ccai.provisioning.aspects.provisioningaspects import (
 from ccai.interfaces.cloudacceleratorspec import (
     CloudAcceleratorSpec
 )
+from ccai.restclient.azure.azurearmerror import AzureRequestError
+
+from ccai.provisioning.model.cloud.cloudimage import CloudImage
 from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
@@ -210,6 +213,63 @@ def test_apply_vpn_join_records_device(venue, credential, region_config,
     records = provisioner.last_vpn_records
     assert len(records) == 1
     assert records[0]["instance_name"] == "inst-a"
+    return
+
+
+_WINDOWS_IMAGE = CloudImage(family="windows-server", version="2022",
+                            architecture="x86_64")
+
+
+class _RefusingExtensionsOps:
+    """
+        A ``virtual_machine_extensions`` double whose create ARM refuses.
+    """
+
+    def begin_create_or_update(self, **kwargs) -> None:
+        """Refuse the extension create."""
+        raise AzureRequestError("The ARM request failed.", status_code=409,
+                                code="OperationNotAllowed")
+
+
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
+def test_apply_windows_vpn_join_installs_extension(venue, credential,
+                                                   region_config, world,
+                                                   session_factory,
+                                                   aspects) -> None:
+    """
+        A VPN-joined Windows VM gets the VPN-join Custom Script Extension.
+    """
+    spec = basic_spec(with_vpn=True, image=_WINDOWS_IMAGE)
+    provisioner = _provisioner(venue=venue, credential=credential,
+                               region_config=region_config,
+                               session_factory=session_factory, spec=spec)
+    provisioner.apply(aspects=aspects)
+
+    assert "rg-testrun01/inst-a/inst-a-vpncse" in world.vm_extensions
+    return
+
+
+@testbase.attach.parameter(create_azure_session_factory, identifier="session_factory")
+@testbase.attach.parameter(create_azure_world, identifier="world")
+def test_apply_windows_vpn_join_extension_failure_propagates(
+        venue, credential, region_config, world, session_factory,
+        aspects) -> None:
+    """
+        A failure installing the VPN-join extension reaches the caller rather
+        than reporting a VM that never joins the VPN.
+    """
+    spec = basic_spec(with_vpn=True, image=_WINDOWS_IMAGE)
+    provisioner = _provisioner(venue=venue, credential=credential,
+                               region_config=region_config,
+                               session_factory=session_factory, spec=spec)
+    compute = session_factory.compute_client()
+    compute.virtual_machine_extensions = _RefusingExtensionsOps()
+
+    with testbase.raises(AzureRequestError) as caught:
+        provisioner.apply(aspects=aspects)
+
+    assert caught.exception.code == "OperationNotAllowed"
     return
 
 

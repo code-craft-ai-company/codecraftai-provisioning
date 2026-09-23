@@ -12,8 +12,6 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-from typing import Dict, List
-
 from ccai.testbase.properties import given
 from ccai.testbase.properties import strategies as st
 

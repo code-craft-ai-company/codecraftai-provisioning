@@ -13,6 +13,8 @@ __credits__ = []
 
 from typing import Any, Dict, List
 
+from ccai.restclient.aws.awserror import ClientError
+
 from ccai.provisioning.venues.aws.awsboto3sessionfactory import (
     AwsBoto3SessionFactory
 )
@@ -96,8 +98,14 @@ class PlacementGroupManager:
                 GroupName=aws_name, Strategy="cluster",
                 TagSpecifications=tag_specs,
             )
-        except Exception:
-            pass
+        except ClientError as xcpt:
+            # The owner-tag lookup above can miss a group that already holds
+            # this run-scoped name, e.g. while describe lags a create that just
+            # finished.  EC2 then answers InvalidPlacementGroup.Duplicate and
+            # the named group exists, which is what ensure promises.  Any
+            # other error is real.
+            if xcpt.code != "InvalidPlacementGroup.Duplicate":
+                raise
 
         rtnval = aws_name
         return rtnval
@@ -128,6 +136,8 @@ class PlacementGroupManager:
                 client.delete_placement_group(GroupName=gname)
                 deleted.append(gname)
             except Exception:
+                # Best-effort teardown sweep; a resource that fails to delete is left out
+                # of the returned list and the sweep continues with the remaining resources.
                 pass
         rtnval = deleted
         return rtnval

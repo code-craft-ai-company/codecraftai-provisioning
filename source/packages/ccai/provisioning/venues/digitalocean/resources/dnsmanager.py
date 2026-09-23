@@ -143,6 +143,8 @@ class DnsManager:
                 domain_record_id=existing.get("id", ""),
             )
         except Exception:
+            # Best-effort teardown of the DNS record; a record that cannot be deleted
+            # must not stop the remaining resources of the run from being torn down.
             pass
         return
 

@@ -13,6 +13,8 @@ __credits__ = []
 
 from typing import Any, Dict, List, Optional
 
+from ccai.restclient.aws.awserror import ClientError
+
 from ccai.provisioning.model.cloud.cloudstoragevolume import (
     CloudStorageVolume
 )
@@ -49,6 +51,26 @@ def map_storage_class(*, storage_class: StorageClass) -> str:
         :returns: AWS VolumeType string.
     """
     rtnval = _STORAGE_CLASS_MAP.get(storage_class, "gp3")
+    return rtnval
+
+
+def _is_attached_to(*, volume: Dict[str, Any], instance_id: str) -> bool:
+    """
+        Report whether a volume is attached, or attaching, to an instance.
+
+        :param volume: A describe_volumes ``Volume`` entry.
+        :param instance_id: AWS instance id.
+
+        :returns: True when the volume is attached to the instance.
+    """
+    for attachment in volume.get("Attachments", []):
+        if attachment.get("InstanceId", "") != instance_id:
+            continue
+        if attachment.get("State", "") in ("attaching", "attached"):
+            rtnval = True
+            return rtnval
+
+    rtnval = False
     return rtnval
 
 
@@ -138,8 +160,18 @@ class VolumeManager:
                     InstanceId=attach_instance_id,
                     Device=device,
                 )
-            except Exception:
-                pass
+            except ClientError as xcpt:
+                # A re-apply finds the volume already attached and EC2 answers
+                # VolumeInUse.  EC2 gives the same answer when the volume is
+                # attached to some other instance, so only an attachment to the
+                # requested instance is tolerated.  Any other error is real.
+                if xcpt.code != "VolumeInUse":
+                    raise
+                already_attached = _is_attached_to(
+                    volume=existing, instance_id=attach_instance_id
+                )
+                if already_attached is False:
+                    raise
 
         attributes: Dict[str, Any] = {}
         attributes["volume_id"] = vol_id
@@ -185,11 +217,15 @@ class VolumeManager:
                         Force=True,
                     )
                 except Exception:
+                    # Best-effort detach; the volume may already be detached, and the delete
+                    # below is attempted either way.
                     pass
             try:
                 client.delete_volume(VolumeId=vol_id)
                 deleted.append(vol_id)
             except Exception:
+                # Best-effort teardown sweep; a resource that fails to delete is left out
+                # of the returned list and the sweep continues with the remaining resources.
                 pass
         rtnval = deleted
         return rtnval

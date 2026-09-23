@@ -11,7 +11,9 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
+
+from ccai.restclient.aws.awserror import ClientError
 
 from ccai.provisioning.model.cloud.cloudsecuritygroup import (
     CloudSecurityGroup
@@ -65,6 +67,61 @@ def _egress_to_aws(rule: Any) -> Dict[str, Any]:
         out["ToPort"] = rule.to_port
     out["IpRanges"] = [{"CidrIp": cidr} for cidr in cidrs]
     rtnval = out
+    return rtnval
+
+
+# EC2 creates every new VPC security group with this allow-all IPv4 egress rule.
+_DEFAULT_EGRESS_PROTOCOL = "-1"
+_DEFAULT_EGRESS_CIDR = "0.0.0.0/0"
+
+
+def _split_default_egress(*, egress_aws: List[Dict[str, Any]]
+                          ) -> Tuple[List[Dict[str, Any]],
+                                     Optional[Dict[str, Any]]]:
+    """
+        Separate the allow-all egress rule EC2 creates with every new group
+        from the rest of the requested egress permissions.
+
+        EC2 authorizes a batch atomically: one ``InvalidPermission.Duplicate``
+        rejects every permission in the call.  Keeping the default rule out of
+        the main batch stops that one expected duplicate from dropping the
+        other requested rules.
+
+        :param egress_aws: Egress permissions in the AWS IpPermissions schema.
+
+        :returns: A ``(remaining, default_rule)`` pair.  ``default_rule`` is
+                  None when the request does not include the allow-all rule.
+    """
+    remaining: List[Dict[str, Any]] = []
+    default_rule: Optional[Dict[str, Any]] = None
+
+    for permission in egress_aws:
+        if permission.get("IpProtocol", "") != _DEFAULT_EGRESS_PROTOCOL:
+            remaining.append(permission)
+            continue
+
+        found_default = False
+        other_ranges: List[Dict[str, Any]] = []
+        for ip_range in permission.get("IpRanges", []):
+            if ip_range.get("CidrIp", "") == _DEFAULT_EGRESS_CIDR:
+                found_default = True
+            else:
+                other_ranges.append(ip_range)
+
+        if found_default is False:
+            remaining.append(permission)
+            continue
+
+        default_rule = {
+            "IpProtocol": _DEFAULT_EGRESS_PROTOCOL,
+            "IpRanges": [{"CidrIp": _DEFAULT_EGRESS_CIDR}],
+        }
+        if len(other_ranges) > 0:
+            trimmed = dict(permission)
+            trimmed["IpRanges"] = other_ranges
+            remaining.append(trimmed)
+
+    rtnval = (remaining, default_rule)
     return rtnval
 
 
@@ -151,20 +208,31 @@ class SecurityGroupManager:
             sg_id = created.get("GroupId", "")
 
             if len(ingress_aws) > 0:
-                try:
-                    client.authorize_security_group_ingress(
-                        GroupId=sg_id, IpPermissions=ingress_aws
-                    )
-                except Exception:
-                    pass
+                # The group was created a moment ago with no inbound rules, so
+                # there is no duplicate to tolerate; any failure is real.
+                client.authorize_security_group_ingress(
+                    GroupId=sg_id, IpPermissions=ingress_aws
+                )
             if len(egress_aws) > 0:
-                try:
+                remaining_egress, default_egress = _split_default_egress(
+                    egress_aws=egress_aws
+                )
+                if len(remaining_egress) > 0:
                     client.authorize_security_group_egress(
-                        GroupId=sg_id, IpPermissions=egress_aws
+                        GroupId=sg_id, IpPermissions=remaining_egress
                     )
-                except Exception:
-                    pass
-            existing = {"GroupId": sg_id, "Tags": []}
+                if default_egress is not None:
+                    try:
+                        client.authorize_security_group_egress(
+                            GroupId=sg_id, IpPermissions=[default_egress]
+                        )
+                    except ClientError as xcpt:
+                        # EC2 already gave the new group this allow-all egress
+                        # rule, so it answers InvalidPermission.Duplicate and
+                        # the rule is in the requested state.  Any other
+                        # error is real.
+                        if xcpt.code != "InvalidPermission.Duplicate":
+                            raise
             existing = client.describe_security_groups(
                 GroupIds=[sg_id]
             ).get("SecurityGroups", [{}])[0]
@@ -207,6 +275,8 @@ class SecurityGroupManager:
                 client.delete_security_group(GroupId=gid)
                 deleted.append(gid)
             except Exception:
+                # Best-effort teardown sweep; a resource that fails to delete is left out
+                # of the returned list and the sweep continues with the remaining resources.
                 pass
         rtnval = deleted
         return rtnval

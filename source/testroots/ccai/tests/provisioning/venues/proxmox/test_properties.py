@@ -36,7 +36,7 @@ from ccai.provisioning.venues.proxmox.pvetagtranslator import (
     PveTagTranslator
 )
 
-from ccai.tests.provisioning.venues.proxmox._mockclient import MockProxmoxClient, RecordingVpnControlPlane
+from ccai.tests.provisioning.venues.proxmox._mockclient import MockProxmoxClient
 from ccai.tests.provisioning.venues.proxmox._specfactory import (
     basic_spec, make_credential, make_instance, make_keypair,
     make_network, make_resolver

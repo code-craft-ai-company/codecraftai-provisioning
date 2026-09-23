@@ -195,6 +195,8 @@ class NetworkManager:
                 self._client.vpcs.delete(vpc_id=vpc_id)
                 deleted.append(str(vpc_id))
             except Exception:
+                # Best-effort teardown sweep; a resource that fails to delete is left out
+                # of the returned list and the sweep continues with the remaining resources.
                 pass
         rtnval = deleted
         return rtnval

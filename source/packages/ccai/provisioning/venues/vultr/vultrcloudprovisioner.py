@@ -46,12 +46,6 @@ from ccai.provisioning.venues.vultr.vultrresolver import VultrResolver
 from ccai.provisioning.venues.vultr.vultrspec import VultrSpec
 
 
-# HPC interconnect kinds Vultr cannot realise (anything other than NONE).
-_REJECTED_INTERCONNECTS = frozenset({
-    "INFINIBAND_HDR", "INFINIBAND_NDR", "INFINIBAND_XDR", "OCI_RDMA",
-    "EFA", "NVSWITCH", "NVLINK",
-})
-
 # WEKA / Lustre-class shared filesystems Vultr has no managed service for.
 _REJECTED_FS_KINDS = frozenset({
     "LUSTRE", "WEKA", "VAST", "GPFS", "EFS", "FILESTORE",
@@ -349,10 +343,7 @@ class VultrCloudProvisioner(CloudProvisioner):
         """
         run_id = self._run_id(aspects=aspects)
         resources = self._inventory.list_run(run_id=run_id)
-        try:
-            self._inventory.persist(run_id=run_id, resources=resources)
-        except OSError:
-            pass
+        self._inventory.persist(run_id=run_id, resources=resources)
         rtnval = resources
         return rtnval
 

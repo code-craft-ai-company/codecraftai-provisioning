@@ -26,7 +26,6 @@ from ccai.provisioning.model.cloud.cloudkeypair import CloudKeyPair
 from ccai.provisioning.model.cloud.cloudloadbalancer import (
     CloudLoadBalancer
 )
-from ccai.provisioning.model.cloud.cloudnetwork import CloudNetwork
 from ccai.provisioning.model.cloud.cloudobjectbucket import (
     CloudObjectBucket
 )

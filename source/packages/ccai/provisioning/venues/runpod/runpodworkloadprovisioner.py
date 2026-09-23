@@ -47,7 +47,7 @@ from ccai.provisioning.venues.runpod.rpplanbuilder import RpPlanBuilder
 from ccai.provisioning.venues.runpod.rpresolver import RpResolver
 from ccai.provisioning.venues.runpod.rpsidecartag import RpSidecarTag
 from ccai.provisioning.venues.runpod.runpodworkloadspec import (
-    RUNPOD_TIER_SECURE,
+    RUNPOD_TIER_SECURE, _SUPPORTED_TIERS,
 )
 
 
@@ -129,8 +129,9 @@ class RunpodWorkloadProvisioner(WorkloadProvisioner):
             :returns: A :class:`ValidationResult` carrying warnings for the
                 unrealised network resources.
 
-            :raises: :class:`RpValidationError` on an object-storage,
-                load-balancer, DNS, or non-NONE interconnect request;
+            :raises: :class:`RpValidationError` on an unsupported capacity
+                tier or an object-storage, load-balancer, DNS, or non-NONE
+                interconnect request;
                 :class:`RpCapacityError` when a Secure Cloud GPU type has no
                 Secure Cloud capacity.
         """
@@ -138,6 +139,14 @@ class RunpodWorkloadProvisioner(WorkloadProvisioner):
 
         errors: List[Dict[str, Any]] = []
         warnings: List[Dict[str, Any]] = []
+
+        # An unknown tier would otherwise be launched as Secure Cloud.
+        if spec.tier not in _SUPPORTED_TIERS:
+            err_msg_lines = ["The RunPod capacity tier is not supported."]
+            err_msg_lines.append("TIER: {!r}".format(spec.tier))
+            err_msg_lines.append("SUPPORTED TIERS: {}".format(
+                ", ".join(_SUPPORTED_TIERS)))
+            raise RpValidationError(os.linesep.join(err_msg_lines))
 
         # Hard rejections — RunPod has no API surface for these.
         if len(spec.buckets) > 0:

@@ -14,7 +14,7 @@ __credits__ = []
 import re
 import unittest
 
-from ccai.testbase.properties import assume, given
+from ccai.testbase.properties import given
 from ccai.testbase.properties import strategies as st
 
 from ccai.interfaces.schemavalidationerror import SchemaValidationError

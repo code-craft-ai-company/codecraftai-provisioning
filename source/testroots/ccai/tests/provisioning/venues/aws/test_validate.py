@@ -28,7 +28,6 @@ from ccai.provisioning.venues.aws.awscloudprovisioner import (
     AwsCloudProvisioner
 )
 from ccai.provisioning.venues.aws.awserrors import AwsValidationError
-from ccai.provisioning.venues.aws.awsspec import AwsSpec
 
 from ccai.tests.provisioning.venues.aws._specfactory import basic_spec
 

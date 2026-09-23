@@ -17,8 +17,6 @@ import unittest
 
 from pathlib import Path
 
-import yaml
-
 from ccai.provisioning.model.cloud.provisionedresource import (
     ProvisionedResource
 )

@@ -18,10 +18,6 @@ from ccai.interop.libvirt.model.libvirtdomaininfo import LibvirtDomainInfo
 from ccai.interop.libvirt.model.libvirtnetwork import LibvirtNetwork
 from ccai.interop.libvirt.model.libvirtvolume import LibvirtVolume
 
-from ccai.provisioning.venues.libvirt.lvdomainxmlbuilder import (
-    LvDomainXmlBuilder
-)
-
 
 class _MockNetworksGroup:
     """

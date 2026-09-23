@@ -15,8 +15,6 @@ __credits__ = []
 
 import tempfile
 
-from typing import Dict, List
-
 
 from ccai.testbase.properties import given
 from ccai.testbase.properties import strategies as st

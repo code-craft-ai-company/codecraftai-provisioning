@@ -30,9 +30,6 @@ from ccai.provisioning.model.cloud.cloudacceleratorcatalog import (
     CloudAcceleratorCatalog, default_accelerator_catalog,
     reset_default_accelerator_catalog
 )
-from ccai.provisioning.model.cloud.cloudacceleratorcatalogentry import (
-    CloudAcceleratorCatalogEntry
-)
 
 
 def _build_pairs(catalog: CloudAcceleratorCatalog):
@@ -99,6 +96,8 @@ class CatalogLoaderTests(unittest.TestCase):
             except Exception:
                 swallowed = True
         except SchemaSemanticError:
+            # Expected: SchemaSemanticError derives from BaseException, so it passes
+            # through the inner 'except Exception' and is captured here.
             pass
         self.assertFalse(swallowed)
         return

@@ -59,13 +59,14 @@ def cross_platform_lock(*, path: Path,
             time.sleep(poll_interval_seconds)
 
     try:
-        os.write(fd, "{}\n{}\n".format(os.getpid(),
-                                       sys.executable).encode("utf-8"))
-        os.close(fd)
+        with os.fdopen(fd, "wb") as lock_file:
+            lock_file.write("{}\n{}\n".format(os.getpid(),
+                                               sys.executable).encode("utf-8"))
         yield
     finally:
         try:
             os.unlink(str(path))
         except FileNotFoundError:
+            # The lock file is already gone, so the lock is released either way.
             pass
     return

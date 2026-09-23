@@ -204,6 +204,8 @@ class PlacementManager:
                 )
                 deleted.append(ppg_name)
             except Exception:
+                # Best-effort teardown sweep; a resource that fails to delete is left out
+                # of the returned list and the sweep continues with the remaining resources.
                 pass
 
         rtnval = deleted

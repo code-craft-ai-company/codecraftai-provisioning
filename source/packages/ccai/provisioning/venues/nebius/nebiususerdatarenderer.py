@@ -14,8 +14,6 @@ __credits__ = []
 
 from typing import Any, Dict, Optional
 
-import yaml
-
 from ccai.provisioning.cloudinit.bootstraprenderer import (
     render_instance_user_data
 )

@@ -12,16 +12,12 @@ __credits__ = []
 
 
 import json
-import re
 import unittest
 
 import yaml
 
 from ccai.interfaces.schemasemanticerror import SchemaSemanticError
 from ccai.interfaces.vpnjoinspec import VPNJoinSpec
-from ccai.provisioning.cloudinit.cloudinitrenderererror import (
-    CloudInitRendererError
-)
 from ccai.provisioning.cloudinit.vpncloudinitrenderer import (
     render_cloud_init, render_azure_cse,
     render_vsphere_guest_customization,

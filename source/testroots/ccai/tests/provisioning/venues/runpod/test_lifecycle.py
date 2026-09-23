@@ -48,6 +48,31 @@ def test_validate_happy_path():
     assert result.ok is True
 
 
+def test_validate_rejects_unknown_tier():
+    """
+        An unknown capacity tier is rejected rather than launched as Secure
+        Cloud.
+    """
+    provisioner = make_provisioner(
+        spec=make_spec(jobs=[make_gpu_job()], tier="spot"))
+    with testbase.raises(RpValidationError) as caught:
+        provisioner.validate()
+
+    assert "spot" in str(caught.exception)
+    return
+
+
+def test_validate_accepts_community_tier():
+    """
+        The community tier is a supported tier.
+    """
+    provisioner = make_provisioner(
+        spec=make_spec(jobs=[make_gpu_job()], tier="community"))
+    result = provisioner.validate()
+    assert result.ok is True
+    return
+
+
 def test_validate_rejects_object_bucket():
     """
         A spec carrying an object bucket is rejected — RunPod has no

@@ -16,8 +16,6 @@ import base64
 
 from typing import Dict, Optional
 
-import yaml
-
 from ccai.provisioning.cloudinit.bootstraprenderer import (
     render_instance_user_data
 )

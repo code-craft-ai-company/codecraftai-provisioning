@@ -78,6 +78,8 @@ class VsDestroyStages:
             try:
                 self._ops.power(vm_id=vm_id, action="stop", aspects=aspects)
             except Exception:
+                # Best-effort power-off; the VM may already be stopped, and delete_vm
+                # below raises if the VM cannot be removed.
                 pass
             self._ops.delete_vm(vm_id=vm_id, aspects=aspects)
             deleted_vm_ids.append(vm_id)
@@ -106,6 +108,8 @@ class VsDestroyStages:
                 self._ops.delete_port_group(network_id=net_id,
                                             aspects=aspects)
             except Exception:
+                # Best-effort teardown; a failed delete must not stop the remaining
+                # resources of the run from being torn down.
                 pass
 
         rtnval = deleted_vm_ids
