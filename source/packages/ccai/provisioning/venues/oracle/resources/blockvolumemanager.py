@@ -12,6 +12,7 @@ __credits__ = []
 
 from ccai.restclient.oracle import ocimodels
 
+from ccai.restclient.oracle.ocierror import ServiceError
 from ccai.restclient.oracle.ocipagination import (
     list_call_get_all_results
 )
@@ -39,7 +40,37 @@ from ccai.provisioning.venues.oracle.ocitagging import (
 # OCI Block Volume minimum size is 50 GB.
 _MIN_VOLUME_GB = 50
 
+# The HTTP status OCI answers an attach with when the volume is already
+# attached -- to the requested instance or to any other.
+_CONFLICT_STATUS = 409
 
+# Volume attachment lifecycle states in which the attach is in place or
+# underway.
+_ATTACHED_STATES = ("ATTACHING", "ATTACHED")
+
+
+def _is_attached_to(*, attachments: List[Any], instance_id: str,
+                    volume_id: str) -> bool:
+    """
+        Report whether a volume is attached, or attaching, to an instance.
+
+        :param attachments: ListVolumeAttachments entries.
+        :param instance_id: OCI instance OCID.
+        :param volume_id: OCI volume OCID.
+
+        :returns: True when the volume is attached to the instance.
+    """
+    for attachment in attachments:
+        if getattr(attachment, "instance_id", None) != instance_id:
+            continue
+        if getattr(attachment, "volume_id", None) != volume_id:
+            continue
+        if getattr(attachment, "lifecycle_state", None) in _ATTACHED_STATES:
+            rtnval = True
+            return rtnval
+
+    rtnval = False
+    return rtnval
 
 
 class BlockVolumeManager:
@@ -114,6 +145,8 @@ class BlockVolumeManager:
             :param aspects: Aspects.
 
             :returns: A ProvisionedResource describing the volume.
+            :raises: ServiceError when the attach fails, including the 409
+                for a volume attached to a different instance.
         """
 
         client = self._block()
@@ -150,12 +183,28 @@ class BlockVolumeManager:
                 instance_id=attach_instance_id,
                 volume_id=volume_id,
             )
+            compute = self._compute()
             try:
-                self._compute().attach_volume(
-                    attach_volume_details=attach_details
+                compute.attach_volume(attach_volume_details=attach_details)
+            except ServiceError as xcpt:
+                # A re-apply finds the volume already attached and OCI
+                # answers 409.  OCI gives the same status when the volume is
+                # attached to some other instance, so only an attachment of
+                # this volume to the requested instance is tolerated.  Any
+                # other error is real.
+                if xcpt.status != _CONFLICT_STATUS:
+                    raise
+                listing = list_call_get_all_results(
+                    compute.list_volume_attachments,
+                    compartment_id=compartment_id,
+                    instance_id=attach_instance_id, volume_id=volume_id,
                 )
-            except Exception:
-                pass
+                already_attached = _is_attached_to(
+                    attachments=listing.data, instance_id=attach_instance_id,
+                    volume_id=volume_id,
+                )
+                if already_attached is False:
+                    raise
 
         attributes: Dict[str, Any] = {}
         attributes["volume_id"] = volume_id

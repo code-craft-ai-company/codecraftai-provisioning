@@ -19,6 +19,9 @@ from typing import Any, List, Optional
 
 from ccai.aspects.aspects import Aspects
 
+from ccai.restclient.coreweave.aspectscoreweave import (
+    AspectsCoreweave, DEFAULT_COREWEAVE_ASPECTS
+)
 from ccai.restclient.coreweave.coreweaveclient import CoreweaveClient
 from ccai.interop.kubernetes.kubernetesclient import KubernetesClient
 from ccai.interop.kubernetes.specs.workloadspecs import NamespaceSpec
@@ -88,6 +91,30 @@ def _first_accelerator(workload: Any) -> Optional[Any]:
         rtnval = None
         return rtnval
     rtnval = accelerators[0]
+    return rtnval
+
+
+def _coreweave_aspects(aspects: Any) -> AspectsCoreweave:
+    """
+        Pick the aspects to hand a CoreWeave REST client call.
+
+        The lifecycle verbs accept whatever aspects their caller holds: the
+        engine passes :class:`ProvisioningAspects`, and ``None`` is allowed.
+        Only an :class:`AspectsCoreweave` carries the REST behaviour fields
+        (action pattern, timeouts, allowed error codes) the client's
+        transport reads, so one is forwarded as given; anything else yields
+        the client's own default rather than an object its transport would
+        fail on.
+
+        :param aspects: The aspects the lifecycle verb was called with.
+
+        :returns: The :class:`AspectsCoreweave` for the REST call.
+    """
+    if isinstance(aspects, AspectsCoreweave) is True:
+        rtnval = aspects
+        return rtnval
+
+    rtnval = DEFAULT_COREWEAVE_ASPECTS
     return rtnval
 
 
@@ -162,7 +189,7 @@ class CoreweaveWorkloadProvisioner(WorkloadProvisioner):
     # Kubeconfig chaining
     # ------------------------------------------------------------------
 
-    def _ensure_kubernetes_client(self, *, aspects: Aspects) -> KubernetesClient:
+    def _ensure_kubernetes_client(self, *, aspects: Any) -> KubernetesClient:
         """
             Ensure a usable :class:`KubernetesClient`.
 
@@ -171,8 +198,9 @@ class CoreweaveWorkloadProvisioner(WorkloadProvisioner):
             kubeconfig dict. The kubeconfig is re-minted whenever this method
             finds no cached client.
 
-            :param aspects: Behaviour control. Propagated into the CoreWeave
-                kubeconfig mint.
+            :param aspects: Behaviour control. An :class:`AspectsCoreweave`
+                is propagated into the CoreWeave kubeconfig mint; anything
+                else mints with the client's default aspects.
 
             :returns: A :class:`KubernetesClient` bound to the target
                 cluster.
@@ -184,9 +212,10 @@ class CoreweaveWorkloadProvisioner(WorkloadProvisioner):
             rtnval = self._kubernetes_client
             return rtnval
 
+        rest_aspects = _coreweave_aspects(aspects)
         try:
             kubeconfig = self._coreweave_client.mint_kubeconfig(
-                cluster_id=self._spec.cluster_id)
+                cluster_id=self._spec.cluster_id, aspects=rest_aspects)
         except Exception as mint_error:
             err_msg_lines = ["Failed to mint a CoreWeave kubeconfig."]
             err_msg_lines.append("CLUSTER: {}".format(self._spec.cluster_id))
@@ -205,15 +234,20 @@ class CoreweaveWorkloadProvisioner(WorkloadProvisioner):
         rtnval = self._kubernetes_client
         return rtnval
 
-    def _node_pool_selector(self) -> CwNodePoolSelector:
+    def _node_pool_selector(self, *, aspects: Any) -> CwNodePoolSelector:
         """
             Build a :class:`CwNodePoolSelector` from the CoreWeave node-pool
             catalog of the target cluster.
 
+            :param aspects: The lifecycle verb's aspects; an
+                :class:`AspectsCoreweave` is forwarded to the node-pool
+                lookup, anything else uses the client default.
+
             :returns: A populated :class:`CwNodePoolSelector`.
         """
+        rest_aspects = _coreweave_aspects(aspects)
         node_pools = self._coreweave_client.node_pools.list(
-            cluster_id=self._spec.cluster_id)
+            cluster_id=self._spec.cluster_id, aspects=rest_aspects)
         rtnval = CwNodePoolSelector(node_pools=node_pools)
         return rtnval
 
@@ -226,16 +260,14 @@ class CoreweaveWorkloadProvisioner(WorkloadProvisioner):
             Run shape + semantic validation across the declared workload
             resources.
 
-            :param aspects: Behaviour control. ``None`` substitutes the
-                default :class:`Aspects`.
+            :param aspects: Behaviour control. An :class:`AspectsCoreweave`
+                is forwarded to the node-pool lookup; ``None`` or any other
+                aspects use the CoreWeave client's default.
 
             :returns: A :class:`ValidationResult`.
 
             :raises: :class:`CwValidationError` on a hard rejection.
         """
-        if aspects is None:
-            aspects = Aspects()
-
         venue_kind = self._venue.kind
         if venue_kind in _SCHEDULER_KINDS and self._spec.sub_mode != "sunk":
             err_msg_lines = ["The CoreWeave venue ships scheduler enumerants "
@@ -256,7 +288,7 @@ class CoreweaveWorkloadProvisioner(WorkloadProvisioner):
             raise CwValidationError(err_msg)
 
         # Every accelerator-bearing workload must resolve to a node pool.
-        selector = self._node_pool_selector()
+        selector = self._node_pool_selector(aspects=aspects)
         all_workloads = list(self._spec.jobs) + list(self._spec.services)
         for workload in all_workloads:
             accel = _first_accelerator(workload)
@@ -463,7 +495,8 @@ class CoreweaveWorkloadProvisioner(WorkloadProvisioner):
         else:
             workload_resources = self._apply_workloads(kube=kube,
                                                        namespace=namespace,
-                                                       run_id=run_id)
+                                                       run_id=run_id,
+                                                       aspects=aspects)
             for entry in workload_resources:
                 created.append(entry)
 
@@ -503,17 +536,20 @@ class CoreweaveWorkloadProvisioner(WorkloadProvisioner):
         return rtnval
 
     def _apply_workloads(self, *, kube: KubernetesClient, namespace: str,
-                         run_id: str) -> List[ProvisionedResource]:
+                         run_id: str,
+                         aspects: Any) -> List[ProvisionedResource]:
         """
             Apply the Job / Deployment / Service resources.
 
             :param kube: The :class:`KubernetesClient`.
             :param namespace: The target namespace.
             :param run_id: The ccai run identifier.
+            :param aspects: The apply aspects, forwarded to the node-pool
+                lookup.
 
             :returns: A list of :class:`ProvisionedResource` entries.
         """
-        selector = self._node_pool_selector()
+        selector = self._node_pool_selector(aspects=aspects)
         renderer = CwManifestRenderer(selector=selector,
                                       label_translator=self._labels)
 

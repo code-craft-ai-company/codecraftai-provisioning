@@ -106,6 +106,7 @@ class _MockNodePoolsGroup:
             :returns: ``None``.
         """
         self._pools = pools
+        self.received_aspects: List[Any] = []
         return
 
     def list(self, *, cluster_id: str,
@@ -114,10 +115,12 @@ class _MockNodePoolsGroup:
             Return the configured node pools.
 
             :param cluster_id: The cluster identifier (ignored).
-            :param aspects: Behaviour control (ignored).
+            :param aspects: Behaviour control, recorded so tests can check
+                what the provisioner forwarded.
 
             :returns: The configured node pool list.
         """
+        self.received_aspects.append(aspects)
         rtnval = self._pools
         return rtnval
 
@@ -141,6 +144,7 @@ class MockCoreweaveClient:
                                   interconnect="INFINIBAND_NDR")]
         self.node_pools = _MockNodePoolsGroup(pools=pools)
         self.mint_count = 0
+        self.mint_aspects: List[Any] = []
         self.credential = "fake-credential"
         return
 
@@ -150,11 +154,13 @@ class MockCoreweaveClient:
             Mint a fake kubeconfig.
 
             :param cluster_id: The cluster identifier (ignored).
-            :param aspects: Behaviour control (ignored).
+            :param aspects: Behaviour control, recorded so tests can check
+                what the provisioner forwarded.
 
             :returns: A :class:`FakeKubeconfig`.
         """
         self.mint_count = self.mint_count + 1
+        self.mint_aspects.append(aspects)
         rtnval = FakeKubeconfig()
         return rtnval
 

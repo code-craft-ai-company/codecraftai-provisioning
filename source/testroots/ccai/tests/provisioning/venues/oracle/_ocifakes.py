@@ -21,6 +21,8 @@ import itertools
 from types import SimpleNamespace
 from typing import Any, Dict, List
 
+from ccai.restclient.oracle.ocierror import ServiceError
+
 
 _OCID_COUNTER = itertools.count(1)
 
@@ -309,12 +311,46 @@ class FakeComputeClient:
         return rtnval
 
     def attach_volume(self, *, attach_volume_details: Any) -> _Response:
-        """Attach a block volume to an instance."""
-        self.volume_attachments.append(SimpleNamespace(
+        """
+            Attach a block volume to an instance.
+
+            Answers the way OCI does for a volume that already has a live
+            attachment: HTTP 409, whichever instance holds it.
+        """
+        volume_id = attach_volume_details.volume_id
+        for attachment in self.volume_attachments:
+            if attachment.volume_id != volume_id:
+                continue
+            if attachment.lifecycle_state in ("ATTACHING", "ATTACHED"):
+                raise ServiceError(
+                    "The OCI request failed. STATUS: 409 CODE: Conflict",
+                    status=409, code="Conflict",
+                    message="Volume {} is already attached.".format(
+                        volume_id))
+
+        attachment = SimpleNamespace(
+            id=_ocid(kind="volumeattachment"),
             instance_id=attach_volume_details.instance_id,
-            volume_id=attach_volume_details.volume_id,
-        ))
-        rtnval = _Response(data=None)
+            volume_id=volume_id,
+            lifecycle_state="ATTACHED",
+        )
+        self.volume_attachments.append(attachment)
+        rtnval = _Response(data=attachment)
+        return rtnval
+
+    def list_volume_attachments(self, *, compartment_id: str,
+                                **kwargs: Any) -> _Response:
+        """List volume attachments, narrowed by instance_id / volume_id."""
+        instance_id = kwargs.get("instance_id", None)
+        volume_id = kwargs.get("volume_id", None)
+        data: List[Any] = []
+        for attachment in self.volume_attachments:
+            if instance_id is not None and attachment.instance_id != instance_id:
+                continue
+            if volume_id is not None and attachment.volume_id != volume_id:
+                continue
+            data.append(attachment)
+        rtnval = _Response(data=data)
         return rtnval
 
 

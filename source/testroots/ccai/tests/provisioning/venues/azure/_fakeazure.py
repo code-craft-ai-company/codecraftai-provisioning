@@ -267,7 +267,6 @@ class _ChildScopedOps:
                   or kwargs.get("subnet_parameters", None)
                   or kwargs.get("extension_parameters", None)
                   or kwargs.get("disk", None)
-                  or kwargs.get("blob_container", None)
                   or {})
         location = self._location
         if isinstance(params, dict) and "location" in params:
@@ -298,24 +297,6 @@ class _ChildScopedOps:
             :returns: The stored FakeResource.
         """
         rtnval = self._store_create(**kwargs)
-        return rtnval
-
-    def create(self, **kwargs: Any) -> Any:
-        """
-            Create a resource synchronously (storage / blob shape).
-
-            Container creates carry no ``location``; they are treated as a
-            no-op record so the venue's ``blob_containers.create`` succeeds.
-
-            :param kwargs: The scoping + name + parameters keywords.
-
-            :returns: A resolved _Poller or the FakeResource.
-        """
-        if "blob_container" in kwargs:
-            rtnval: Any = FakeResource(name=kwargs.get(self._name_kw, ""))
-            return rtnval
-        resource = self._store_create(**kwargs)
-        rtnval = _Poller(value=resource)
         return rtnval
 
     def begin_create(self, **kwargs: Any) -> _Poller:
@@ -384,6 +365,116 @@ class _ChildScopedOps:
         """
         rtnval = self.list(resource_group_name=resource_group_name)
         return rtnval
+
+
+class _BlobContainersOps:
+    """
+        Fake of ``StorageManagementClient.blob_containers``.
+
+        Mirrors ``BlobContainersCollection`` of codecraftai-restclient-azure
+        call for call — ``get`` / ``list`` / ``create`` / ``delete``, keyword
+        only, with ``create`` answered synchronously — rather than riding on
+        the generic :class:`_ChildScopedOps`.  A fake that accepts calls the
+        real client does not have is how the venue once shipped a container
+        create that raised on every real run while this suite stayed green.
+    """
+
+    def __init__(self, *, store: Dict[str, FakeResource],
+                 accounts: Dict[str, FakeResource]) -> None:
+        """
+            Construct.
+
+            :param store: Backing dict keyed ``<rg>/<account>/<container>``.
+            :param accounts: The storage accounts store, keyed
+                ``<rg>/<account>``, consulted because ARM refuses a
+                container in an account that does not exist.
+        """
+        self._store: Dict[str, FakeResource] = store
+        self._accounts: Dict[str, FakeResource] = accounts
+        return
+
+    def get(self, *, resource_group_name: str, account_name: str,
+            container_name: str) -> FakeResource:
+        """
+            Return a stored container, or raise when absent.
+
+            :param resource_group_name: Resource group name.
+            :param account_name: Parent storage account name.
+            :param container_name: Container name.
+
+            :returns: The FakeResource.
+            :raises: ResourceNotFoundError
+        """
+        key = "{}/{}/{}".format(resource_group_name, account_name,
+                                container_name)
+        entry = self._store.get(key, None)
+        if entry is None:
+            raise ResourceNotFoundError(
+                "container not found: {}".format(key))
+        rtnval = entry
+        return rtnval
+
+    def list(self, *, resource_group_name: str,
+             account_name: str) -> List[FakeResource]:
+        """
+            List the containers of one storage account.
+
+            :param resource_group_name: Resource group name.
+            :param account_name: Parent storage account name.
+
+            :returns: A list of FakeResource entries.
+        """
+        prefix = "{}/{}/".format(resource_group_name, account_name)
+        out: List[FakeResource] = []
+        for key, value in self._store.items():
+            if key.startswith(prefix):
+                out.append(value)
+        rtnval = out
+        return rtnval
+
+    def create(self, *, resource_group_name: str, account_name: str,
+               container_name: str,
+               blob_container: Dict[str, Any]) -> FakeResource:
+        """
+            Create or replace a container synchronously.
+
+            :param resource_group_name: Resource group name.
+            :param account_name: Parent storage account name.
+            :param container_name: Container name.
+            :param blob_container: The container body.
+
+            :returns: The stored FakeResource.
+            :raises: ResourceNotFoundError when the account does not exist.
+        """
+        account_key = "{}/{}".format(resource_group_name, account_name)
+        if account_key not in self._accounts:
+            raise ResourceNotFoundError(
+                "storage account not found: {}".format(account_key))
+
+        key = "{}/{}".format(account_key, container_name)
+        fields: Dict[str, Any] = dict(blob_container)
+        fields["name"] = container_name
+        fields["id"] = "/fake/{}".format(key)
+        resource = FakeResource(**fields)
+        self._store[key] = resource
+        rtnval = resource
+        return rtnval
+
+    def delete(self, *, resource_group_name: str, account_name: str,
+               container_name: str) -> None:
+        """
+            Delete a container.
+
+            :param resource_group_name: Resource group name.
+            :param account_name: Parent storage account name.
+            :param container_name: Container name.
+
+            :returns: None.
+        """
+        key = "{}/{}/{}".format(resource_group_name, account_name,
+                                container_name)
+        self._store.pop(key, None)
+        return None
 
 
 class FakeResourceClient:
@@ -484,9 +575,8 @@ class FakeStorageClient:
         )
         # ``get_properties`` aliases ``get`` on the storage accounts ops.
         self.storage_accounts.get_properties = self.storage_accounts.get
-        self.blob_containers: _ChildScopedOps = _ChildScopedOps(
-            store=world.blob_containers, name_kw="container_name",
-            location=loc, second_kw="account_name",
+        self.blob_containers: _BlobContainersOps = _BlobContainersOps(
+            store=world.blob_containers, accounts=world.storage_accounts,
         )
         return
 

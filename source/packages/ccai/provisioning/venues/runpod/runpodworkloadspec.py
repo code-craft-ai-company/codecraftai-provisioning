@@ -12,7 +12,11 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+import os
+
 from typing import Any, Dict, List, Optional
+
+from ccai.provisioning.venues.runpod.rperrors import RpValidationError
 
 
 # RunPod capacity tiers, mapped onto the interop RunpodCloudType.
@@ -20,6 +24,32 @@ RUNPOD_TIER_SECURE = "secure"
 RUNPOD_TIER_COMMUNITY = "community"
 
 _SUPPORTED_TIERS = (RUNPOD_TIER_SECURE, RUNPOD_TIER_COMMUNITY)
+
+
+def require_supported_tier(*, tier: Any) -> None:
+    """
+        Refuse a capacity tier RunPod does not offer.
+
+        Called by ``validate`` and again wherever the tier is acted on,
+        because ``apply`` can be driven without a prior ``validate`` and an
+        unknown tier must never fall through to a Secure Cloud launch.
+
+        :param tier: The spec's capacity tier.
+
+        :returns: ``None``.
+
+        :raises: :class:`RpValidationError` when the tier is not one of the
+            supported tiers.
+    """
+    if tier not in _SUPPORTED_TIERS:
+        err_msg_lines = ["The RunPod capacity tier is not supported."]
+        err_msg_lines.append("TIER: {!r}".format(tier))
+        err_msg_lines.append("SUPPORTED TIERS: {}".format(
+            ", ".join(_SUPPORTED_TIERS)))
+        err_msg = os.linesep.join(err_msg_lines)
+        raise RpValidationError(err_msg)
+
+    return
 
 
 class RunpodWorkloadSpec:
@@ -109,4 +139,5 @@ class RunpodWorkloadSpec:
         return rtnval
 
 
-__all__ = ["RunpodWorkloadSpec", "RUNPOD_TIER_SECURE", "RUNPOD_TIER_COMMUNITY"]
+__all__ = ["RunpodWorkloadSpec", "RUNPOD_TIER_SECURE", "RUNPOD_TIER_COMMUNITY",
+           "require_supported_tier"]

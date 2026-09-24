@@ -246,12 +246,27 @@ class FakeEc2Client:
 
     def create_route(self, *, RouteTableId: str = "",
                      DestinationCidrBlock: str = "",
+                     GatewayId: str = "",
                      **kwargs: Any) -> Dict[str, Any]:
         entry = self.route_tables.get(RouteTableId, None)
         if entry is not None:
             entry["Routes"].append(
-                {"DestinationCidrBlock": DestinationCidrBlock})
+                {"DestinationCidrBlock": DestinationCidrBlock,
+                 "GatewayId": GatewayId, "State": "active"})
         return {"Return": True}
+
+    def replace_route(self, *, RouteTableId: str = "",
+                      DestinationCidrBlock: str = "",
+                      GatewayId: str = "",
+                      **kwargs: Any) -> Dict[str, Any]:
+        entry = self.route_tables.get(RouteTableId, None)
+        if entry is not None:
+            for route in entry["Routes"]:
+                if route.get("DestinationCidrBlock", "") == \
+                        DestinationCidrBlock:
+                    route["GatewayId"] = GatewayId
+                    route["State"] = "active"
+        return {}
 
     def associate_route_table(self, *, RouteTableId: str = "",
                               SubnetId: str = "",

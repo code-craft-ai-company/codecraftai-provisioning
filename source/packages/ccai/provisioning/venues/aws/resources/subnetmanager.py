@@ -49,6 +49,28 @@ def _has_subnet_association(*, associations: List[Dict[str, Any]],
     return rtnval
 
 
+# The destination of the default route a public route table carries.
+_DEFAULT_ROUTE_CIDR = "0.0.0.0/0"
+
+
+def _default_route_of(*, routes: List[Dict[str, Any]]
+                      ) -> Optional[Dict[str, Any]]:
+    """
+        Find the 0.0.0.0/0 route among a route table's routes.
+
+        :param routes: The route table's ``Routes`` entries.
+
+        :returns: The default route, or None when the table has none.
+    """
+    for route in routes:
+        if route.get("DestinationCidrBlock", "") == _DEFAULT_ROUTE_CIDR:
+            rtnval: Optional[Dict[str, Any]] = route
+            return rtnval
+
+    rtnval = None
+    return rtnval
+
+
 class SubnetManager:
     """
         Manager for AWS Subnets.
@@ -164,6 +186,9 @@ class SubnetManager:
         """
             Create or reuse a public route table that points 0.0.0.0/0 at IGW.
 
+            A reused table is repaired: a missing default route is added and
+            one pointing at a different gateway is replaced.
+
             :param run_id: Run identifier.
             :param network_name: Parent neutral network name.
             :param vpc_id: AWS VPC id.
@@ -183,6 +208,26 @@ class SubnetManager:
         if len(tables) > 0:
             rt_id = tables[0].get("RouteTableId", "")
             associations = tables[0].get("Associations", [])
+
+            # A table left by an earlier run can lack its default route (the
+            # run stopped between creating the table and adding the route,
+            # or the route was removed since) or carry one to an IGW that no
+            # longer exists.  Reusing the table must still leave 0.0.0.0/0
+            # pointing at this network's IGW.
+            default_route = _default_route_of(
+                routes=tables[0].get("Routes", []))
+            if default_route is None:
+                client.create_route(
+                    RouteTableId=rt_id,
+                    DestinationCidrBlock=_DEFAULT_ROUTE_CIDR,
+                    GatewayId=igw_id,
+                )
+            elif default_route.get("GatewayId", "") != igw_id:
+                client.replace_route(
+                    RouteTableId=rt_id,
+                    DestinationCidrBlock=_DEFAULT_ROUTE_CIDR,
+                    GatewayId=igw_id,
+                )
         else:
             neutral_tags = base_resource_tags(
                 run_id=run_id, resource_name=rt_name,
@@ -200,7 +245,7 @@ class SubnetManager:
             # route, so there is no duplicate to tolerate; any failure is real.
             client.create_route(
                 RouteTableId=rt_id,
-                DestinationCidrBlock="0.0.0.0/0",
+                DestinationCidrBlock=_DEFAULT_ROUTE_CIDR,
                 GatewayId=igw_id,
             )
 

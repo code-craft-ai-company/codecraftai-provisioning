@@ -47,7 +47,7 @@ from ccai.provisioning.venues.runpod.rpplanbuilder import RpPlanBuilder
 from ccai.provisioning.venues.runpod.rpresolver import RpResolver
 from ccai.provisioning.venues.runpod.rpsidecartag import RpSidecarTag
 from ccai.provisioning.venues.runpod.runpodworkloadspec import (
-    RUNPOD_TIER_SECURE, _SUPPORTED_TIERS,
+    RUNPOD_TIER_SECURE, require_supported_tier,
 )
 
 
@@ -141,12 +141,7 @@ class RunpodWorkloadProvisioner(WorkloadProvisioner):
         warnings: List[Dict[str, Any]] = []
 
         # An unknown tier would otherwise be launched as Secure Cloud.
-        if spec.tier not in _SUPPORTED_TIERS:
-            err_msg_lines = ["The RunPod capacity tier is not supported."]
-            err_msg_lines.append("TIER: {!r}".format(spec.tier))
-            err_msg_lines.append("SUPPORTED TIERS: {}".format(
-                ", ".join(_SUPPORTED_TIERS)))
-            raise RpValidationError(os.linesep.join(err_msg_lines))
+        require_supported_tier(tier=spec.tier)
 
         # Hard rejections — RunPod has no API surface for these.
         if len(spec.buckets) > 0:
@@ -282,10 +277,17 @@ class RunpodWorkloadProvisioner(WorkloadProvisioner):
 
             :returns: A :class:`ProvisioningResult`.
 
-            :raises: :class:`ConfirmationRequiredError` when a destructive
+            :raises: :class:`RpValidationError` on an unsupported capacity
+                tier, before anything is created;
+                :class:`ConfirmationRequiredError` when a destructive
                 action is planned and confirmation is withheld.
         """
         spec = self._spec
+
+        # apply can be driven without a prior validate; refuse an unknown
+        # tier before any volume is created rather than launch it as Secure
+        # Cloud.
+        require_supported_tier(tier=spec.tier)
 
         plan = self.plan(aspects=aspects)
         if self._plan_is_all_skip(plan=plan):

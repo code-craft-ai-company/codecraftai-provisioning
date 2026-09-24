@@ -99,6 +99,24 @@ class BlobManager:
                              account_name=account_name)
         return rtnval
 
+    def find_container(self, *, resource_group: str, account_name: str,
+                       container_name: str) -> Optional[Any]:
+        """
+            Find an existing blob container in a storage account.
+
+            :param resource_group: ResourceGroup name.
+            :param account_name: Azure storage account name.
+            :param container_name: Blob container name.
+
+            :returns: The BlobContainer object, or None.
+        """
+        client = self._storage()
+        rtnval = get_or_none(getter=client.blob_containers.get,
+                             resource_group_name=resource_group,
+                             account_name=account_name,
+                             container_name=container_name)
+        return rtnval
+
     def ensure(self, *, desired: CloudObjectBucket, resource_group: str,
                location: str, run_id: str,
                default_tags: List[Dict[str, str]],
@@ -141,13 +159,18 @@ class BlobManager:
             )
 
         container_name = desired.name.lower().replace("_", "-")
-        try:
+        container = self.find_container(resource_group=resource_group,
+                                        account_name=account,
+                                        container_name=container_name)
+        if container is None:
+            # ARM's container PUT is create-or-replace and is answered
+            # synchronously, so there is no already-exists answer to
+            # tolerate; any failure is real and reaches the caller rather
+            # than reporting a bucket that has no container.
             client.blob_containers.create(
                 resource_group_name=resource_group, account_name=account,
                 container_name=container_name, blob_container={},
             )
-        except Exception:
-            pass
 
         attributes: Dict[str, Any] = {}
         attributes["storage_account"] = account

@@ -162,9 +162,43 @@ class _StrictEc2Client(FakeEc2Client):
             GroupId=GroupId, IpPermissions=IpPermissions, **kwargs)
         return rtnval
 
-    def create_route(self, **kwargs: Any) -> Dict[str, Any]:
+    def create_route(self, *, RouteTableId: str = "",
+                     DestinationCidrBlock: str = "",
+                     **kwargs: Any) -> Dict[str, Any]:
         self._raise_injected(operation="create_route")
-        rtnval = super().create_route(**kwargs)
+
+        # EC2 refuses a second route to the same destination.
+        table = self.route_tables.get(RouteTableId, None)
+        if table is not None:
+            for route in table["Routes"]:
+                if route.get("DestinationCidrBlock", "") == \
+                        DestinationCidrBlock:
+                    raise _client_error(code="RouteAlreadyExists")
+
+        rtnval = super().create_route(RouteTableId=RouteTableId,
+                                      DestinationCidrBlock=DestinationCidrBlock,
+                                      **kwargs)
+        return rtnval
+
+    def replace_route(self, *, RouteTableId: str = "",
+                      DestinationCidrBlock: str = "",
+                      **kwargs: Any) -> Dict[str, Any]:
+        self._raise_injected(operation="replace_route")
+
+        # EC2 can only replace a route that exists.
+        found = False
+        table = self.route_tables.get(RouteTableId, None)
+        if table is not None:
+            for route in table["Routes"]:
+                if route.get("DestinationCidrBlock", "") == \
+                        DestinationCidrBlock:
+                    found = True
+        if found is False:
+            raise _client_error(code="InvalidRoute.NotFound")
+
+        rtnval = super().replace_route(
+            RouteTableId=RouteTableId,
+            DestinationCidrBlock=DestinationCidrBlock, **kwargs)
         return rtnval
 
     def associate_route_table(self, *, RouteTableId: str = "",
@@ -358,6 +392,120 @@ def test_public_route_failure_propagates() -> None:
     ec2.failures["create_route"] = _client_error(
         code="InvalidGatewayID.NotFound")
     manager = SubnetManager(session_factory=_factory_with(ec2=ec2))
+
+    with testbase.raises(ClientError) as caught:
+        _ensure_subnet(manager=manager, public=True)
+
+    assert caught.exception.code == "InvalidGatewayID.NotFound"
+    return
+
+
+def _public_route_table(*, ec2: _StrictEc2Client) -> Dict[str, Any]:
+    """
+        Return the one route table the SubnetManager tests create.
+
+        :param ec2: The EC2 fake.
+
+        :returns: The stored route table.
+    """
+    tables = list(ec2.route_tables.values())
+    assert len(tables) == 1
+    rtnval = tables[0]
+    return rtnval
+
+
+def _default_routes_of(*, table: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """
+        Return a route table's 0.0.0.0/0 routes.
+
+        :param table: The stored route table.
+
+        :returns: The default routes.
+    """
+    found: List[Dict[str, Any]] = []
+    for route in table["Routes"]:
+        if route.get("DestinationCidrBlock", "") == "0.0.0.0/0":
+            found.append(route)
+    rtnval = found
+    return rtnval
+
+
+def test_public_route_added_to_existing_table_without_one() -> None:
+    """
+        A public route table left by an earlier run without its 0.0.0.0/0
+        route gets the route when the subnet is ensured again.
+    """
+    ec2 = _StrictEc2Client()
+    ec2.failures["create_route"] = _client_error(code="RequestLimitExceeded")
+    manager = SubnetManager(session_factory=_factory_with(ec2=ec2))
+
+    # The earlier run created the table, then failed adding the route.
+    with testbase.raises(ClientError):
+        _ensure_subnet(manager=manager, public=True)
+    ec2.failures.pop("create_route")
+
+    _ensure_subnet(manager=manager, public=True)
+
+    default_routes = _default_routes_of(
+        table=_public_route_table(ec2=ec2))
+    assert len(default_routes) == 1
+    assert default_routes[0]["GatewayId"] == "igw-1"
+    return
+
+
+def test_public_route_reapply_keeps_one_default_route() -> None:
+    """
+        Re-applying a public subnet whose table already routes 0.0.0.0/0 at
+        the IGW adds no second default route.
+    """
+    ec2 = _StrictEc2Client()
+    manager = SubnetManager(session_factory=_factory_with(ec2=ec2))
+
+    _ensure_subnet(manager=manager, public=True)
+    _ensure_subnet(manager=manager, public=True)
+
+    default_routes = _default_routes_of(
+        table=_public_route_table(ec2=ec2))
+    assert len(default_routes) == 1
+    return
+
+
+def test_public_route_to_another_gateway_is_replaced() -> None:
+    """
+        A reused public route table whose 0.0.0.0/0 route points at a
+        different (for example since-deleted) gateway is repointed at the
+        network's IGW.
+    """
+    ec2 = _StrictEc2Client()
+    manager = SubnetManager(session_factory=_factory_with(ec2=ec2))
+
+    _ensure_subnet(manager=manager, public=True)
+    table = _public_route_table(ec2=ec2)
+    stale_routes = _default_routes_of(table=table)
+    stale_routes[0]["GatewayId"] = "igw-stale"
+    stale_routes[0]["State"] = "blackhole"
+
+    _ensure_subnet(manager=manager, public=True)
+
+    default_routes = _default_routes_of(table=table)
+    assert len(default_routes) == 1
+    assert default_routes[0]["GatewayId"] == "igw-1"
+    return
+
+
+def test_public_route_repair_failure_propagates() -> None:
+    """
+        A failure adding the missing default route to a reused table reaches
+        the caller.
+    """
+    ec2 = _StrictEc2Client()
+    manager = SubnetManager(session_factory=_factory_with(ec2=ec2))
+
+    _ensure_subnet(manager=manager, public=True)
+    table = _public_route_table(ec2=ec2)
+    table["Routes"] = []
+    ec2.failures["create_route"] = _client_error(
+        code="InvalidGatewayID.NotFound")
 
     with testbase.raises(ClientError) as caught:
         _ensure_subnet(manager=manager, public=True)

@@ -32,7 +32,7 @@ from ccai.provisioning.venues.runpod.rpcontainerstartrenderer import (
 from ccai.provisioning.venues.runpod.rpnaming import pod_name, volume_name
 from ccai.provisioning.venues.runpod.rpresolver import RpResolver
 from ccai.provisioning.venues.runpod.runpodworkloadspec import (
-    RUNPOD_TIER_COMMUNITY
+    RUNPOD_TIER_COMMUNITY, require_supported_tier
 )
 
 
@@ -199,7 +199,12 @@ class RpApplyStages:
             :param spec: The :class:`RunpodWorkloadSpec`.
 
             :returns: The matching :class:`RunpodCloudType`.
+
+            :raises: :class:`RpValidationError` when the tier is not a
+                supported tier, rather than launching it as Secure Cloud.
         """
+        require_supported_tier(tier=spec.tier)
+
         if spec.tier == RUNPOD_TIER_COMMUNITY:
             rtnval = RunpodCloudType.COMMUNITY
             return rtnval

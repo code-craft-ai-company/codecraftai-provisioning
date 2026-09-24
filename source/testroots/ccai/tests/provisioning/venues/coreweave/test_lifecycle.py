@@ -12,6 +12,8 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
+from typing import Any
+
 from ccai import testbase
 
 
@@ -19,8 +21,18 @@ from ccai.provisioning.model.cloud.plannedactionintent import (
     PlannedActionIntent
 )
 
+from ccai.restclient.coreweave.aspectscoreweave import (
+    AspectsCoreweave, DEFAULT_COREWEAVE_ASPECTS
+)
+
+from ccai.provisioning.aspects.provisioningaspects import (
+    ProvisioningAspects
+)
+from ccai.provisioning.venues.coreweave.coreweaveworkloadprovisioner import (
+    CoreweaveWorkloadProvisioner
+)
 from ccai.provisioning.venues.coreweave.cwerrors import (
-    ConfirmationRequiredError, CwValidationError
+    ConfirmationRequiredError, CwKubeconfigError, CwValidationError
 )
 
 from ccai.interfaces.vpnjoinspec import VPNJoinSpec
@@ -28,8 +40,40 @@ from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 from ccai.tests.provisioning.venues.coreweave.testsupport import (
     FakeNodePool, MockCoreweaveClient, MockKubernetesClient,
     MockVpnControlPlane, make_gpu_job, make_provisioner, make_service,
-    make_slurm_venue, make_spec
+    make_slurm_venue, make_spec, make_venue
 )
+
+
+class _RefusingMintCoreweaveClient(MockCoreweaveClient):
+    """
+        A mock CoreWeave client that records the mint's aspects and then
+        refuses the mint, so a lifecycle verb stops before it would need a
+        live cluster.
+    """
+
+    def mint_kubeconfig(self, *, cluster_id: str,
+                        aspects: Any = None) -> Any:
+        """
+            Record the aspects, then refuse the mint.
+        """
+        self.mint_aspects.append(aspects)
+        raise RuntimeError("kubeconfig mint refused by the test double")
+
+
+def _unminted_provisioner(*, cw: MockCoreweaveClient
+                          ) -> CoreweaveWorkloadProvisioner:
+    """
+        Build a provisioner with no injected Kubernetes client, so its first
+        lifecycle verb mints a kubeconfig.
+
+        :param cw: The mock CoreWeave client.
+
+        :returns: The provisioner.
+    """
+    rtnval = CoreweaveWorkloadProvisioner(
+        venue=make_venue(), coreweave_client=cw,
+        spec=make_spec(jobs=[make_gpu_job()]), kubernetes_client=None)
+    return rtnval
 
 
 # ----------------------------------------------------------------------
@@ -81,6 +125,73 @@ def test_validate_accepts_slurm_with_sunk():
     return
 
 
+def test_validate_forwards_coreweave_aspects_to_node_pool_lookup():
+    """
+        ``validate`` hands the caller's :class:`AspectsCoreweave` to the
+        node-pool lookup rather than dropping it.
+    """
+    rest_aspects = AspectsCoreweave(completion_timeout=5)
+    cw = MockCoreweaveClient()
+    provisioner = make_provisioner(spec=make_spec(jobs=[make_gpu_job()]),
+                                   coreweave_client=cw)
+
+    provisioner.validate(aspects=rest_aspects)
+
+    assert cw.node_pools.received_aspects == [rest_aspects]
+    return
+
+
+def test_validate_without_coreweave_aspects_uses_client_default():
+    """
+        ``validate`` called with aspects the CoreWeave client cannot read
+        hands the node-pool lookup the client's default aspects.
+    """
+    cw = MockCoreweaveClient()
+    provisioner = make_provisioner(spec=make_spec(jobs=[make_gpu_job()]),
+                                   coreweave_client=cw)
+
+    provisioner.validate(aspects=ProvisioningAspects())
+    provisioner.validate()
+
+    received = cw.node_pools.received_aspects
+    assert received == [DEFAULT_COREWEAVE_ASPECTS, DEFAULT_COREWEAVE_ASPECTS]
+    return
+
+
+def test_plan_forwards_coreweave_aspects_to_kubeconfig_mint():
+    """
+        Minting the kubeconfig hands the caller's :class:`AspectsCoreweave`
+        to the CoreWeave client rather than dropping it.
+    """
+    rest_aspects = AspectsCoreweave(completion_timeout=5)
+    cw = _RefusingMintCoreweaveClient()
+    provisioner = _unminted_provisioner(cw=cw)
+
+    with testbase.raises(CwKubeconfigError):
+        provisioner.plan(aspects=rest_aspects)
+
+    assert cw.mint_aspects == [rest_aspects]
+    return
+
+
+def test_plan_without_coreweave_aspects_mints_with_client_default():
+    """
+        Minting the kubeconfig for aspects the CoreWeave client cannot read
+        uses the client's default aspects.
+    """
+    cw = _RefusingMintCoreweaveClient()
+    provisioner = _unminted_provisioner(cw=cw)
+
+    with testbase.raises(CwKubeconfigError):
+        provisioner.plan(aspects=ProvisioningAspects())
+    with testbase.raises(CwKubeconfigError):
+        provisioner.plan()
+
+    assert cw.mint_aspects == [DEFAULT_COREWEAVE_ASPECTS,
+                               DEFAULT_COREWEAVE_ASPECTS]
+    return
+
+
 # ----------------------------------------------------------------------
 # plan
 # ----------------------------------------------------------------------
@@ -128,6 +239,22 @@ def test_apply_workload_job_creates_k8s_job():
     assert "Namespace" in kinds
     job_record = kube.jobs.get(name="trainer")
     assert job_record.name == "trainer"
+    return
+
+
+def test_apply_forwards_coreweave_aspects_to_node_pool_lookup():
+    """
+        ``apply`` hands the caller's :class:`AspectsCoreweave` to the
+        node-pool lookup that places its workloads.
+    """
+    rest_aspects = AspectsCoreweave(completion_timeout=5)
+    cw = MockCoreweaveClient()
+    provisioner = make_provisioner(spec=make_spec(jobs=[make_gpu_job()]),
+                                   coreweave_client=cw)
+
+    provisioner.apply(aspects=rest_aspects)
+
+    assert cw.node_pools.received_aspects == [rest_aspects]
     return
 
 

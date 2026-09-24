@@ -20,6 +20,7 @@ from ccai.provisioning.model.cloud.plannedactionintent import (
 )
 from ccai.interfaces.vpnjoinspec import VPNJoinSpec
 
+from ccai.provisioning.venues.runpod.rpapplystages import RpApplyStages
 from ccai.provisioning.venues.runpod.rperrors import (
     ConfirmationRequiredError, RpCapacityError, RpValidationError
 )
@@ -235,6 +236,42 @@ def test_apply_ensures_network_volumes():
     provisioner = make_provisioner(spec=spec, runpod_client=client)
     provisioner.apply()
     assert client.volume_create_count == 1
+
+
+def test_apply_rejects_unknown_tier():
+    """
+        ``apply`` refuses an unknown capacity tier before creating anything,
+        rather than launching it as Secure Cloud.
+    """
+    spec = make_spec(jobs=[make_gpu_job()], tier="spot",
+                     network_volumes=[{"name": "data", "size_gb": 100}])
+    client = MockRunpodClient()
+    provisioner = make_provisioner(spec=spec, runpod_client=client)
+
+    with testbase.raises(RpValidationError) as caught:
+        provisioner.apply()
+
+    assert "spot" in str(caught.exception)
+    assert client.launch_count == 0
+    assert client.volume_create_count == 0
+    return
+
+
+def test_apply_pods_rejects_unknown_tier():
+    """
+        The apply stage refuses an unknown tier where it maps the tier onto a
+        RunPod cloud type, rather than defaulting it to Secure Cloud.
+    """
+    spec = make_spec(jobs=[make_gpu_job()], tier="spot")
+    client = MockRunpodClient()
+    stages = RpApplyStages()
+
+    with testbase.raises(RpValidationError):
+        stages.apply_pods(spec=spec, client=client, volume_ids={},
+                          existing_pods={})
+
+    assert client.launch_count == 0
+    return
 
 
 def test_apply_reapply_makes_no_mutating_calls():

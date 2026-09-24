@@ -38,8 +38,9 @@ RunPod REST API at `rest.runpod.io/v1`.
 - **plan** — lists Pods and Network Volumes by the
   `<name>-<run-id-short>` prefix and emits `PlannedAction`s. A drifted GPU
   type yields UPDATE-by-recreate. A re-plan of an applied spec is all SKIP.
-- **apply** — ensures Network Volumes, then launches a pod per workload.
-  Idempotent: an all-SKIP plan makes no mutating call. A destructive plan
+- **apply** — refuses an unsupported capacity tier (`RpValidationError`)
+  before creating anything, ensures Network Volumes, then launches a pod per
+  workload. Idempotent: an all-SKIP plan makes no mutating call. A destructive plan
   (UPDATE / DELETE) is gated on `aspects.confirm`.
 - **destroy** — stops and terminates the run's pods, de-registers VPN
   devices via `IVPNControlPlane.delete_device`, then deletes the run's
