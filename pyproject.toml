@@ -51,6 +51,10 @@ dependencies = [
 # to avoid dragging native toolchains into pure-model consumers. Install with
 # ``poetry install --with hypervisors`` when a hypervisor venue is needed.
 
+[project.urls]
+Repository = "https://github.com/code-craft-ai-company/codecraftai-provisioning"
+Issues = "https://github.com/code-craft-ai-company/codecraftai-provisioning/issues"
+
 [dependency-groups]
 hypervisors = [
     "codecraftai-interop-kubernetes<2.0.0",
