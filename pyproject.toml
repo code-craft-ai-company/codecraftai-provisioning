@@ -1,6 +1,6 @@
 [project]
 name = "codecraftai-provisioning"
-version = "1.3.1"
+version = "1.3.2"
 description = "Code Craft AI - Provisioning Package"
 readme = "README.rst"
 license = "LicenseRef-CodeCraftAI-Source-Available"
@@ -42,27 +42,30 @@ dependencies = [
     "codecraftai-restclient-linode>=1.0.0,<2.0.0",
     "codecraftai-restclient-nutanix>=1.0.0,<2.0.0",
 ]
+
+[project.optional-dependencies]
 # Hypervisor interop bindings are execution-time backends only. They pull
 # heavyweight, platform-specific native deps (e.g. ``interop-libvirt`` ->
 # ``libvirt-python`` needs pkg-config + libvirt headers; ``interop-kubernetes``
 # -> the full kubernetes client). The ``ccai.provisioning.model.*`` types that
 # downstream packages (``codecraftai-configuration`` and beyond) import are
-# self-contained and never import these, so they are kept in an optional group
-# to avoid dragging native toolchains into pure-model consumers. Install with
-# ``poetry install --with hypervisors`` when a hypervisor venue is needed.
-
-[project.urls]
-Repository = "https://github.com/code-craft-ai-company/codecraftai-provisioning"
-Issues = "https://github.com/code-craft-ai-company/codecraftai-provisioning/issues"
-
-[dependency-groups]
+# self-contained and never import these, so they are kept in an optional extra
+# to avoid dragging native toolchains into pure-model consumers. The libvirt,
+# xcpng, hyperv and coreweave venues need it: install
+# ``codecraftai-provisioning[hypervisors]``, or ``poetry install --all-extras``
+# in a checkout.
 hypervisors = [
     "codecraftai-interop-kubernetes>=1.0.0,<2.0.0",
     "codecraftai-interop-libvirt>=1.0.0,<2.0.0",
     "codecraftai-interop-xen>=1.0.0,<2.0.0",
     "codecraftai-interop-hyperv>=1.0.0,<2.0.0",
 ]
-cloud-sdks = []
+
+[project.urls]
+Repository = "https://github.com/code-craft-ai-company/codecraftai-provisioning"
+Issues = "https://github.com/code-craft-ai-company/codecraftai-provisioning/issues"
+
+[dependency-groups]
 dev = [
     "codecraftai-testbase>=1.0.0,<2.0.0",
     "requests-mock>=1.12,<2.0.0",
@@ -74,12 +77,6 @@ packages = [{include="ccai", from="source/packages"}]
 include = [
     { path = "source/packages/ccai/provisioning/model/cloud/accelerators.yaml", format = ["sdist", "wheel"] }
 ]
-
-[tool.poetry.group.hypervisors]
-optional = true
-
-[tool.poetry.group.cloud-sdks]
-optional = true
 
 [tool.ruff.lint]
 # Deliberately narrow.  This gate exists for one reason: a bare `except:`

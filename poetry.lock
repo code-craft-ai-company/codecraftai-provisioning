@@ -83,7 +83,7 @@ version = "2026.7.22"
 description = "Python package for providing Mozilla's CA Bundle."
 optional = false
 python-versions = ">=3.7"
-groups = ["main", "dev", "hypervisors"]
+groups = ["main", "dev"]
 files = [
     {file = "certifi-2026.7.22-py3-none-any.whl", hash = "sha256:62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775"},
     {file = "certifi-2026.7.22.tar.gz", hash = "sha256:741e2c3b351ddf169a738da9f2c048608ff7f2c5cc02f1ebc6b118bb090d5d55"},
@@ -209,7 +209,7 @@ version = "3.5.1"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
 optional = false
 python-versions = ">=3.7"
-groups = ["main", "dev", "hypervisors"]
+groups = ["main", "dev"]
 files = [
     {file = "charset_normalizer-3.5.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:d1ee1e296209fdce05b81b663250eefa02213a2da7b41bf26f7829b8ba3545aa"},
     {file = "charset_normalizer-3.5.1-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:e9fbdce1e47394b09bc9f26ab117dfc8d6491977a11d86f592bb42c779db2fda"},
@@ -444,7 +444,7 @@ version = "1.2.1"
 description = "Code Craft AI - Credentials Package"
 optional = false
 python-versions = "<4.0,>=3.10"
-groups = ["main", "hypervisors"]
+groups = ["main"]
 files = [
     {file = "codecraftai_credentials-1.2.1-py3-none-any.whl", hash = "sha256:ffd3fe1101ca5f44fa310c6f9ecb81b476c25a73fa11f33c27593de0114f086e"},
     {file = "codecraftai_credentials-1.2.1.tar.gz", hash = "sha256:89163b8726b74aa31f9719d723754caf6a3933a05ed2d5359b343b652d7f480c"},
@@ -486,7 +486,7 @@ version = "1.2.1"
 description = "Code Craft AI - Foundations Package"
 optional = false
 python-versions = "<4.0,>=3.10"
-groups = ["main", "dev", "hypervisors"]
+groups = ["main", "dev"]
 files = [
     {file = "codecraftai_foundations-1.2.1-py3-none-any.whl", hash = "sha256:356854e3e41bced216362ac3beb811547f427106efd703fce29ee7eed03d8ec8"},
     {file = "codecraftai_foundations-1.2.1.tar.gz", hash = "sha256:368e635cb1026f442dd155b813191a3e9f916c852595c6da19a68a853f6d2e55"},
@@ -547,9 +547,10 @@ rpyc = ">=6.0.1,<7.0.0"
 name = "codecraftai-interop-hyperv"
 version = "1.2.1"
 description = "Code Craft AI - Hyper-V interop client"
-optional = false
+optional = true
 python-versions = "<4.0,>=3.10"
-groups = ["hypervisors"]
+groups = ["main"]
+markers = "extra == \"hypervisors\""
 files = [
     {file = "codecraftai_interop_hyperv-1.2.1-py3-none-any.whl", hash = "sha256:85c292f7255ec9c91eede1e2b6819ba6d7be6d5d717e54a2bbd085921f7b0e18"},
     {file = "codecraftai_interop_hyperv-1.2.1.tar.gz", hash = "sha256:bb7c3e039fad510b28bb644cb3be5008513124330255e18cad441333b312693a"},
@@ -562,9 +563,10 @@ codecraftai-foundations = ">=1.0.0,<2.0.0"
 name = "codecraftai-interop-kubernetes"
 version = "1.2.1"
 description = "Code Craft AI - Kubernetes interop client"
-optional = false
+optional = true
 python-versions = "<4.0,>=3.10"
-groups = ["hypervisors"]
+groups = ["main"]
+markers = "extra == \"hypervisors\""
 files = [
     {file = "codecraftai_interop_kubernetes-1.2.1-py3-none-any.whl", hash = "sha256:b81b15c2c2b6b6003f483d8cae141c7ab6b1b9ce944f7ee408d34eb5b762b812"},
     {file = "codecraftai_interop_kubernetes-1.2.1.tar.gz", hash = "sha256:005a097dde9cb1956b283e292da8ba74ddc80f1408d80c7ed5e5683471895bc4"},
@@ -579,9 +581,10 @@ PyYAML = ">=6.0"
 name = "codecraftai-interop-libvirt"
 version = "1.2.1"
 description = "Code Craft AI - libvirt/KVM interop client"
-optional = false
+optional = true
 python-versions = "<4.0,>=3.10"
-groups = ["hypervisors"]
+groups = ["main"]
+markers = "extra == \"hypervisors\""
 files = [
     {file = "codecraftai_interop_libvirt-1.2.1-py3-none-any.whl", hash = "sha256:5cb110d612ad31ce445d84521c466d8b66125c57ed19760c651c4fadae202844"},
     {file = "codecraftai_interop_libvirt-1.2.1.tar.gz", hash = "sha256:8942872c5b0c3d923deb09451bac1d27c9ce53c6cc8aecc4f920722dafc1d8aa"},
@@ -594,9 +597,10 @@ codecraftai-foundations = ">=1.0.0,<2.0.0"
 name = "codecraftai-interop-xen"
 version = "1.2.1"
 description = "Code Craft AI - XCP-ng/XenServer interop client"
-optional = false
+optional = true
 python-versions = "<4.0,>=3.10"
-groups = ["hypervisors"]
+groups = ["main"]
+markers = "extra == \"hypervisors\""
 files = [
     {file = "codecraftai_interop_xen-1.2.1-py3-none-any.whl", hash = "sha256:16c894bea00148eef93e9242b0d3955235f13b8d3474d07320249d5f4b100841"},
     {file = "codecraftai_interop_xen-1.2.1.tar.gz", hash = "sha256:c6307d264fa9ef2ecdea1db3da99c091146dad9c144e2f63df158d552e5d6647"},
@@ -689,7 +693,7 @@ version = "1.2.1"
 description = "Code Craft AI - Rest Client Base"
 optional = false
 python-versions = "<4.0,>=3.10"
-groups = ["main", "hypervisors"]
+groups = ["main"]
 files = [
     {file = "codecraftai_restclient_base-1.2.1-py3-none-any.whl", hash = "sha256:fb9eedae4ee4e048bc123ce48f6f24eec91522ea3a13c1112f554aae02f99f01"},
     {file = "codecraftai_restclient_base-1.2.1.tar.gz", hash = "sha256:ed1351dd26ef24908279bcd21fa5b25ff0b0ed949ec36164bd53fc9fadaa67e4"},
@@ -797,9 +801,10 @@ requests = ">=2.32.4,<3.0.0"
 name = "codecraftai-restclient-kubernetes"
 version = "1.2.1"
 description = "Code Craft AI - Kubernetes REST client"
-optional = false
+optional = true
 python-versions = "<4.0,>=3.10"
-groups = ["hypervisors"]
+groups = ["main"]
+markers = "extra == \"hypervisors\""
 files = [
     {file = "codecraftai_restclient_kubernetes-1.2.1-py3-none-any.whl", hash = "sha256:3ffe62730fabe93787e5815f1e31a402356243cee4f17561b5f25964692023d4"},
     {file = "codecraftai_restclient_kubernetes-1.2.1.tar.gz", hash = "sha256:01d46850c635e5aa91d175146fe81fdca7c1a728ea47c935a7e088c47920227e"},
@@ -1133,7 +1138,7 @@ version = "3.19"
 description = "Internationalized Domain Names in Applications (IDNA)"
 optional = false
 python-versions = ">=3.9"
-groups = ["main", "dev", "hypervisors"]
+groups = ["main", "dev"]
 files = [
     {file = "idna-3.19-py3-none-any.whl", hash = "sha256:815e7be7a7806d54abb586dc943addc79e8b2ee16915059658cbeff4b1b43bf4"},
     {file = "idna-3.19.tar.gz", hash = "sha256:5e0811a4383b21dc5838069f801c4fb62113b7447663d2530d2bd6e77b49bf15"},
@@ -1289,7 +1294,7 @@ version = "6.0.3"
 description = "YAML parser and emitter for Python"
 optional = false
 python-versions = ">=3.8"
-groups = ["main", "dev", "hypervisors"]
+groups = ["main", "dev"]
 files = [
     {file = "PyYAML-6.0.3-cp38-cp38-macosx_10_13_x86_64.whl", hash = "sha256:c2514fceb77bc5e7a2f7adfaa1feb2fb311607c9cb518dbc378688ec73d8292f"},
     {file = "PyYAML-6.0.3-cp38-cp38-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:9c57bb8c96f6d1808c030b1687b9b5fb476abaa47f0db9c0101f5e9f394e97f4"},
@@ -1372,7 +1377,7 @@ version = "2.34.2"
 description = "Python HTTP for Humans."
 optional = false
 python-versions = ">=3.10"
-groups = ["main", "dev", "hypervisors"]
+groups = ["main", "dev"]
 files = [
     {file = "requests-2.34.2-py3-none-any.whl", hash = "sha256:2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0"},
     {file = "requests-2.34.2.tar.gz", hash = "sha256:f288924cae4e29463698d6d60bc6a4da69c89185ad1e0bcc4104f584e960b9ed"},
@@ -1440,7 +1445,7 @@ version = "2.7.0"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
 python-versions = ">=3.10"
-groups = ["main", "dev", "hypervisors"]
+groups = ["main", "dev"]
 files = [
     {file = "urllib3-2.7.0-py3-none-any.whl", hash = "sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897"},
     {file = "urllib3-2.7.0.tar.gz", hash = "sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c"},
@@ -1452,7 +1457,10 @@ h2 = ["h2 (>=4,<5)"]
 socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["backports-zstd (>=1.0.0) ; python_version < \"3.14\""]
 
+[extras]
+hypervisors = ["codecraftai-interop-hyperv", "codecraftai-interop-kubernetes", "codecraftai-interop-libvirt", "codecraftai-interop-xen"]
+
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "41adaaa7081c6e23037bb8a41bab77f1de4da570333b31168cddf14a2cb9ba8d"
+content-hash = "b0d95f500a87e7adc6421e1633b1e80f7834e1486c99824f497f3ae37ef0890d"

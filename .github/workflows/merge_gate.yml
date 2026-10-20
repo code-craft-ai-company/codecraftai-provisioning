@@ -63,9 +63,9 @@ jobs:
       - name: Setup the Virtual Environment
         run: |
           python ./development/setup-environment
-          # The hypervisors group holds the interop packages the libvirt, xcpng, hyperv and coreweave venues
-          # import; without it their test modules fail to import and never run.
-          poetry install --all-extras --with hypervisors
+          # --all-extras includes the hypervisors extra: the interop packages the libvirt, xcpng, hyperv and
+          # coreweave venues import. Without it their test modules fail to import and never run.
+          poetry install --all-extras
 
       - name: Run Tests
         run: |
