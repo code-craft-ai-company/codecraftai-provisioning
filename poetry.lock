@@ -978,22 +978,24 @@ codecraftai-this-app = ">=1.0.0,<2.0.0"
 
 [[package]]
 name = "codecraftai-testbase"
-version = "1.3.1"
+version = "1.3.2"
 description = "Code Craft AI - TestBase"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main", "dev"]
 files = [
-    {file = "codecraftai_testbase-1.3.1-py3-none-any.whl", hash = "sha256:fa48312b8a352cac9c8b787838752d8a2094c81bf382a6b8cc2ff572f5666ba6"},
-    {file = "codecraftai_testbase-1.3.1.tar.gz", hash = "sha256:91a686ab28eeefcbf452ff12ea9bebb63cb9f4a8b2fced5dcfe1fe51e4082127"},
+    {file = "codecraftai_testbase-1.3.2-py3-none-any.whl", hash = "sha256:514ebdbf6575f18e7f849c17f57dde7fd957ccb210a823ae1aa605d1b9cefe7e"},
+    {file = "codecraftai_testbase-1.3.2.tar.gz", hash = "sha256:90d736aec4b54630aa791a744fb18e52d7feb0b82ab486caef954d8d04291cad"},
 ]
 
 [package.dependencies]
 codecraftai-arcli = ">=1.0.0,<2.0.0"
+codecraftai-extension = ">=1.0.0,<2.0.0"
 codecraftai-foundations = ">=1.0.0,<2.0.0"
 codecraftai-runtime = ">=1.0.0,<2.0.0"
 codecraftai-this-app = ">=1.0.0,<2.0.0"
 codecraftai-xmodules = ">=1.0.0,<2.0.0"
+debugpy = ">=1.8.14,<2.0.0"
 pyyaml = ">=6.0.2,<7.0.0"
 
 [[package]]
@@ -1463,4 +1465,4 @@ hypervisors = ["codecraftai-interop-hyperv", "codecraftai-interop-kubernetes", "
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "b0d95f500a87e7adc6421e1633b1e80f7834e1486c99824f497f3ae37ef0890d"
+content-hash = "c1f2ffcd46f467f7472115425aaf4c14bfe63879782a45ab59b260fcfc7c20fa"

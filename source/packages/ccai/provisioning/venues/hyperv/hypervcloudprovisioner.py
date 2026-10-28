@@ -16,6 +16,11 @@ import os
 
 from typing import Any, Dict, List, Optional
 
+from ccai.provisioning.venuedrivers import require_venue_driver
+
+require_venue_driver(venue="hyperv", driver_module="ccai.interop.hyperv",
+                     driver_distribution="codecraftai-interop-hyperv")
+
 from ccai.interop.hyperv.aspectshyperv import DEFAULT_HYPERV_ASPECTS
 from ccai.interop.hyperv.hypervclient import HypervClient
 

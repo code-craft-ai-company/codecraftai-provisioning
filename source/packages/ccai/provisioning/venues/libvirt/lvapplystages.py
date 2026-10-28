@@ -32,6 +32,11 @@ from ccai.provisioning.venues.libvirt.lvseedisobuilder import (
     LvSeedIsoBuilder
 )
 
+from ccai.provisioning.venuedrivers import require_venue_driver
+
+require_venue_driver(venue="libvirt", driver_module="ccai.interop.libvirt",
+                     driver_distribution="codecraftai-interop-libvirt")
+
 from ccai.interop.libvirt.specs.libvirtnetworkspec import (
     LibvirtNetworkSpec
 )

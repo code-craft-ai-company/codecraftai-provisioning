@@ -31,6 +31,11 @@ from ccai.provisioning.venues.xcpng.xentagtranslator import (
 )
 from ccai.provisioning.venues.xcpng.xcpngspec import XcpngSpec
 
+from ccai.provisioning.venuedrivers import require_venue_driver
+
+require_venue_driver(venue="xcpng", driver_module="ccai.interop.xen",
+                     driver_distribution="codecraftai-interop-xen")
+
 from ccai.interop.xen.specs.xenvbdspec import XenVbdSpec
 from ccai.interop.xen.specs.xenvdispec import XenVdiSpec
 from ccai.interop.xen.specs.xenvifspec import XenVifSpec

@@ -37,6 +37,7 @@ from ccai.provisioning.model.workload.workloadprovisioner import (
 )
 from ccai.provisioning.model.workload.workloadspec import WorkloadSpec
 from ccai.provisioning.model.workload.workloadvenue import WorkloadVenue
+from ccai.provisioning.venuedrivers import require_venue_driver
 from ccai.interfaces.workloadvenuekind import (
     WorkloadVenueKind
 )
@@ -248,6 +249,8 @@ class KubernetesWorkloadProvisioner(WorkloadProvisioner):
 
             :returns: A :class:`ProvisioningResult`.
         """
+        require_venue_driver(venue="kubernetes", driver_module="ccai.interop.kubernetes",
+                             driver_distribution="codecraftai-interop-kubernetes")
         from ccai.interop.kubernetes.specs.workloadspecs import (
             DeploymentSpec, JobSpec, NamespaceSpec, ServiceSpec
         )

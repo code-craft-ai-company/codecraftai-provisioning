@@ -23,6 +23,11 @@ from ccai.restclient.coreweave.aspectscoreweave import (
     AspectsCoreweave, DEFAULT_COREWEAVE_ASPECTS
 )
 from ccai.restclient.coreweave.coreweaveclient import CoreweaveClient
+from ccai.provisioning.venuedrivers import require_venue_driver
+
+require_venue_driver(venue="coreweave", driver_module="ccai.interop.kubernetes",
+                     driver_distribution="codecraftai-interop-kubernetes")
+
 from ccai.interop.kubernetes.kubernetesclient import KubernetesClient
 from ccai.interop.kubernetes.specs.workloadspecs import NamespaceSpec
 

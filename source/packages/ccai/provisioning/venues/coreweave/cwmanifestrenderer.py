@@ -15,6 +15,11 @@ __credits__ = []
 
 from typing import Any, Dict, List, Optional
 
+from ccai.provisioning.venuedrivers import require_venue_driver
+
+require_venue_driver(venue="coreweave", driver_module="ccai.interop.kubernetes",
+                     driver_distribution="codecraftai-interop-kubernetes")
+
 from ccai.interop.kubernetes.specs.workloadspecs import (
     DeploymentSpec, JobSpec, PvcSpec, ServiceSpec
 )

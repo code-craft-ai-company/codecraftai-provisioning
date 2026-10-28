@@ -14,6 +14,11 @@ __credits__ = []
 
 from typing import Any, Dict, List, Optional
 
+from ccai.provisioning.venuedrivers import require_venue_driver
+
+require_venue_driver(venue="hyperv", driver_module="ccai.interop.hyperv",
+                     driver_distribution="codecraftai-interop-hyperv")
+
 from ccai.interop.hyperv.specs.hypervadapterspec import HypervAdapterSpec
 from ccai.interop.hyperv.specs.hypervswitchspec import HypervSwitchSpec
 from ccai.interop.hyperv.specs.hypervvhdxspec import HypervVhdxSpec

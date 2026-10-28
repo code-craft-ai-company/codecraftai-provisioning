@@ -20,6 +20,11 @@ from ccai.provisioning.venues.libvirt.lvmetadatatranslator import (
     LvMetadataTranslator
 )
 
+from ccai.provisioning.venuedrivers import require_venue_driver
+
+require_venue_driver(venue="libvirt", driver_module="ccai.interop.libvirt",
+                     driver_distribution="codecraftai-interop-libvirt")
+
 from ccai.interop.libvirt.specs.libvirtdiskspec import LibvirtDiskSpec
 from ccai.interop.libvirt.specs.libvirtdomainspec import LibvirtDomainSpec
 from ccai.interop.libvirt.specs.libvirtnicspec import LibvirtNicSpec
